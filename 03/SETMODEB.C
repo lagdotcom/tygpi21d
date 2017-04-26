@@ -16,26 +16,26 @@
 
 void Set_Video_Mode(int mode)
 {
-    /* Use video interrupt 10h to set the video mode to the sent value */
-    union REGS inregs, outregs;
+	/* Use video interrupt 10h to set the video mode to the sent value */
+	union REGS inregs, outregs;
 
-    inregs.h.ah = 0;                    /* Set the video mode subfunction. */
-    inregs.h.al = (unsigned char)mode;  /* Video mode to which to change.  */
+	inregs.h.ah = 0;                    /* Set the video mode subfunction. */
+	inregs.h.al = (unsigned char)mode;  /* Video mode to which to change.  */
 
-    int86(0x10, &inregs, &outregs);
+	int86(0x10, &inregs, &outregs);
 }
 
 /* /////////////////////////////////////////////////////////////////////// */
 
 void main(void)
 {
-    /* Set the video mode to the 320x200, 256-color mode. */
-    Set_Video_Mode(VGA256);
+	/* Set the video mode to the 320x200, 256-color mode. */
+	Set_Video_Mode(VGA256);
 
-    /* Wait for a key to be hit. */
-    while (!kbhit()) {}
+	/* Wait for a key to be hit. */
+	while (!kbhit()) {}
 
-    /* Put the computer back into text mode. */
-    Set_Video_Mode(TEXT_MODE);
+	/* Put the computer back into text mode. */
+	Set_Video_Mode(TEXT_MODE);
 }
 
