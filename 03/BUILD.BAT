@@ -1,0 +1,1 @@
+TCC -G -I/TC/INCLUDE -L/TC/LIB -mh %1
