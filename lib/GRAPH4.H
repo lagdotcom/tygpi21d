@@ -7,6 +7,8 @@
 
 #define MAX_SPRITE_FRAMES   20  /* TODO */
 
+#define SPRITE_DEAD		0
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct sprite_typ {
@@ -54,6 +56,16 @@ typedef struct pcx_picture_typ {
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void PCX_Delete(pcx_picture_ptr image);
+void PCX_Grab_Bitmap(pcx_picture_ptr image, sprite_ptr sprite,
+	int sprite_frame, int grab_x, int grab_y);
 void PCX_Init(pcx_picture_ptr image);
 void PCX_Load(char *filename, pcx_picture_ptr image, int enable_palette);
 void PCX_Show_Buffer(pcx_picture_ptr image);
+
+void Behind_Sprite(sprite_ptr sprite);
+void Draw_Sprite(sprite_ptr sprite);
+void Erase_Sprite(sprite_ptr sprite);
+int Sprite_Collide(sprite_ptr sprite_1, sprite_ptr sprite_2);
+void Sprite_Delete(sprite_ptr sprite);
+void Sprite_Init(sprite_ptr sprite, int x, int y, int ac, int as,
+	int mc, int ms, int width, int height);
