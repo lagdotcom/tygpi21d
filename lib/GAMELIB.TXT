@@ -1,11 +1,14 @@
 Publics by module
 
-GRAPH3  	size = 1087
+GRAPH3  	size = 994
 	_Blit_Char                        _Blit_String
 	_Create_Cool_Palette              _Delay
 	_Fill_Screen                      _Get_Palette_Register
 	_H_Line                           _H_Line_Fast
 	_Plot_Pixel                       _Plot_Pixel_Fast
 	_Set_Palette_Register             _Set_Video_Mode
-	_V_Line                           _rom_char_set
-	_video_buffer                     _video_buffer_w
+	_V_Line                         
+
+GRAPH4  	size = 768
+	_PCX_Delete                       _PCX_Init
+	_PCX_Load                         _PCX_Show_Buffer

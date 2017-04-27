@@ -6,13 +6,15 @@ I used Borland's Turbo C v2.01 to compile the examples. I also needed to set the
 
 André used Microsoft C/C++ 7.0; several things have to be changed for this to work in TC:
 
-| MSCC7        | TC2       |
-| ------------ | --------- |
-| `<memory.h>` | `<mem.h>` |
-| `_int86`     | `int86`   |
-| `_inp`       | `inp`     |
-| `_outp`      | `outp`    |
-| `_fmemset`   | `memset`  |
+| MSCC7        | TC2         |
+| ------------ | ----------- |
+| `<memory.h>` | `<mem.h>`   |
+| `_ffree`     | `farefree`  |
+| `_fmalloc`   | `farmalloc` |
+| `_fmemset`   | `memset`    |
+| `_inp`       | `inp`       |
+| `_int86`     | `int86`     |
+| `_outp`      | `outp`      |
 
 Also, TC doesn't support `// single line comments`, so it's `/* olde schoole time */`.
 

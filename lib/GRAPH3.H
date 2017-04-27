@@ -9,11 +9,11 @@ typedef struct RGB_color_typ {
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 /* vram byte ptr */
-unsigned char far *video_buffer = (char far *)0xA0000000L;
-unsigned short far *video_buffer_w = (short far *)0xA0000000L;
+static unsigned char far *video_buffer = (char far *)0xA0000000L;
+static unsigned short far *video_buffer_w = (short far *)0xA0000000L;
 
 /* 8x8 ROM characters */
-unsigned char far *rom_char_set = (char far *)0xF000FA6EL;
+static unsigned char far *rom_char_set = (char far *)0xF000FA6EL;
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
