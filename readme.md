@@ -15,3 +15,7 @@ André used Microsoft C/C++ 7.0; several things have to be changed for this to w
 | `_fmemset`   | `memset`  |
 
 Also, TC doesn't support `// single line comments`, so it's `/* olde schoole time */`.
+
+## TODO
+* Chapter 3, Exercise 5: Try to make `Plot_Pixel_Fast()` even faster!
+* Chapter 3, Exercise 6: Using the keyboard as an input device, try to mkae a crude drawing program that allows the user to change colors and move a pen on the screen.
