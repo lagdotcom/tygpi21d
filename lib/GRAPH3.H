@@ -6,6 +6,15 @@ typedef struct RGB_color_typ {
 	unsigned char blue;     /* Blue component of color 0-63 */
 } RGB_color, *RGB_color_ptr;
 
+/* G L O B A L S ///////////////////////////////////////////////////////// */
+
+/* vram byte ptr */
+unsigned char far *video_buffer = (char far *)0xA0000000L;
+unsigned short far *video_buffer_w = (short far *)0xA0000000L;
+
+/* 8x8 ROM characters */
+unsigned char far *rom_char_set = (char far *)0xF000FA6EL;
+
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define VGA256    0x13          /* 320x200x256 */
@@ -28,8 +37,12 @@ void Blit_Char(int cx, int yc, char c, int color, int trans_flag);
 void Blit_String(int x, int y, int color, char *string, int trans_flag);
 void Create_Cool_Palette(void);
 void Delay(int clicks);
+void Fill_Screen(int value);
 void Get_Palette_Register(int index, RGB_color_ptr color);
 void H_Line(int x1, int x2, int y, unsigned int color);
+void H_Line_Fast(int x1, int x2, int y, unsigned int color);
+void Plot_Pixel(int x, int y, char color);
 void Plot_Pixel_Fast(int x, int y, unsigned char color);
 void Set_Palette_Register(int index, RGB_color_ptr color);
 void Set_Video_Mode(int mode);
+void V_Line(int y1, int y2, int x, unsigned int color);

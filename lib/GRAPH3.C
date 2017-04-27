@@ -12,15 +12,14 @@
 #include <string.h>
 #include "graph3.h"
 
-/* G L O B A L S ///////////////////////////////////////////////////////// */
-
-/* vram byte ptr */
-unsigned char far *video_buffer = (char far *)0xA0000000L;
-
-/* 8x8 ROM characters */
-unsigned char far *rom_char_set = (char far *)0xF000FA6EL;
-
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
+
+void Fill_Screen(int value)
+{
+	/* This function uses the "_fmemset" function to fill the video buffer
+	with a sent value. */
+	memset(video_buffer, (char)value, SCREEN_WIDTH * SCREEN_HEIGHT + 1);
+}
 
 void Blit_Char(int xc, int yc, char c, int color, int trans_flag)
 {
@@ -77,6 +76,13 @@ void Blit_String(int x, int y, int color, char *string, int trans_flag)
 			trans_flag
 		);
 	}
+}
+
+void Plot_Pixel(int x, int y, char color)
+{
+	/* This function plots a pixel on the video screen by multiplying the
+	row by 320 and adding the column. */
+	video_buffer[320 * y + x] = color;
 }
 
 void Plot_Pixel_Fast(int x, int y, unsigned char color)
@@ -198,4 +204,68 @@ void H_Line(int x1, int x2, int y, unsigned int color)
 
 	memset((char far*)(video_buffer + ((y << 8) + (y << 6)) + x1),
 		color, x2 - x1 + 1);
+}
+
+void H_Line_Fast(int x1, int x2, int y, unsigned int color)
+{
+	/* A fast horizontal line renderer uses WORD-sized writes instead of
+	BYTE-sized writes. The only problem is that the endpoints of the h line
+	must be	taken into account. Test whether the endpoints of the horizontal
+	are on WORD boundaries; that is, that they are evenly divisible by 2.
+	Basically, we must consider the two endpoints of the line separately if
+	we want to write WORDs at a time (or, in other words, two pixels at a
+	time).
+	Note: x2 > x1 */
+	unsigned int first_word, middle_word, last_word, line_offset, index;
+
+	/* Test the 1's bit of the starting x. */
+	if (x1 & 0x0001) {
+		first_word = color << 8;
+	} else {
+		/* Repliocate color into both bytes. */
+		first_word = (color << 8) | color;
+	}
+
+	/* Test the 1's bit of the ending x. */
+	if (x2 & 0x0001) {
+		last_word = (color << 8) | color;
+	} else {
+		/* Place color in high byte of word only. */
+		last_word = color;
+	}
+
+	/* Now we can draw the horizontal line two pixels at a time. */
+	line_offset = (y << 7) + (y << 5);
+	/* y * 160, because there are 160 words/line. */
+
+	/* Compute the middle color. */
+	middle_word = (color << 8) | color;
+
+	/* Left endpoint. */
+	video_buffer_w[line_offset + (x1 >> 1)] = first_word;
+
+	/* The middle of the line. */
+	for (index = (x1 >> 1) + 1; index < (x2 >> 1); index++) {
+		video_buffer_w[line_offset + index] = middle_word;
+	}
+
+	/* Right endpoint. */
+	video_buffer_w[line_offset + (x2 >> 1)] = last_word;
+}
+
+void V_Line(int y1, int y2, int x, unsigned int color)
+{
+	/* Draw a vertical line.
+	Note: y2 > y1 */
+	unsigned int line_offset, index;
+
+	/* Compute the starting position */
+	line_offset = (y1 << 8) + (y1 << 6) + x;
+
+	for (index = 0; index <= y2 - y1; index++) {
+		video_buffer[line_offset] = color;
+
+		/* Move to the next line. */
+		line_offset += 320;
+	}
 }
