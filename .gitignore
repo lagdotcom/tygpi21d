@@ -1,4 +1,5 @@
 *.BAK
 *.EXE
+*.LIB
 *.OBJ
 TCCONFIG.TC
