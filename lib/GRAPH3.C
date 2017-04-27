@@ -10,33 +10,6 @@
 #include <mem.h>
 #include <math.h>
 #include <string.h>
-
-/* D E F I N E S ///////////////////////////////////////////////////////// */
-
-#define VGA256    0x13          /* 320x200x256 */
-#define TEXT_MODE 0x03          /* The default text mode */
-
-#define PALETTE_MASK        0x3c6
-#define PALETTE_REGISTER_RD 0x3c7
-#define PALETTE_REGISTER_WR 0x3c8
-#define PALETTE_DATA        0x3c9
-
-#define CHAR_WIDTH  8
-#define CHAR_HEIGHT 8
-
-#define SCREEN_WIDTH        (unsigned int)320
-#define SCREEN_HEIGHT       (unsigned int)200
-
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
-typedef struct RGB_color_typ {
-	unsigned char red;      /* Red component of color 0-63 */
-	unsigned char green;    /* Green component of color 0-63 */
-	unsigned char blue;     /* Blue component of color 0-63 */
-} RGB_color, *RGB_color_ptr;
-
-/* P R O T O T Y P E S /////////////////////////////////////////////////// */
-
 #include "graph3.h"
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
@@ -189,6 +162,22 @@ void Create_Cool_Palette(void)
 	color.green = 0;
 	color.blue  = 0;
 	Set_Palette_Register(0, (RGB_color_ptr)&color);
+}
+
+void Delay(int clicks)
+{
+	/* This function uses the internal timekeeper (the one that runs at 18.2
+	clicks/sec) to time a delay. You can find the 32-bit value of this timer
+	at 0000:046Ch. */
+	unsigned int far *clock = (unsigned int far *)0x0000046CL;
+	unsigned int now;
+
+	/* Get the current time */
+	now = *clock;
+
+	/* Wait until the time has gone past the current time plus the amount we
+	wanted to wait. Note that each tick is approximately 55 milliseconds. */
+	while(abs(*clock - now) < clicks) {}
 }
 
 void Set_Video_Mode(int mode)

@@ -1,8 +1,9 @@
 Publics by module
 
-GRAPH3  	size = 699
+GRAPH3  	size = 758
 	_Blit_Char                        _Blit_String
-	_Create_Cool_Palette              _Get_Palette_Register
-	_H_Line                           _Plot_Pixel_Fast
-	_Set_Palette_Register             _Set_Video_Mode
-	_rom_char_set                     _video_buffer
+	_Create_Cool_Palette              _Delay
+	_Get_Palette_Register             _H_Line
+	_Plot_Pixel_Fast                  _Set_Palette_Register
+	_Set_Video_Mode                   _rom_char_set
+	_video_buffer                   

@@ -7,7 +7,7 @@
 @DEL *.OBJ
 
 @REM Compile to Object
-TCC -G -I/TC/INCLUDE -L/TC/LIB -mh -c GRAPH3.C
+TCC -G -I\TC\INCLUDE -L\TC\LIB -mh -c GRAPH3.C
 
 @REM Make Library
 @DEL GAMELIB.*
