@@ -16,3 +16,6 @@ GRAPH4  	size = 1810
 	_PCX_Load                         _PCX_Show_Buffer
 	_Sprite_Collide                   _Sprite_Delete
 	_Sprite_Init                    
+
+GRAPH5  	size = 226
+	_Bline                          
