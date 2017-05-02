@@ -17,5 +17,9 @@ GRAPH4  	size = 1810
 	_Sprite_Collide                   _Sprite_Delete
 	_Sprite_Init                    
 
-GRAPH5  	size = 226
-	_Bline                          
+GRAPH5  	size = 6366
+	_Bline                            _Clip_Line
+	_Create_Tables                    _Draw_Polygon
+	_Draw_Polygon_Clip                _Rotate_Polygon
+	_Scale_Polygon                    _Set_Clipping_Region
+	_Translate_Polygon              
