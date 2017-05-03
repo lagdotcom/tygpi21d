@@ -23,3 +23,8 @@ GRAPH5  	size = 6366
 	_Draw_Polygon_Clip                _Rotate_Polygon
 	_Scale_Polygon                    _Set_Clipping_Region
 	_Translate_Polygon              
+
+GRAPH6  	size = 241
+	_Create_Double_Buffer             _Delete_Double_Buffer
+	_Fill_Double_Buffer               _Plot_Pixel_Fast_DB
+	_Show_Double_Buffer             
