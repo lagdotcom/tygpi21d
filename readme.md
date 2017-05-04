@@ -26,3 +26,9 @@ Also, TC doesn't support `// single line comments`, so it's `/* olde schoole tim
 * Chapter 4, Exercise 3: Write a function named Sprite_Fizz() that makes a sprite fizzle away in 25 cycles.
 * Chapter 4, Exercise 4: When the tanks collide in the Attank!!! demo, nothing happens. Make something spectacular happen when the tanks collide.
 * Chapter 4, Exercise 5: Create a starfield that looks like the one in the shuttle.exe program (?); that is, one that swings around. Then, place a sprite of a spaceship with glowing engines in the center of the starfield. (Hint: use color-register animation to make the engines glow.)
+* Chapter 5, Exercise 1: Write a function that draws a circle of any radius.
+* Chapter 5, Exercise 2: Write a function that scales polygons differently on each axis; that is, there's a separate scaling function for both the x- and y-axis.
+* Chapter 5, Exercise 3: Time and analyze the difference in performance between Draw_Polygon() and Draw_Polygon_Clip().
+* Chapter 5, Exercise 4: Make the ship in rockdemo fire missiles.
+* Chapter 5, Exercise 5: Place a black hole into rockdemo by creating a local gravity field somewhere on the screen.
+* Chapter 5, Exercise 6: _Extra Credit_: see if you can devise the rotation equations.
