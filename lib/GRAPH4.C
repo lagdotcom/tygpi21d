@@ -2,6 +2,7 @@
 
 #include <alloc.h>
 #include <stdio.h>
+#include <string.h>
 #include "graph3.h"
 #include "graph4.h"
 
@@ -11,8 +12,8 @@ void PCX_Init(pcx_picture_ptr image)
 {
 	/* This function allocates the buffer region needed to load a
 	PCX file. */
-	if (!(image->buffer = (char far*)
-		farmalloc(SCREEN_WIDTH * SCREEN_HEIGHT + 1))) {
+	image->buffer = (char far *)farmalloc(SCREEN_WIDTH * SCREEN_HEIGHT + 1);
+	if (!image->buffer) {
 		printf("\ncouldn't allocate screen buffer");
 	}
 }
@@ -309,4 +310,3 @@ int Sprite_Collide(sprite_ptr sprite_1, sprite_ptr sprite_2)
 		return 0;
 	}
 }
-

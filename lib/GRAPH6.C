@@ -2,6 +2,7 @@
 
 #include <alloc.h>
 #include <dos.h>
+#include <string.h>
 #include "graph3.h"
 #include "graph6.h"
 
@@ -137,7 +138,7 @@ void Draw_Sprite_DB(sprite_ptr sprite)
 	multiplication. */
 	char far *work_sprite;
 	int work_offset = 0, offset, x, y;
-	unsigned char data;
+	char data;
 
 	/* Alias a pointer to the sprite for ease of access. */
 	work_sprite = sprite->frames[sprite->curr_frame];
@@ -149,7 +150,9 @@ void Draw_Sprite_DB(sprite_ptr sprite)
 		for (x = 0; x < sprite->width; x++) {
 			/* Test for a transparent pixel; that is, 0. If the
 			pixel is not transparent, draw it. */
-			if ((data = work_sprite[work_offset + x])) {
+			data = work_sprite[work_offset + x];
+
+			if (data) {
 				double_buffer[offset + x] = data;
 			}
 		}
@@ -173,7 +176,7 @@ void Draw_Sprite_Clipped_DB(sprite_ptr sprite, int min_x, int min_y,
 	    x, y, xs, ys,
 	    xe, ye,
 	    clip_width, clip_height;
-	unsigned char data;
+	char data;
 
 	/* Extract the sprite position. */
 	xs = sprite->x;
@@ -223,7 +226,9 @@ void Draw_Sprite_Clipped_DB(sprite_ptr sprite, int min_x, int min_y,
 		for (x = 0; x < clip_width; x++) {
 			/* Test for a transparent pixel; that is, 0. If the pixel is not
 			transparent, draw it. */
-			if ((data = work_sprite[work_offset + x + x_off])) {
+			data = work_sprite[work_offset + x];
+
+			if (data) {
 				double_buffer[offset + x + x_off] = data;
 			}
 		}

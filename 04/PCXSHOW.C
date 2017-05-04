@@ -46,4 +46,3 @@ void main(int argc, char **argv)
 	/* Go back to text mode. */
 	Set_Video_Mode(TEXT_MODE);
 }
-

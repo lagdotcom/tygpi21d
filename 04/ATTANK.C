@@ -1,7 +1,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
+#include <conio.h>
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include "graph3.h"
 #include "graph4.h"
@@ -232,4 +232,3 @@ void main(void)
 	/* Go back to text mode. */
 	Set_Video_Mode(TEXT_MODE);
 }
-

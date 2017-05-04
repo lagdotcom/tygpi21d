@@ -499,5 +499,3 @@ void Set_Clipping_Region(int minx, int miny, int maxx, int maxy)
 	poly_clip_max_x = maxx;
 	poly_clip_max_y = maxy;
 }
-
-

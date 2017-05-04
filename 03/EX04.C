@@ -1,6 +1,5 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include "graph3.h"
 
@@ -42,4 +41,3 @@ void main(void)
 
 	Set_Video_Mode(TEXT_MODE);
 }
-

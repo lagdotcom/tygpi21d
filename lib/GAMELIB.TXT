@@ -9,7 +9,7 @@ GRAPH3  	size = 994
 	_Set_Palette_Register             _Set_Video_Mode
 	_V_Line                         
 
-GRAPH4  	size = 1810
+GRAPH4  	size = 1821
 	_Behind_Sprite                    _Draw_Sprite
 	_Erase_Sprite                     _PCX_Delete
 	_PCX_Grab_Bitmap                  _PCX_Init

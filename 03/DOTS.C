@@ -1,7 +1,6 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <conio.h>
 #include "graph3.h"     /* this is all we need to include so the program
 						knows all the #defines, structures, prototypes */
 
@@ -24,4 +23,3 @@ void main(void)
 	/* Put the computer back into text mode. */
 	Set_Video_Mode(TEXT_MODE);
 }
-

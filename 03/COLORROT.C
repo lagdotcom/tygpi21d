@@ -1,14 +1,8 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <io.h>
 #include <conio.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <dos.h>
-#include <bios.h>
-#include <fcntl.h>
-#include <mem.h>
-#include <math.h>
+#include <stdio.h>
 #include <string.h>
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
@@ -191,4 +185,3 @@ void main(void)
 	/* Put the computer back into text mode. */
 	Set_Video_Mode(TEXT_MODE);
 }
-

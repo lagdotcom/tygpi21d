@@ -1,8 +1,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <stdio.h>
-#include <dos.h>
 #include <conio.h>
+#include <dos.h>
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -38,4 +37,3 @@ void main(void)
 	/* Put the computer back into text mode. */
 	Set_Video_Mode(TEXT_MODE);
 }
-

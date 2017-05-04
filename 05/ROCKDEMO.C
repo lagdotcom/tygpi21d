@@ -1,6 +1,8 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
+#include <conio.h>
 #include <math.h>
+#include <stdlib.h>
 #include "graph3.h"
 #include "graph5.h"
 
