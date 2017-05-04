@@ -13,7 +13,6 @@ void main(void)
 	char buffer[128];		/* temporary string buffer */
 	long number_vsyncs = 0;	/* tracks the number of retrace cycles */
 
-
 	/* Set the video mode to the 320x200, 256-color mode. */
 	Set_Video_Mode(VGA256);
 

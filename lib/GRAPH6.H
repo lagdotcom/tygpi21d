@@ -13,15 +13,13 @@
 #define VGA_VSYNC_MASK		0x08
 	/* bit 3 */
 
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
-/* G L O B A L S ///////////////////////////////////////////////////////// */
-
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-int Create_Double_Buffer(int num_lines);
 void Behind_Sprite_DB(sprite_ptr sprite);
+int Create_Double_Buffer(int num_lines);
 void Delete_Double_Buffer(void);
+void Draw_Sprite_Clipped_DB(sprite_ptr sprite, int min_x, int min_y,
+	int max_x, int max_y);
 void Draw_Sprite_DB(sprite_ptr sprite);
 void Erase_Sprite_DB(sprite_ptr sprite);
 void Fill_Double_Buffer(int color);
