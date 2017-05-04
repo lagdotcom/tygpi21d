@@ -9,6 +9,7 @@ André used Microsoft C/C++ 7.0; several things have to be changed for this to w
 | MSCC7        | TC2         | Comment |
 | ------------ | ----------- | ------- |
 | `<memory.h>` | `<mem.h>`   | not sure this has identical functions |
+| `_bios_keybrd` | `bioskey` | |
 | `_ffree`     | `farfree`   | |
 | `_fmalloc`   | `farmalloc` | |
 | `_fmemset`   | `memset`    | doesn't seem to be a `far *` memset |

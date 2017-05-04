@@ -30,3 +30,7 @@ GRAPH6  	size = 1049
 	_Draw_Sprite_DB                   _Erase_Sprite_DB
 	_Fill_Double_Buffer               _Plot_Pixel_Fast_DB
 	_Show_Double_Buffer               _Wait_For_Vsync
+
+GRAPH7  	size = 75
+	_Get_Ascii_Key                    _Get_Control_Keys
+	_Get_Scan_Code                  
