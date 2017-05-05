@@ -24,12 +24,14 @@ GRAPH5  	size = 6366
 	_Scale_Polygon                    _Set_Clipping_Region
 	_Translate_Polygon              
 
-GRAPH6  	size = 1049
-	_Behind_Sprite_DB                 _Create_Double_Buffer
+GRAPH6  	size = 1272
+	_Behind_Sprite_DB                 _Blit_Char_DB
+	_Blit_String_DB                   _Create_Double_Buffer
 	_Delete_Double_Buffer             _Draw_Sprite_Clipped_DB
 	_Draw_Sprite_DB                   _Erase_Sprite_DB
-	_Fill_Double_Buffer               _Plot_Pixel_Fast_DB
-	_Show_Double_Buffer               _Wait_For_Vsync
+	_Fill_Double_Buffer               _Get_Double_Buffer
+	_Plot_Pixel_Fast_DB               _Show_Double_Buffer
+	_Wait_For_Vsync                 
 
 GRAPH7  	size = 75
 	_Get_Ascii_Key                    _Get_Control_Keys

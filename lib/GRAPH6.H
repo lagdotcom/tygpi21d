@@ -16,6 +16,8 @@
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Behind_Sprite_DB(sprite_ptr sprite);
+void Blit_Char_DB(int cx, int yc, char c, int color, int trans_flag);
+void Blit_String_DB(int x, int y, int color, char *string, int trans_flag);
 int Create_Double_Buffer(int num_lines);
 void Delete_Double_Buffer(void);
 void Draw_Sprite_Clipped_DB(sprite_ptr sprite, int min_x, int min_y,
@@ -23,6 +25,7 @@ void Draw_Sprite_Clipped_DB(sprite_ptr sprite, int min_x, int min_y,
 void Draw_Sprite_DB(sprite_ptr sprite);
 void Erase_Sprite_DB(sprite_ptr sprite);
 void Fill_Double_Buffer(int color);
+unsigned char far *Get_Double_Buffer(void);
 void Plot_Pixel_Fast_DB(int x, int y, unsigned char color);
 void Show_Double_Buffer(void);
 void Wait_For_Vsync(void);
