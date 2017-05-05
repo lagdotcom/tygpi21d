@@ -38,3 +38,7 @@ Also, TC doesn't support `// single line comments`, so it's `/* olde schoole tim
 * Chapter 6, Exercise 4: Modify the `Dissolve()` screen transition function so that it dissolves the screen with any color.
 * Chapter 6, Exercise 5: Modify the fading-light function so it increases the intensity of all the color registers until they're saturated.
 * Chapter 6, Exercise 6: _Extra Credit_: Try to make Robopunk jump in a parabolic path. (_Hint_: use the fact that `position = yo + velocity * time + 1/2 * acceleration * time^2`.)
+* Chapter 7, Exercise 1: Write a program that prints out the bit pattern in memory locations 417h and 418h. Use the output to figure out which bit represents what part of the shift state.
+* Chapter 7, Exercise 2: Write another version of the Video Easel program that uses the keyboard instead of the mouse; however, make a pointer that resembles the mouse pointer using sprites.
+* Chapter 7, Exercise 3: Experiment with the mouse sensitivity until one inch on your mouse pad is equivalent to one inch on your computer screen.
+* Chapter 7, Exercise 4: See if you can figure out a technique to detect whether a joystick(s) is present that differs from the technique we implemented today.
