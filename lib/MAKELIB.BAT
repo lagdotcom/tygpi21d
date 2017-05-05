@@ -3,19 +3,19 @@
 @REM   -G   compile for speed
 @REM   -I.. include dir
 @REM   -L.. lib dir
-@REM   -ml  Large memory model - needed for far ptrs
+@REM   -mc  Compact memory model: small code, large data
 @REM   -c   compile only
 @DEL *.OBJ
 
 @REM Compile to Object
-TCC -G -I\TC\INCLUDE -L\TC\LIB -ml -c GRAPH3.C
-TCC -B -G -I\TC\INCLUDE -L\TC\LIB -ml -c GRAPH4.C
-TCC -G -I\TC\INCLUDE -L\TC\LIB -ml -c GRAPH5.C
-TCC -B -G -I\TC\INCLUDE -L\TC\LIB -ml -c GRAPH6.C
-TCC -B -G -I\TC\INCLUDE -L\TC\LIB -ml -c GRAPH7J.C
-TCC -B -G -I\TC\INCLUDE -L\TC\LIB -ml -c GRAPH7K.C
-TCC -G -I\TC\INCLUDE -L\TC\LIB -ml -c GRAPH7M.C
-TCC -G -I\TC\INCLUDE -L\TC\LIB -ml -c GRAPH8.C
+TCC    -G -I\TC\INCLUDE -L\TC\LIB -mc -c GRAPH3.C
+TCC -B -G -I\TC\INCLUDE -L\TC\LIB -mc -c GRAPH4.C
+TCC    -G -I\TC\INCLUDE -L\TC\LIB -mc -c GRAPH5.C
+TCC -B -G -I\TC\INCLUDE -L\TC\LIB -mc -c GRAPH6.C
+TCC -B -G -I\TC\INCLUDE -L\TC\LIB -mc -c GRAPH7J.C
+TCC -B -G -I\TC\INCLUDE -L\TC\LIB -mc -c GRAPH7K.C
+TCC    -G -I\TC\INCLUDE -L\TC\LIB -mc -c GRAPH7M.C
+TCC    -G -I\TC\INCLUDE -L\TC\LIB -mc -c GRAPH8.C
 
 @REM Make Library
 @DEL GAMELIB.LIB
