@@ -69,6 +69,11 @@ void Melt(void)
 	int index, ticks = 0;
 	worm worms[NUM_WORMS];
 
+	/* lag: Clearly, there's something wrong with this function; it only
+	initialises half the worms, but then runs off the rest, and it doesn't
+	even use the NUM_WORMS constant to refer to the array, except for the
+	declaration. I may revisit this later. */
+
 	/* Initialize the worms. */
 	for (index = 0; index < 160; index++) {
 		worms[index].color   = Get_Pixel(index, 0);
