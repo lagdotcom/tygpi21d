@@ -75,3 +75,20 @@ void Print_Fixed(fixed f1)
 	printf("%ld.%ld", f1 >> FP_SHIFT,
 		100 * (unsigned long)(f1 & FP_FRAC_MASK) / FP_SHIFT_2N);
 }
+
+void Fill_Double_Buffer_I(unsigned char color)
+{
+	/* lag: this '160' comes from SCREEN_WIDTH / 2, but you can't directly
+	reference the constant here because it has non-ASM code in its
+	definition... should maybe change that at some point, OR make it a
+	global variable which Set_Video_Mode() changes the value of. */
+
+	asm mov ax, 160;
+	asm mul buffer_height;	/* multiply buffer_height * SCREEN_WIDTH / 2 */
+	asm mov cx, ax;			/* CX holds the number of words to set */
+	asm mov ah, color;		/* move the color into both AH and AL */
+	asm mov al, ah;
+	asm les di, double_buffer;	/* es:di is the destination of move */
+	asm cld;
+	asm rep stosw;			/* move all the words */
+}

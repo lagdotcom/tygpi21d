@@ -52,10 +52,10 @@ GRAPH7K 	size = 69
 GRAPH7M 	size = 303
 	_Squeeze_Mouse                  
 
-GRAPH8  	size = 261
+GRAPH8  	size = 290
 	_Add_Fixed                        _Assign_Float
 	_Assign_Integer                   _Div_Fixed
-	_Mul_Fixed                        _Plot_Pixel_Global
-	_Print_Fixed                      _Sub_Fixed
-	_g_color                          _g_x
-	_g_y                            
+	_Fill_Double_Buffer_I             _Mul_Fixed
+	_Plot_Pixel_Global                _Print_Fixed
+	_Sub_Fixed                        _g_color
+	_g_x                              _g_y

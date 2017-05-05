@@ -28,6 +28,7 @@ extern unsigned char g_color;
 
 /* new optimisations */
 void Plot_Pixel_Global(void);
+void Fill_Double_Buffer_I(unsigned char color);
 
 /* fixed-point maths */
 fixed Assign_Float(float number);
