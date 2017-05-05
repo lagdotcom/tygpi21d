@@ -51,3 +51,7 @@ GRAPH7K 	size = 75
 
 GRAPH7M 	size = 315
 	_Squeeze_Mouse                  
+
+GRAPH8  	size = 40
+	_Plot_Pixel_Global                _g_color
+	_g_x                              _g_y
