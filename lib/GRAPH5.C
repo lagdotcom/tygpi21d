@@ -11,10 +11,10 @@ static float sin_look[361],
              cos_look[361];
 
 /* Polygon clipping extents */
-static int poly_clip_min_x,
-           poly_clip_min_y,
-           poly_clip_max_x,
-           poly_clip_max_y;
+int poly_clip_min_x = 0,
+	poly_clip_min_y = 0,
+	poly_clip_max_x = SCREEN_WIDTH,
+	poly_clip_max_y = SCREEN_HEIGHT;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -491,11 +491,16 @@ void Draw_Polygon_Clip(polygon_ptr poly)
 	}
 }
 
-void Set_Clipping_Region(int minx, int miny, int maxx, int maxy)
+void Draw_Boundary(int color)
 {
-	/* lag: utility function */
-	poly_clip_min_x = minx;
-	poly_clip_min_y = miny;
-	poly_clip_max_x = maxx;
-	poly_clip_max_y = maxy;
+	/* Draws in the clipping boundary, if the user is interested in seeing
+	it. */
+	Bline(poly_clip_min_x, poly_clip_min_y,
+	      poly_clip_max_x, poly_clip_min_y, color);
+	Bline(poly_clip_max_x, poly_clip_min_y,
+	      poly_clip_max_x, poly_clip_max_y, color);
+	Bline(poly_clip_max_x, poly_clip_max_y,
+	      poly_clip_min_x, poly_clip_max_y, color);
+	Bline(poly_clip_min_x, poly_clip_max_y,
+	      poly_clip_min_x, poly_clip_min_y, color);
 }

@@ -1,16 +1,40 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
+#define GRAPH_6_EXPORT
+
 #include <alloc.h>
 #include <dos.h>
 #include <string.h>
 #include "graph3.h"
 #include "graph6.h"
 
+/* D E F I N E S ///////////////////////////////////////////////////////// */
+
+/* VGA status register 1 */
+#define VGA_INPUT_STATUS_1	0x3DA
+	/* bit 3: vsync -
+		1: retrace in progress
+		0: no retrace */
+
+#define VGA_VSYNC_MASK		0x08
+	/* bit 3 */
+
+#define NUM_WORMS		320
+
+/* S T R U C T U R E S /////////////////////////////////////////////////// */
+
+typedef struct worm_typ {
+	int y;			/* current y position of worm */
+	int color;		/* color of worm */
+	int speed;		/* speed of worm */
+	int counter;	/* counter */
+} worm, *worm_ptr;
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-static unsigned char far *double_buffer = NULL;
-static unsigned int buffer_height = SCREEN_HEIGHT;
-static unsigned int buffer_size = SCREEN_WIDTH * SCREEN_HEIGHT / 2;
+unsigned char far *double_buffer = NULL;
+unsigned int buffer_height = SCREEN_HEIGHT;
+unsigned int buffer_size = SCREEN_WIDTH * SCREEN_HEIGHT / 2;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -50,12 +74,6 @@ void Show_Double_Buffer(void)
 	asm cld;						/* make sure to move forward */
 	asm rep movsw;					/* move all the WORDs */
 	asm pop ds;						/* restore ds */
-}
-
-unsigned char far *Get_Double_Buffer(void)
-{
-	/* lag: utility function */
-	return double_buffer;
 }
 
 void Delete_Double_Buffer(void)
@@ -310,5 +328,140 @@ void Blit_String_DB(int x, int y, int color, char *string, int trans_flag)
 			color,
 			trans_flag
 		);
+	}
+}
+
+void Fade_Lights(void)
+{
+	/* This function fades the lights by slowly decreasing the color values
+	in all color registers. */
+	int pal_reg, index;
+	RGB_color color;
+
+	for (index = 0; index < 30; index++) {
+		for (pal_reg = 1; pal_reg <= 255; pal_reg++) {
+			/* Get the color to fade. */
+			Get_Palette_Register(pal_reg, &color);
+
+			if (color.red > 5) color.red -= 3;
+			else color.red = 0;
+
+			if (color.green > 5) color.green -= 3;
+			else color.green = 0;
+
+			if (color.blue > 5) color.blue -= 3;
+			else color.blue = 0;
+
+			/* Set the color to a diminished intensity. */
+			Set_Palette_Register(pal_reg, &color);
+		}
+
+		Delay(2);
+	}
+}
+
+void Dissolve(void)
+{
+	/* Dissolve the screen by plotting zillions of black pixels. */
+	unsigned long index;
+
+	for (index = 0; index <= 300000; index++) {
+		Plot_Pixel_Fast(rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT, 0);
+	}
+}
+
+void Melt(void)
+{
+	/* This function 'melts' the screen by moving little worms at different
+	speeds down the screen. These worms change to the color they're eating */
+	int index, ticks = 0;
+	worm worms[NUM_WORMS];
+
+	/* lag: Clearly, there's something wrong with this function; it only
+	initialises half the worms, but then runs off the rest, and it doesn't
+	even use the NUM_WORMS constant to refer to the array, except for the
+	declaration. I may revisit this later. */
+
+	/* Initialize the worms. */
+	for (index = 0; index < 160; index++) {
+		worms[index].color   = Get_Pixel(index, 0);
+		worms[index].speed   = 3 + rand() % 9;
+		worms[index].y       = 0;
+		worms[index].counter = 0;
+
+		/* Draw the worm. */
+		Plot_Pixel_Fast((index << 1),     0, worms[index].color);
+		Plot_Pixel_Fast((index << 1),     1, worms[index].color);
+		Plot_Pixel_Fast((index << 1),     2, worms[index].color);
+
+		Plot_Pixel_Fast((index << 1) + 1, 0, worms[index].color);
+		Plot_Pixel_Fast((index << 1) + 1, 1, worms[index].color);
+		Plot_Pixel_Fast((index << 1) + 1, 2, worms[index].color);
+	}
+
+	/* Do the screen melt. */
+	while (++ticks < 1800) {
+		/* Process each worm. */
+		for (index = 0; index < 320; index++) {
+			/* Is it time to move the worm? */
+			if (++worms[index].counter >= worms[index].speed) {
+				/* Reset the counter. */
+				worms[index].counter = 0;
+				worms[index].color = Get_Pixel(index, worms[index].y + 4);
+
+				/* Has the worm hit bottom? */
+				if (worms[index].y < 193) {
+					Plot_Pixel_Fast((index << 1),     worms[index].y, 0);
+					Plot_Pixel_Fast((index << 1),     worms[index].y + 1,
+						worms[index].color);
+					Plot_Pixel_Fast((index << 1),     worms[index].y + 2,
+						worms[index].color);
+					Plot_Pixel_Fast((index << 1),     worms[index].y + 3,
+						worms[index].color);
+
+					Plot_Pixel_Fast((index << 1) + 1, worms[index].y, 0);
+					Plot_Pixel_Fast((index << 1) + 1, worms[index].y + 1,
+						worms[index].color);
+					Plot_Pixel_Fast((index << 1) + 1, worms[index].y + 2,
+						worms[index].color);
+					Plot_Pixel_Fast((index << 1) + 1, worms[index].y + 3,
+						worms[index].color);
+
+					worms[index].y++;
+				}
+			}
+		}
+
+		/* Accelerate the melt. */
+		if (!(ticks % 500)) {
+			for (index = 0; index < 160; index++) {
+				worms[index].speed--;
+			}
+		}
+	}
+}
+
+void Shear(void)
+{
+	/* This program 'shears' the screen (for lack of a better word). */
+	long index;
+	int x, y;
+
+	/* Select the starting point of the shear. */
+	x = rand() % SCREEN_WIDTH;
+	y = rand() % SCREEN_HEIGHT;
+
+	/* Do it a few times to make sure the whole screen is destroyed. */
+	for (index = 0; index < 100000; index++) {
+		/* Move the shear. */
+		x += 17;		/* note the user of prime numbers */
+		y += 13;
+
+		/* Test whether shears are of boundaries. If so, roll them over. */
+		if (x > 319) x = x - 319;
+		if (y > 199) y = y - 199;
+
+		/* Plot the pixel in black. */
+		Plot_Pixel_Fast(x, y, 0);
 	}
 }

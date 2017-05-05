@@ -1,3 +1,6 @@
+#ifndef GAMELIB_GRAPH_7K
+#define GAMELIB_GRAPH_7K
+
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 /* bitmasks for control keys/shift status */
@@ -115,3 +118,5 @@ would just call it the SCAN_1 key. */
 unsigned char Get_Ascii_Key(void);
 unsigned int Get_Control_Keys(unsigned int mask);
 unsigned char Get_Scan_Code(void);
+
+#endif

@@ -156,8 +156,10 @@ void main(void)
 	Create_Tables();
 
 	/* Set initial clipping region. */
-	Set_Clipping_Region(POLY_CLIP_MIN_X, POLY_CLIP_MIN_Y,
-	                    POLY_CLIP_MAX_X, POLY_CLIP_MAX_Y);
+	poly_clip_min_x = POLY_CLIP_MIN_X;
+	poly_clip_min_y = POLY_CLIP_MIN_Y;
+	poly_clip_max_x = POLY_CLIP_MAX_X;
+	poly_clip_max_y = POLY_CLIP_MAX_Y;
 
 /* // S E C T I O N  2 /////////////////////////////////////////////////// */
 

@@ -1,3 +1,6 @@
+#ifndef GAMELIB_GRAPH_3
+#define GAMELIB_GRAPH_3
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct RGB_color_typ {
@@ -9,11 +12,11 @@ typedef struct RGB_color_typ {
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 /* vram byte ptr */
-static unsigned char far *video_buffer = (unsigned char far *)0xA0000000L;
-static unsigned short far *video_buffer_w = (unsigned short far *)0xA0000000L;
+extern unsigned char far *video_buffer;
+extern unsigned short far *video_buffer_w;
 
 /* 8x8 ROM characters */
-static unsigned char far *rom_char_set = (unsigned char far *)0xF000FA6EL;
+extern unsigned char far *rom_char_set;
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -47,3 +50,5 @@ void Plot_Pixel_Fast(int x, int y, unsigned char color);
 void Set_Palette_Register(int index, RGB_color_ptr color);
 void Set_Video_Mode(int mode);
 void V_Line(int y1, int y2, int x, unsigned int color);
+
+#endif

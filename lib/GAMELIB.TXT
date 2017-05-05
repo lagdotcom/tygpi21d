@@ -8,8 +8,10 @@ GRAPH3  	size = 1029
 	_H_Line_Fast                      _Plot_Pixel
 	_Plot_Pixel_Fast                  _Set_Palette_Register
 	_Set_Video_Mode                   _V_Line
+	_rom_char_set                     _video_buffer
+	_video_buffer_w                 
 
-GRAPH4  	size = 1821
+GRAPH4  	size = 1809
 	_Behind_Sprite                    _Draw_Sprite
 	_Erase_Sprite                     _PCX_Delete
 	_PCX_Grab_Bitmap                  _PCX_Init
@@ -17,21 +19,26 @@ GRAPH4  	size = 1821
 	_Sprite_Collide                   _Sprite_Delete
 	_Sprite_Init                    
 
-GRAPH5  	size = 6366
+GRAPH5  	size = 6430
 	_Bline                            _Clip_Line
-	_Create_Tables                    _Draw_Polygon
-	_Draw_Polygon_Clip                _Rotate_Polygon
-	_Scale_Polygon                    _Set_Clipping_Region
-	_Translate_Polygon              
+	_Create_Tables                    _Draw_Boundary
+	_Draw_Polygon                     _Draw_Polygon_Clip
+	_Rotate_Polygon                   _Scale_Polygon
+	_Translate_Polygon                _poly_clip_max_x
+	_poly_clip_max_y                  _poly_clip_min_x
+	_poly_clip_min_y                
 
-GRAPH6  	size = 1272
+GRAPH6  	size = 2671
 	_Behind_Sprite_DB                 _Blit_Char_DB
 	_Blit_String_DB                   _Create_Double_Buffer
-	_Delete_Double_Buffer             _Draw_Sprite_Clipped_DB
-	_Draw_Sprite_DB                   _Erase_Sprite_DB
-	_Fill_Double_Buffer               _Get_Double_Buffer
-	_Plot_Pixel_Fast_DB               _Show_Double_Buffer
-	_Wait_For_Vsync                 
+	_Delete_Double_Buffer             _Dissolve
+	_Draw_Sprite_Clipped_DB           _Draw_Sprite_DB
+	_Erase_Sprite_DB                  _Fade_Lights
+	_Fill_Double_Buffer               _Melt
+	_Plot_Pixel_Fast_DB               _Shear
+	_Show_Double_Buffer               _Wait_For_Vsync
+	_buffer_height                    _buffer_size
+	_double_buffer                  
 
 GRAPH7J 	size = 266
 	_Buttons                          _Buttons_Bios

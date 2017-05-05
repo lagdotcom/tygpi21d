@@ -1,3 +1,6 @@
+#ifndef GAMELIB_GRAPH_7M
+#define GAMELIB_GRAPH_7M
+
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define MOUSE_RESET				0x00	/* reset mouse */
@@ -14,3 +17,5 @@
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 int Squeeze_Mouse(int command, int *x, int *y, int *buttons);
+
+#endif

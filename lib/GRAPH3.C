@@ -5,6 +5,15 @@
 #include <string.h>
 #include "graph3.h"
 
+/* G L O B A L S ///////////////////////////////////////////////////////// */
+
+/* vram byte ptr */
+unsigned char far *video_buffer = (unsigned char far *)0xA0000000L;
+unsigned short far *video_buffer_w = (unsigned short far *)0xA0000000L;
+
+/* 8x8 ROM characters */
+unsigned char far *rom_char_set = (unsigned char far *)0xF000FA6EL;
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 void Fill_Screen(int value)

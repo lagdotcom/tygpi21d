@@ -20,7 +20,8 @@ void main(int argc, char **argv)
 	}
 
 	/* Test whether the file exists, but not for the PCX extension. */
-	if (!fopen(argv[1], "rb")) {
+	fp = fopen(argv[1], "rb");
+	if (!fp) {
 		printf("\nFile:%s - not found!", argv[1]);
 		return;
 	} else {

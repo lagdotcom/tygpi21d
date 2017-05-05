@@ -13,23 +13,6 @@
 #define POLY_CLIP_MAX_X		(160 + 30)
 #define POLY_CLIP_MAX_Y		(100 + 30)
 
-/* F U N C T I O N S ///////////////////////////////////////////////////// */
-
-void Draw_Boundary(int color)
-{
-	/* Draws in the clipping boundary, if the user is interested in seeing
-	it. */
-
-	Bline(POLY_CLIP_MIN_X, POLY_CLIP_MIN_Y,
-	      POLY_CLIP_MAX_X, POLY_CLIP_MIN_Y, color);
-	Bline(POLY_CLIP_MAX_X, POLY_CLIP_MIN_Y,
-	      POLY_CLIP_MAX_X, POLY_CLIP_MAX_Y, color);
-	Bline(POLY_CLIP_MAX_X, POLY_CLIP_MAX_Y,
-	      POLY_CLIP_MIN_X, POLY_CLIP_MAX_Y, color);
-	Bline(POLY_CLIP_MIN_X, POLY_CLIP_MAX_Y,
-	      POLY_CLIP_MIN_X, POLY_CLIP_MIN_Y, color);
-}
-
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 void vset(polygon_ptr poly, int index, int x, int y)
@@ -46,8 +29,10 @@ void main(void)
 	int done = 0;		/* System exit flag */
 
 	/* Set initial clipping region. */
-	Set_Clipping_Region(POLY_CLIP_MIN_X, POLY_CLIP_MIN_Y,
-	                    POLY_CLIP_MAX_X, POLY_CLIP_MAX_Y);
+	poly_clip_min_x = POLY_CLIP_MIN_X;
+	poly_clip_min_y = POLY_CLIP_MIN_Y;
+	poly_clip_max_x = POLY_CLIP_MAX_X;
+	poly_clip_max_y = POLY_CLIP_MAX_Y;
 
 	/* Set the video mode to the 320x200, 256-color mode. */
 	Set_Video_Mode(VGA256);

@@ -1,3 +1,10 @@
+#ifndef GAMELIB_GRAPH_4
+#define GAMELIB_GRAPH_4
+
+/* I N C L U D E S /////////////////////////////////////////////////////// */
+
+#include "graph3.h"
+
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define PCX_VER_25      0       /* ver 2.5 Paintbrush */
@@ -51,8 +58,6 @@ typedef struct pcx_picture_typ {
 	char far *buffer;
 } pcx_picture, *pcx_picture_ptr;
 
-/* G L O B A L S ///////////////////////////////////////////////////////// */
-
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void PCX_Delete(pcx_picture_ptr image);
@@ -69,3 +74,5 @@ int Sprite_Collide(sprite_ptr sprite_1, sprite_ptr sprite_2);
 void Sprite_Delete(sprite_ptr sprite);
 void Sprite_Init(sprite_ptr sprite, int x, int y, int ac, int as,
 	int mc, int ms, int width, int height);
+
+#endif

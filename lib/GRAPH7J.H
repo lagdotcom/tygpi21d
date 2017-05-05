@@ -1,3 +1,6 @@
+#ifndef GAMELIB_GRAPH_7J
+#define GAMELIB_GRAPH_7J
+
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define BUTTON_1_1			0x10	/* stick 1, button 1 */
@@ -20,3 +23,5 @@ unsigned char Buttons_Bios(unsigned char button);
 unsigned int Joystick(unsigned char stick);
 int Joystick_Available(int stick_num);
 unsigned int Joystick_Bios(unsigned char stick);
+
+#endif

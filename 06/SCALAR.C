@@ -21,7 +21,6 @@ void Scale_Sprite(sprite_ptr sprite, float scale)
 	neded to satisfy the number of destination pixels.
 	Note: this function works in the double buffer. */
 	char far *work_sprite;
-	unsigned char far *double_buffer;
 
 	int work_offset = 0,
 		offset,
@@ -33,9 +32,6 @@ void Scale_Sprite(sprite_ptr sprite, float scale)
 	      x_scale_step,
 	      y_scale_step,
 	      x_scale_index;
-
-	/* lag: get the double buffer */
-	double_buffer = Get_Double_Buffer();
 
 	/* Set the first source pixel. */
 	y_scale_index = 0;
