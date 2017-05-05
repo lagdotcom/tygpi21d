@@ -39,6 +39,7 @@ void Create_Cool_Palette(void);
 void Delay(int clicks);
 void Fill_Screen(int value);
 void Get_Palette_Register(int index, RGB_color_ptr color);
+unsigned char Get_Pixel(int x, int y);
 void H_Line(int x1, int x2, int y, unsigned int color);
 void H_Line_Fast(int x1, int x2, int y, unsigned int color);
 void Plot_Pixel(int x, int y, char color);

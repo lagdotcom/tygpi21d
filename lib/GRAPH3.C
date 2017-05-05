@@ -262,3 +262,8 @@ void V_Line(int y1, int y2, int x, unsigned int color)
 		line_offset += 320;
 	}
 }
+
+unsigned char Get_Pixel(int x, int y)
+{
+	return video_buffer[((y << 8) + (y << 6)) + x];
+}
