@@ -42,3 +42,7 @@ Also, TC doesn't support `// single line comments`, so it's `/* olde schoole tim
 * Chapter 7, Exercise 2: Write another version of the Video Easel program that uses the keyboard instead of the mouse; however, make a pointer that resembles the mouse pointer using sprites.
 * Chapter 7, Exercise 3: Experiment with the mouse sensitivity until one inch on your mouse pad is equivalent to one inch on your computer screen.
 * Chapter 7, Exercise 4: See if you can figure out a technique to detect whether a joystick(s) is present that differs from the technique we implemented today.
+* Chapter 8, Exercise 1: Modify the fixed-point library to use a fixed-point number format that has 16 bits of whole part and 16 bits of decimal part.
+* Chapter 8, Exercise 2: Write a test program that creates two fixed-point numbers and then adds them together 10,000 times. Compare this to using floating-point numbers.
+* Chapter 8, Exercise 3: Compare the difference in speed between the C and in-line two versions of `Fill_Double_Buffer()`.
+* Chapter 8, Exercise 4: _Extra Credit_ (really hard): Try to figure out how to perform general binary division of any divisor using shifting.
