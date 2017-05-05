@@ -1,7 +1,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "graph3.h"
-#include "graph7.h"
+#include "graph7j.h"
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -20,7 +20,7 @@ void Joystick_Calibrate(int stick, calib_ptr joy)
 	use. */
 	unsigned int x_new, y_new;		/* temporary joystick positions */
 
-	if (stick == JOY_1_CAL) {
+	if (stick == JOYSTICK_1) {
 		printf("\nCalibrating Joystick #1: ");
 		printf("Swirl stick then release and press fire");
 
@@ -49,7 +49,7 @@ void Joystick_Calibrate(int stick, calib_ptr joy)
 		/* The user has let the stick go to center. */
 		joy->cx = x_new;
 		joy->cy = y_new;
-	} else if (stick == JOY_2_CAL) {
+	} else if (stick == JOYSTICK_2) {
 		printf("\nCalibrating Joystick #2: ");
 		printf("Swirl stick then release and press fire");
 
@@ -97,7 +97,7 @@ void main(void)
 	}
 
 	/* Calibrate the joystick. */
-	Joystick_Calibrate(JOY_1_CAL, &joy_1);
+	Joystick_Calibrate(JOYSTICK_1, &joy_1);
 
 	/* Set the video mode to the 320x200, 256-color mode. */
 	Set_Video_Mode(VGA256);

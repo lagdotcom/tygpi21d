@@ -33,9 +33,14 @@ GRAPH6  	size = 1272
 	_Plot_Pixel_Fast_DB               _Show_Double_Buffer
 	_Wait_For_Vsync                 
 
-GRAPH7  	size = 660
+GRAPH7J 	size = 266
 	_Buttons                          _Buttons_Bios
+	_Joystick                         _Joystick_Available
+	_Joystick_Bios                  
+
+GRAPH7K 	size = 75
 	_Get_Ascii_Key                    _Get_Control_Keys
-	_Get_Scan_Code                    _Joystick
-	_Joystick_Available               _Joystick_Bios
+	_Get_Scan_Code                  
+
+GRAPH7M 	size = 315
 	_Squeeze_Mouse                  
