@@ -59,3 +59,13 @@ GRAPH8  	size = 290
 	_Plot_Pixel_Global                _Print_Fixed
 	_Sub_Fixed                        _g_color
 	_g_x                              _g_y
+
+GRAPH9  	size = 891
+	_Voc_Break_Sound                  _Voc_Continue_Sound
+	_Voc_Get_Version                  _Voc_Init_Driver
+	_Voc_Load_Driver                  _Voc_Load_Sound
+	_Voc_Pause_Sound                  _Voc_Play_Sound
+	_Voc_Set_DMA                      _Voc_Set_Port
+	_Voc_Set_Speaker                  _Voc_Set_Status_Addr
+	_Voc_Stop_Sound                   _Voc_Terminate_Driver
+	_Voc_Unload_Sound                 _driver_ptr
