@@ -14,24 +14,26 @@ pcx_picture explore_bg;
 party P;
 zone Z;
 
-bool redraw_party;
+bool
+	redraw_description,
+	redraw_party;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-char Offset_X(char direction)
+char Offset_X(direction dir)
 {
-	switch (direction) {
-		case DIR_E: return 1;
-		case DIR_W: return -1;
+	switch (dir) {
+		case East: return 1;
+		case West: return -1;
 		default: return 0;
 	}
 }
 
-char Offset_Y(char direction)
+char Offset_Y(direction dir)
 {
-	switch (direction) {
-		case DIR_S: return 1;
-		case DIR_N: return -1;
+	switch (dir) {
+		case South: return 1;
+		case North: return -1;
 		default: return 0;
 	}
 }
@@ -43,49 +45,49 @@ bool Valid_Coord(coord x, coord y)
 	return true;
 }
 
-tile* Tile_Ahead(coord x, coord y, char direction, char multiple)
+tile* Tile_Ahead(coord x, coord y, direction dir, char multiple)
 {
-	coord ax = x + Offset_X(direction) * multiple;
-	coord ay = y + Offset_Y(direction) * multiple;
+	coord ax = x + Offset_X(dir) * multiple;
+	coord ay = y + Offset_Y(dir) * multiple;
 	
 	if (Valid_Coord(ax, ay)) return &Z.tiles[ax][ay];
 	return (tile*)null;
 }
 
-wall* Wall_Offset(coord x, coord y, char direction, char selection)
+wall* Wall_Offset(coord x, coord y, direction dir, relative rel)
 {
 	tile* under = &Z.tiles[x][y];
 
-	switch (direction) {
-		case DIR_N:
-			switch (selection) {
-				case SEL_LEFT:  return &under->walls[DIR_W];
-				case SEL_AHEAD: return &under->walls[DIR_N];
-				case SEL_RIGHT: return &under->walls[DIR_E];
+	switch (dir) {
+		case North:
+			switch (rel) {
+				case Left:  return &under->walls[West];
+				case Ahead: return &under->walls[North];
+				case Right: return &under->walls[East];
 				default: return null;
 			}
 
-		case DIR_E:
-			switch (selection) {
-				case SEL_LEFT:  return &under->walls[DIR_N];
-				case SEL_AHEAD: return &under->walls[DIR_E];
-				case SEL_RIGHT: return &under->walls[DIR_S];
+		case East:
+			switch (rel) {
+				case Left:  return &under->walls[North];
+				case Ahead: return &under->walls[East];
+				case Right: return &under->walls[South];
 				default: return null;
 			}
 
-		case DIR_S:
-			switch (selection) {
-				case SEL_LEFT:  return &under->walls[DIR_E];
-				case SEL_AHEAD: return &under->walls[DIR_S];
-				case SEL_RIGHT: return &under->walls[DIR_W];
+		case South:
+			switch (rel) {
+				case Left:  return &under->walls[East];
+				case Ahead: return &under->walls[South];
+				case Right: return &under->walls[West];
 				default: return null;
 			}
 
-		case DIR_W:
-			switch (selection) {
-				case SEL_LEFT:  return &under->walls[DIR_S];
-				case SEL_AHEAD: return &under->walls[DIR_W];
-				case SEL_RIGHT: return &under->walls[DIR_N];
+		case West:
+			switch (rel) {
+				case Left:  return &under->walls[South];
+				case Ahead: return &under->walls[West];
+				case Right: return &under->walls[North];
 				default: return null;
 			}
 	}
@@ -96,35 +98,40 @@ wall* Wall_Offset(coord x, coord y, char direction, char selection)
 void Demo(void)
 {
 	/* Set up party */
-	P.zone = 0; P.x = 0; P.y = 0; P.facing = DIR_E;
+	P.zone = 0; P.x = 0; P.y = 0; P.facing = East;
 
-	strcpy(P.characters[0].name, "Lag.Com");
-
-	strcpy(P.characters[1].name, "Mercury");
-
-	strcpy(P.characters[2].name, "Emptyeye");
-
-	strcpy(P.characters[3].name, "Silver");
-
-	strcpy(P.characters[4].name, "Zan-zan");
-
-	strcpy(P.characters[5].name, "Sizzler");
+	#define pset(n, _name, _maxhp, _hp, _maxmp, _mp) { \
+		strcpy(P.characters[n].name, _name); \
+		P.characters[n].maxhp = _maxhp; \
+		P.characters[n].hp = _hp; \
+		P.characters[n].maxmp = _maxmp; \
+		P.characters[n].mp = _mp; \
+	}
+	pset(0, "Lag.Com",   8,  8, 16, 16);
+	pset(1, "Mercury",  21, 18,  4,  1);
+	pset(2, "Emptyeye", 17,  3,  0,  0);
+	pset(3, "Silver",   15, 14, 14,  8);
+	pset(4, "Zan-zan",  10, 10,  0,  0);
+	pset(5, "Sizzler",  17, 17,  8,  7);
+	#undef pset
 
 	/* Set up zone */
-	#define zts(x, y, f, c, wn, we, ws, ww) { \
+	#define zts(x, y, f, c, wn, we, ws, ww, d) { \
 		Z.tiles[x][y].floor = f; \
 		Z.tiles[x][y].ceil = c; \
-		Z.tiles[x][y].walls[DIR_N].texture = wn; \
-		Z.tiles[x][y].walls[DIR_E].texture = we; \
-		Z.tiles[x][y].walls[DIR_S].texture = ws; \
-		Z.tiles[x][y].walls[DIR_W].texture = ww; \
+		Z.tiles[x][y].walls[North].texture = wn; \
+		Z.tiles[x][y].walls[East].texture = we; \
+		Z.tiles[x][y].walls[South].texture = ws; \
+		Z.tiles[x][y].walls[West].texture = ww; \
+		Z.tiles[x][y].description = d; \
 	}
-	zts(0, 0, 9,10,11, 0,11,11);
-	zts(1, 0, 9,10,11, 0,11, 0);
-	zts(2, 0, 9,10,11,11, 0, 0);
-	zts(2, 1, 9,10, 0,15, 0,15);
-	zts(2, 2, 9,10, 0,15,15, 0);
-	zts(1, 2, 9,10,15, 0,15,15);
+	strcpy(Z.text, "There's nothing particularly\ninteresting about this corridor.");
+	zts(0, 0, 9,10,11, 0,11,11, 1);
+	zts(1, 0, 9,10,11, 0,11, 0, 1);
+	zts(2, 0, 9,10,11,11, 0, 0, 1);
+	zts(2, 1, 9,10, 0,15, 0,15, 1);
+	zts(2, 2, 9,10, 0,15,15, 0, 1);
+	zts(1, 2, 9,10,15, 0,15,15, 1);
 	#undef zts
 	Zone_Save("DEMO.ZON");
 }
@@ -132,8 +139,19 @@ void Demo(void)
 void Draw_Character_Status(int index, int x, int y)
 {
 	character* ch = &P.characters[index];
+	char buffer[11];
 
-	Blit_String_DB(x, y, 15, ch->name, 1);
+	strncpy(buffer, ch->name, 10);
+	buffer[10] = 0;
+	Blit_String_DB(x, y, 15, buffer, 0);
+
+	sprintf(buffer, "%4d/%d", ch->hp, ch->maxhp);
+	Blit_String_DB(x, y + 8, 15, buffer, 0);
+
+	if (ch->maxmp > 0) {
+		sprintf(buffer, "%4d/%d", ch->mp, ch->maxmp);
+		Blit_String_DB(x, y + 16, 15, buffer, 0);
+	}
 }
 
 void Draw_Party_Status(void)
@@ -142,11 +160,11 @@ void Draw_Party_Status(void)
 	#define SY 12
 
 	Draw_Character_Status(0, SX, SY);
-	Draw_Character_Status(1, SX, SY + 40);
-	Draw_Character_Status(2, SX, SY + 80);
+	Draw_Character_Status(1, SX, SY + 34);
+	Draw_Character_Status(2, SX, SY + 68);
 	Draw_Character_Status(3, SX + 80, SY);
-	Draw_Character_Status(4, SX + 80, SY + 40);
-	Draw_Character_Status(5, SX + 80, SY + 80);
+	Draw_Character_Status(4, SX + 80, SY + 34);
+	Draw_Character_Status(5, SX + 80, SY + 68);
 
 	redraw_party = false;
 
@@ -154,12 +172,23 @@ void Draw_Party_Status(void)
 	#undef SX
 }
 
+void Draw_Description(void)
+{
+	tile* under = &Z.tiles[P.x][P.y];
+
+	if (under->description) {
+		Blit_String_Box(12, 148, 37, 5, 15, &Z.text[under->description - 1], 0);
+	} else {
+		/* TODO */
+	}
+}
+
 bool Try_Move_Forward(void)
 {
 	wall *centre;
 	coord ax, ay;
 
-	centre = Wall_Offset(P.x, P.y, P.facing, SEL_AHEAD);
+	centre = Wall_Offset(P.x, P.y, P.facing, Ahead);
 	if (centre->texture) {
 		/* TODO: ow! */
 		return false;
@@ -170,6 +199,7 @@ bool Try_Move_Forward(void)
 
 	P.x = ax;
 	P.y = ay;
+	redraw_description = true;
 	redraw_fp = true;
 
 	return true;
@@ -194,8 +224,9 @@ void main(void)
 	memcpy(double_buffer, explore_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
 
 	Demo();
-	redraw_party = true;
+	redraw_description = true;
 	redraw_fp = true;
+	redraw_party = true;
 
 	while (!done) {
 		if (kbhit()) {
@@ -206,13 +237,13 @@ void main(void)
 					break;
 
 				case 'a':
-					if (P.facing == DIR_N) P.facing = DIR_W;
+					if (P.facing == North) P.facing = West;
 					else P.facing--;
 					redraw_fp = true;
 					break;
 
 				case 'd':
-					if (P.facing == DIR_W) P.facing = DIR_N;
+					if (P.facing == West) P.facing = North;
 					else P.facing++;
 					redraw_fp = true;
 					break;
@@ -223,6 +254,7 @@ void main(void)
 			}
 		}
 
+		if (redraw_description) Draw_Description();
 		if (redraw_fp) Draw_First_Person();
 		if (redraw_party) Draw_Party_Status();
 

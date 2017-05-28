@@ -12,12 +12,6 @@
 #define P2 36
 #define P3 42
 
-/* G L O B A L S ///////////////////////////////////////////////////////// */
-
-bool redraw_fp;
-
-/* F U N C T I O N S ///////////////////////////////////////////////////// */
-
 #define XA SX + ps
 #define XB EX - ps
 #define XC SX + pe
@@ -29,7 +23,13 @@ bool redraw_fp;
 
 #define FILLED 1
 
-void TrapeziumH_DB(char color, int x0, int x1, int x2, int x3, int y0, int y1)
+/* G L O B A L S ///////////////////////////////////////////////////////// */
+
+bool redraw_fp;
+
+/* F U N C T I O N S ///////////////////////////////////////////////////// */
+
+void TrapeziumH_DB(colour col, int x0, int x1, int x2, int x3, int y0, int y1)
 {
 	#if FILLED
 	int xa, xb, y, ye, m;
@@ -43,21 +43,21 @@ void TrapeziumH_DB(char color, int x0, int x1, int x2, int x3, int y0, int y1)
 		m = 1;
 	}
 	while (y != ye) {
-		Bline_DB(xa, y, xb, y, color);
+		Bline_DB(xa, y, xb, y, col);
 
 		xa++;
 		xb--;
 		y += m;
 	}
 	#else
-	Bline_DB(x0, y0, x1, y0, color);
-	Dline_DB(x0, y0, x2, y1, color);
-	Dline_DB(x1, y0, x3, y1, color);
-	Bline_DB(x2, y1, x3, y1, color);
+	Bline_DB(x0, y0, x1, y0, col);
+	Dline_DB(x0, y0, x2, y1, col);
+	Dline_DB(x1, y0, x3, y1, col);
+	Bline_DB(x2, y1, x3, y1, col);
 	#endif
 }
 
-void TrapeziumV_DB(char color, int x0, int x1, int y0, int y1, int y2, int y3)
+void TrapeziumV_DB(colour col, int x0, int x1, int y0, int y1, int y2, int y3)
 {
 	#if FILLED
 	int x, xe, ya, yb, m;
@@ -71,32 +71,32 @@ void TrapeziumV_DB(char color, int x0, int x1, int y0, int y1, int y2, int y3)
 		m = 1;
 	}
 	while (x != xe) {
-		Bline_DB(x, ya, x, yb, color);
+		Bline_DB(x, ya, x, yb, col);
 
 		ya++;
 		yb--;
 		x += m;
 	}
 	#else
-	Bline_DB(x0, y0, x0, y1, color);
-	Dline_DB(x0, y0, x1, y2, color);
-	Dline_DB(x0, y1, x1, y3, color);
-	Bline_DB(x1, y2 - 1, x1, y3 + 1, color);
+	Bline_DB(x0, y0, x0, y1, col);
+	Dline_DB(x0, y0, x1, y2, col);
+	Dline_DB(x0, y1, x1, y3, col);
+	Bline_DB(x1, y2 - 1, x1, y3 + 1, col);
 	#endif
 }
 
-void Square_DB(char color, int x0, int x1, int y0, int y1)
+void Square_DB(colour col, int x0, int x1, int y0, int y1)
 {
 	#if FILLED
 	int y;
 	for (y = y0; y <= y1; y++) {
-		Bline_DB(x0, y, x1, y, color);
+		Bline_DB(x0, y, x1, y, col);
 	}
 	#else
-	Bline_DB(x0, y0, x1, y0, color);
-	Bline_DB(x0, y1, x1, y1, color);
-	Bline_DB(x0, y0, x0, y1, color);
-	Bline_DB(x1, y0, x1, y1, color);
+	Bline_DB(x0, y0, x1, y0, col);
+	Bline_DB(x0, y1, x1, y1, col);
+	Bline_DB(x0, y0, x0, y1, col);
+	Bline_DB(x1, y0, x1, y1, col);
 	#endif
 }
 
@@ -114,20 +114,19 @@ bool Draw_First_Person_Tile(coord x, coord y, char ps, char pe, char cmod)
 		TrapeziumH_DB(under->ceil + cmod, XA, XB, XC - 1, XD + 1, YA, YC - 1);
 	}
 
-	left = Wall_Offset(x, y, P.facing, SEL_LEFT);
+	left = Wall_Offset(x, y, P.facing, Left);
 	if (left->texture) {
 		TrapeziumV_DB(left->texture + cmod, XA, XC - 1, YA + 1, YB - 1, YC + 1, YD - 1);
 	}
 
-	right = Wall_Offset(x, y, P.facing, SEL_RIGHT);
+	right = Wall_Offset(x, y, P.facing, Right);
 	if (right->texture) {
 		TrapeziumV_DB(right->texture + cmod, XB, XD + 1, YA + 1, YB - 1, YC + 1, YD - 1);
 	}
 
-	centre = Wall_Offset(x, y, P.facing, SEL_AHEAD);
+	centre = Wall_Offset(x, y, P.facing, Ahead);
 	if (centre->texture) {
 		Square_DB(centre->texture + cmod, XC, XD, YC, YD);
-		
 
 		return false;
 	}

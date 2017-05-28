@@ -5,7 +5,7 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Bline_DB(int xo, int yo, int x1, int y1, unsigned char color)
+void Bline_DB(int xo, int yo, int x1, int y1, colour col)
 {
 	/* This function uses Bresenham's algorithm (IBM 1965) to draw a line
 	from (xo,yo) - (x1,y1). */
@@ -50,7 +50,7 @@ void Bline_DB(int xo, int yo, int x1, int y1, unsigned char color)
 		/* Draw the line. */
 		for (index = 0; index <= dx; index++) {
 			/* Set the pixel */
-			*vb_start = color;
+			*vb_start = col;
 
 			/* Adjust the disciminant. */
 			error += dy;
@@ -67,7 +67,7 @@ void Bline_DB(int xo, int yo, int x1, int y1, unsigned char color)
 		}
 	} else {
 		for (index = 0; index <= dy; index++) {
-			*vb_start = color;
+			*vb_start = col;
 
 			error += dx;
 
@@ -82,7 +82,7 @@ void Bline_DB(int xo, int yo, int x1, int y1, unsigned char color)
 	}
 }
 
-void Dline_DB(int xo, int yo, int x1, int y1, unsigned char color)
+void Dline_DB(int xo, int yo, int x1, int y1, colour col)
 {
 	int x, y, xd, yd;
 
@@ -94,9 +94,37 @@ void Dline_DB(int xo, int yo, int x1, int y1, unsigned char color)
 	else if (y1 > yo) yd = 1;
 
 	while (x != x1 && y != y1) {
-		Plot_Pixel_Fast_DB(x, y, color);
+		Plot_Pixel_Fast_DB(x, y, col);
 
 		x += xd;
 		y += yd;
+	}
+}
+
+void Blit_String_Box(int x, int y, int w, int h, colour col, char *string, bool trans_flag)
+{
+	int row = 0,
+		column = 0,
+		i = 0;
+	char ch;
+
+	while (string[i]) {
+		if (row >= h) return;
+
+		ch = string[i++];
+		if (ch == ' ' && column == 0) continue;
+		if (ch == '\n') {
+			column = 0;
+			row++;
+			continue;
+		}
+
+		Blit_Char_DB(x + column*8, y + row*8, ch, col, trans_flag);
+
+		column++;
+		if (column >= w) {
+			column = 0;
+			row++;
+		}
 	}
 }
