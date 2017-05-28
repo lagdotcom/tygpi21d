@@ -22,7 +22,7 @@ void Show_Double_Buffer(void);
 
 /* Double Buffer drawing */
 void Behind_Sprite_DB(sprite_ptr sprite);
-void Blit_Char_DB(int cx, int yc, char c, int color, int trans_flag);
+void Blit_Char_DB(int xc, int yc, char c, int color, int trans_flag);
 void Blit_String_DB(int x, int y, int color, char *string, int trans_flag);
 void Draw_Sprite_Clipped_DB(sprite_ptr sprite, int min_x, int min_y,
 	int max_x, int max_y);

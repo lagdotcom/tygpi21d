@@ -32,7 +32,7 @@ Also, TC doesn't support `// single line comments`, so it's `/* olde schoole tim
 * Chapter 5, Exercise 3: Time and analyze the difference in performance between `Draw_Polygon()` and `Draw_Polygon_Clip()`.
 * Chapter 5, Exercise 4: Make the ship in rockdemo fire missiles.
 * Chapter 5, Exercise 5: Place a black hole into rockdemo by creating a local gravity field somewhere on the screen.
-* Chapter 5, Exercise 6: _Extra Credit_: see if you can devise the rotation equations.
+* Chapter 5, Exercise 6: _Extra Credit_: see if you can derive the rotation equations.
 * Chapter 6, Exercise 2: Modify the robo.c program so that when Robopunk walks all the way to the right edge of the universe, he falls downward instead of floating in mid-air.
 * Chapter 6, Exercise 3: Write a function that adds a starfield to robo.c.
 * Chapter 6, Exercise 4: Modify the `Dissolve()` screen transition function so that it dissolves the screen with any color.

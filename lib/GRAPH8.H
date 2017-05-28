@@ -1,8 +1,6 @@
 #ifndef GAMELIB_GRAPH_8
 #define GAMELIB_GRAPH_8
 
-/* I N C L U D E S /////////////////////////////////////////////////////// */
-
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define FP_SHIFT		8		/* number of decimal digits */
