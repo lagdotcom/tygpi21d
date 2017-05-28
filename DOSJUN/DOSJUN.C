@@ -3,10 +3,6 @@
 #include "gamelib.h"
 #include "dosjun.h"
 
-/* D E F I N E S ///////////////////////////////////////////////////////// */
-
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 pcx_picture explore_bg;
@@ -14,9 +10,7 @@ pcx_picture explore_bg;
 party P;
 zone Z;
 
-bool
-	redraw_description,
-	redraw_party;
+bool redraw_description;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -114,6 +108,7 @@ void Demo(void)
 	pset(4, "Zan-zan",  10, 10,  0,  0);
 	pset(5, "Sizzler",  17, 17,  8,  7);
 	#undef pset
+	Party_Save("DEMO.SAV");
 
 	/* Set up zone */
 	#define zts(x, y, f, c, wn, we, ws, ww, d) { \
@@ -134,42 +129,6 @@ void Demo(void)
 	zts(1, 2, 9,10,15, 0,15,15, 1);
 	#undef zts
 	Zone_Save("DEMO.ZON");
-}
-
-void Draw_Character_Status(int index, int x, int y)
-{
-	character* ch = &P.characters[index];
-	char buffer[11];
-
-	strncpy(buffer, ch->name, 10);
-	buffer[10] = 0;
-	Blit_String_DB(x, y, 15, buffer, 0);
-
-	sprintf(buffer, "%4d/%d", ch->hp, ch->maxhp);
-	Blit_String_DB(x, y + 8, 15, buffer, 0);
-
-	if (ch->maxmp > 0) {
-		sprintf(buffer, "%4d/%d", ch->mp, ch->maxmp);
-		Blit_String_DB(x, y + 16, 15, buffer, 0);
-	}
-}
-
-void Draw_Party_Status(void)
-{
-	#define SX 148
-	#define SY 12
-
-	Draw_Character_Status(0, SX, SY);
-	Draw_Character_Status(1, SX, SY + 34);
-	Draw_Character_Status(2, SX, SY + 68);
-	Draw_Character_Status(3, SX + 80, SY);
-	Draw_Character_Status(4, SX + 80, SY + 34);
-	Draw_Character_Status(5, SX + 80, SY + 68);
-
-	redraw_party = false;
-
-	#undef SY
-	#undef SX
 }
 
 void Draw_Description(void)

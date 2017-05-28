@@ -88,6 +88,8 @@ void Blit_String_Box(int sx, int sy, int w, int h, colour col, char *string, boo
 void Dline_DB(int xo, int yo, int x1, int y1, colour col);
 void Draw_Character_Status(int index, int x, int y);
 void Draw_Party_Status(void);
+void Party_Load(char *filename);
+void Party_Save(char *filename);
 void Zone_Load(char *filename);
 void Zone_Save(char *filename);
 wall* Wall_Offset(coord x, coord y, direction dir, relative rel);
