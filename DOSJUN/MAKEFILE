@@ -1,0 +1,24 @@
+CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc
+OBJS = dosjun.obj fp.obj gfx.obj party.obj zone.obj
+
+dosjun.exe: $(OBJS)
+	TCC $(CFLAGS) $(OBJS) ..\LIB\GAMELIB.LIB
+
+dosjun.obj: dosjun.c
+	TCC $(CFLAGS) -c dosjun.c
+
+fp.obj: fp.c
+	TCC $(CFLAGS) -c fp.c
+
+gfx.obj: gfx.c
+	TCC $(CFLAGS) -c gfx.c
+
+party.obj: party.c
+	TCC $(CFLAGS) -c party.c
+
+zone.obj: zone.c
+	TCC $(CFLAGS) -c zone.c
+
+clean:
+	-DEL *.OBJ
+	-DEL *.EXE
