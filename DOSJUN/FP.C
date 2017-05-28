@@ -21,84 +21,11 @@
 #define YC SY + pe
 #define YD EY - pe
 
-#define FILLED 1
-
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 bool redraw_fp;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
-
-void TrapeziumH_DB(colour col, int x0, int x1, int x2, int x3, int y0, int y1)
-{
-	#if FILLED
-	int xa, xb, y, ye, m;
-	xa = x0;
-	xb = x1;
-	y = y0;
-	ye = y1;
-	if (y1 < y0) {
-		m = -1;
-	} else {
-		m = 1;
-	}
-	while (y != ye) {
-		Bline_DB(xa, y, xb, y, col);
-
-		xa++;
-		xb--;
-		y += m;
-	}
-	#else
-	Bline_DB(x0, y0, x1, y0, col);
-	Dline_DB(x0, y0, x2, y1, col);
-	Dline_DB(x1, y0, x3, y1, col);
-	Bline_DB(x2, y1, x3, y1, col);
-	#endif
-}
-
-void TrapeziumV_DB(colour col, int x0, int x1, int y0, int y1, int y2, int y3)
-{
-	#if FILLED
-	int x, xe, ya, yb, m;
-	ya = y0;
-	yb = y1;
-	x = x0;
-	xe = x1;
-	if (x1 < x0) {
-		m = -1;
-	} else {
-		m = 1;
-	}
-	while (x != xe) {
-		Bline_DB(x, ya, x, yb, col);
-
-		ya++;
-		yb--;
-		x += m;
-	}
-	#else
-	Bline_DB(x0, y0, x0, y1, col);
-	Dline_DB(x0, y0, x1, y2, col);
-	Dline_DB(x0, y1, x1, y3, col);
-	Bline_DB(x1, y2 - 1, x1, y3 + 1, col);
-	#endif
-}
-
-void Square_DB(colour col, int x0, int x1, int y0, int y1)
-{
-	#if FILLED
-	int y;
-	for (y = y0; y <= y1; y++) {
-		Bline_DB(x0, y, x1, y, col);
-	}
-	#else
-	Bline_DB(x0, y0, x1, y0, col);
-	Bline_DB(x0, y1, x1, y1, col);
-	Bline_DB(x0, y0, x0, y1, col);
-	Bline_DB(x1, y0, x1, y1, col);
-	#endif
-}
 
 bool Draw_First_Person_Tile(coord x, coord y, char ps, char pe, char cmod)
 {
