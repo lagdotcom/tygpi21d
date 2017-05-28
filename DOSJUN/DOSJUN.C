@@ -113,25 +113,7 @@ void Demo(void)
 	#undef pset
 	Party_Save("DEMO.SAV");
 
-	/* Set up zone */
-	#define zts(x, y, f, c, wn, we, ws, ww, d) { \
-		Z.tiles[x][y].floor = f; \
-		Z.tiles[x][y].ceil = c; \
-		Z.tiles[x][y].walls[North].texture = wn; \
-		Z.tiles[x][y].walls[East].texture = we; \
-		Z.tiles[x][y].walls[South].texture = ws; \
-		Z.tiles[x][y].walls[West].texture = ww; \
-		Z.tiles[x][y].description = d; \
-	}
-	strcpy(Z.text, "Other than its ridiculous colour,\nthere's nothing particularly\ninteresting about this corridor.");
-	zts(0, 0, 9,10,11, 0,11,11, 1);
-	zts(1, 0, 9,10,11, 0,11, 0, 1);
-	zts(2, 0, 9,10,11,11, 0, 0, 1);
-	zts(2, 1, 9,10, 0,15, 0,15, 1);
-	zts(2, 2, 9,10, 0,15,15, 0, 1);
-	zts(1, 2, 9,10,15, 0,15,15, 1);
-	#undef zts
-	Zone_Save("DEMO.ZON");
+	Zone_Load("DEMO.ZON");
 }
 
 void Draw_Description(void)
