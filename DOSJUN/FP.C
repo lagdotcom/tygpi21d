@@ -1,5 +1,6 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
+#include "gamelib.h"
 #include "dosjun.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
@@ -21,6 +22,8 @@
 #define YC SY + pe
 #define YD EY - pe
 
+#define FILLED true
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 bool redraw_fp;
@@ -34,26 +37,26 @@ bool Draw_First_Person_Tile(coord x, coord y, char ps, char pe, char cmod)
 
 	under = &Z.tiles[x][y];
 	if (under->floor) {
-		TrapeziumH_DB(under->floor + cmod, XA, XB, XC - 1, XD + 1, YB, YD + 1);
+		TrapeziumH_DB(under->floor + cmod, XA, XB, XC - 1, XD + 1, YB, YD + 1, FILLED);
 	}
 
 	if (under->ceil) {
-		TrapeziumH_DB(under->ceil + cmod, XA, XB, XC - 1, XD + 1, YA, YC - 1);
+		TrapeziumH_DB(under->ceil + cmod, XA, XB, XC - 1, XD + 1, YA, YC - 1, FILLED);
 	}
 
 	left = Wall_Offset(x, y, P.facing, Left);
 	if (left->texture) {
-		TrapeziumV_DB(left->texture + cmod, XA, XC - 1, YA + 1, YB - 1, YC + 1, YD - 1);
+		TrapeziumV_DB(left->texture + cmod, XA, XC - 1, YA + 1, YB - 1, YC + 1, YD - 1, FILLED);
 	}
 
 	right = Wall_Offset(x, y, P.facing, Right);
 	if (right->texture) {
-		TrapeziumV_DB(right->texture + cmod, XB, XD + 1, YA + 1, YB - 1, YC + 1, YD - 1);
+		TrapeziumV_DB(right->texture + cmod, XB, XD + 1, YA + 1, YB - 1, YC + 1, YD - 1, FILLED);
 	}
 
 	centre = Wall_Offset(x, y, P.facing, Ahead);
 	if (centre->texture) {
-		Square_DB(centre->texture + cmod, XC, XD, YC, YD);
+		Square_DB(centre->texture + cmod, XC, YC, XD, YD, FILLED);
 
 		return false;
 	}

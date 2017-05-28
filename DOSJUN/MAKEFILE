@@ -1,8 +1,9 @@
 CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc
-OBJS = dosjun.obj fp.obj gfx.obj party.obj zone.obj
+MAIN_OBJS = dosjun.obj fp.obj gfx.obj party.obj zone.obj
+EDITOR_OBJS = editor.obj gfx.obj zone.obj
 
-dosjun.exe: $(OBJS)
-	TCC $(CFLAGS) $(OBJS) ..\LIB\GAMELIB.LIB
+dosjun.exe: $(MAIN_OBJS)
+	TCC $(CFLAGS) $(MAIN_OBJS) ..\LIB\GAMELIB.LIB
 
 dosjun.obj: dosjun.c
 	TCC $(CFLAGS) -c dosjun.c
@@ -18,6 +19,12 @@ party.obj: party.c
 
 zone.obj: zone.c
 	TCC $(CFLAGS) -c zone.c
+
+editor.exe: $(EDITOR_OBJS)
+	TCC $(CFLAGS) $(EDITOR_OBJS) ..\LIB\GAMELIB.LIB
+
+editor.obj: editor.c
+	TCC $(CFLAGS) -c editor.c
 
 clean:
 	-DEL *.OBJ
