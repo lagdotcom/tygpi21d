@@ -19,12 +19,14 @@
 #define true 1
 #define false 0
 #ifndef bool
-#define bool unsigned char
+typedef unsigned char bool;
 #endif
 
 #ifndef null
 #define null 0
 #endif
+
+typedef char coord;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -34,7 +36,8 @@ typedef struct character_typ {
 
 typedef struct party_typ {
 	character characters[PARTY_SIZE];
-	char zone, x, y, facing;
+	char zone, facing;
+	coord x, y;
 } party;
 
 typedef struct wall_typ {
@@ -52,7 +55,23 @@ typedef struct zone_typ {
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-party P;
-zone Z;
+extern party P;
+extern zone Z;
+
+extern bool redraw_fp,
+	redraw_party;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
+
+bool Try_Move_Forward(void);
+bool Valid_Coord(coord x, coord y);
+char Offset_X(char direction);
+char Offset_Y(char direction);
+tile* Tile_Ahead(coord x, coord y, char direction, char multiple);
+void Bline_DB(int xo, int yo, int x1, int y1, unsigned char color);
+void Dline_DB(int xo, int yo, int x1, int y1, unsigned char color);
+void Draw_Character_Status(int index, int x, int y);
+void Draw_Party_Status(void);
+void Zone_Load(char *filename);
+void Zone_Save(char *filename);
+wall* Wall_Offset(coord x, coord y, char direction, char selection);
