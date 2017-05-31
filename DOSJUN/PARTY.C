@@ -16,23 +16,9 @@ bool redraw_party;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Party_Load(char *filename)
-{
-	FILE *fp = fopen(filename, "rb");
-	fread(&P, sizeof(party), 1, fp);
-	fclose(fp);
-}
-
-void Party_Save(char *filename)
-{
-	FILE *fp = fopen(filename, "wb");
-	fwrite(&P, sizeof(party), 1, fp);
-	fclose(fp);
-}
-
 void Draw_Character_Status(int index, int x, int y)
 {
-	character* ch = &P.characters[index];
+	character* ch = &S.characters[index];
 	char buffer[11];
 
 	strncpy(buffer, ch->name, 10);

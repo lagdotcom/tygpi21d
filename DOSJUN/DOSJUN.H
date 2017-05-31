@@ -1,74 +1,18 @@
+#ifndef DOSJUN_MAIN_H
+#define DOSJUN_MAIN_H
+
 /* I N C L U D E S /////////////////////////////////////////////////////// */
+
+#include "types.h"
+#include "files.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define NAME_SIZE		24
-#define PARTY_SIZE		6
-#define ZONE_WIDTH		30
-#define ZONE_HEIGHT		20
-#define ZONE_TEXT_SIZE	10000
-
-#define true 1
-#define false 0
-#ifndef bool
-typedef unsigned char bool;
-#endif
-
-#ifndef null
-#define null 0
-#endif
-
-typedef enum direction_typ {
-	North = 0,
-	East = 1,
-	South = 2,
-	West = 3
-} direction;
-
-typedef enum relative_typ {
-	Ahead,
-	Left,
-	Right
-} relative;
-
-typedef unsigned char colour;
-typedef unsigned char coord;
-typedef unsigned short text_offset;
-typedef unsigned char zone_id;
-
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
-typedef struct character_typ {
-	char name[NAME_SIZE];
-	unsigned short hp, maxhp;
-	unsigned short mp, maxmp;
-} character;
-
-typedef struct party_typ {
-	character characters[PARTY_SIZE];
-	zone_id zone;
-	direction facing;
-	coord x, y;
-} party;
-
-typedef struct wall_typ {
-	colour texture;
-} wall;
-
-typedef struct tile_typ {
-	colour floor, ceil;
-	wall walls[4];
-	text_offset description;
-} tile;
-
-typedef struct zone_typ {
-	tile tiles[ZONE_WIDTH][ZONE_HEIGHT];
-	char text[ZONE_TEXT_SIZE];
-} zone;
+#define TILE(z, x, y) (&z.tiles[y * z.header.width + x])
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-extern party P;
+extern save S;
 extern zone Z;
 
 extern bool
@@ -96,6 +40,8 @@ void Party_Save(char *filename);
 void Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled);
 void TrapeziumH_DB(colour col, int x0, int x1, int x2, int x3, int y0, int y1, bool filled);
 void TrapeziumV_DB(colour col, int x0, int x1, int y0, int y1, int y2, int y3, bool filled);
-void Zone_Load(char *filename);
-void Zone_Save(char *filename);
+void Zone_Load(char *filename, zone *z);
+void Zone_Save(char *filename, zone *z);
 wall* Wall_Offset(coord x, coord y, direction dir, relative rel);
+
+#endif

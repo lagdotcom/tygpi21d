@@ -1,33 +1,45 @@
 CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc
-MAIN_OBJS = dosjun.obj fp.obj gfx.obj party.obj zone.obj
-EDITOR_OBJS = editor.obj gfx.obj input.obj zone.obj
+DEMO_OBJS = mkdemo.obj load.obj save.obj
+MAIN_OBJS = dosjun.obj fp.obj gfx.obj load.obj party.obj save.obj
+EDITOR_OBJS = editor.obj gfx.obj input.obj load.obj save.obj
+HEADERS = dosjun.h files.h types.h
 
-dosjun.exe: $(MAIN_OBJS)
+dosjun: $(MAIN_OBJS)
 	TCC $(CFLAGS) $(MAIN_OBJS) ..\LIB\GAMELIB.LIB
 
-editor.exe: $(EDITOR_OBJS)
+editor: $(EDITOR_OBJS)
 	TCC $(CFLAGS) $(EDITOR_OBJS) ..\LIB\GAMELIB.LIB
 
-dosjun.obj: dosjun.c
+demo: $(DEMO_OBJS)
+	TCC $(CFLAGS) $(DEMO_OBJS)
+	MKDEMO
+
+dosjun.obj: dosjun.c $(HEADERS)
 	TCC $(CFLAGS) -c dosjun.c
 
-editor.obj: editor.c
+editor.obj: editor.c $(HEADERS)
 	TCC $(CFLAGS) -c editor.c
 
-fp.obj: fp.c
+fp.obj: fp.c $(HEADERS)
 	TCC $(CFLAGS) -c fp.c
 
-gfx.obj: gfx.c
+gfx.obj: gfx.c $(HEADERS)
 	TCC $(CFLAGS) -c gfx.c
 
-input.obj: input.c
+input.obj: input.c $(HEADERS)
 	TCC $(CFLAGS) -c input.c
 
-party.obj: party.c
+load.obj: save.c $(HEADERS)
+	TCC $(CFLAGS) -c load.c
+
+mkdemo.obj: mkdemo.c $(HEADERS)
+	TCC $(CFLAGS) -c mkdemo.c
+
+party.obj: party.c $(HEADERS)
 	TCC $(CFLAGS) -c party.c
 
-zone.obj: zone.c
-	TCC $(CFLAGS) -c zone.c
+save.obj: save.c $(HEADERS)
+	TCC $(CFLAGS) -c save.c
 
 clean:
 	-DEL *.OBJ

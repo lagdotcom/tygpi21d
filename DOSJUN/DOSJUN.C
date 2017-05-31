@@ -10,7 +10,7 @@
 
 pcx_picture explore_bg;
 
-party P;
+save S;
 zone Z;
 
 bool redraw_description;
@@ -37,8 +37,8 @@ char Offset_Y(direction dir)
 
 bool Valid_Coord(coord x, coord y)
 {
-	if (x < 0 || x >= ZONE_WIDTH) return false;
-	if (y < 0 || y >= ZONE_HEIGHT) return false;
+	if (x < 0 || x >= Z.header.width) return false;
+	if (y < 0 || y >= Z.header.height) return false;
 	return true;
 }
 
@@ -47,13 +47,13 @@ tile* Tile_Ahead(coord x, coord y, direction dir, char multiple)
 	coord ax = x + Offset_X(dir) * multiple;
 	coord ay = y + Offset_Y(dir) * multiple;
 	
-	if (Valid_Coord(ax, ay)) return &Z.tiles[ax][ay];
+	if (Valid_Coord(ax, ay)) return TILE(Z, ax, ay);
 	return (tile*)null;
 }
 
 wall* Wall_Offset(coord x, coord y, direction dir, relative rel)
 {
-	tile* under = &Z.tiles[x][y];
+	tile* under = TILE(Z, x, y);
 
 	switch (dir) {
 		case North:
@@ -95,14 +95,19 @@ wall* Wall_Offset(coord x, coord y, direction dir, relative rel)
 void Demo(void)
 {
 	/* Set up party */
-	P.zone = 0; P.x = 0; P.y = 0; P.facing = East;
+	strncpy(S.header.campaign_name, "DEMO", 8);
+	S.header.zone = 0;
+	S.header.x = 0;
+	S.header.y = 0;
+	S.header.facing = East;
+	S.header.num_characters = 6;
 
 	#define pset(n, _name, _maxhp, _hp, _maxmp, _mp) { \
-		strcpy(P.characters[n].name, _name); \
-		P.characters[n].maxhp = _maxhp; \
-		P.characters[n].hp = _hp; \
-		P.characters[n].maxmp = _maxmp; \
-		P.characters[n].mp = _mp; \
+		strcpy(S.characters[n].name, _name); \
+		S.characters[n].maxhp = _maxhp; \
+		S.characters[n].hp = _hp; \
+		S.characters[n].maxmp = _maxmp; \
+		S.characters[n].mp = _mp; \
 	}
 	pset(0, "Lag.Com",   8,  8, 16, 16);
 	pset(1, "Mercury",  21, 18,  4,  1);
@@ -111,20 +116,21 @@ void Demo(void)
 	pset(4, "Zan-zan",  10, 10,  0,  0);
 	pset(5, "Sizzler",  17, 17,  8,  7);
 	#undef pset
-	Party_Save("DEMO.SAV");
+	Savefile_Save("DEMO.SAV", &S);
 
-	Zone_Load("DEMO.ZON");
+	Zone_Load("DEMO.ZON", &Z);
 }
 
 void Draw_Description(void)
 {
-	tile* under = &Z.tiles[P.x][P.y];
+	tile* under = TILE(Z, S.header.x, S.header.y);
 
-	if (under->description) {
-		Blit_String_Box(12, 148, 37, 5, 15, &Z.text[under->description - 1], 0);
-	} else {
-		/* TODO */
+	Square_DB(0, 12, 148, 12 + 37*8, 148 + 5*8, 1);
+	if (under->description > 0) {
+		Blit_String_Box(12, 148, 37, 5, 15, Z.strings[under->description - 1], 0);
 	}
+
+	redraw_description = false;
 }
 
 bool Try_Move_Forward(void)
@@ -132,17 +138,17 @@ bool Try_Move_Forward(void)
 	wall *centre;
 	coord ax, ay;
 
-	centre = Wall_Offset(P.x, P.y, P.facing, Ahead);
+	centre = Wall_Offset(S.header.x, S.header.y, S.header.facing, Ahead);
 	if (centre->texture) {
 		/* TODO: ow! */
 		return false;
 	}
 
-	ax = P.x + Offset_X(P.facing);
-	ay = P.y + Offset_Y(P.facing);
+	ax = S.header.x + Offset_X(S.header.facing);
+	ay = S.header.y + Offset_Y(S.header.facing);
 
-	P.x = ax;
-	P.y = ay;
+	S.header.x = ax;
+	S.header.y = ay;
 	redraw_description = true;
 	redraw_fp = true;
 
@@ -181,14 +187,14 @@ void main(void)
 					break;
 
 				case 'a':
-					if (P.facing == North) P.facing = West;
-					else P.facing--;
+					if (S.header.facing == North) S.header.facing = West;
+					else S.header.facing--;
 					redraw_fp = true;
 					break;
 
 				case 'd':
-					if (P.facing == West) P.facing = North;
-					else P.facing++;
+					if (S.header.facing == West) S.header.facing = North;
+					else S.header.facing++;
 					redraw_fp = true;
 					break;
 

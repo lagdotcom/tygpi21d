@@ -8,7 +8,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define MAX_STRINGS 1000
+#define MAX_STRING_LIST 1000
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
@@ -18,9 +18,6 @@ zone Z;
 bool redraw_details, redraw_zone;
 int sel_x, sel_y;
 
-char* strings[MAX_STRINGS];
-int next_string;
-
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 #define TX (8 + x*7)
@@ -28,7 +25,7 @@ int next_string;
 
 void Draw_Tile(x, y)
 {
-	tile* t = &Z.tiles[x][y];
+	tile* t = TILE(Z, x, y);
 
 	if (x == sel_x && y == sel_y) {
 		Square_DB(15, TX, TY, TX + 6, TY + 6, 0);
@@ -47,8 +44,8 @@ void Draw_Zone(void)
 {
 	int x, y;
 
-	for (x = 0; x < ZONE_WIDTH; x++) {
-		for (y = 0; y < ZONE_HEIGHT; y++) {
+	for (x = 0; x < Z.header.width; x++) {
+		for (y = 0; y < Z.header.height; y++) {
 			Draw_Tile(x, y);
 		}
 	}
@@ -63,7 +60,7 @@ void Draw_Zone(void)
 
 void Draw_Details(void)
 {
-	tile* t = &Z.tiles[sel_x][sel_y];
+	tile* t = TILE(Z, sel_x, sel_y);
 	char buf[100];
 
 	sprintf(buf, "%3d,%-3d", sel_x, sel_y);
@@ -89,8 +86,9 @@ void Draw_Details(void)
 
 	sprintf(buf, "D: %5d", t->description);
 	Blit_String_DB(DX, 88, 15, buf, 0);
+	Square_DB(0, 8, 160, 8 + 38*8, 160 + 4*8, 1);
 	if (t->description)
-		Blit_String_Box(8, 160, 38, 4, 15, &Z.text[t->description - 1], 0);
+		Blit_String_Box(8, 160, 38, 4, 15, Z.strings[t->description - 1], 0);
 
 	redraw_details = false;
 }
@@ -110,7 +108,7 @@ bool Get_Colour(colour* value)
 
 void Change_Ceiling()
 {
-	if (Get_Colour(&Z.tiles[sel_x][sel_y].ceil)) {
+	if (Get_Colour(&TILE(Z, sel_x, sel_y)->ceil)) {
 		Draw_Tile(sel_x, sel_y);
 		redraw_details = true;
 	}
@@ -118,7 +116,7 @@ void Change_Ceiling()
 
 void Change_Floor()
 {
-	if (Get_Colour(&Z.tiles[sel_x][sel_y].floor)) {
+	if (Get_Colour(&TILE(Z, sel_x, sel_y)->floor)) {
 		Draw_Tile(sel_x, sel_y);
 		redraw_details = true;
 	}
@@ -126,7 +124,7 @@ void Change_Floor()
 
 void Change_Wall(direction dir)
 {
-	if (Get_Colour(&Z.tiles[sel_x][sel_y].walls[dir].texture)) {
+	if (Get_Colour(&TILE(Z, sel_x, sel_y)->walls[dir].texture)) {
 		Draw_Tile(sel_x, sel_y);
 		redraw_details = true;
 	}
@@ -134,56 +132,16 @@ void Change_Wall(direction dir)
 
 #undef DX
 
-void Load_Text_List(void)
-{
-	int ti = 0,
-		l;
-	char *load;
-
-	next_string = 0;
-
-	while (true) {
-		l = strlen(&Z.text[ti]);
-		if (l == 0) return;
-
-		load = malloc(l + 1);
-		strcpy(load, &Z.text[ti]);
-		ti += l + 1;
-		strings[next_string++] = load;
-	}
-}
-
-void Delete_Text_List(void)
-{
-	int i;
-
-	for (i = 0; i < next_string; i++) {
-		free(strings[i]);
-	}
-
-	next_string = 0;
-}
-
-int Get_Text_Offset(int id)
-{
-	int j, k;
-
-	k = id + 1;
-	for (j = 0; j < id; j++) {
-		k += strlen(strings[j]);
-	}
-
-	return k;
-}
-
 void Change_Description(void)
 {
 	int offset = 0,
 		i;
 
-	char buffer[1000],
+	char buffer[MAX_STRING_LIST],
 		*allocd,
 		ch;
+
+	tile *under = TILE(Z, sel_x, sel_y);
 
 	/* We're drawing over everything, so... */
 	redraw_details = true;
@@ -191,10 +149,10 @@ void Change_Description(void)
 
 	while (true) {
 		for (i = 0; i < 10; i++) {
-			if (offset + i >= next_string) break;
+			if (offset + i >= Z.header.num_strings) break;
 
 			sprintf(buffer, "%d: ", i);
-			strncat(buffer, strings[offset + i], 34);
+			strncat(buffer, Z.strings[offset + i], 34);
 
 			Blit_String_DB(8, 8 + i*8, 15, buffer, 0);
 		}
@@ -209,32 +167,29 @@ void Change_Description(void)
 				}
 
 			case '.':
-				if (offset + 10 < next_string) {
+				if (offset + 10 < Z.header.num_strings) {
 					offset += 10;
 					break;
 				}
 
 			case 'q':
-				Z.tiles[sel_x][sel_y].description = 0;
+				under->description = 0;
 				return;
 
 			case 'n':
-				if (Input_String(8, 8, buffer, 1000)) {
-					allocd = strdup(buffer);
-					offset = Get_Text_Offset(next_string);
-					strings[next_string++] = allocd;
-					Z.tiles[sel_x][sel_y].description = offset;
-					strcpy(&Z.text[offset - 1], allocd);
+				if (Input_String(8, 8, buffer, MAX_STRING_LIST)) {
+					Z.strings[Z.header.num_strings] = strdup(buffer);
+					Z.header.num_strings++;
+					under->description = offset + i + 1;
 				} else {
-					Z.tiles[sel_x][sel_y].description = 0;
+					under->description = 0;
 				}
 
 				return;
 
 			case '0': case '1':	case '2': case '3': case '4':
 			case '5': case '6':	case '7': case '8': case '9':
-				i = offset + ch - '0';
-				Z.tiles[sel_x][sel_y].description = Get_Text_Offset(i);
+				under->description = offset + ch - '0' + 1;
 				return;
 		}
 	}
@@ -259,8 +214,7 @@ void main(void)
 	PCX_Delete(&explore_bg);
 
 	/* Open up our zone file */
-	Zone_Load("DEMO.ZON");
-	Load_Text_List();
+	Zone_Load("DEMO.ZON", &Z);
 
 	redraw_details = true;
 	redraw_zone = true;
@@ -275,7 +229,7 @@ void main(void)
 					break;
 
 				case ' ':
-					Zone_Save("DEMO.ZON");
+					Zone_Save("DEMO.ZON", &Z);
 					Blit_String_DB(100, 100, 15, "SAVED!", 0);
 					break;
 
@@ -289,7 +243,7 @@ void main(void)
 					break;
 
 				case 'l':
-					if (sel_x < (ZONE_WIDTH - 1)) {
+					if (sel_x < (Z.header.width - 1)) {
 						sel_x++;
 						Draw_Tile(sel_x - 1, sel_y);
 						Draw_Tile(sel_x, sel_y);
@@ -307,7 +261,7 @@ void main(void)
 					break;
 
 				case 'k':
-					if (sel_y < (ZONE_HEIGHT - 1)) {
+					if (sel_y < (Z.header.height - 1)) {
 						sel_y++;
 						Draw_Tile(sel_x, sel_y - 1);
 						Draw_Tile(sel_x, sel_y);
@@ -347,7 +301,7 @@ void main(void)
 		Delay(1);
 	}
 
-	Delete_Text_List();
+	Zone_Free(&Z);
 
 	/* Cleanup */
 	Set_Video_Mode(TEXT_MODE);
