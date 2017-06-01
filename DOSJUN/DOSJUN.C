@@ -184,6 +184,7 @@ void Dungeon_Screen(void)
 
 void main(void)
 {
+	printf("Initialising DOSJUN...");
 	Campaign_Init(&C);
 	Savefile_Init(&S);
 	Zone_Init(&Z);
@@ -192,6 +193,8 @@ void main(void)
 		printf("\nNot enough memory to create double buffer.");
 		return;
 	}
+
+	printf("OK\n");
 
 	Set_Video_Mode(VGA256);
 
@@ -209,10 +212,15 @@ void main(void)
 		}
 	}
 
+	Set_Video_Mode(TEXT_MODE);
+
+	printf("Cleaning up after DOSJUN...");
+
 	Campaign_Free(&C);
 	Savefile_Free(&S);
 	Zone_Free(&Z);
 
-	Set_Video_Mode(TEXT_MODE);
 	Delete_Double_Buffer();
+
+	printf("OK!\n");
 }

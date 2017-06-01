@@ -13,6 +13,19 @@ pcx_picture menu_bg;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
+void Init_Character(character *c, job_id job, unsigned short str,
+	unsigned short intelligence, unsigned short dex, unsigned short hp,
+	unsigned short mp)
+{
+	c->job = job;
+	c->level = 1;
+	c->stats[Strength] = str;
+	c->stats[Dexterity] = dex;
+	c->stats[Intelligence] = intelligence;
+	c->stats[HP] = c->stats[MaxHP] = hp;
+	c->stats[MP] = c->stats[MaxMP] = mp;
+}
+
 void New_Game()
 {
 	char buffer[13];
@@ -25,33 +38,27 @@ void New_Game()
 
 	Blit_String_DB(0, 40, 15, "Who are you?", 0);
 	Input_String(104, 40, &S.characters[0].name, NAME_SIZE);
-	S.characters[0].job = Bard;
-	S.characters[0].level = 1;
+	Init_Character(&S.characters[0], Bard,     8, 13, 13, 10, 0);
 
 	Blit_String_DB(0, 56, 15, "Who's the strong one?", 0);
 	Input_String(176, 56, &S.characters[1].name, NAME_SIZE);
-	S.characters[1].job = Fighter;
-	S.characters[1].level = 1;
+	Init_Character(&S.characters[1], Fighter, 14,  9, 11, 20, 0);
 
 	Blit_String_DB(0, 72, 15, "Who's the nerd?", 0);
 	Input_String(128, 72, &S.characters[2].name, NAME_SIZE);
-	S.characters[2].job = Mage;
-	S.characters[2].level = 1;
+	Init_Character(&S.characters[2], Mage,     9, 14, 11,  8, 8);
 
 	Blit_String_DB(0, 88, 15, "Who's kinda shifty?", 0);
 	Input_String(160, 88, &S.characters[3].name, NAME_SIZE);
-	S.characters[3].job = Rogue;
-	S.characters[3].level = 1;
+	Init_Character(&S.characters[3], Rogue,    9, 11, 14, 12, 0);
 
 	Blit_String_DB(0, 104, 15, "Who cares a lot?", 0);
 	Input_String(136, 104, &S.characters[4].name, NAME_SIZE);
-	S.characters[4].job = Cleric;
-	S.characters[4].level = 1;
+	Init_Character(&S.characters[4], Cleric,  13, 13,  8, 14, 6);
 
 	Blit_String_DB(0, 120, 15, "Who likes guns?", 0);
 	Input_String(128, 120, &S.characters[5].name, NAME_SIZE);
-	S.characters[5].job = Ranger;
-	S.characters[5].level = 1;
+	Init_Character(&S.characters[5], Ranger,  13,  8, 13, 13, 0);
 
 	G = State_Dungeon;
 
@@ -68,6 +75,7 @@ void New_Game()
 	strcat(buffer, ".ZON");
 
 	Zone_Load(buffer, &Z);
+	Savefile_Save("DEMO.SAV", &S);
 }
 
 bool Load_Game()

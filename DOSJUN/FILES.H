@@ -52,12 +52,12 @@ typedef enum {
 } item_types;
 
 typedef enum {
-	Fighter,
-	Cleric,
-	Mage,
-	Rogue,
-	Ranger,
-	Bard
+	Fighter,	/* Str */
+	Cleric,		/* Str, Int */
+	Mage,		/* Int */
+	Rogue,		/* Dex */
+	Ranger,		/* Str, Dex */
+	Bard		/* Int, Dex */
 } jobs;
 
 #define IT_LIGHT		1
