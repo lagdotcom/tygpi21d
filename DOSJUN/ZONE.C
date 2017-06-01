@@ -1,41 +1,17 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <alloc.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "files.h"
-
-/* D E F I N E S ///////////////////////////////////////////////////////// */
-
-#define NFREE(r) if (r != null) { \
-	free(r); \
-	r = null; \
-}
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-char* Get_String(FILE* fp)
+void Zone_Init(zone *z)
 {
-	char* string;
-	length len;
-
-	fread(&len, sizeof(length), 1, fp);
-	string = malloc(len + 1);
-	fread(string, 1, len + 1, fp);
-	return string;
-}
-
-void Savefile_Load(char *filename, save *s)
-{
-	FILE *fp = fopen(filename, "rb");
-	fread(s, sizeof(save), 1, fp);
-
-	/* TODO: Check magic/version */
-	fclose(fp);
-}
-
-void Savefile_Free(save *s)
-{
-	/* Nothing! */
+	z->tiles = null;
+	z->strings = null;
+	z->scripts = null;
+	z->script_lengths = null;
 }
 
 void Zone_Load(char *filename, zone *z)
@@ -43,6 +19,7 @@ void Zone_Load(char *filename, zone *z)
 	int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "rb");
+	if (!fp) IO_Error("Could not open zone");
 
 	fread(h, sizeof(zone_header), 1, fp);
 	/* TODO: Check magic/version */
@@ -77,20 +54,42 @@ void Zone_Free(zone *z)
 {
 	int i;
 
-	NFREE(z->tiles);
+	Free_If_Null(z->tiles);
 
 	if (z->strings != null) {
 		for (i = 0; i < z->header.num_strings; i++) {
 			free(z->strings[i]);
 		}
-		free(z->strings);
+		Free_If_Null(z->strings);
 	}
 
 	if (z->scripts != null) {
 		for (i = 0; i < z->header.num_scripts; i++) {
 			free(z->scripts[i]);
 		}
-		free(z->scripts);
-		free(z->script_lengths);
+		Free_If_Null(z->scripts);
+		Free_If_Null(z->script_lengths);
 	}
+}
+
+void Zone_Save(char *filename, zone *z)
+{
+	int i;
+	zone_header *h = &z->header;
+	FILE *fp = fopen(filename, "wb");
+
+	Set_Version_Header(z->header);
+	fwrite(&z->header, sizeof(zone_header), 1, fp);
+	fwrite(z->tiles, sizeof(tile), h->width * h->height, fp);
+
+	for (i = 0; i < h->num_strings; i++) {
+		Save_String(z->strings[i], fp);
+	}
+
+	for (i = 0; i < h->num_scripts; i++) {
+		fwrite(&z->script_lengths[i], sizeof(length), 1, fp);
+		fwrite(z->scripts[i], 1, z->script_lengths[i], fp);
+	}
+
+	fclose(fp);
 }

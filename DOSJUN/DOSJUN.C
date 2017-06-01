@@ -10,6 +10,8 @@
 
 pcx_picture explore_bg;
 
+campaign C;
+gamestate G;
 save S;
 zone Z;
 
@@ -92,35 +94,6 @@ wall* Wall_Offset(coord x, coord y, direction dir, relative rel)
 	return null;
 }
 
-void Demo(void)
-{
-	/* Set up party */
-	strncpy(S.header.campaign_name, "DEMO", 8);
-	S.header.zone = 0;
-	S.header.x = 0;
-	S.header.y = 0;
-	S.header.facing = East;
-	S.header.num_characters = 6;
-
-	#define pset(n, _name, _maxhp, _hp, _maxmp, _mp) { \
-		strcpy(S.characters[n].name, _name); \
-		S.characters[n].maxhp = _maxhp; \
-		S.characters[n].hp = _hp; \
-		S.characters[n].maxmp = _maxmp; \
-		S.characters[n].mp = _mp; \
-	}
-	pset(0, "Lag.Com",   8,  8, 16, 16);
-	pset(1, "Mercury",  21, 18,  4,  1);
-	pset(2, "Emptyeye", 17,  3,  0,  0);
-	pset(3, "Silver",   15, 14, 14,  8);
-	pset(4, "Zan-zan",  10, 10,  0,  0);
-	pset(5, "Sizzler",  17, 17,  8,  7);
-	#undef pset
-	Savefile_Save("DEMO.SAV", &S);
-
-	Zone_Load("DEMO.ZON", &Z);
-}
-
 void Draw_Description(void)
 {
 	tile* under = TILE(Z, S.header.x, S.header.y);
@@ -157,23 +130,15 @@ bool Try_Move_Forward(void)
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-void main(void)
+void Dungeon_Screen(void)
 {
 	int done = 0;
-
-	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
-		printf("\nNot enough memory to create double buffer.");
-		return;
-	}
-
-	Set_Video_Mode(VGA256);
 
 	/* Get background image and palette */
 	PCX_Init(&explore_bg);
 	PCX_Load("BACK.PCX", &explore_bg, 1);
 	memcpy(double_buffer, explore_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
 
-	Demo();
 	redraw_description = true;
 	redraw_fp = true;
 	redraw_party = true;
@@ -183,6 +148,7 @@ void main(void)
 			switch (getch()) {
 				/* TODO: replace later */
 				case 'q':
+					G = State_Quit;
 					done = 1;
 					break;
 
@@ -214,6 +180,39 @@ void main(void)
 
 	/* Cleanup */
 	PCX_Delete(&explore_bg);
+}
+
+void main(void)
+{
+	Campaign_Init(&C);
+	Savefile_Init(&S);
+	Zone_Init(&Z);
+
+	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
+		printf("\nNot enough memory to create double buffer.");
+		return;
+	}
+
+	Set_Video_Mode(VGA256);
+
+	G = State_MainMenu;
+
+	while (G != State_Quit) {
+		switch (G) {
+			case State_MainMenu:
+				Main_Menu();
+				break;
+
+			case State_Dungeon:
+				Dungeon_Screen();
+				break;
+		}
+	}
+
+	Campaign_Free(&C);
+	Savefile_Free(&S);
+	Zone_Free(&Z);
+
 	Set_Video_Mode(TEXT_MODE);
 	Delete_Double_Buffer();
 }

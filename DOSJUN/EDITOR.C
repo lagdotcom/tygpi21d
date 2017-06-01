@@ -177,7 +177,7 @@ void Change_Description(void)
 				return;
 
 			case 'n':
-				if (Input_String(8, 8, buffer, MAX_STRING_LIST)) {
+				if (Input_Multiline_String(8, 8, buffer, MAX_STRING_LIST)) {
 					Z.strings[Z.header.num_strings] = strdup(buffer);
 					Z.header.num_strings++;
 					under->description = offset + i + 1;

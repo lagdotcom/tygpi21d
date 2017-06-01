@@ -18,7 +18,7 @@ typedef unsigned char bool;
 #define South	2
 #define West	3
 
-typedef enum relative_typ {
+typedef enum {
 	Ahead,
 	Left,
 	Right
@@ -27,9 +27,13 @@ typedef enum relative_typ {
 typedef unsigned char colour;
 typedef unsigned char coord;
 typedef unsigned char direction;
+typedef unsigned short item_id;
+typedef unsigned short item_flags;
+typedef unsigned char item_type;
+typedef unsigned char job_id;
 typedef unsigned short length;
-typedef unsigned short string_id;
 typedef unsigned short script_id;
+typedef unsigned short string_id;
 typedef unsigned char zone_id;
 
 #endif

@@ -1,11 +1,13 @@
 CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc
-DEMO_OBJS = mkdemo.obj load.obj save.obj
-MAIN_OBJS = dosjun.obj fp.obj gfx.obj load.obj party.obj save.obj
-EDITOR_OBJS = editor.obj gfx.obj input.obj load.obj save.obj
+DEMO_OBJS = mkdemo.obj campaign.obj io.obj items.obj save.obj zone.obj
+MAIN_OBJS = dosjun.obj campaign.obj fp.obj gfx.obj input.obj io.obj main.obj party.obj save.obj zone.obj
+EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj save.obj zone.obj
 HEADERS = dosjun.h files.h types.h
 
+all: dosjun editor demo
+
 dosjun: $(MAIN_OBJS)
-	TCC $(CFLAGS) $(MAIN_OBJS) ..\LIB\GAMELIB.LIB
+	TCC $(CFLAGS) DOSJUN.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
 editor: $(EDITOR_OBJS)
 	TCC $(CFLAGS) $(EDITOR_OBJS) ..\LIB\GAMELIB.LIB
@@ -13,6 +15,10 @@ editor: $(EDITOR_OBJS)
 demo: $(DEMO_OBJS)
 	TCC $(CFLAGS) $(DEMO_OBJS)
 	MKDEMO
+
+campaign.obj: campaign.c $(HEADERS)
+	TCC $(CFLAGS) -c campaign.c
+	TLIB DOSJUN.LIB +-campaign.obj, DOSJUN.TXT
 
 dosjun.obj: dosjun.c $(HEADERS)
 	TCC $(CFLAGS) -c dosjun.c
@@ -22,24 +28,42 @@ editor.obj: editor.c $(HEADERS)
 
 fp.obj: fp.c $(HEADERS)
 	TCC $(CFLAGS) -c fp.c
+	TLIB DOSJUN.LIB +-fp.obj, DOSJUN.TXT
 
 gfx.obj: gfx.c $(HEADERS)
 	TCC $(CFLAGS) -c gfx.c
+	TLIB DOSJUN.LIB +-gfx.obj, DOSJUN.TXT
 
 input.obj: input.c $(HEADERS)
 	TCC $(CFLAGS) -c input.c
+	TLIB DOSJUN.LIB +-input.obj, DOSJUN.TXT
 
-load.obj: save.c $(HEADERS)
-	TCC $(CFLAGS) -c load.c
+io.obj: io.c $(HEADERS)
+	TCC $(CFLAGS) -c io.c
+	TLIB DOSJUN.LIB +-io.obj, DOSJUN.TXT
+
+items.obj: items.c $(HEADERS)
+	TCC $(CFLAGS) -c items.c
+	TLIB DOSJUN.LIB +-items.obj, DOSJUN.TXT
+
+main.obj: main.c $(HEADERS)
+	TCC $(CFLAGS) -c main.c
+	TLIB DOSJUN.LIB +-main.obj, DOSJUN.TXT
 
 mkdemo.obj: mkdemo.c $(HEADERS)
 	TCC $(CFLAGS) -c mkdemo.c
 
 party.obj: party.c $(HEADERS)
 	TCC $(CFLAGS) -c party.c
+	TLIB DOSJUN.LIB +-PARTY.OBJ, DOSJUN.TXT
 
 save.obj: save.c $(HEADERS)
 	TCC $(CFLAGS) -c save.c
+	TLIB DOSJUN.LIB +-save.obj, DOSJUN.TXT
+
+zone.obj: zone.c $(HEADERS)
+	TCC $(CFLAGS) -c zone.c
+	TLIB DOSJUN.LIB +-zone.obj, DOSJUN.TXT
 
 clean:
 	-DEL *.OBJ
