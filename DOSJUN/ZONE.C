@@ -12,6 +12,7 @@ void Zone_Init(zone *z)
 	z->strings = null;
 	z->scripts = null;
 	z->script_lengths = null;
+	z->encounters = null;
 }
 
 void Zone_Load(char *filename, zone *z)
@@ -47,6 +48,11 @@ void Zone_Load(char *filename, zone *z)
 		z->scripts = null;
 	}
 
+	if (h->num_encounters > 0) {
+		z->encounters = malloc(sizeof(encounter) * h->num_encounters);
+		fread(z->encounters, sizeof(encounter), h->num_encounters, fp);
+	}
+
 	fclose(fp);
 }
 
@@ -70,6 +76,8 @@ void Zone_Free(zone *z)
 		Free_If_Null(z->scripts);
 		Free_If_Null(z->script_lengths);
 	}
+
+	Free_If_Null(z->encounters);
 }
 
 void Zone_Save(char *filename, zone *z)
@@ -90,6 +98,8 @@ void Zone_Save(char *filename, zone *z)
 		fwrite(&z->script_lengths[i], sizeof(length), 1, fp);
 		fwrite(z->scripts[i], 1, z->script_lengths[i], fp);
 	}
+
+	fwrite(z->encounters, sizeof(encounter), h->num_encounters, fp);
 
 	fclose(fp);
 }

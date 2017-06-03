@@ -23,6 +23,11 @@ void Items_Free(items *i)
 	Free_If_Null(i->items);
 }
 
+void Items_Init(items *i)
+{
+	i->items = null;
+}
+
 void Items_Save(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "wb");

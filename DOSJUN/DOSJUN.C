@@ -12,6 +12,8 @@ pcx_picture explore_bg;
 
 campaign C;
 gamestate G;
+items I;
+monsters M;
 save S;
 zone Z;
 
@@ -186,6 +188,8 @@ void main(void)
 {
 	printf("Initialising DOSJUN...");
 	Campaign_Init(&C);
+	Items_Init(&I);
+	Monsters_Init(&M);
 	Savefile_Init(&S);
 	Zone_Init(&Z);
 
@@ -217,6 +221,8 @@ void main(void)
 	printf("Cleaning up after DOSJUN...");
 
 	Campaign_Free(&C);
+	Items_Free(&I);
+	Monsters_Init(&M);
 	Savefile_Free(&S);
 	Zone_Free(&Z);
 

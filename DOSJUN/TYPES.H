@@ -27,11 +27,13 @@ typedef enum {
 typedef unsigned char colour;
 typedef unsigned char coord;
 typedef unsigned char direction;
+typedef unsigned short encounter_id;
 typedef unsigned short item_id;
 typedef unsigned short item_flags;
 typedef unsigned char item_type;
 typedef unsigned char job_id;
 typedef unsigned short length;
+typedef unsigned short monster_id;
 typedef unsigned short script_id;
 typedef unsigned short string_id;
 typedef unsigned char zone_id;

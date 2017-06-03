@@ -26,15 +26,53 @@ void Init_Character(character *c, job_id job, unsigned short str,
 	c->stats[MP] = c->stats[MaxMP] = mp;
 }
 
-void New_Game()
+void Load_Campaign_Data()
 {
 	char buffer[13];
+
+	strcpy(buffer, S.header.campaign_name);
+	strcat(buffer, ".ITM");
+	Items_Free(&I);
+	Items_Load(buffer, &I);
+
+	strcpy(buffer, S.header.campaign_name);
+	strcat(buffer, ".MON");
+	Monsters_Free(&M);
+	Monsters_Load(buffer, &M);
+
+	strcpy(buffer, C.zones[S.header.zone]);
+	strcat(buffer, ".ZON");
+	Zone_Free(&Z);
+	Zone_Load(buffer, &Z);
+}
+
+void Start_Campaign(char *name)
+{
+	char buffer[13];
+
+	strncpy(S.header.campaign_name, name, 8);
+
+	strcpy(buffer, name);
+	strcat(buffer, ".CMP");
+	Campaign_Load(buffer, &C);
+
+	S.header.zone = C.header.start_zone;
+	S.header.x = C.header.start_x;
+	S.header.y = C.header.start_y;
+	S.header.facing = C.header.start_facing;
+
+	Load_Campaign_Data();
+}
+
+void New_Game()
+{
 	Fill_Double_Buffer(0);
 
 	Blit_String_DB(0,  0, 15, "You've always wanted to play one of", 0);
 	Blit_String_DB(0,  8, 15, "those 'Escape the Room' games, so you", 0);
 	Blit_String_DB(0, 16, 15, "get together a group of friends and go", 0);
 	Blit_String_DB(0, 24, 15, "to a local one.", 0);
+	S.header.num_characters = 6;
 
 	Blit_String_DB(0, 40, 15, "Who are you?", 0);
 	Input_String(104, 40, &S.characters[0].name, NAME_SIZE);
@@ -60,27 +98,38 @@ void New_Game()
 	Input_String(128, 120, &S.characters[5].name, NAME_SIZE);
 	Init_Character(&S.characters[5], Ranger,  13,  8, 13, 13, 0);
 
+	Start_Campaign("DEMO");
 	G = State_Dungeon;
-
-	Campaign_Load("DEMO.CMP", &C);
-	S.header.num_characters = 6;
-
-	strncpy(S.header.campaign_name, "DEMO", 8);
-	S.header.zone = C.header.start_zone;
-	S.header.x = C.header.start_x;
-	S.header.y = C.header.start_y;
-	S.header.facing = C.header.start_facing;
-
-	strcpy(buffer, C.zones[C.header.start_zone]);
-	strcat(buffer, ".ZON");
-
-	Zone_Load(buffer, &Z);
+	
 	Savefile_Save("DEMO.SAV", &S);
 }
 
 bool Load_Game()
 {
-	return false;
+	char **filenames;
+	char buffer[13];
+	int done,
+		i,
+		choice,
+		count;
+
+	Fill_Double_Buffer(0);
+
+	filenames = Get_Directory_Listing("*.SAV", &count);
+	choice = Input_Menu(filenames, count, 0, 0);
+
+	Savefile_Load(filenames[choice], &S);
+
+	strcpy(buffer, S.header.campaign_name);
+	strcat(buffer, ".CMP");
+	Campaign_Load(buffer, &C);
+
+	Load_Campaign_Data();
+	G = State_Dungeon;
+
+	Free_Directory_Listing(filenames, count);
+
+	return true;
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */

@@ -20,6 +20,8 @@ typedef enum {
 
 extern campaign C;
 extern gamestate G;
+extern items I;
+extern monsters M;
 extern save S;
 extern zone Z;
 
@@ -30,6 +32,7 @@ extern bool
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+char **Get_Directory_Listing(char *pattern, int *count);
 wall* Wall_Offset(coord x, coord y, direction dir, relative rel);
 
 #endif

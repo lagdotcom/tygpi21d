@@ -1,6 +1,6 @@
 CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc
-DEMO_OBJS = mkdemo.obj campaign.obj io.obj items.obj save.obj zone.obj
-MAIN_OBJS = dosjun.obj campaign.obj fp.obj gfx.obj input.obj io.obj main.obj party.obj save.obj zone.obj
+DEMO_OBJS = mkdemo.obj campaign.obj io.obj items.obj monsters.obj save.obj zone.obj
+MAIN_OBJS = dosjun.obj campaign.obj fp.obj gfx.obj input.obj io.obj main.obj monsters.obj party.obj save.obj zone.obj
 EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj save.obj zone.obj
 HEADERS = dosjun.h files.h types.h
 
@@ -52,6 +52,10 @@ main.obj: main.c $(HEADERS)
 
 mkdemo.obj: mkdemo.c $(HEADERS)
 	TCC $(CFLAGS) -c mkdemo.c
+
+monsters.obj: monsters.c $(HEADERS)
+	TCC $(CFLAGS) -c monsters.c
+	TLIB DOSJUN.LIB +-monsters.obj, DOSJUN.TXT
 
 party.obj: party.c $(HEADERS)
 	TCC $(CFLAGS) -c party.c

@@ -13,6 +13,7 @@
 
 #define NAME_SIZE		24
 #define PARTY_SIZE		6
+#define ENCOUNTER_SIZE	6
 
 typedef enum {
 	Weapon,
@@ -76,8 +77,9 @@ typedef enum {
 #define CAMPAIGN_HEADER_PADDING		23
 #define ITEMS_HEADER_PADDING		27
 #define ITEM_PADDING				11
+#define MONSTERS_HEADER_PADDING		27
 #define SAVE_HEADER_PADDING			15
-#define ZONE_HEADER_PADDING			22
+#define ZONE_HEADER_PADDING			20
 
 /* Campaign */
 
@@ -124,6 +126,28 @@ typedef struct {
 	item *items;
 } items;
 
+/* Monster */
+
+typedef struct {
+	char name[NAME_SIZE];
+	monster_id id;
+	unsigned short stats[NUM_STATS];
+} monster;
+
+typedef struct {
+	VERSION_HEADER;
+
+	unsigned char num_monsters;
+
+	unsigned char unused[MONSTERS_HEADER_PADDING];
+} monsters_header;
+
+typedef struct {
+	monsters_header header;
+
+	monster *monsters;
+} monsters;
+
 /* Save */
 
 typedef struct {
@@ -165,11 +189,18 @@ typedef struct {
 } tile;
 
 typedef struct {
+	monster_id monsters[ENCOUNTER_SIZE];
+	unsigned char minimum[ENCOUNTER_SIZE];
+	unsigned char maximum[ENCOUNTER_SIZE];
+} encounter;
+
+typedef struct {
 	VERSION_HEADER;
 
 	coord width, height;
 	string_id num_strings;
 	script_id num_scripts;
+	encounter_id num_encounters;
 
 	unsigned char unused[ZONE_HEADER_PADDING];
 } zone_header;
@@ -181,6 +212,7 @@ typedef struct {
 	char **strings;
 	char **scripts;
 	length *script_lengths;
+	encounter* encounters;
 } zone;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
