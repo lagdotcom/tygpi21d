@@ -1,0 +1,81 @@
+#JUNCODE
+Include "ETR_GLOB.JC"
+
+# Quest status
+Const q_init = 0
+Const q_door_locked = 1
+Const q_key_found = 2
+Const q_door_unlocked = 3
+Const q_fought_rat = 4
+Local q_status
+
+Script wake_up
+	Text "You slowly come to your senses, and find yourself in unfamiliar surroundings. You rouse your friends."
+	PcSpeak strong, "Ugh... where are we?"
+	PcSpeak nerd, "I don't think it matters. We're supposed to escape, right?"
+	PcSpeak leader, "Let's look around."
+	Text "The walls are newly whitewashed, and the room seems nearly featureless save for a door a few paces away."
+	PcSpeak strong, "Whose idea was this, again?"
+
+	q_status = q_init
+EndScript
+
+Script facing_door
+	If q_status == q_init
+		Text "You find a door. It looks quite strong, and there's an imposing lock hanging off it."
+		PcSpeak liberal, "This looks like the way out!"
+		PcSpeak shifty, "Hmm... it's locked. Good lock, too."
+		PcSpeak leader, "There has to be something in here."
+		q_status = q_door_locked
+	ElseIf q_status == q_door_locked
+		PcSpeak nra, "Maybe we could shoot the lock off."
+		PcSpeak nerd, "With what?"
+	ElseIf q_status == q_key_found
+		PcSpeak shifty, "Let me try the key."
+		Text "The lock rattles around a bit, then gives."
+		PcSpeak liberal, "Great... can we leave now?"
+		Unlock PartyX, PartyY, East
+		q_status = q_door_unlocked
+	EndIf
+EndScript
+
+Script at_key
+	If q_status == q_init
+		Text "At first, this corner of the room seems as empty of the others, but a glint catches your eye."
+		PcSpeak leader, "I think I saw something."
+		PcSpeak nra, "It's a key. At least we're getting somewhere."
+		Text "You pocket the key."
+		PcSpeak liberal, "Not much of a puzzle, was it?"
+		q_status = q_key_found
+	EndIf
+EndScript
+
+Script just_outside
+	If q_status != q_door_unlocked
+		Return
+	EndIf
+
+	Text "The contrast between the room you just left and this corridor is sharp. Everything around you is made of dry stone."
+	Text "Everyone seems confused. You look at each other for a while before someone speaks."
+	PcSpeak nerd, "Aren't we supposed to be in a warehouse?"
+	PcSpeak liberal, "I heard something! Ugh, something unpleasant."
+	Text "You hear it too; a quiet skittering sound. It doesn't take long before the culprit is revealed."
+	# Show the rat somehow?
+	Text "A very large rat slowly approaches your group. It lifts its nose and sniffs the air, then makes a strange hissing noise."
+	PcSpeak nra, "That's the second largest rat I've ever seen."
+	Text "You don't have time to rebuke your friend; the rat suddenly charges at you!"
+	Combat 0
+	q_status = q_fought_rat
+
+	PcSpeak strong, "Was that thing rabid?"
+	PcSpeak shifty, "I don't want to know. I want to know if this place is licensed."
+	Text "You check your watch. It's only been half an hour since you arrived at the leisure centre, but you feel somewhat ill."
+	Text "Your head is foggy, but you blame it on the anaesthetic they injected you with shortly after your names were called."
+	Text "You're not sure that's standard procedure for these games..."
+	PcSpeak leader, "Something is wrong."
+	Text "You take out your phone, but it isn't turned on. It won't even turn on."
+	PcSpeak nerd, "Mine's out too. I charged it this morning... should last a day, at least."
+	Text "Everyone is silent."
+	PcSpeak liberal, "What are we going to do?"
+	PcSpeak nra, "Let's just keep looking. There has to be an exit."
+EndScript

@@ -1,0 +1,9 @@
+#JUNSCRIPT
+
+# NPC IDs
+Const leader = 0
+Const strong = 1
+Const nerd = 2
+Const shifty = 3
+Const liberal = 4
+Const nra = 5
