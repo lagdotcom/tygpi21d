@@ -34,7 +34,7 @@ Script facing_door
 		PcSpeak shifty, "Let me try the key."
 		Text "The lock rattles around a bit, then gives."
 		PcSpeak liberal, "Great... can we leave now?"
-		Unlock PartyX, PartyY, East
+		#Unlock PartyX, PartyY, East
 		q_status = q_door_unlocked
 	EndIf
 EndScript

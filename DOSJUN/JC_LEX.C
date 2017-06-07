@@ -1,6 +1,5 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include "types.h"
 #include "jc.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -105,6 +104,8 @@ void JC_Lex_AddToken(jc_token *tokens, int *count, char *buffer, int *buffer_off
 
 	(*count)++;
 }
+
+/* M A I N /////////////////////////////////////////////////////////////// */
 
 bool JC_Lex_String(char *source, jc_token *tokens, int *count)
 {
