@@ -8,7 +8,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define LEXER_TOKEN_SIZE	100
+#define LEXER_TOKEN_SIZE	300
 
 typedef enum {
 	None,
@@ -40,7 +40,7 @@ typedef enum {
 	case '_'
 
 #define caseWhitespace \
-	case ' ': case '\t'
+	case ' ': case '\t': case ','
 
 #define caseEol \
 	case '\n': case '\r': case '\0'
@@ -76,8 +76,7 @@ lex_state JC_Lex_Guess(char source)
 void JC_Lex_Error(char *line, int offset, char *message)
 {
 	printf("-- LEXER ERROR --\n");
-	printf("  %s\n", line);
-	printf("    at %d: %s", offset, message);
+	printf("%s%s at column %d\n", line, message, offset);
 }
 
 #define Lex_Error(message) { \
@@ -86,18 +85,27 @@ void JC_Lex_Error(char *line, int offset, char *message)
 }
 #define Lex_Push(c) buffer[buffer_offset++] = c
 #define Lex_AddToken(tt) { \
-	(*count)++; \
-	tokens = realloc(tokens, *count * sizeof(jc_token)); \
-	tokens[*count - 1].type = (tt); \
-	if (buffer_offset > 0) { \
-		buffer[buffer_offset] = 0; \
-		tokens[*count - 1].value = strdup(buffer); \
-		buffer_offset = 0; \
-	} else { \
-		tokens[*count - 1].value = null; \
-	} \
+	JC_Lex_AddToken(tokens, count, buffer, &buffer_offset, tt); \
 	state = None; \
 }
+
+void JC_Lex_AddToken(jc_token *tokens, int *count, char *buffer, int *buffer_offset, jc_token_type tt)
+{
+	int index = *count;
+	int bo = *buffer_offset;
+
+	tokens[index].type = tt;
+	if (bo > 0) {
+		buffer[bo] = 0;
+		tokens[index].value = strdup(buffer);
+		*buffer_offset = 0;
+	} else {
+		tokens[index].value = null;
+	}
+
+	(*count)++;
+}
+
 bool JC_Lex_String(char *source, jc_token *tokens, int *count)
 {
 	lex_state state = None,
@@ -108,7 +116,9 @@ bool JC_Lex_String(char *source, jc_token *tokens, int *count)
 	char buffer[LEXER_TOKEN_SIZE];
 	int buffer_offset = 0;
 
+	memset(buffer, 0, LEXER_TOKEN_SIZE);
 	*count = 0;
+
 	while (guess != EndOfLine) {
 		ch = *(ptr++);
 		guess = JC_Lex_Guess(ch);
@@ -185,7 +195,6 @@ bool JC_Lex_String(char *source, jc_token *tokens, int *count)
 
 					caseEol:
 					caseWhitespace:
-					case ',':
 						Lex_AddToken(NumericLiteral);
 						continue;
 
@@ -209,7 +218,6 @@ bool JC_Lex_String(char *source, jc_token *tokens, int *count)
 
 					case EndOfLine:
 					case Whitespace:
-					case ',':
 						Lex_Push('\0');
 						Lex_AddToken(JC_IsKeyword(buffer) ? Keyword : Identifier);
 						continue;
