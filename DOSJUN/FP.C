@@ -30,33 +30,33 @@ bool redraw_fp;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-bool Draw_First_Person_Tile(coord x, coord y, char ps, char pe, char cmod)
+bool Draw_FP_Tile(coord x, coord y, char ps, char pe, char cmod)
 {
 	tile *under;
 	wall *left, *right, *centre;
 
 	under = TILE(Z, x, y);
 	if (under->floor) {
-		TrapeziumH_DB(under->floor + cmod, XA, XB, XC - 1, XD + 1, YB, YD + 1, FILLED);
+		Draw_HorzTrapezium_DB(under->floor + cmod, XA, XB, XC - 1, XD + 1, YB, YD + 1, FILLED);
 	}
 
 	if (under->ceil) {
-		TrapeziumH_DB(under->ceil + cmod, XA, XB, XC - 1, XD + 1, YA, YC - 1, FILLED);
+		Draw_HorzTrapezium_DB(under->ceil + cmod, XA, XB, XC - 1, XD + 1, YA, YC - 1, FILLED);
 	}
 
-	left = Wall_Offset(x, y, S.header.facing, Left);
+	left = Get_Wall(x, y, S.header.facing, rLeft);
 	if (left->texture) {
-		TrapeziumV_DB(left->texture + cmod, XA, XC - 1, YA + 1, YB - 1, YC + 1, YD - 1, FILLED);
+		Draw_VertTrapezium_DB(left->texture + cmod, XA, XC - 1, YA + 1, YB - 1, YC + 1, YD - 1, FILLED);
 	}
 
-	right = Wall_Offset(x, y, S.header.facing, Right);
+	right = Get_Wall(x, y, S.header.facing, rRight);
 	if (right->texture) {
-		TrapeziumV_DB(right->texture + cmod, XB, XD + 1, YA + 1, YB - 1, YC + 1, YD - 1, FILLED);
+		Draw_VertTrapezium_DB(right->texture + cmod, XB, XD + 1, YA + 1, YB - 1, YC + 1, YD - 1, FILLED);
 	}
 
-	centre = Wall_Offset(x, y, S.header.facing, Ahead);
+	centre = Get_Wall(x, y, S.header.facing, rAhead);
 	if (centre->texture) {
-		Square_DB(centre->texture + cmod, XC, YC, XD, YD, FILLED);
+		Draw_Square_DB(centre->texture + cmod, XC, YC, XD, YD, FILLED);
 
 		return false;
 	}
@@ -64,7 +64,7 @@ bool Draw_First_Person_Tile(coord x, coord y, char ps, char pe, char cmod)
 	return true;
 }
 
-void Clear_First_Person(void)
+void Clear_FP(void)
 {
 	int x, y;
 
@@ -75,24 +75,24 @@ void Clear_First_Person(void)
 	}
 }
 
-void Draw_First_Person(void)
+void Draw_FP(void)
 {
 	int x, y, ox, oy;
 
-	Clear_First_Person();
+	Clear_FP();
 
-	ox = Offset_X(S.header.facing);
-	oy = Offset_Y(S.header.facing);
+	ox = Get_X_Offset(S.header.facing);
+	oy = Get_Y_Offset(S.header.facing);
 
-	if (Draw_First_Person_Tile(S.header.x, S.header.y, 0, P1, 0)) {
+	if (Draw_FP_Tile(S.header.x, S.header.y, 0, P1, 0)) {
 		x = S.header.x + ox;
 		y = S.header.y + oy;
 
-		if (Draw_First_Person_Tile(x, y, P1, P2, 16)) {
+		if (Draw_FP_Tile(x, y, P1, P2, 16)) {
 			x += ox;
 			y += oy;
 
-			Draw_First_Person_Tile(x, y, P2, P3, 32);
+			Draw_FP_Tile(x, y, P2, P3, 32);
 		}
 	}
 

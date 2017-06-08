@@ -247,7 +247,7 @@ bool Pop_Stack(jc_parser *p)
 
 /* P A R S E R  S T A T E S ////////////////////////////////////////////// */
 
-bool JC_Define_Const(jc_parser *p)
+bool Define_Const_State(jc_parser *p)
 {
 	jc_token *ident;
 	jc_token *val;
@@ -259,13 +259,13 @@ bool JC_Define_Const(jc_parser *p)
 	CONSUME();
 
 	val = CONSUME();
-	if (val->type != NumericLiteral) return Parse_Error(p, "Expected number");
+	if (val->type != ttNumber) return Parse_Error(p, "Expected number");
 
 	Save_Constant(p, ident->value, atoi(val->value));
 	return true;
 }
 
-bool JC_Define_Global(jc_parser *p)
+bool Define_Global_State(jc_parser *p)
 {
 	jc_token *ident;
 
@@ -275,7 +275,7 @@ bool JC_Define_Global(jc_parser *p)
 	return Save_Variable(p, scGlobal, ident->value);
 }
 
-bool JC_Define_Local(jc_parser *p)
+bool Define_Local_State(jc_parser *p)
 {
 	jc_token *ident;
 
@@ -285,7 +285,7 @@ bool JC_Define_Local(jc_parser *p)
 	return Save_Variable(p, scLocal, ident->value);
 }
 
-bool JC_Define_Script(jc_parser *p)
+bool Begin_Script_State(jc_parser *p)
 {
 	jc_token *ident;
 
@@ -301,7 +301,7 @@ bool JC_Define_Script(jc_parser *p)
 	return true;
 }
 
-bool JC_PcSpeak(jc_parser *p)
+bool Call_PcSpeak_State(jc_parser *p)
 {
 	jc_token *pc, *val;
 	jc_var *pc_var;
@@ -311,16 +311,16 @@ bool JC_PcSpeak(jc_parser *p)
 	pc = CONSUME();
 	val = CONSUME();
 
-	if (val->type == NumericLiteral) {
+	if (val->type == ttNumber) {
 		EMIT_ARG(coPushLiteral, atoi(val->value));
-	} else if (val->type == StringLiteral) {
+	} else if (val->type == ttString) {
 		sindex = Save_String(p, val->value);
 		EMIT_ARG(coPushLiteral, sindex);
 	}
 
-	if (pc->type == NumericLiteral) {
+	if (pc->type == ttNumber) {
 		EMIT_ARG(coPushLiteral, atoi(pc->value));
-	} else if (pc->type == Identifier) {
+	} else if (pc->type == ttIdentifier) {
 		pc_var = RESOLVE(pc->value);
 		if (pc_var == null) return Parse_Error(p, "Unknown identifier");
 		EMIT_PUSH_VAR(pc_var);
@@ -332,7 +332,7 @@ bool JC_PcSpeak(jc_parser *p)
 	return true;
 }
 
-bool JC_Text(jc_parser *p)
+bool Call_Text_State(jc_parser *p)
 {
 	jc_token *val;
 	int sindex;
@@ -340,9 +340,9 @@ bool JC_Text(jc_parser *p)
 	CONSUME();
 	val = CONSUME();
 
-	if (val->type == NumericLiteral) {
+	if (val->type == ttNumber) {
 		EMIT_ARG(coPushLiteral, atoi(val->value));
-	} else if (val->type == StringLiteral) {
+	} else if (val->type == ttString) {
 		sindex = Save_String(p, val->value);
 		EMIT_ARG(coPushLiteral, sindex);
 	} else {
@@ -353,7 +353,7 @@ bool JC_Text(jc_parser *p)
 	return true;
 }
 
-bool JC_End_Script(jc_parser *p)
+bool End_Script_State(jc_parser *p)
 {
 	/* TODO: resize code alloc? */
 	if (p->stack_size > 0) return Parse_Error(p, "Unclosed scope");
@@ -364,7 +364,7 @@ bool JC_End_Script(jc_parser *p)
 	return true;
 }
 
-bool JC_If(jc_parser *p)
+bool Start_If_State(jc_parser *p)
 {
 	/* TODO: expressions */
 	jc_token *left, *right, *cmp;
@@ -375,9 +375,9 @@ bool JC_If(jc_parser *p)
 	cmp = CONSUME();
 	right = CONSUME();
 
-	if (left->type == NumericLiteral) {
+	if (left->type == ttNumber) {
 		EMIT_ARG(coPushLiteral, atoi(left->value));
-	} else if (left->type == Identifier) {
+	} else if (left->type == ttIdentifier) {
 		left_v = RESOLVE(left->value);
 		if (left_v == null) return Parse_Error(p, "Unknown left identifier");
 		EMIT_PUSH_VAR(left_v);
@@ -385,9 +385,9 @@ bool JC_If(jc_parser *p)
 		return Parse_Error(p, "Invalid left argument to If");
 	}
 
-	if (right->type == NumericLiteral) {
+	if (right->type == ttNumber) {
 		EMIT_ARG(coPushLiteral, atoi(right->value));
-	} else if (right->type == Identifier) {
+	} else if (right->type == ttIdentifier) {
 		right_v = RESOLVE(right->value);
 		if (right_v == null) return Parse_Error(p, "Unknown right identifier");
 		EMIT_PUSH_VAR(right_v);
@@ -395,9 +395,9 @@ bool JC_If(jc_parser *p)
 		return Parse_Error(p, "Invalid right argument to If");
 	}
 
-	if (cmp->type == IsEqual) {
+	if (cmp->type == ttEquals) {
 		EMIT(coEQ);
-	} else if (cmp->type == IsNotEqual) {
+	} else if (cmp->type == ttNotEqual) {
 		EMIT(coNEQ);
 	} else {
 		return Parse_Error(p, "Unknown comparison");
@@ -408,7 +408,7 @@ bool JC_If(jc_parser *p)
 	return true;
 }
 
-bool JC_ElseIf(jc_parser *p)
+bool Start_ElseIf_State(jc_parser *p)
 {
 	/* TODO: expressions */
 	jc_token *left, *right, *cmp;
@@ -426,9 +426,9 @@ bool JC_ElseIf(jc_parser *p)
 	cmp = CONSUME();
 	right = CONSUME();
 
-	if (left->type == NumericLiteral) {
+	if (left->type == ttNumber) {
 		EMIT_ARG(coPushLiteral, atoi(left->value));
-	} else if (left->type == Identifier) {
+	} else if (left->type == ttIdentifier) {
 		left_v = RESOLVE(left->value);
 		if (left_v == null) return Parse_Error(p, "Unknown left identifier");
 		EMIT_PUSH_VAR(left_v);
@@ -436,9 +436,9 @@ bool JC_ElseIf(jc_parser *p)
 		return Parse_Error(p, "Invalid left argument to ElseIf");
 	}
 
-	if (right->type == NumericLiteral) {
+	if (right->type == ttNumber) {
 		EMIT_ARG(coPushLiteral, atoi(right->value));
-	} else if (right->type == Identifier) {
+	} else if (right->type == ttIdentifier) {
 		right_v = RESOLVE(right->value);
 		if (right_v == null) return Parse_Error(p, "Unknown right identifier");
 		EMIT_PUSH_VAR(right_v);
@@ -446,9 +446,9 @@ bool JC_ElseIf(jc_parser *p)
 		return Parse_Error(p, "Invalid right argument to ElseIf");
 	}
 
-	if (cmp->type == IsEqual) {
+	if (cmp->type == ttEquals) {
 		EMIT(coEQ);
-	} else if (cmp->type == IsNotEqual) {
+	} else if (cmp->type == ttNotEqual) {
 		EMIT(coNEQ);
 	} else {
 		return Parse_Error(p, "Unknown comparison");
@@ -459,7 +459,7 @@ bool JC_ElseIf(jc_parser *p)
 	return true;
 }
 
-bool JC_EndIf(jc_parser *p)
+bool End_If_State(jc_parser *p)
 {
 	int i;
 
@@ -473,13 +473,13 @@ bool JC_EndIf(jc_parser *p)
 	return true;
 }
 
-bool JC_Return(jc_parser *p)
+bool Return_State(jc_parser *p)
 {
 	EMIT(coReturn);
 	return true;
 }
 
-bool JC_Combat(jc_parser *p)
+bool Call_Combat_State(jc_parser *p)
 {
 	/* TODO: expressions */
 	jc_token *val;
@@ -488,9 +488,9 @@ bool JC_Combat(jc_parser *p)
 	CONSUME();
 	val = CONSUME();
 
-	if (val->type == NumericLiteral) {
+	if (val->type == ttNumber) {
 		EMIT_ARG(coPushLiteral, atoi(val->value));
-	} else if (val->type == Identifier) {
+	} else if (val->type == ttIdentifier) {
 		val_v = RESOLVE(val->value);
 		if (val_v == null) return Parse_Error(p, "Unknown identifier");
 		EMIT_PUSH_VAR(val_v);
@@ -502,31 +502,31 @@ bool JC_Combat(jc_parser *p)
 	return true;
 }
 
-bool JC_Parse_Keyword(jc_parser *p)
+bool Keyword_State(jc_parser *p)
 {
 	if (!p->in_script) {
-		if (MATCH("Const")) return JC_Define_Const(p);
-		if (MATCH("Global")) return JC_Define_Global(p);
-		if (MATCH("Local")) return JC_Define_Local(p);
+		if (MATCH("Const")) return Define_Const_State(p);
+		if (MATCH("Global")) return Define_Global_State(p);
+		if (MATCH("Local")) return Define_Local_State(p);
 
-		if (MATCH("Script")) return JC_Define_Script(p);
+		if (MATCH("Script")) return Begin_Script_State(p);
 	} else {
-		if (MATCH("Combat")) return JC_Combat(p);
-		if (MATCH("PcSpeak")) return JC_PcSpeak(p);
-		if (MATCH("Text")) return JC_Text(p);
+		if (MATCH("Combat")) return Call_Combat_State(p);
+		if (MATCH("PcSpeak")) return Call_PcSpeak_State(p);
+		if (MATCH("Text")) return Call_Text_State(p);
 
-		if (MATCH("If")) return JC_If(p);
-		if (MATCH("ElseIf")) return JC_ElseIf(p);
-		if (MATCH("EndIf")) return JC_EndIf(p);
+		if (MATCH("If")) return Start_If_State(p);
+		if (MATCH("ElseIf")) return Start_ElseIf_State(p);
+		if (MATCH("EndIf")) return End_If_State(p);
 
-		if (MATCH("Return")) return JC_Return(p);
-		if (MATCH("EndScript")) return JC_End_Script(p);
+		if (MATCH("Return")) return Return_State(p);
+		if (MATCH("EndScript")) return End_Script_State(p);
 	}
 
 	return Parse_Error(p, "Unexpected keyword");
 }
 
-bool JC_Parse_Identifier(jc_parser *p)
+bool ttIdentifier_State(jc_parser *p)
 {
 	/* TODO: Expressions */
 	jc_token *targ, *value;
@@ -546,9 +546,9 @@ bool JC_Parse_Identifier(jc_parser *p)
 	CONSUME();
 
 	value = CONSUME();
-	if (value->type == NumericLiteral) {
+	if (value->type == ttNumber) {
 		EMIT_ARG(coPushLiteral, atoi(value->value));
-	} else if (value->type == Identifier) {
+	} else if (value->type == ttIdentifier) {
 		value_var = RESOLVE(value->value);
 		if (value_var == null) return Parse_Error(p, "Unknown identifier");
 		EMIT_PUSH_VAR(value_var);
@@ -562,7 +562,7 @@ bool JC_Parse_Identifier(jc_parser *p)
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-void Parser_Init(jc_parser *p)
+void Initialise_Parser(jc_parser *p)
 {
 	p->vars = calloc(MAX_GLOBALS + MAX_LOCALS + MAX_TEMPS + MAX_CONSTS, sizeof(jc_var));
 	p->global_count = 0;
@@ -582,7 +582,7 @@ void Parser_Init(jc_parser *p)
 	p->stack_size = 0;
 }
 
-void Parser_Free(jc_parser *p)
+void Free_Parser(jc_parser *p)
 {
 	int i;
 
@@ -605,7 +605,7 @@ void Parser_Free(jc_parser *p)
 	free(p->stack);
 }
 
-void Parser_Dump(jc_parser *p)
+void Dump_Parser_State(jc_parser *p)
 {
 	int i;
 
@@ -624,18 +624,18 @@ void Parser_Dump(jc_parser *p)
 	printf("[STRINGS]: %d\n", p->string_count);
 }
 
-bool JC_Parse(jc_parser *p, jc_token *tokens, int count)
+bool Parse_Tokens(jc_parser *p, jc_token *tokens, int count)
 {
 	p->tokens = tokens;
 	p->token_count = count;
 	p->position = 0;
 
 	switch (PEEK()->type) {
-		case Keyword:
-			return JC_Parse_Keyword(p);
+		case ttKeyword:
+			return Keyword_State(p);
 
-		case Identifier:
-			return JC_Parse_Identifier(p);
+		case ttIdentifier:
+			return ttIdentifier_State(p);
 
 		default:
 			Parse_Error(p, "Invalid starting token");

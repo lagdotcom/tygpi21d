@@ -10,15 +10,15 @@
 #define LEXER_TOKEN_SIZE	300
 
 typedef enum {
-	None,
-	CommentStart,
-	Number,
-	String,
-	StringEscape,
-	KeywordOrIdent,
-	Operator,
-	Whitespace,
-	EndOfLine
+	lsNone,
+	lsCommentStart,
+	lsNumber,
+	lsString,
+	lsStringEscape,
+	lsKeywordOrIdent,
+	lsOperator,
+	lsWhitespace,
+	lsEndOfLine
 } lex_state;
 
 #define caseNumeric \
@@ -50,45 +50,45 @@ typedef enum {
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-lex_state JC_Lex_Guess(char source)
+lex_state Get_Lexer_State(char source)
 {
 	switch (source) {
-		case '#':		return CommentStart;
-		case '\\':		return StringEscape;
-		case '"': 		return String;
-		caseNumeric:	return Number;
+		case '#':		return lsCommentStart;
+		case '\\':		return lsStringEscape;
+		case '"': 		return lsString;
+		caseNumeric:	return lsNumber;
 
 		case '=':
 		case '!':
 		case '>':
-		case '<':		return Operator;
+		case '<':		return lsOperator;
 
-		caseWhitespace:	return Whitespace;
-		caseEol:		return EndOfLine;
+		caseWhitespace:	return lsWhitespace;
+		caseEol:		return lsEndOfLine;
 
-		caseAlphabetic:	return KeywordOrIdent;
+		caseAlphabetic:	return lsKeywordOrIdent;
 	}
 
-	return None;
+	return lsNone;
 }
 
-void JC_Lex_Error(char *line, int offset, char *message)
+void Lexer_Error(char *line, int offset, char *message)
 {
 	printf("-- LEXER ERROR --\n");
 	printf("%s%s at column %d\n", line, message, offset);
 }
 
 #define Lex_Error(message) { \
-	JC_Lex_Error(source, ptr - source, message); \
+	Lexer_Error(source, ptr - source, message); \
 	return false; \
 }
 #define Lex_Push(c) buffer[buffer_offset++] = c
 #define Lex_AddToken(tt) { \
-	JC_Lex_AddToken(tokens, count, buffer, &buffer_offset, tt); \
-	state = None; \
+	Add_Lexer_Token(tokens, count, buffer, &buffer_offset, tt); \
+	state = lsNone; \
 }
 
-void JC_Lex_AddToken(jc_token *tokens, int *count, char *buffer, int *buffer_offset, jc_token_type tt)
+void Add_Lexer_Token(jc_token *tokens, int *count, char *buffer, int *buffer_offset, jc_token_type tt)
 {
 	int index = *count;
 	int bo = *buffer_offset;
@@ -107,10 +107,10 @@ void JC_Lex_AddToken(jc_token *tokens, int *count, char *buffer, int *buffer_off
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-bool JC_Lex_String(char *source, jc_token *tokens, int *count)
+bool Tokenize_Code_String(char *source, jc_token *tokens, int *count)
 {
-	lex_state state = None,
-		guess = None;
+	lex_state state = lsNone,
+		guess = lsNone;
 	jc_token_type token_type;
 	unsigned char *ptr = source,
 		ch;
@@ -120,31 +120,31 @@ bool JC_Lex_String(char *source, jc_token *tokens, int *count)
 	memset(buffer, 0, LEXER_TOKEN_SIZE);
 	*count = 0;
 
-	while (guess != EndOfLine) {
+	while (guess != lsEndOfLine) {
 		ch = *(ptr++);
-		guess = JC_Lex_Guess(ch);
+		guess = Get_Lexer_State(ch);
 
 		switch (state) {
-			case None:
+			case lsNone:
 				switch (guess) {
 					/* ignore rest of line */
-					case CommentStart:
-					case EndOfLine:
+					case lsCommentStart:
+					case lsEndOfLine:
 						return true;
 
 					/* ignore */
-					case Whitespace:
+					case lsWhitespace:
 						continue;
 
 					/* change state */
-					case String:
+					case lsString:
 						state = guess;
 						continue;
 
 					/* set buffer, change state */
-					case Number:
-					case Operator:
-					case KeywordOrIdent:
+					case lsNumber:
+					case lsOperator:
+					case lsKeywordOrIdent:
 						state = guess;
 						Lex_Push(ch);
 						continue;
@@ -152,42 +152,42 @@ bool JC_Lex_String(char *source, jc_token *tokens, int *count)
 					default: Lex_Error("Invalid character");
 				}
 
-			case String:
+			case lsString:
 				switch (ch) {
 					case '\\':
-						state = StringEscape;
+						state = lsStringEscape;
 						continue;
 
 					case '"':
-						Lex_AddToken(StringLiteral);
+						Lex_AddToken(ttString);
 						continue;
 
-					case EndOfLine: Lex_Error("Unexpected end of line");
+					caseEol: Lex_Error("Unexpected end of line");
 
 					default:
 						Lex_Push(ch);
 						continue;
 				}
 
-			case StringEscape:
+			case lsStringEscape:
 				switch (ch) {
 					case 'n':
 						Lex_Push('\n');
 						break;
 
-					case EndOfLine: Lex_Error("Unexpected end of line");
+					caseEol: Lex_Error("Unexpected end of line");
 
 					default:
 						Lex_Push(ch);
 						break;
 				}
-				state = String;
+				state = lsString;
 				continue;
 
-			case Number:
+			case lsNumber:
 				switch (ch) {
 					case '#':
-						Lex_AddToken(NumericLiteral);
+						Lex_AddToken(ttNumber);
 						return true;
 
 					caseNumeric:
@@ -196,52 +196,53 @@ bool JC_Lex_String(char *source, jc_token *tokens, int *count)
 
 					caseEol:
 					caseWhitespace:
-						Lex_AddToken(NumericLiteral);
+						Lex_AddToken(ttNumber);
 						continue;
 
 					default: Lex_Error("Invalid character in numeric literal");
 				}
 
-			case KeywordOrIdent:
+			case lsKeywordOrIdent:
 				switch (guess) {
-					case '#':
-						Lex_AddToken(NumericLiteral);
+					case lsCommentStart:
+						Lex_Push('\0');
+						Lex_AddToken(Is_Code_Keyword(buffer) ? ttKeyword : ttIdentifier);
 						return true;
 
-					case KeywordOrIdent:
-					case Number:
+					case lsKeywordOrIdent:
+					case lsNumber:
 						Lex_Push(ch);
 						continue;
 
-					case Operator:
+					case lsOperator:
 						ptr--;
 						/* FALL THROUGH */
 
-					case EndOfLine:
-					case Whitespace:
+					case lsEndOfLine:
+					case lsWhitespace:
 						Lex_Push('\0');
-						Lex_AddToken(JC_IsKeyword(buffer) ? Keyword : Identifier);
+						Lex_AddToken(Is_Code_Keyword(buffer) ? ttKeyword : ttIdentifier);
 						continue;
 
 					default: Lex_Error("Invalid character in keyword/identifier");
 				}
 
-			case Operator:
+			case lsOperator:
 				switch (guess) {
-					case Operator:
+					case lsOperator:
 						Lex_Push(ch);
 						continue;
 
-					case KeywordOrIdent:
-					case Number:
-					case '"':
+					case lsKeywordOrIdent:
+					case lsNumber:
+					case lsString:
 						ptr--;
 						/* FALL THROUGH */
 
-					case EndOfLine:
-					case Whitespace:
-						token_type = JC_Operator(buffer);
-						if (token_type == Unknown) Lex_Error("Unknown operator");
+					case lsEndOfLine:
+					case lsWhitespace:
+						token_type = Parse_Operator(buffer);
+						if (token_type == ttUnknown) Lex_Error("Unknown operator");
 						Lex_AddToken(token_type);
 						continue;
 				}

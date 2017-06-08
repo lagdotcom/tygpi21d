@@ -15,15 +15,15 @@
 #define MAX_STACK_OFFSETS		20
 
 typedef enum {
-	Unknown,
-	Comment,
-	Keyword,
-	Identifier,
-	StringLiteral,
-	NumericLiteral,
-	Assignment,
-	IsEqual,
-	IsNotEqual
+	ttUnknown,
+	ttComment,
+	ttKeyword,
+	ttIdentifier,
+	ttString,
+	ttNumber,
+	ttAssignment,
+	ttEquals,
+	ttNotEqual
 } jc_token_type;
 
 typedef enum {
@@ -85,7 +85,7 @@ typedef struct {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-jc_token_type JC_Operator(char *string);
-bool JC_IsKeyword(char *string);
+jc_token_type Parse_Operator(char *string);
+bool Is_Keyword(char *string);
 
 #endif

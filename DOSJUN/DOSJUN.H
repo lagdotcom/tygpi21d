@@ -11,9 +11,9 @@
 #define TILE(z, x, y) (&z.tiles[y * z.header.width + x])
 
 typedef enum {
-	State_MainMenu,
-	State_Dungeon,
-	State_Quit
+	gsMainMenu,
+	gsDungeon,
+	gsQuit
 } gamestate;
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
@@ -33,6 +33,6 @@ extern bool
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 char **Get_Directory_Listing(char *pattern, int *count);
-wall* Wall_Offset(coord x, coord y, direction dir, relative rel);
+wall* Get_Wall(coord x, coord y, direction dir, relative rel);
 
 #endif

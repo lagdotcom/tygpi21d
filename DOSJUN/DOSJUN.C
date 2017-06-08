@@ -21,7 +21,7 @@ bool redraw_description;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-char Offset_X(direction dir)
+char Get_X_Offset(direction dir)
 {
 	switch (dir) {
 		case East: return 1;
@@ -30,7 +30,7 @@ char Offset_X(direction dir)
 	}
 }
 
-char Offset_Y(direction dir)
+char Get_Y_Offset(direction dir)
 {
 	switch (dir) {
 		case South: return 1;
@@ -39,56 +39,56 @@ char Offset_Y(direction dir)
 	}
 }
 
-bool Valid_Coord(coord x, coord y)
+bool Is_Coord_Valid(coord x, coord y)
 {
 	if (x < 0 || x >= Z.header.width) return false;
 	if (y < 0 || y >= Z.header.height) return false;
 	return true;
 }
 
-tile* Tile_Ahead(coord x, coord y, direction dir, char multiple)
+tile* Get_Adjacent_Tile(coord x, coord y, direction dir, char multiple)
 {
-	coord ax = x + Offset_X(dir) * multiple;
-	coord ay = y + Offset_Y(dir) * multiple;
+	coord ax = x + Get_X_Offset(dir) * multiple;
+	coord ay = y + Get_Y_Offset(dir) * multiple;
 	
-	if (Valid_Coord(ax, ay)) return TILE(Z, ax, ay);
+	if (Is_Coord_Valid(ax, ay)) return TILE(Z, ax, ay);
 	return (tile*)null;
 }
 
-wall* Wall_Offset(coord x, coord y, direction dir, relative rel)
+wall* Get_Wall(coord x, coord y, direction dir, relative rel)
 {
 	tile* under = TILE(Z, x, y);
 
 	switch (dir) {
 		case North:
 			switch (rel) {
-				case Left:  return &under->walls[West];
-				case Ahead: return &under->walls[North];
-				case Right: return &under->walls[East];
+				case rLeft:  return &under->walls[West];
+				case rAhead: return &under->walls[North];
+				case rRight: return &under->walls[East];
 				default: return null;
 			}
 
 		case East:
 			switch (rel) {
-				case Left:  return &under->walls[North];
-				case Ahead: return &under->walls[East];
-				case Right: return &under->walls[South];
+				case rLeft:  return &under->walls[North];
+				case rAhead: return &under->walls[East];
+				case rRight: return &under->walls[South];
 				default: return null;
 			}
 
 		case South:
 			switch (rel) {
-				case Left:  return &under->walls[East];
-				case Ahead: return &under->walls[South];
-				case Right: return &under->walls[West];
+				case rLeft:  return &under->walls[East];
+				case rAhead: return &under->walls[South];
+				case rRight: return &under->walls[West];
 				default: return null;
 			}
 
 		case West:
 			switch (rel) {
-				case Left:  return &under->walls[South];
-				case Ahead: return &under->walls[West];
-				case Right: return &under->walls[North];
+				case rLeft:  return &under->walls[South];
+				case rAhead: return &under->walls[West];
+				case rRight: return &under->walls[North];
 				default: return null;
 			}
 	}
@@ -100,9 +100,9 @@ void Draw_Description(void)
 {
 	tile* under = TILE(Z, S.header.x, S.header.y);
 
-	Square_DB(0, 12, 148, 12 + 37*8, 148 + 5*8, 1);
+	Draw_Square_DB(0, 12, 148, 12 + 37*8, 148 + 5*8, 1);
 	if (under->description > 0) {
-		Blit_String_Box(12, 148, 37, 5, 15, Z.strings[under->description - 1], 0);
+		Draw_Bounded_String(12, 148, 37, 5, 15, Z.strings[under->description - 1], 0);
 	}
 
 	redraw_description = false;
@@ -113,14 +113,14 @@ bool Try_Move_Forward(void)
 	wall *centre;
 	coord ax, ay;
 
-	centre = Wall_Offset(S.header.x, S.header.y, S.header.facing, Ahead);
+	centre = Get_Wall(S.header.x, S.header.y, S.header.facing, rAhead);
 	if (centre->texture) {
 		/* TODO: ow! */
 		return false;
 	}
 
-	ax = S.header.x + Offset_X(S.header.facing);
-	ay = S.header.y + Offset_Y(S.header.facing);
+	ax = S.header.x + Get_X_Offset(S.header.facing);
+	ay = S.header.y + Get_Y_Offset(S.header.facing);
 
 	S.header.x = ax;
 	S.header.y = ay;
@@ -132,7 +132,7 @@ bool Try_Move_Forward(void)
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-void Dungeon_Screen(void)
+void Show_Dungeon_Screen(void)
 {
 	int done = 0;
 
@@ -150,7 +150,7 @@ void Dungeon_Screen(void)
 			switch (getch()) {
 				/* TODO: replace later */
 				case 'q':
-					G = State_Quit;
+					G = gsQuit;
 					done = 1;
 					break;
 
@@ -173,7 +173,7 @@ void Dungeon_Screen(void)
 		}
 
 		if (redraw_description) Draw_Description();
-		if (redraw_fp) Draw_First_Person();
+		if (redraw_fp) Draw_FP();
 		if (redraw_party) Draw_Party_Status();
 
 		Show_Double_Buffer();
@@ -187,11 +187,11 @@ void Dungeon_Screen(void)
 void main(void)
 {
 	printf("Initialising DOSJUN...");
-	Campaign_Init(&C);
-	Items_Init(&I);
-	Monsters_Init(&M);
-	Savefile_Init(&S);
-	Zone_Init(&Z);
+	Initialise_Campaign(&C);
+	Initialise_Items(&I);
+	Initialise_Monsters(&M);
+	Initialise_Savefile(&S);
+	Initialise_Zone(&Z);
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
 		printf("\nNot enough memory to create double buffer.");
@@ -202,16 +202,16 @@ void main(void)
 
 	Set_Video_Mode(VGA256);
 
-	G = State_MainMenu;
+	G = gsMainMenu;
 
-	while (G != State_Quit) {
+	while (G != gsQuit) {
 		switch (G) {
-			case State_MainMenu:
-				Main_Menu();
+			case gsMainMenu:
+				Show_Main_Menu();
 				break;
 
-			case State_Dungeon:
-				Dungeon_Screen();
+			case gsDungeon:
+				Show_Dungeon_Screen();
 				break;
 		}
 	}
@@ -220,11 +220,11 @@ void main(void)
 
 	printf("Cleaning up after DOSJUN...");
 
-	Campaign_Free(&C);
-	Items_Free(&I);
-	Monsters_Init(&M);
-	Savefile_Free(&S);
-	Zone_Free(&Z);
+	Free_Campaign(&C);
+	Free_Items(&I);
+	Free_Monsters(&M);
+	Free_Savefile(&S);
+	Free_Zone(&Z);
 
 	Delete_Double_Buffer();
 

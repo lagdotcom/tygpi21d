@@ -5,12 +5,12 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Savefile_Init(save *s)
+void Initialise_Savefile(save *s)
 {
 	/* Nothing! */
 }
 
-void Savefile_Load(char *filename, save *s)
+void Load_Savefile(char *filename, save *s)
 {
 	FILE *fp = fopen(filename, "rb");
 	fread(s, sizeof(save), 1, fp);
@@ -19,12 +19,12 @@ void Savefile_Load(char *filename, save *s)
 	fclose(fp);
 }
 
-void Savefile_Free(save *s)
+void Free_Savefile(save *s)
 {
 	/* Nothing! */
 }
 
-void Savefile_Save(char *filename, save *s)
+void Save_Savefile(char *filename, save *s)
 {
 	FILE *fp = fopen(filename, "wb");
 

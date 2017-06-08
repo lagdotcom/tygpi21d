@@ -6,12 +6,12 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Campaign_Init(campaign *c)
+void Initialise_Campaign(campaign *c)
 {
 	c->zones = null;
 }
 
-void Campaign_Load(char *filename, campaign *c)
+void Load_Campaign(char *filename, campaign *c)
 {
 	int i;
 
@@ -22,13 +22,13 @@ void Campaign_Load(char *filename, campaign *c)
 
 	c->zones = malloc(sizeof(char*) * c->header.num_zones);
 	for (i = 0; i < c->header.num_zones; i++) {
-		c->zones[i] = Get_String(fp);
+		c->zones[i] = Read_LengthString(fp);
 	}
 
 	fclose(fp);
 }
 
-void Campaign_Free(campaign *c)
+void Free_Campaign(campaign *c)
 {
 	int i;
 
@@ -36,11 +36,11 @@ void Campaign_Free(campaign *c)
 		for (i = 0; i < c->header.num_zones; i++) {
 			free(c->zones[i]);
 		}
-		Free_If_Null(c->zones);
+		nullfree(c->zones);
 	}
 }
 
-void Campaign_Save(char *filename, campaign *c)
+void Save_Campaign(char *filename, campaign *c)
 {
 	int i;
 	FILE *fp = fopen(filename, "wb");
@@ -49,7 +49,7 @@ void Campaign_Save(char *filename, campaign *c)
 	fwrite(&c->header, sizeof(campaign_header), 1, fp);
 
 	for (i = 0; i < c->header.num_zones; i++) {
-		Save_String(c->zones[i], fp);
+		Write_LengthString(c->zones[i], fp);
 	}
 
 	fclose(fp);

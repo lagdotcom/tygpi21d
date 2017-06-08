@@ -6,7 +6,7 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Items_Load(char *filename, items *i)
+void Load_Items(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "rb");
 	fread(&i->header, sizeof(items_header), 1, fp);
@@ -18,17 +18,17 @@ void Items_Load(char *filename, items *i)
 	fclose(fp);
 }
 
-void Items_Free(items *i)
+void Free_Items(items *i)
 {
-	Free_If_Null(i->items);
+	nullfree(i->items);
 }
 
-void Items_Init(items *i)
+void Initialise_Items(items *i)
 {
 	i->items = null;
 }
 
-void Items_Save(char *filename, items *i)
+void Save_Items(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "wb");
 

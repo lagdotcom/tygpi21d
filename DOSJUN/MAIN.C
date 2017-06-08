@@ -13,17 +13,17 @@ pcx_picture menu_bg;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Init_Character(character *c, job_id job, unsigned short str,
+void Initialise_Character(character *c, job_id job, unsigned short str,
 	unsigned short intelligence, unsigned short dex, unsigned short hp,
 	unsigned short mp)
 {
 	c->job = job;
 	c->level = 1;
-	c->stats[Strength] = str;
-	c->stats[Dexterity] = dex;
-	c->stats[Intelligence] = intelligence;
-	c->stats[HP] = c->stats[MaxHP] = hp;
-	c->stats[MP] = c->stats[MaxMP] = mp;
+	c->stats[sStrength] = str;
+	c->stats[sDexterity] = dex;
+	c->stats[sIntelligence] = intelligence;
+	c->stats[sHP] = c->stats[sMaxHP] = hp;
+	c->stats[sMP] = c->stats[sMaxMP] = mp;
 }
 
 void Load_Campaign_Data()
@@ -32,18 +32,18 @@ void Load_Campaign_Data()
 
 	strcpy(buffer, S.header.campaign_name);
 	strcat(buffer, ".ITM");
-	Items_Free(&I);
-	Items_Load(buffer, &I);
+	Free_Items(&I);
+	Load_Items(buffer, &I);
 
 	strcpy(buffer, S.header.campaign_name);
 	strcat(buffer, ".MON");
-	Monsters_Free(&M);
-	Monsters_Load(buffer, &M);
+	Free_Monsters(&M);
+	Load_Monsters(buffer, &M);
 
 	strcpy(buffer, C.zones[S.header.zone]);
 	strcat(buffer, ".ZON");
-	Zone_Free(&Z);
-	Zone_Load(buffer, &Z);
+	Free_Zone(&Z);
+	Load_Zone(buffer, &Z);
 }
 
 void Start_Campaign(char *name)
@@ -54,7 +54,7 @@ void Start_Campaign(char *name)
 
 	strcpy(buffer, name);
 	strcat(buffer, ".CMP");
-	Campaign_Load(buffer, &C);
+	Load_Campaign(buffer, &C);
 
 	S.header.zone = C.header.start_zone;
 	S.header.x = C.header.start_x;
@@ -64,7 +64,7 @@ void Start_Campaign(char *name)
 	Load_Campaign_Data();
 }
 
-void New_Game()
+void Start_New_Game()
 {
 	Fill_Double_Buffer(0);
 
@@ -76,32 +76,32 @@ void New_Game()
 
 	Blit_String_DB(0, 40, 15, "Who are you?", 0);
 	Input_String(104, 40, &S.characters[0].name, NAME_SIZE);
-	Init_Character(&S.characters[0], Bard,     8, 13, 13, 10, 0);
+	Initialise_Character(&S.characters[0], jBard,     8, 13, 13, 10, 0);
 
 	Blit_String_DB(0, 56, 15, "Who's the strong one?", 0);
 	Input_String(176, 56, &S.characters[1].name, NAME_SIZE);
-	Init_Character(&S.characters[1], Fighter, 14,  9, 11, 20, 0);
+	Initialise_Character(&S.characters[1], jFighter, 14,  9, 11, 20, 0);
 
 	Blit_String_DB(0, 72, 15, "Who's the nerd?", 0);
 	Input_String(128, 72, &S.characters[2].name, NAME_SIZE);
-	Init_Character(&S.characters[2], Mage,     9, 14, 11,  8, 8);
+	Initialise_Character(&S.characters[2], jMage,     9, 14, 11,  8, 8);
 
 	Blit_String_DB(0, 88, 15, "Who's kinda shifty?", 0);
 	Input_String(160, 88, &S.characters[3].name, NAME_SIZE);
-	Init_Character(&S.characters[3], Rogue,    9, 11, 14, 12, 0);
+	Initialise_Character(&S.characters[3], jRogue,    9, 11, 14, 12, 0);
 
 	Blit_String_DB(0, 104, 15, "Who cares a lot?", 0);
 	Input_String(136, 104, &S.characters[4].name, NAME_SIZE);
-	Init_Character(&S.characters[4], Cleric,  13, 13,  8, 14, 6);
+	Initialise_Character(&S.characters[4], jCleric,  13, 13,  8, 14, 6);
 
 	Blit_String_DB(0, 120, 15, "Who likes guns?", 0);
 	Input_String(128, 120, &S.characters[5].name, NAME_SIZE);
-	Init_Character(&S.characters[5], Ranger,  13,  8, 13, 13, 0);
+	Initialise_Character(&S.characters[5], jRanger,  13,  8, 13, 13, 0);
 
 	Start_Campaign("DEMO");
-	G = State_Dungeon;
+	G = gsDungeon;
 	
-	Savefile_Save("DEMO.SAV", &S);
+	Save_Savefile("DEMO.SAV", &S);
 }
 
 bool Load_Game()
@@ -118,14 +118,14 @@ bool Load_Game()
 	filenames = Get_Directory_Listing("*.SAV", &count);
 	choice = Input_Menu(filenames, count, 0, 0);
 
-	Savefile_Load(filenames[choice], &S);
+	Load_Savefile(filenames[choice], &S);
 
 	strcpy(buffer, S.header.campaign_name);
 	strcat(buffer, ".CMP");
-	Campaign_Load(buffer, &C);
+	Load_Campaign(buffer, &C);
 
 	Load_Campaign_Data();
-	G = State_Dungeon;
+	G = gsDungeon;
 
 	Free_Directory_Listing(filenames, count);
 
@@ -134,7 +134,7 @@ bool Load_Game()
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-void Main_Menu(void)
+void Show_Main_Menu(void)
 {
 	int option;
 	bool done = false;
@@ -152,7 +152,7 @@ void Main_Menu(void)
 
 		switch (option) {
 			case 0:
-				New_Game();
+				Start_New_Game();
 				done = true;
 				break;
 
@@ -161,7 +161,7 @@ void Main_Menu(void)
 				break;
 
 			case 2:
-				G = State_Quit;
+				G = gsQuit;
 				done = true;
 				break;
 		}

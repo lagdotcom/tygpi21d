@@ -12,7 +12,7 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-char* Get_String(FILE* fp)
+char* Read_LengthString(FILE* fp)
 {
 	char* string;
 	length len;
@@ -23,7 +23,7 @@ char* Get_String(FILE* fp)
 	return string;
 }
 
-void Save_String(char *string, FILE *fp)
+void Write_LengthString(char *string, FILE *fp)
 {
 	length len;
 

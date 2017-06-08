@@ -30,16 +30,16 @@ void Draw_Tile(x, y)
 	tile* t = TILE(Z, x, y);
 
 	if (x == sel_x && y == sel_y) {
-		Square_DB(15, TX, TY, TX + 6, TY + 6, 0);
+		Draw_Square_DB(15, TX, TY, TX + 6, TY + 6, 0);
 	} else {
-		Square_DB(0, TX, TY, TX + 6, TY + 6, 0);
+		Draw_Square_DB(0, TX, TY, TX + 6, TY + 6, 0);
 	}
 
-	Square_DB(t->floor, TX + 1, TY + 1, TX + 5, TY + 5, 1);
-	Bline_DB(TX + 2, TY + 0, TX + 4, TY + 0, t->walls[North].texture);
-	Bline_DB(TX + 2, TY + 6, TX + 4, TY + 6, t->walls[South].texture);
-	Bline_DB(TX + 0, TY + 2, TX + 0, TY + 4, t->walls[West].texture);
-	Bline_DB(TX + 6, TY + 2, TX + 6, TY + 4, t->walls[East].texture);
+	Draw_Square_DB(t->floor, TX + 1, TY + 1, TX + 5, TY + 5, 1);
+	Draw_Line_DB(TX + 2, TY + 0, TX + 4, TY + 0, t->walls[North].texture);
+	Draw_Line_DB(TX + 2, TY + 6, TX + 4, TY + 6, t->walls[South].texture);
+	Draw_Line_DB(TX + 0, TY + 2, TX + 0, TY + 4, t->walls[West].texture);
+	Draw_Line_DB(TX + 6, TY + 2, TX + 6, TY + 4, t->walls[East].texture);
 }
 
 void Draw_Zone(void)
@@ -88,9 +88,9 @@ void Draw_Details(void)
 
 	sprintf(buf, "D: %5d", t->description);
 	Blit_String_DB(DX, 88, 15, buf, 0);
-	Square_DB(0, 8, 160, 8 + 38*8, 160 + 4*8, 1);
+	Draw_Square_DB(0, 8, 160, 8 + 38*8, 160 + 4*8, 1);
 	if (t->description)
-		Blit_String_Box(8, 160, 38, 4, 15, Z.strings[t->description - 1], 0);
+		Draw_Bounded_String(8, 160, 38, 4, 15, Z.strings[t->description - 1], 0);
 
 	redraw_details = false;
 }
@@ -213,7 +213,7 @@ void Change_Description(void)
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-void Editor_Main(void)
+void Main_Editor_Loop(void)
 {
 	int done = 0;
 
@@ -230,7 +230,7 @@ void Editor_Main(void)
 					break;
 
 				case ' ':
-					Zone_Save(zone_filename, &Z);
+					Save_Zone(zone_filename, &Z);
 					Blit_String_DB(100, 100, 15, "SAVED!", 0);
 					break;
 
@@ -303,12 +303,12 @@ void Editor_Main(void)
 	}
 }
 
-void New_Zone(void)
+void Create_Zone(void)
 {
 	char buffer[100];
 	coord size;
 
-	Zone_Init(&Z);
+	Initialise_Zone(&Z);
 	printf("Creating new zone file.\n");
 
 	printf("Zone Name: ");
@@ -331,10 +331,10 @@ void New_Zone(void)
 	Z.tiles = calloc(Z.header.width * Z.header.height, sizeof(tile));
 }
 
-void Load_Zone(char *filename)
+void Edit_Zone(char *filename)
 {
 	printf("Loading zone: %s\n", filename);
-	Zone_Load(filename, &Z);
+	Load_Zone(filename, &Z);
 
 	zone_filename = strdup(filename);
 }
@@ -342,9 +342,9 @@ void Load_Zone(char *filename)
 void main(int argc, char **argv)
 {
 	if (argc < 2) {
-		New_Zone();
+		Create_Zone();
 	} else {
-		Load_Zone(argv[1]);
+		Edit_Zone(argv[1]);
 	}
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
@@ -359,9 +359,9 @@ void main(int argc, char **argv)
 	PCX_Load("BACK.PCX", &explore_bg, 1);
 	PCX_Delete(&explore_bg);
 
-	Editor_Main();
+	Main_Editor_Loop();
 
-	Zone_Free(&Z);
+	Free_Zone(&Z);
 	free(zone_filename);
 
 	/* Cleanup */

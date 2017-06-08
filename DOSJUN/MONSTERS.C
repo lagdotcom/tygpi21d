@@ -6,7 +6,7 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Monsters_Load(char *filename, monsters *m)
+void Load_Monsters(char *filename, monsters *m)
 {
 	FILE *fp = fopen(filename, "rb");
 	fread(&m->header, sizeof(monsters_header), 1, fp);
@@ -18,17 +18,17 @@ void Monsters_Load(char *filename, monsters *m)
 	fclose(fp);
 }
 
-void Monsters_Free(monsters *m)
+void Free_Monsters(monsters *m)
 {
-	Free_If_Null(m->monsters);
+	nullfree(m->monsters);
 }
 
-void Monsters_Init(monsters *m)
+void Initialise_Monsters(monsters *m)
 {
 	m->monsters = null;
 }
 
-void Monsters_Save(char *filename, monsters *m)
+void Save_Monsters(char *filename, monsters *m)
 {
 	FILE *fp = fopen(filename, "wb");
 

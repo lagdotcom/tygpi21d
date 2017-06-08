@@ -19,9 +19,9 @@ typedef unsigned char bool;
 #define West	3
 
 typedef enum {
-	Ahead,
-	Left,
-	Right
+	rAhead,
+	rLeft,
+	rRight
 } relative;
 
 typedef unsigned char colour;

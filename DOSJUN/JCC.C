@@ -17,11 +17,11 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	Parser_Init(&parser);
-	rvalue = JC_Compile(&parser, argv[1], true);
+	Initialise_Parser(&parser);
+	rvalue = Compile_JC(&parser, argv[1], true);
 
-	JCC_Dump(&parser, "DUMP.JCC");
-	Parser_Free(&parser);
+	Dump_Compiled_JC(&parser, "DUMP.JCC");
+	Free_Parser(&parser);
 
 	return rvalue;
 }

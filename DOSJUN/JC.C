@@ -17,16 +17,16 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-jc_token_type JC_Operator(char *string)
+jc_token_type Parse_Operator(char *string)
 {
-	if (!strncmp(string, "==", 2)) return IsEqual;
-	if (!strncmp(string, "!=", 2)) return IsNotEqual;
-	if (!strncmp(string, "=", 1)) return Assignment;
+	if (!strncmp(string, "==", 2)) return ttEquals;
+	if (!strncmp(string, "!=", 2)) return ttNotEqual;
+	if (!strncmp(string, "=", 1)) return ttAssignment;
 
-	return Unknown;
+	return ttUnknown;
 }
 
-bool JC_IsKeyword(char *string)
+bool Is_Code_Keyword(char *string)
 {
 	if (!strncmp(string, "Combat", 6)) return true;
 	if (!strncmp(string, "Const", 5)) return true;
@@ -47,24 +47,24 @@ bool JC_IsKeyword(char *string)
 	return false;
 }
 
-char *JC_TokenName(jc_token_type tt)
+char *Get_Token_Name(jc_token_type tt)
 {
 	switch (tt) {
-		case Unknown: return "UNK";
-		case Comment: return "COM";
-		case Keyword: return "KEY";
-		case Identifier: return "VAR";
-		case StringLiteral: return "STR";
-		case NumericLiteral: return "NUM";
-		case Assignment: return "SET";
-		case IsEqual: return "EQU";
-		case IsNotEqual: return "NEQ";
+		case ttUnknown: return "UNK";
+		case ttComment: return "COM";
+		case ttKeyword: return "KEY";
+		case ttIdentifier: return "VAR";
+		case ttString: return "STR";
+		case ttNumber: return "NUM";
+		case ttAssignment: return "SET";
+		case ttEquals: return "EQU";
+		case ttNotEqual: return "NEQ";
 
 		default: return "???";
 	}
 }
 
-int JC_Compile(jc_parser *parser, char *filename, bool toplevel)
+int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 {
 	bool success;
 	char line[JC_LINE_LENGTH];
@@ -80,14 +80,14 @@ int JC_Compile(jc_parser *parser, char *filename, bool toplevel)
 	fp = fopen(filename, "r");
 	while (fgets(line, JC_LINE_LENGTH, fp)) {
 		line_no++;
-		success = JC_Lex_String(line, tokens, &count);
+		success = Tokenize_Code_String(line, tokens, &count);
 
 		if (success && count > 0) {
 			/* special handling for Include */
-			if (tokens[0].type == Keyword && !strcmp(tokens[0].value, "Include")) {
-				success = JC_Compile(parser, tokens[1].value, false) == 0;
+			if (tokens[0].type == ttKeyword && !strcmp(tokens[0].value, "Include")) {
+				success = Compile_JC(parser, tokens[1].value, false) == 0;
 			} else {
-				success = JC_Parse(parser, tokens, count);
+				success = Parse_Tokens(parser, tokens, count);
 			}
 		}
 
@@ -105,12 +105,12 @@ int JC_Compile(jc_parser *parser, char *filename, bool toplevel)
 	}
 	fclose(fp);
 
-	if (toplevel) Parser_Dump(parser);
+	if (toplevel) Dump_Parser_State(parser);
 	free(tokens);
 	return err;
 }
 
-void JCC_Dump(jc_parser *p, char *filename)
+void Dump_Compiled_JC(jc_parser *p, char *filename)
 {
 	FILE *fp;
 	int i, j, opbytes = 0;

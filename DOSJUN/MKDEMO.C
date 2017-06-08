@@ -61,7 +61,7 @@ void Demo_Campaign(char *filename)
 	c.zones = calloc(1, sizeof(char*));
 	c.zones[0] = "DEMO";
 
-	Campaign_Save(filename, &c);
+	Save_Campaign(filename, &c);
 	printf("Wrote %s\n", filename);
 
 	free(c.zones);
@@ -76,35 +76,35 @@ void Demo_Items(char *filename)
 
 	i.items = calloc(8, sizeof(item));
 
-	Set_Item( 0, 0x100, "Longsword", PrimaryWeapon, IT_HEAVY, 100);
-	Set_ItemStat( 0, MinDamage, 4);
-	Set_ItemStat( 0, MaxDamage, 8);
+	Set_Item( 0, 0x100, "Longsword", itPrimaryWeapon, ifHeavy, 100);
+	Set_ItemStat( 0, sMinDamage, 4);
+	Set_ItemStat( 0, sMaxDamage, 8);
 
-	Set_Item( 1, 0x101, "Dagger", SmallWeapon, IT_LIGHT, 10);
-	Set_ItemStat( 1, MinDamage, 1);
-	Set_ItemStat( 1, MaxDamage, 2);
+	Set_Item( 1, 0x101, "Dagger", itSmallWeapon, ifLight, 10);
+	Set_ItemStat( 1, sMinDamage, 1);
+	Set_ItemStat( 1, sMaxDamage, 2);
 
-	Set_Item( 2, 0x200, "Buckler", Shield, 0, 15);
-	Set_ItemStat( 2, Armour, 1);
+	Set_Item( 2, 0x200, "Buckler", itShield, 0, 15);
+	Set_ItemStat( 2, sArmour, 1);
 
-	Set_Item( 3, 0x300, "Leather Cap", Helmet, IT_LIGHT, 25);
-	Set_ItemStat( 3, Armour, 2);	
+	Set_Item( 3, 0x300, "Leather Cap", itHelmet, ifLight, 25);
+	Set_ItemStat( 3, sArmour, 2);	
 
-	Set_Item( 4, 0x400, "Platemail", BodyArmour, IT_HEAVY, 25000);
-	Set_ItemStat( 4, Armour, 13);
+	Set_Item( 4, 0x400, "Platemail", itBodyArmour, ifHeavy, 25000);
+	Set_ItemStat( 4, sArmour, 13);
 
-	Set_Item( 5, 0x500, "Spiked Boots", Footwear, IT_LIGHT, 150);
-	Set_ItemStat( 5, Armour, 2);
-	Set_ItemStat( 5, MaxDamage, 1);
+	Set_Item( 5, 0x500, "Spiked Boots", itFootwear, ifLight, 150);
+	Set_ItemStat( 5, sArmour, 2);
+	Set_ItemStat( 5, sMaxDamage, 1);
 
-	Set_Item( 6, 0x600, "Moonstone Pendant", Jewellery, IT_LIGHT, 2000);
-	Set_ItemStat( 6, Intelligence, 1);
+	Set_Item( 6, 0x600, "Moonstone Pendant", itJewellery, ifLight, 2000);
+	Set_ItemStat( 6, sIntelligence, 1);
 
-	Set_Item( 7, 0x601, "Cloudy Tanzanite Ring", Jewellery, IT_LIGHT, 1450);
-	Set_ItemStat( 7, Strength, 2);
-	Set_ItemStat( 7, Dexterity, -1);
+	Set_Item( 7, 0x601, "Cloudy Tanzanite Ring", itJewellery, ifLight, 1450);
+	Set_ItemStat( 7, sStrength, 2);
+	Set_ItemStat( 7, sDexterity, -1);
 
-	Items_Save(filename, &i);
+	Save_Items(filename, &i);
 	printf("Wrote %s\n", filename);
 
 	free(i.items);
@@ -120,16 +120,16 @@ void Demo_Monsters(char *filename)
 	m.monsters = calloc(1, sizeof(monster));
 
 	Set_Monster(0, RAT, "Large Rat");
-	Set_MonsterStat(0, MaxHP, 3);
-	Set_MonsterStat(0, MaxMP, 0);
-	Set_MonsterStat(0, MinDamage, 1);
-	Set_MonsterStat(0, MaxDamage, 1);
-	Set_MonsterStat(0, Armour, 0);
-	Set_MonsterStat(0, Strength, 2);
-	Set_MonsterStat(0, Dexterity, 5);
-	Set_MonsterStat(0, Intelligence, 1);
+	Set_MonsterStat(0, sMaxHP, 3);
+	Set_MonsterStat(0, sMaxMP, 0);
+	Set_MonsterStat(0, sMinDamage, 1);
+	Set_MonsterStat(0, sMaxDamage, 1);
+	Set_MonsterStat(0, sArmour, 0);
+	Set_MonsterStat(0, sStrength, 2);
+	Set_MonsterStat(0, sDexterity, 5);
+	Set_MonsterStat(0, sIntelligence, 1);
 
-	Monsters_Save(filename, &m);
+	Save_Monsters(filename, &m);
 	printf("Wrote %s\n", filename);
 
 	free(m.monsters);
@@ -138,7 +138,7 @@ void Demo_Monsters(char *filename)
 void Demo_Zone(char *filename)
 {
 	zone z;
-	Zone_Init(&z);
+	Initialise_Zone(&z);
 	Zero(z.header.unused, ZONE_HEADER_PADDING);
 
 	strcpy(z.header.campaign_name, "DEMO");
@@ -169,10 +169,10 @@ void Demo_Zone(char *filename)
 	z.encounters = calloc(1, sizeof(encounter));
 	Set_Encounter( 0, 0, RAT, 1, 3);
 
-	Zone_Save(filename, &z);
+	Save_Zone(filename, &z);
 	printf("Wrote %s\n", filename);
 
-	Zone_Free(&z);
+	Free_Zone(&z);
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */

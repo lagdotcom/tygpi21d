@@ -1,6 +1,6 @@
 CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc
 DEMO_OBJS = mkdemo.obj campaign.obj io.obj items.obj monsters.obj save.obj zone.obj
-MAIN_OBJS = dosjun.obj campaign.obj fp.obj gfx.obj input.obj io.obj main.obj monsters.obj party.obj save.obj zone.obj
+MAIN_OBJS = dosjun.obj campaign.obj fp.obj gfx.obj input.obj io.obj items.obj main.obj monsters.obj party.obj save.obj zone.obj
 EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj jc.obj jc_lex.obj jc_par.obj save.obj zone.obj
 JCC_OBJS = jcc.obj jc.obj jc_lex.obj jc_par.obj
 HEADERS = dosjun.h files.h types.h

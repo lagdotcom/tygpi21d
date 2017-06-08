@@ -16,56 +16,56 @@
 #define ENCOUNTER_SIZE	6
 
 typedef enum {
-	Weapon,
-	OffHand,
-	Head,
-	Body,
-	Feet,
-	Accessory
+	slWeapon,
+	slOffHand,
+	slHead,
+	slBody,
+	slFeet,
+	slAccessory
 } slot_id;
 #define ITEM_SLOTS		6
 
 typedef enum {
-	MaxHP,
-	MaxMP,
-	MinDamage,
-	MaxDamage,
-	Armour,
-	Strength,
-	Dexterity,
-	Intelligence,
-	HP,
-	MP
+	sMaxHP,
+	sMaxMP,
+	sMinDamage,
+	sMaxDamage,
+	sArmour,
+	sStrength,
+	sDexterity,
+	sIntelligence,
+	sHP,
+	sMP
 } stat_id;
 #define NUM_STATS		10
 
 typedef enum {
-	PrimaryWeapon,
-	SmallWeapon,
-	TwoHandedWeapon,
-	Shield,
-	Helmet,
-	BodyArmour,
-	Footwear,
-	Jewellery,
-	Potion,
-	Scroll
+	itPrimaryWeapon,
+	itSmallWeapon,
+	itTwoHandedWeapon,
+	itShield,
+	itHelmet,
+	itBodyArmour,
+	itFootwear,
+	itJewellery,
+	itPotion,
+	itScroll
 } item_types;
 
 typedef enum {
-	Fighter,	/* Str */
-	Cleric,		/* Str, Int */
-	Mage,		/* Int */
-	Rogue,		/* Dex */
-	Ranger,		/* Str, Dex */
-	Bard		/* Int, Dex */
+	jFighter,	/* Str */
+	jCleric,	/* Str, Int */
+	jMage,		/* Int */
+	jRogue,		/* Dex */
+	jRanger,	/* Str, Dex */
+	jBard		/* Int, Dex */
 } jobs;
 
-#define IT_LIGHT		1
-#define IT_HEAVY		2
+#define ifLight		1
+#define ifHeavy		2
 
 #define Set_Version_Header(h) strncpy(h.magic, FILE_MAGIC, 3); h.version = VERSION_1
-#define Free_If_Null(r) if (r != null) { \
+#define nullfree(r) if (r != null) { \
 	free(r); \
 	r = null; \
 }
@@ -219,8 +219,8 @@ typedef struct {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-char* Get_String(FILE* fp);
-void Save_String(char *string, FILE *fp);
+char* Read_LengthString(FILE* fp);
+void Write_LengthString(char *string, FILE *fp);
 void IO_Error(char *message);
 
 #endif

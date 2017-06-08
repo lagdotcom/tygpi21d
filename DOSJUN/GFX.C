@@ -5,7 +5,7 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Bline_DB(int xo, int yo, int x1, int y1, colour col)
+void Draw_Line_DB(int xo, int yo, int x1, int y1, colour col)
 {
 	/* This function uses Bresenham's algorithm (IBM 1965) to draw a line
 	from (xo,yo) - (x1,y1). */
@@ -82,7 +82,7 @@ void Bline_DB(int xo, int yo, int x1, int y1, colour col)
 	}
 }
 
-void Dline_DB(int xo, int yo, int x1, int y1, colour col)
+void Draw_Diagonal_DB(int xo, int yo, int x1, int y1, colour col)
 {
 	int x, y, xd, yd;
 
@@ -101,7 +101,7 @@ void Dline_DB(int xo, int yo, int x1, int y1, colour col)
 	}
 }
 
-void Blit_String_Box(int x, int y, int w, int h, colour col, char *string, bool trans_flag)
+void Draw_Bounded_String(int x, int y, int w, int h, colour col, char *string, bool trans_flag)
 {
 	int row = 0,
 		column = 0,
@@ -129,7 +129,7 @@ void Blit_String_Box(int x, int y, int w, int h, colour col, char *string, bool 
 	}
 }
 
-void TrapeziumH_DB(colour col, int x0, int x1, int x2, int x3, int y0, int y1, bool filled)
+void Draw_HorzTrapezium_DB(colour col, int x0, int x1, int x2, int x3, int y0, int y1, bool filled)
 {
 	int xa = x0,
 		xb = x1,
@@ -145,21 +145,21 @@ void TrapeziumH_DB(colour col, int x0, int x1, int x2, int x3, int y0, int y1, b
 		}
 
 		while (y != ye) {
-			Bline_DB(xa, y, xb, y, col);
+			Draw_Line_DB(xa, y, xb, y, col);
 
 			xa++;
 			xb--;
 			y += m;
 		}
 	} else {
-		Bline_DB(x0, y0, x1, y0, col);
-		Dline_DB(x0, y0, x2, y1, col);
-		Dline_DB(x1, y0, x3, y1, col);
-		Bline_DB(x2, y1, x3, y1, col);
+		Draw_Line_DB(x0, y0, x1, y0, col);
+		Draw_Diagonal_DB(x0, y0, x2, y1, col);
+		Draw_Diagonal_DB(x1, y0, x3, y1, col);
+		Draw_Line_DB(x2, y1, x3, y1, col);
 	}
 }
 
-void TrapeziumV_DB(colour col, int x0, int x1, int y0, int y1, int y2, int y3, bool filled)
+void Draw_VertTrapezium_DB(colour col, int x0, int x1, int y0, int y1, int y2, int y3, bool filled)
 {
 	int x = x0,
 		xe = x1,
@@ -175,32 +175,32 @@ void TrapeziumV_DB(colour col, int x0, int x1, int y0, int y1, int y2, int y3, b
 		}
 
 		while (x != xe) {
-			Bline_DB(x, ya, x, yb, col);
+			Draw_Line_DB(x, ya, x, yb, col);
 
 			ya++;
 			yb--;
 			x += m;
 		}
 	} else {
-		Bline_DB(x0, y0, x0, y1, col);
-		Dline_DB(x0, y0, x1, y2, col);
-		Dline_DB(x0, y1, x1, y3, col);
-		Bline_DB(x1, y2 - 1, x1, y3 + 1, col);
+		Draw_Line_DB(x0, y0, x0, y1, col);
+		Draw_Diagonal_DB(x0, y0, x1, y2, col);
+		Draw_Diagonal_DB(x0, y1, x1, y3, col);
+		Draw_Line_DB(x1, y2 - 1, x1, y3 + 1, col);
 	}
 }
 
-void Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled)
+void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled)
 {
 	int y;
 
 	if (filled) {
 		for (y = y0; y <= y1; y++) {
-			Bline_DB(x0, y, x1, y, col);
+			Draw_Line_DB(x0, y, x1, y, col);
 		}
 	} else {
-		Bline_DB(x0, y0, x1, y0, col);
-		Bline_DB(x0, y1, x1, y1, col);
-		Bline_DB(x0, y0, x0, y1, col);
-		Bline_DB(x1, y0, x1, y1, col);
+		Draw_Line_DB(x0, y0, x1, y0, col);
+		Draw_Line_DB(x0, y1, x1, y1, col);
+		Draw_Line_DB(x0, y0, x0, y1, col);
+		Draw_Line_DB(x1, y0, x1, y1, col);
 	}
 }

@@ -6,7 +6,7 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Zone_Init(zone *z)
+void Initialise_Zone(zone *z)
 {
 	z->tiles = null;
 	z->strings = null;
@@ -15,7 +15,7 @@ void Zone_Init(zone *z)
 	z->encounters = null;
 }
 
-void Zone_Load(char *filename, zone *z)
+void Load_Zone(char *filename, zone *z)
 {
 	int i;
 	zone_header *h = &z->header;
@@ -31,7 +31,7 @@ void Zone_Load(char *filename, zone *z)
 	if (h->num_strings > 0) {
 		z->strings = malloc(sizeof(char*) * h->num_strings);
 		for (i = 0; i < h->num_strings; i++)
-			z->strings[i] = Get_String(fp);
+			z->strings[i] = Read_LengthString(fp);
 	} else {
 		z->strings = null;
 	}
@@ -56,31 +56,31 @@ void Zone_Load(char *filename, zone *z)
 	fclose(fp);
 }
 
-void Zone_Free(zone *z)
+void Free_Zone(zone *z)
 {
 	int i;
 
-	Free_If_Null(z->tiles);
+	nullfree(z->tiles);
 
 	if (z->strings != null) {
 		for (i = 0; i < z->header.num_strings; i++) {
 			free(z->strings[i]);
 		}
-		Free_If_Null(z->strings);
+		nullfree(z->strings);
 	}
 
 	if (z->scripts != null) {
 		for (i = 0; i < z->header.num_scripts; i++) {
 			free(z->scripts[i]);
 		}
-		Free_If_Null(z->scripts);
-		Free_If_Null(z->script_lengths);
+		nullfree(z->scripts);
+		nullfree(z->script_lengths);
 	}
 
-	Free_If_Null(z->encounters);
+	nullfree(z->encounters);
 }
 
-void Zone_Save(char *filename, zone *z)
+void Save_Zone(char *filename, zone *z)
 {
 	int i;
 	zone_header *h = &z->header;
@@ -91,7 +91,7 @@ void Zone_Save(char *filename, zone *z)
 	fwrite(z->tiles, sizeof(tile), h->width * h->height, fp);
 
 	for (i = 0; i < h->num_strings; i++) {
-		Save_String(z->strings[i], fp);
+		Write_LengthString(z->strings[i], fp);
 	}
 
 	for (i = 0; i < h->num_scripts; i++) {
