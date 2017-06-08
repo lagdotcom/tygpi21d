@@ -95,7 +95,7 @@ void Draw_Details(void)
 	redraw_details = false;
 }
 
-bool Get_Colour(colour* value)
+bool Get_Colour(colour *value)
 {
 	int temp = *value;
 

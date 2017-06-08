@@ -11,7 +11,7 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-bool Input_Number(int x, int y, int* number, int min, int max)
+bool Input_Number(int x, int y, int *number, int min, int max)
 {
 	int cx = 0,
 		cy = y,
@@ -117,7 +117,7 @@ bool Input_String(int x, int y, char *string, int max)
 	}
 }
 
-bool Input_Multiline_String(int x, int y, char* string, int max)
+bool Input_Multiline_String(int x, int y, char *string, int max)
 {
 	int cx = x,
 		cy = y,
@@ -163,7 +163,7 @@ bool Input_Multiline_String(int x, int y, char* string, int max)
 	}
 }
 
-int Input_Menu(char** menu, int choices, int x, int y)
+int Input_Menu(char **menu, int choices, int x, int y)
 {
 	int choice = 0,
 		i;

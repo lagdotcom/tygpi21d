@@ -12,9 +12,9 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-char* Read_LengthString(FILE* fp)
+char *Read_LengthString(FILE *fp)
 {
-	char* string;
+	char *string;
 	length len;
 
 	fread(&len, sizeof(length), 1, fp);
@@ -40,7 +40,7 @@ void IO_Error(char *message)
 
 char **Get_Directory_Listing(char *pattern, int *count)
 {
-	char** filenames;
+	char **filenames;
 	struct ffblk ff;
 	int i, done;
 

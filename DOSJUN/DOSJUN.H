@@ -33,6 +33,6 @@ extern bool
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 char **Get_Directory_Listing(char *pattern, int *count);
-wall* Get_Wall(coord x, coord y, direction dir, relative rel);
+wall *Get_Wall(coord x, coord y, direction dir, relative rel);
 
 #endif

@@ -214,12 +214,12 @@ typedef struct {
 	char **strings;
 	bytecode **scripts;
 	length *script_lengths;
-	encounter* encounters;
+	encounter *encounters;
 } zone;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-char* Read_LengthString(FILE* fp);
+char *Read_LengthString(FILE *fp);
 void Write_LengthString(char *string, FILE *fp);
 void IO_Error(char *message);
 
