@@ -11,9 +11,9 @@
 
 #define JC_LINE_LENGTH	1000
 
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
+/* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-/* G L O B A L S ///////////////////////////////////////////////////////// */
+bool Tokenize_Code_String(char *source, jc_token *tokens, int *count);
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -68,7 +68,7 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 {
 	bool success;
 	char line[JC_LINE_LENGTH];
-	jc_token *tokens = calloc(MAX_TOKENS_PER_LINE, sizeof(jc_token));
+	jc_token *tokens = szalloc(MAX_TOKENS_PER_LINE, jc_token);
 	int count,
 		i,
 		err = 0,

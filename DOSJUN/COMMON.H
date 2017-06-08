@@ -1,5 +1,9 @@
-#ifndef DOSJUN_TYPES_H
-#define DOSJUN_TYPES_H
+#ifndef DOSJUN_COMMON_H
+#define DOSJUN_COMMON_H
+
+/* I N C L U D E S /////////////////////////////////////////////////////// */
+
+#include <stdlib.h>
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -12,6 +16,13 @@ typedef unsigned char bool;
 #ifndef null
 #define null 0
 #endif
+
+#define szalloc(n, o) calloc(n, sizeof(o))
+
+#define nullfree(r) if (r != null) { \
+	free(r); \
+	r = null; \
+}
 
 #define North	0
 #define East	1

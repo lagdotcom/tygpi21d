@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "gamelib.h"
 #include "dosjun.h"
+#include "jc.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -14,18 +15,31 @@
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 pcx_picture explore_bg;
+jc_parser parser;
 zone Z;
 
 char *zone_filename;
 bool redraw_details, redraw_zone;
 int sel_x, sel_y;
 
+/* P R O T O T Y P E S /////////////////////////////////////////////////// */
+
+bool Input_Multiline_String(int x, int y, char *string, int max);
+bool Input_Number(int x, int y, int *number, int min, int max);
+void Draw_Bounded_String(int x, int y, int w, int h, colour col, char *string, bool trans_flag);
+void Draw_Line_DB(int xo, int yo, int x1, int y1, colour col);
+void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled);
+void Free_Zone(zone *z);
+void Initialise_Zone(zone *z);
+void Load_Zone(char *filename, zone *z);
+void Save_Zone(char *filename, zone *z);
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 #define TX (8 + x*7)
 #define TY (8 + y*7)
 
-void Draw_Tile(x, y)
+void Draw_Tile(coord x, coord y)
 {
 	tile* t = TILE(Z, x, y);
 
@@ -97,10 +111,15 @@ void Draw_Details(void)
 
 bool Get_Colour(colour *value)
 {
+	bool success;
 	int temp = *value;
 
 	Blit_String_DB(DX, 140, 15, "0-255:", 0);
-	if (Input_Number(DX, 148, &temp, 0, 255)) {
+	success = Input_Number(DX, 148, &temp, 0, 255);
+	Blit_String_DB(DX, 140, 15, "      ", 0);
+	Blit_String_DB(DX, 148, 15, "        ", 0);
+
+	if (success) {
 		*value = (colour)temp;
 		return true;
 	}
@@ -143,6 +162,7 @@ string_id Add_Description(void)
 		Z.strings = realloc(Z.strings, sizeof(char *) * (Z.header.num_strings + 1));
 		Z.strings[Z.header.num_strings] = strdup(buffer);
 		Z.header.num_strings++;
+		Z.header.start_script_strings++;
 		return Z.header.num_strings;
 	}
 
@@ -211,10 +231,74 @@ void Change_Description(void)
 	}
 }
 
+void Import_Code_Strings(void)
+{
+	int i, total;
+
+	total = Z.header.start_script_strings + parser.string_count;
+
+	/* In case we're re-importing, free old string entries */
+	for (i = Z.header.start_script_strings; i < Z.header.num_strings; i++) {
+		free(Z.strings[i]);
+	}
+
+	/* Import strings */
+	Z.header.num_strings = total;
+	Z.strings = realloc(Z.strings, sizeof(char *) * total);
+	for (i = 0; i < parser.string_count; i++) {
+		Z.strings[i + parser.string_offset] = strdup(parser.strings[i]);
+	}
+}
+
+void Import_Code_Scripts(void)
+{
+	int i;
+	bytecode *code;
+
+	/* Free old scripts */
+	for (i = 0; i < Z.header.num_scripts; i++) {
+		free(Z.strings[i]);
+	}
+
+	/* Import scripts */
+	Z.header.num_scripts = parser.script_count;
+	Z.scripts = realloc(Z.scripts, sizeof(bytecode *));
+	Z.script_lengths = realloc(Z.script_lengths, sizeof(length));
+	for (i = 0; i < parser.script_count; i++) {
+		Z.script_lengths[i] = parser.scripts[i].size;
+		code = szalloc(parser.scripts[i].size, bytecode);
+		memcpy(code, parser.scripts[i].code, parser.scripts[i].size);
+		Z.scripts[i] = code;
+	}
+}
+
+void Load_Code(void)
+{
+	char buffer[100],
+		*dot;
+
+	Free_Parser(&parser);
+	Initialise_Parser(&parser);
+
+	strcpy(buffer, zone_filename);
+	dot = strchr(buffer, '.');
+	strcpy(dot, ".JC");
+
+	parser.string_offset = Z.header.start_script_strings;
+	if (Compile_JC(&parser, buffer, true) == 0) {
+		Import_Code_Strings();
+		Import_Code_Scripts();
+	} else {
+		Free_Parser(&parser);
+		getch();
+	}
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 void Main_Editor_Loop(void)
 {
+	unsigned char scan;
 	int done = 0;
 
 	redraw_details = true;
@@ -223,83 +307,85 @@ void Main_Editor_Loop(void)
 	sel_y = 0;
 
 	while (!done) {
-		if (kbhit()) {
-			switch (getch()) {
-				case 'q':
-					done = 1;
-					break;
-
-				case ' ':
-					Save_Zone(zone_filename, &Z);
-					Blit_String_DB(100, 100, 15, "SAVED!", 0);
-					break;
-
-				case 'j':
-					if (sel_x > 0) {
-						sel_x--;
-						Draw_Tile(sel_x + 1, sel_y);
-						Draw_Tile(sel_x, sel_y);
-						redraw_details = true;
-					}
-					break;
-
-				case 'l':
-					if (sel_x < (Z.header.width - 1)) {
-						sel_x++;
-						Draw_Tile(sel_x - 1, sel_y);
-						Draw_Tile(sel_x, sel_y);
-						redraw_details = true;
-					}
-					break;
-
-				case 'i':
-					if (sel_y > 0) {
-						sel_y--;
-						Draw_Tile(sel_x, sel_y + 1);
-						Draw_Tile(sel_x, sel_y);
-						redraw_details = true;
-					}
-					break;
-
-				case 'k':
-					if (sel_y < (Z.header.height - 1)) {
-						sel_y++;
-						Draw_Tile(sel_x, sel_y - 1);
-						Draw_Tile(sel_x, sel_y);
-						redraw_details = true;
-					}
-					break;
-
-				case 'n':
-					Change_Wall(North);
-					break;
-				case 'e':
-					Change_Wall(East);
-					break;
-				case 's':
-					Change_Wall(South);
-					break;
-				case 'w':
-					Change_Wall(West);
-					break;
-				case 'c':
-					Change_Ceiling();
-					break;
-				case 'f':
-					Change_Floor();
-					break;
-
-				case 'd':
-					Change_Description();
-					break;
-			}
-		}
-
 		if (redraw_zone) Draw_Zone();
 		if (redraw_details) Draw_Details();
 
 		Show_Double_Buffer();
-		Delay(1);
+
+		scan = Get_Scan_Code();
+		switch (scan) {
+			case SCAN_Q:
+				done = 1;
+				break;
+
+			case SCAN_SPACE:
+				Save_Zone(zone_filename, &Z);
+				Blit_String_DB(100, 100, 15, "SAVED!", 0);
+				break;
+
+			case SCAN_LEFT:
+				if (sel_x > 0) {
+					sel_x--;
+					Draw_Tile(sel_x + 1, sel_y);
+					Draw_Tile(sel_x, sel_y);
+					redraw_details = true;
+				}
+				break;
+
+			case SCAN_RIGHT:
+				if (sel_x < (Z.header.width - 1)) {
+					sel_x++;
+					Draw_Tile(sel_x - 1, sel_y);
+					Draw_Tile(sel_x, sel_y);
+					redraw_details = true;
+				}
+				break;
+
+			case SCAN_UP:
+				if (sel_y > 0) {
+					sel_y--;
+					Draw_Tile(sel_x, sel_y + 1);
+					Draw_Tile(sel_x, sel_y);
+					redraw_details = true;
+				}
+				break;
+
+			case SCAN_DOWN:
+				if (sel_y < (Z.header.height - 1)) {
+					sel_y++;
+					Draw_Tile(sel_x, sel_y - 1);
+					Draw_Tile(sel_x, sel_y);
+					redraw_details = true;
+				}
+				break;
+
+			case SCAN_N:
+				Change_Wall(North);
+				break;
+			case SCAN_E:
+				Change_Wall(East);
+				break;
+			case SCAN_S:
+				Change_Wall(South);
+				break;
+			case SCAN_W:
+				Change_Wall(West);
+				break;
+			case SCAN_C:
+				Change_Ceiling();
+				break;
+			case SCAN_F:
+				Change_Floor();
+				break;
+
+			case SCAN_D:
+				Change_Description();
+				break;
+
+			case SCAN_TILDE:
+				Load_Code();
+				break;
+		}
 	}
 }
 
@@ -328,7 +414,7 @@ void Create_Zone(void)
 	scanf("%d", &size);
 	Z.header.height = size;
 
-	Z.tiles = calloc(Z.header.width * Z.header.height, sizeof(tile));
+	Z.tiles = szalloc(Z.header.width * Z.header.height, tile);
 }
 
 void Edit_Zone(char *filename)
@@ -361,10 +447,11 @@ void main(int argc, char **argv)
 
 	Main_Editor_Loop();
 
-	Free_Zone(&Z);
-	free(zone_filename);
-
 	/* Cleanup */
 	Set_Video_Mode(TEXT_MODE);
 	Delete_Double_Buffer();
+
+	Free_Zone(&Z);
+	Free_Parser(&parser);
+	free(zone_filename);
 }

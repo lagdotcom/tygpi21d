@@ -4,7 +4,8 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include <stdio.h>
-#include "types.h"
+#include <string.h>
+#include "common.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -61,14 +62,12 @@ typedef enum {
 	jBard		/* Int, Dex */
 } jobs;
 
-#define ifLight		1
-#define ifHeavy		2
+typedef enum {
+	ifLight = 1,
+	ifHeavy = 2,
+} itemflag;
 
 #define Set_Version_Header(h) strncpy(h.magic, FILE_MAGIC, 3); h.version = VERSION_1
-#define nullfree(r) if (r != null) { \
-	free(r); \
-	r = null; \
-}
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 

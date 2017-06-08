@@ -192,7 +192,7 @@ bool Push_Stack(jc_parser *p, char *name, int smod)
 	/* TODO: check stack size */
 	strncpy(p->stack[p->stack_size].name, name, 5);
 	p->stack[p->stack_size].start = p->scripts[p->script_count - 1].size + smod;
-	p->stack[p->stack_size].offsets = calloc(MAX_STACK_OFFSETS, sizeof(int));
+	p->stack[p->stack_size].offsets = szalloc(MAX_STACK_OFFSETS, int);
 	p->stack[p->stack_size].offset_count = 0;
 
 	p->stack_size++;
@@ -526,7 +526,7 @@ bool Keyword_State(jc_parser *p)
 	return Parse_Error(p, "Unexpected keyword");
 }
 
-bool ttIdentifier_State(jc_parser *p)
+bool Identifier_State(jc_parser *p)
 {
 	/* TODO: Expressions */
 	jc_token *targ, *value;
@@ -558,27 +558,25 @@ bool ttIdentifier_State(jc_parser *p)
 	return true;
 }
 
-/* P R O T O T Y P E S /////////////////////////////////////////////////// */
-
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 void Initialise_Parser(jc_parser *p)
 {
-	p->vars = calloc(MAX_GLOBALS + MAX_LOCALS + MAX_TEMPS + MAX_CONSTS, sizeof(jc_var));
+	p->vars = szalloc(MAX_GLOBALS + MAX_LOCALS + MAX_TEMPS + MAX_CONSTS, jc_var);
 	p->global_count = 0;
 	p->local_count = 0;
 	p->temp_count = 0;
 	p->var_count = 0;
 
-	p->scripts = calloc(MAX_SCRIPTS, sizeof(jc_script));
+	p->scripts = szalloc(MAX_SCRIPTS, jc_script);
 	p->script_count = 0;
 	p->in_script = false;
 
-	p->strings = calloc(MAX_STRINGS, sizeof(char *));
+	p->strings = szalloc(MAX_STRINGS, char *);
 	p->string_count = 0;
 	p->string_offset = 0;
 
-	p->stack = calloc(MAX_STACK, sizeof(jc_stack));
+	p->stack = szalloc(MAX_STACK, jc_stack);
 	p->stack_size = 0;
 }
 
@@ -589,20 +587,20 @@ void Free_Parser(jc_parser *p)
 	for (i = 0; i < p->var_count; i++) {
 		free(p->vars[i].name);
 	}
-	free(p->vars);
+	nullfree(p->vars);
 
 	for (i = 0; i < p->script_count; i++) {
 		free(p->scripts[i].name);
 		free(p->scripts[i].code);
 	}
-	free(p->scripts);
+	nullfree(p->scripts);
 
 	for (i = 0; i < p->string_count; i++) {
 		free(p->strings[i]);
 	}
-	free(p->strings);
+	nullfree(p->strings);
 
-	free(p->stack);
+	nullfree(p->stack);
 }
 
 void Dump_Parser_State(jc_parser *p)
@@ -635,7 +633,7 @@ bool Parse_Tokens(jc_parser *p, jc_token *tokens, int count)
 			return Keyword_State(p);
 
 		case ttIdentifier:
-			return ttIdentifier_State(p);
+			return Identifier_State(p);
 
 		default:
 			Parse_Error(p, "Invalid starting token");

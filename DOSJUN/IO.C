@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "types.h"
+#include "common.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -44,7 +44,7 @@ char **Get_Directory_Listing(char *pattern, int *count)
 	struct ffblk ff;
 	int i, done;
 
-	filenames = calloc(MAX_FILES, sizeof(char*));
+	filenames = szalloc(MAX_FILES, char *);
 
 	i = 0;
 	done = findfirst(pattern, &ff, 0);

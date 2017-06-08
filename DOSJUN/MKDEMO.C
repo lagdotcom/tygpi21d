@@ -58,7 +58,7 @@ void Demo_Campaign(char *filename)
 	c.header.num_zones = 1;
 	Zero(c.header.unused, CAMPAIGN_HEADER_PADDING);
 
-	c.zones = calloc(1, sizeof(char*));
+	c.zones = szalloc(1, char *);
 	c.zones[0] = "DEMO";
 
 	Save_Campaign(filename, &c);
@@ -74,7 +74,7 @@ void Demo_Items(char *filename)
 	i.header.num_items = 8;
 	Zero(i.header.unused, ITEMS_HEADER_PADDING);
 
-	i.items = calloc(8, sizeof(item));
+	i.items = szalloc(8, item);
 
 	Set_Item( 0, 0x100, "Longsword", itPrimaryWeapon, ifHeavy, 100);
 	Set_ItemStat( 0, sMinDamage, 4);
@@ -117,7 +117,7 @@ void Demo_Monsters(char *filename)
 	m.header.num_monsters = 1;
 	Zero(m.header.unused, MONSTERS_HEADER_PADDING);
 
-	m.monsters = calloc(1, sizeof(monster));
+	m.monsters = szalloc(1, monster);
 
 	Set_Monster(0, RAT, "Large Rat");
 	Set_MonsterStat(0, sMaxHP, 3);
@@ -144,7 +144,7 @@ void Demo_Zone(char *filename)
 	strcpy(z.header.campaign_name, "DEMO");
 	z.header.width = 10;
 	z.header.height = 10;
-	z.tiles = calloc(10 * 10, sizeof(tile));
+	z.tiles = szalloc(10 * 10, tile);
 	/*        I   C   F  WN  WE  WS  WW  S */
 	Set_Tile( 0, 10,  9, 11,  0, 11, 11, 0);
 	Set_Tile( 1, 10,  9, 11,  0, 11,  0, 0);
@@ -156,7 +156,7 @@ void Demo_Zone(char *filename)
 	Set_Tile(21, 10,  9, 15,  0, 15, 15, 0);
 
 	z.header.num_strings = 3;
-	z.strings = calloc(3, sizeof(char*));
+	z.strings = szalloc(3, char*);
 	z.strings[0] = "Other than its ridiculous colour,\nthere's nothing particularly\ninteresting about this corridor.";
 	z.strings[1] = "New text.";
 	z.strings[2] = "Another line of text!\nOne day this will be a REAL GAME.";
@@ -166,7 +166,7 @@ void Demo_Zone(char *filename)
 	z.script_lengths = null;
 
 	z.header.num_encounters = 1;
-	z.encounters = calloc(1, sizeof(encounter));
+	z.encounters = szalloc(1, encounter);
 	Set_Encounter( 0, 0, RAT, 1, 3);
 
 	Save_Zone(filename, &z);

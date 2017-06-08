@@ -8,6 +8,10 @@
 
 void Initialise_Zone(zone *z)
 {
+	z->header.num_strings = 0;
+	z->header.num_scripts = 0;
+	z->header.num_encounters = 0;
+
 	z->tiles = null;
 	z->strings = null;
 	z->scripts = null;
@@ -25,11 +29,11 @@ void Load_Zone(char *filename, zone *z)
 	fread(h, sizeof(zone_header), 1, fp);
 	/* TODO: Check magic/version */
 
-	z->tiles = malloc(sizeof(tile) * h->width * h->height);
+	z->tiles = szalloc(h->width * h->height, tile);
 	fread(z->tiles, sizeof(tile), h->width * h->height, fp);
 
 	if (h->num_strings > 0) {
-		z->strings = malloc(sizeof(char*) * h->num_strings);
+		z->strings = szalloc(h->num_strings, char *);
 		for (i = 0; i < h->num_strings; i++)
 			z->strings[i] = Read_LengthString(fp);
 	} else {
@@ -37,11 +41,11 @@ void Load_Zone(char *filename, zone *z)
 	}
 
 	if (h->num_scripts > 0) {
-		z->scripts = malloc(sizeof(char*) * h->num_scripts);
-		z->script_lengths = malloc(sizeof(length) * h->num_scripts);
+		z->scripts = szalloc(h->num_scripts, char *);
+		z->script_lengths = szalloc(h->num_scripts, length);
 		for (i = 0; i < h->num_scripts; i++) {
 			fread(&z->script_lengths[i], sizeof(length), 1, fp);
-			z->scripts[i] = malloc(sizeof(bytecode) * z->script_lengths[i]);
+			z->scripts[i] = szalloc(z->script_lengths[i], bytecode);
 			fread(&z->scripts[i], 1, z->script_lengths[i], fp);
 		}
 	} else {
@@ -49,7 +53,7 @@ void Load_Zone(char *filename, zone *z)
 	}
 
 	if (h->num_encounters > 0) {
-		z->encounters = malloc(sizeof(encounter) * h->num_encounters);
+		z->encounters = szalloc(h->num_encounters, encounter);
 		fread(z->encounters, sizeof(encounter), h->num_encounters, fp);
 	}
 
@@ -87,7 +91,7 @@ void Save_Zone(char *filename, zone *z)
 	FILE *fp = fopen(filename, "wb");
 
 	Set_Version_Header(z->header);
-	fwrite(&z->header, sizeof(zone_header), 1, fp);
+	fwrite(h, sizeof(zone_header), 1, fp);
 	fwrite(z->tiles, sizeof(tile), h->width * h->height, fp);
 
 	for (i = 0; i < h->num_strings; i++) {

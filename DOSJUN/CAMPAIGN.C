@@ -20,7 +20,7 @@ void Load_Campaign(char *filename, campaign *c)
 	fread(&c->header, sizeof(campaign_header), 1, fp);
 	/* TODO: Check magic/version */
 
-	c->zones = malloc(sizeof(char*) * c->header.num_zones);
+	c->zones = szalloc(c->header.num_zones, char *);
 	for (i = 0; i < c->header.num_zones; i++) {
 		c->zones[i] = Read_LengthString(fp);
 	}
