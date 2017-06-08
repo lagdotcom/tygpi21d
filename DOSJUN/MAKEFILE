@@ -1,8 +1,8 @@
 CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc
 DEMO_OBJS = mkdemo.obj campaign.obj io.obj items.obj monsters.obj save.obj zone.obj
 MAIN_OBJS = dosjun.obj campaign.obj fp.obj gfx.obj input.obj io.obj main.obj monsters.obj party.obj save.obj zone.obj
-EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj save.obj zone.obj
-JCC_OBJS = jcc.obj jc_lex.obj jc_par.obj
+EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj jc.obj jc_lex.obj jc_par.obj save.obj zone.obj
+JCC_OBJS = jcc.obj jc.obj jc_lex.obj jc_par.obj
 HEADERS = dosjun.h files.h types.h
 
 all: dosjun editor demo jcc
@@ -11,7 +11,7 @@ dosjun: $(MAIN_OBJS)
 	TCC $(CFLAGS) DOSJUN.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
 editor: $(EDITOR_OBJS)
-	TCC $(CFLAGS) $(EDITOR_OBJS) ..\LIB\GAMELIB.LIB
+	TCC $(CFLAGS) EDITOR.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
 demo: $(DEMO_OBJS)
 	TCC $(CFLAGS) $(DEMO_OBJS)
@@ -50,13 +50,17 @@ items.obj: items.c $(HEADERS)
 	TCC $(CFLAGS) -c items.c
 	TLIB DOSJUN.LIB +-items.obj, DOSJUN.TXT
 
+jc.obj: jc.c jc.h
+	TCC $(CFLAGS) -c jc.c
+	TLIB DOSJUN.LIB +-jc.obj, DOSJUN.TXT
+
 jc_lex.obj: jc_lex.c jc.h types.h
 	TCC $(CFLAGS) -c jc_lex.c
 
 jc_par.obj: jc_par.c code.h jc.h types.h
 	TCC $(CFLAGS) -c jc_par.c
 
-jcc.obj: jcc.c code.h jc.h types.h
+jcc.obj: jcc.c jc.h
 	TCC $(CFLAGS) -c jcc.c
 
 main.obj: main.c $(HEADERS)

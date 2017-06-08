@@ -3,6 +3,7 @@
 #include <conio.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "gamelib.h"
 #include "dosjun.h"
 
@@ -15,6 +16,7 @@
 pcx_picture explore_bg;
 zone Z;
 
+char *zone_filename;
 bool redraw_details, redraw_zone;
 int sel_x, sel_y;
 
@@ -132,12 +134,27 @@ void Change_Wall(direction dir)
 
 #undef DX
 
+string_id Add_Description(void)
+{
+	char buffer[MAX_STRING_LIST];
+
+	Blit_String_DB(8, 8, 15, "- Hit enter twice to finish:", 0);
+	if (Input_Multiline_String(8, 16, buffer, MAX_STRING_LIST)) {
+		Z.strings = realloc(Z.strings, sizeof(char *) * (Z.header.num_strings + 1));
+		Z.strings[Z.header.num_strings] = strdup(buffer);
+		Z.header.num_strings++;
+		return Z.header.num_strings;
+	}
+
+	return 0;
+}
+
 void Change_Description(void)
 {
 	int offset = 0,
 		i;
 
-	char buffer[MAX_STRING_LIST],
+	char buffer[50],
 		*allocd,
 		ch;
 
@@ -146,6 +163,11 @@ void Change_Description(void)
 	/* We're drawing over everything, so... */
 	redraw_details = true;
 	redraw_zone = true;
+
+	if (Z.header.num_strings == 0) {
+		under->description = Add_Description();
+		return;
+	}
 
 	while (true) {
 		for (i = 0; i < 10; i++) {
@@ -177,13 +199,7 @@ void Change_Description(void)
 				return;
 
 			case 'n':
-				if (Input_Multiline_String(8, 8, buffer, MAX_STRING_LIST)) {
-					Z.strings[Z.header.num_strings] = strdup(buffer);
-					Z.header.num_strings++;
-					under->description = offset + i + 1;
-				} else {
-					under->description = 0;
-				}
+				under->description = Add_Description();
 
 				return;
 
@@ -197,24 +213,9 @@ void Change_Description(void)
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-void main(void)
+void Editor_Main(void)
 {
 	int done = 0;
-
-	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
-		printf("\nNot enough memory to create double buffer.");
-		return;
-	}
-
-	Set_Video_Mode(VGA256);
-
-	/* Get palette */
-	PCX_Init(&explore_bg);
-	PCX_Load("BACK.PCX", &explore_bg, 1);
-	PCX_Delete(&explore_bg);
-
-	/* Open up our zone file */
-	Zone_Load("DEMO.ZON", &Z);
 
 	redraw_details = true;
 	redraw_zone = true;
@@ -229,7 +230,7 @@ void main(void)
 					break;
 
 				case ' ':
-					Zone_Save("DEMO.ZON", &Z);
+					Zone_Save(zone_filename, &Z);
 					Blit_String_DB(100, 100, 15, "SAVED!", 0);
 					break;
 
@@ -300,8 +301,68 @@ void main(void)
 		Show_Double_Buffer();
 		Delay(1);
 	}
+}
+
+void New_Zone(void)
+{
+	char buffer[100];
+	coord size;
+
+	Zone_Init(&Z);
+	printf("Creating new zone file.\n");
+
+	printf("Zone Name: ");
+	gets(buffer);
+	strcat(buffer, ".ZON");
+	zone_filename = strdup(buffer);
+
+	printf("Campaign Name: ");
+	gets(buffer);
+	strncpy(Z.header.campaign_name, buffer, 8);
+
+	printf("Width: ");
+	scanf("%d", &size);
+	Z.header.width = size;
+
+	printf("Height: ");
+	scanf("%d", &size);
+	Z.header.height = size;
+
+	Z.tiles = calloc(Z.header.width * Z.header.height, sizeof(tile));
+}
+
+void Load_Zone(char *filename)
+{
+	printf("Loading zone: %s\n", filename);
+	Zone_Load(filename, &Z);
+
+	zone_filename = strdup(filename);
+}
+
+void main(int argc, char **argv)
+{
+	if (argc < 2) {
+		New_Zone();
+	} else {
+		Load_Zone(argv[1]);
+	}
+
+	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
+		printf("\nNot enough memory to create double buffer.");
+		return;
+	}
+
+	Set_Video_Mode(VGA256);
+
+	/* Get palette */
+	PCX_Init(&explore_bg);
+	PCX_Load("BACK.PCX", &explore_bg, 1);
+	PCX_Delete(&explore_bg);
+
+	Editor_Main();
 
 	Zone_Free(&Z);
+	free(zone_filename);
 
 	/* Cleanup */
 	Set_Video_Mode(TEXT_MODE);

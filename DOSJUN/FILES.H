@@ -79,7 +79,7 @@ typedef enum {
 #define ITEM_PADDING				11
 #define MONSTERS_HEADER_PADDING		27
 #define SAVE_HEADER_PADDING			15
-#define ZONE_HEADER_PADDING			20
+#define ZONE_HEADER_PADDING			10
 
 /* Campaign */
 
@@ -197,10 +197,12 @@ typedef struct {
 typedef struct {
 	VERSION_HEADER;
 
+	char campaign_name[8];
 	coord width, height;
 	string_id num_strings;
 	script_id num_scripts;
 	encounter_id num_encounters;
+	string_id start_script_strings;
 
 	unsigned char unused[ZONE_HEADER_PADDING];
 } zone_header;
@@ -210,7 +212,7 @@ typedef struct {
 
 	tile *tiles;
 	char **strings;
-	char **scripts;
+	unsigned char **scripts;
 	length *script_lengths;
 	encounter* encounters;
 } zone;

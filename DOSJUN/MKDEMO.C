@@ -141,6 +141,7 @@ void Demo_Zone(char *filename)
 	Zone_Init(&z);
 	Zero(z.header.unused, ZONE_HEADER_PADDING);
 
+	strcpy(z.header.campaign_name, "DEMO");
 	z.header.width = 10;
 	z.header.height = 10;
 	z.tiles = calloc(10 * 10, sizeof(tile));
