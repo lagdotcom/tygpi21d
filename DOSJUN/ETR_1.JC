@@ -2,14 +2,19 @@
 Include "ETR_GLOB.JC"
 
 # Quest status
-Const q_init = 0
-Const q_door_locked = 1
-Const q_key_found = 2
-Const q_door_unlocked = 3
-Const q_fought_rat = 4
+Const q_first_time = 0
+Const q_init = 1
+Const q_door_locked = 2
+Const q_key_found = 3
+Const q_door_unlocked = 4
+Const q_fought_rat = 5
 Local q_status
 
 Script wake_up
+	If q_status != q_first_time
+		Return
+	EndIf
+
 	Text "You slowly come to your senses, and find yourself in unfamiliar surroundings. You rouse your friends."
 	PcSpeak strong, "Ugh... where are we?"
 	PcSpeak nerd, "I don't think it matters. We're supposed to escape, right?"
