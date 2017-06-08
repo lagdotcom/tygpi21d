@@ -1,5 +1,6 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
+#include "common.h"
 #include "jc.h"
 #include <stdio.h>
 
@@ -23,5 +24,6 @@ int main(int argc, char **argv)
 	Dump_Compiled_JC(&parser, "DUMP.JCC");
 	Free_Parser(&parser);
 
+	Stop_Memory_Tracking();
 	return rvalue;
 }

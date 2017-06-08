@@ -29,11 +29,11 @@ void Load_Zone(char *filename, zone *z)
 	fread(h, sizeof(zone_header), 1, fp);
 	/* TODO: Check magic/version */
 
-	z->tiles = szalloc(h->width * h->height, tile);
+	z->tiles = SzAlloc(h->width * h->height, tile, "Load_Zone.tiles");
 	fread(z->tiles, sizeof(tile), h->width * h->height, fp);
 
 	if (h->num_strings > 0) {
-		z->strings = szalloc(h->num_strings, char *);
+		z->strings = SzAlloc(h->num_strings, char *, "Load_Zone.strings");
 		for (i = 0; i < h->num_strings; i++)
 			z->strings[i] = Read_LengthString(fp);
 	} else {
@@ -41,20 +41,23 @@ void Load_Zone(char *filename, zone *z)
 	}
 
 	if (h->num_scripts > 0) {
-		z->scripts = szalloc(h->num_scripts, char *);
-		z->script_lengths = szalloc(h->num_scripts, length);
+		z->scripts = SzAlloc(h->num_scripts, bytecode *, "Load_Zone.scripts");
+		z->script_lengths = SzAlloc(h->num_scripts, length, "Load_Zone.script_lengths");
 		for (i = 0; i < h->num_scripts; i++) {
 			fread(&z->script_lengths[i], sizeof(length), 1, fp);
-			z->scripts[i] = szalloc(z->script_lengths[i], bytecode);
-			fread(&z->scripts[i], 1, z->script_lengths[i], fp);
+			z->scripts[i] = SzAlloc(z->script_lengths[i], bytecode, "Load_Zone.scripts[i]");
+			fread(z->scripts[i], sizeof(bytecode), z->script_lengths[i], fp);
 		}
 	} else {
 		z->scripts = null;
+		z->script_lengths = null;
 	}
 
 	if (h->num_encounters > 0) {
-		z->encounters = szalloc(h->num_encounters, encounter);
+		z->encounters = SzAlloc(h->num_encounters, encounter, "Load_Zone.encounters");
 		fread(z->encounters, sizeof(encounter), h->num_encounters, fp);
+	} else {
+		z->encounters = null;
 	}
 
 	fclose(fp);
@@ -64,24 +67,24 @@ void Free_Zone(zone *z)
 {
 	int i;
 
-	nullfree(z->tiles);
+	Free(z->tiles);
 
 	if (z->strings != null) {
 		for (i = 0; i < z->header.num_strings; i++) {
-			free(z->strings[i]);
+			Free(z->strings[i]);
 		}
-		nullfree(z->strings);
+		Free(z->strings);
 	}
 
 	if (z->scripts != null) {
 		for (i = 0; i < z->header.num_scripts; i++) {
-			free(z->scripts[i]);
+			Free(z->scripts[i]);
 		}
-		nullfree(z->scripts);
-		nullfree(z->script_lengths);
+		Free(z->scripts);
+		Free(z->script_lengths);
 	}
 
-	nullfree(z->encounters);
+	Free(z->encounters);
 }
 
 void Save_Zone(char *filename, zone *z)

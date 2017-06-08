@@ -12,7 +12,7 @@ void Load_Monsters(char *filename, monsters *m)
 	fread(&m->header, sizeof(monsters_header), 1, fp);
 	/* TODO: Check magic/version */
 
-	m->monsters = szalloc(m->header.num_monsters, monster);
+	m->monsters = SzAlloc(m->header.num_monsters, monster, "Load_Monsters");
 	fread(m->monsters, sizeof(monster), m->header.num_monsters, fp);
 
 	fclose(fp);
@@ -20,7 +20,7 @@ void Load_Monsters(char *filename, monsters *m)
 
 void Free_Monsters(monsters *m)
 {
-	nullfree(m->monsters);
+	Free(m->monsters);
 }
 
 void Initialise_Monsters(monsters *m)

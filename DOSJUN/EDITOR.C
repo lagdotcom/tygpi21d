@@ -19,7 +19,7 @@ jc_parser parser;
 zone Z;
 
 char *zone_filename;
-bool redraw_details, redraw_zone;
+bool redraw_details, redraw_zone, clear_screen;
 int sel_x, sel_y;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
@@ -157,10 +157,12 @@ string_id Add_Description(void)
 {
 	char buffer[MAX_STRING_LIST];
 
+	Draw_Square_DB(0, 8, 8, 39*8, 88, true);
 	Blit_String_DB(8, 8, 15, "- Hit enter twice to finish:", 0);
 	if (Input_Multiline_String(8, 16, buffer, MAX_STRING_LIST)) {
-		Z.strings = realloc(Z.strings, sizeof(char *) * (Z.header.num_strings + 1));
-		Z.strings[Z.header.num_strings] = strdup(buffer);
+		/* TODO: account for adding a string after importing code */
+		Z.strings = Reallocate(Z.strings, Z.header.num_strings + 1, sizeof(char *), "Add_Description.strings");
+		Z.strings[Z.header.num_strings] = Duplicate_String(buffer, "Add_Description.strings[i]");
 		Z.header.num_strings++;
 		Z.header.start_script_strings++;
 		return Z.header.num_strings;
@@ -181,6 +183,7 @@ void Change_Description(void)
 	tile *under = TILE(Z, sel_x, sel_y);
 
 	/* We're drawing over everything, so... */
+	clear_screen = true;
 	redraw_details = true;
 	redraw_zone = true;
 
@@ -190,6 +193,7 @@ void Change_Description(void)
 	}
 
 	while (true) {
+		Draw_Square_DB(0, 8, 8, 39*8, 88, true);
 		for (i = 0; i < 10; i++) {
 			if (offset + i >= Z.header.num_strings) break;
 
@@ -239,14 +243,14 @@ void Import_Code_Strings(void)
 
 	/* In case we're re-importing, free old string entries */
 	for (i = Z.header.start_script_strings; i < Z.header.num_strings; i++) {
-		free(Z.strings[i]);
+		Free(Z.strings[i]);
 	}
 
 	/* Import strings */
 	Z.header.num_strings = total;
-	Z.strings = realloc(Z.strings, sizeof(char *) * total);
+	Z.strings = Reallocate(Z.strings, total, sizeof(char *), "Import_Code_Strings.strings");
 	for (i = 0; i < parser.string_count; i++) {
-		Z.strings[i + parser.string_offset] = strdup(parser.strings[i]);
+		Z.strings[i + parser.string_offset] = Duplicate_String(parser.strings[i], "Import_Code_Strings.strings[i]");
 	}
 }
 
@@ -257,16 +261,16 @@ void Import_Code_Scripts(void)
 
 	/* Free old scripts */
 	for (i = 0; i < Z.header.num_scripts; i++) {
-		free(Z.strings[i]);
+		Free(Z.scripts[i]);
 	}
 
 	/* Import scripts */
 	Z.header.num_scripts = parser.script_count;
-	Z.scripts = realloc(Z.scripts, sizeof(bytecode *));
-	Z.script_lengths = realloc(Z.script_lengths, sizeof(length));
+	Z.scripts = Reallocate(Z.scripts, parser.script_count, sizeof(bytecode *), "Import_Code_Scripts.scripts");
+	Z.script_lengths = Reallocate(Z.script_lengths, parser.script_count, sizeof(length), "Import_Code_Scripts.script_lengths");
 	for (i = 0; i < parser.script_count; i++) {
 		Z.script_lengths[i] = parser.scripts[i].size;
-		code = szalloc(parser.scripts[i].size, bytecode);
+		code = SzAlloc(parser.scripts[i].size, bytecode, "Import_Code_Scripts.code");
 		memcpy(code, parser.scripts[i].code, parser.scripts[i].size);
 		Z.scripts[i] = code;
 	}
@@ -307,6 +311,14 @@ void Main_Editor_Loop(void)
 	sel_y = 0;
 
 	while (!done) {
+		if (clear_screen) {
+			Fill_Double_Buffer(0);
+
+			clear_screen = false;
+			redraw_zone = true;
+			redraw_details = true;
+		}
+
 		if (redraw_zone) Draw_Zone();
 		if (redraw_details) Draw_Details();
 
@@ -398,23 +410,24 @@ void Create_Zone(void)
 	printf("Creating new zone file.\n");
 
 	printf("Zone Name: ");
-	gets(buffer);
+	scanf("%8s", &buffer);
 	strcat(buffer, ".ZON");
-	zone_filename = strdup(buffer);
+	zone_filename = Duplicate_String(buffer, "Create_Zone.name");
+	printf("Zone filename: %s\n", zone_filename);
 
 	printf("Campaign Name: ");
-	gets(buffer);
+	scanf("%8s", &buffer);
 	strncpy(Z.header.campaign_name, buffer, 8);
 
 	printf("Width: ");
-	scanf("%d", &size);
+	scanf("%hhu", &size);
 	Z.header.width = size;
 
 	printf("Height: ");
-	scanf("%d", &size);
+	scanf("%hhu", &size);
 	Z.header.height = size;
 
-	Z.tiles = szalloc(Z.header.width * Z.header.height, tile);
+	Z.tiles = SzAlloc(Z.header.width * Z.header.height, tile, "Create_Zone.tiles");
 }
 
 void Edit_Zone(char *filename)
@@ -422,7 +435,7 @@ void Edit_Zone(char *filename)
 	printf("Loading zone: %s\n", filename);
 	Load_Zone(filename, &Z);
 
-	zone_filename = strdup(filename);
+	zone_filename = Duplicate_String(filename, "Edit_Zone.name");
 }
 
 void main(int argc, char **argv)
@@ -432,6 +445,8 @@ void main(int argc, char **argv)
 	} else {
 		Edit_Zone(argv[1]);
 	}
+
+	Initialise_Parser(&parser);
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
 		printf("\nNot enough memory to create double buffer.");
@@ -453,5 +468,7 @@ void main(int argc, char **argv)
 
 	Free_Zone(&Z);
 	Free_Parser(&parser);
-	free(zone_filename);
+	Free(zone_filename);
+
+	Stop_Memory_Tracking();
 }

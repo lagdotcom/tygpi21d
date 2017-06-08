@@ -12,7 +12,7 @@ void Load_Items(char *filename, items *i)
 	fread(&i->header, sizeof(items_header), 1, fp);
 	/* TODO: Check magic/version */
 
-	i->items = malloc(sizeof(item) * i->header.num_items);
+	i->items = SzAlloc(i->header.num_items, item, "Load_Items");
 	fread(i->items, sizeof(item), i->header.num_items, fp);
 
 	fclose(fp);
@@ -20,7 +20,7 @@ void Load_Items(char *filename, items *i)
 
 void Free_Items(items *i)
 {
-	nullfree(i->items);
+	Free(i->items);
 }
 
 void Initialise_Items(items *i)

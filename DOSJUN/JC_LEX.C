@@ -96,7 +96,7 @@ void Add_Lexer_Token(jc_token *tokens, int *count, char *buffer, int *buffer_off
 	tokens[index].type = tt;
 	if (bo > 0) {
 		buffer[bo] = 0;
-		tokens[index].value = strdup(buffer);
+		tokens[index].value = Duplicate_String(buffer, "Add_Lexer_Token");
 		*buffer_offset = 0;
 	} else {
 		tokens[index].value = null;

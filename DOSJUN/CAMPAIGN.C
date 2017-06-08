@@ -20,7 +20,7 @@ void Load_Campaign(char *filename, campaign *c)
 	fread(&c->header, sizeof(campaign_header), 1, fp);
 	/* TODO: Check magic/version */
 
-	c->zones = szalloc(c->header.num_zones, char *);
+	c->zones = SzAlloc(c->header.num_zones, char *, "Load_Campaign");
 	for (i = 0; i < c->header.num_zones; i++) {
 		c->zones[i] = Read_LengthString(fp);
 	}
@@ -34,9 +34,9 @@ void Free_Campaign(campaign *c)
 
 	if (c->zones != null) {
 		for (i = 0; i < c->header.num_zones; i++) {
-			free(c->zones[i]);
+			Free(c->zones[i]);
 		}
-		nullfree(c->zones);
+		Free(c->zones);
 	}
 }
 

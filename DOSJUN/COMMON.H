@@ -17,13 +17,6 @@ typedef unsigned char bool;
 #define null 0
 #endif
 
-#define szalloc(n, o) calloc(n, sizeof(o))
-
-#define nullfree(r) if (r != null) { \
-	free(r); \
-	r = null; \
-}
-
 #define North	0
 #define East	1
 #define South	2
@@ -49,5 +42,27 @@ typedef unsigned short monster_id;
 typedef unsigned short script_id;
 typedef unsigned short string_id;
 typedef unsigned char zone_id;
+
+/* Memory Debugging */
+
+#ifdef NO_MEMORY_DEBUG
+
+#define Duplicate_String(src, tag) strdup(src)
+#define Allocate(count, size, tag) calloc(count, size)
+#define Free(mem) { free(mem); mem = null; }
+#define Reallocate(mem, count, size, tag) realloc(mem, (count) * (size))
+#define Stop_Memory_Tracking()
+
+#else
+
+char *Duplicate_String(const char *src, char *tag);
+void *Allocate(size_t count, size_t size, char *tag);
+void Free(void *mem);
+void *Reallocate(void *mem, size_t count, size_t size, char *tag);
+void Stop_Memory_Tracking(void);
+
+#endif
+
+#define SzAlloc(count, obj, tag) Allocate(count, sizeof(obj), tag)
 
 #endif

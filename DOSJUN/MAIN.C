@@ -168,5 +168,4 @@ void Show_Main_Menu(void)
 	}
 
 	PCX_Delete(&menu_bg);
-	free(menu);
 }

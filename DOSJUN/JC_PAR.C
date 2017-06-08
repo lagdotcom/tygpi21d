@@ -130,7 +130,7 @@ bool Save_Variable(jc_parser *p, jc_scope sc, char *name)
 	}
 
 	p->vars[p->var_count].scope = sc;
-	p->vars[p->var_count].name = strdup(name);
+	p->vars[p->var_count].name = Duplicate_String(name, "Save_Variable");
 	p->vars[p->var_count].index = *count;
 
 	p->var_count++;
@@ -155,7 +155,7 @@ void Save_Constant(jc_parser *p, char *name, int value)
 {
 	/* TODO: check var count */
 	p->vars[p->var_count].scope = scConst;
-	p->vars[p->var_count].name = strdup(name);
+	p->vars[p->var_count].name = Duplicate_String(name, "Save_Constant");
 	p->vars[p->var_count].index = value;
 
 	p->var_count++;
@@ -164,7 +164,7 @@ void Save_Constant(jc_parser *p, char *name, int value)
 int Save_String(jc_parser *p, char *string)
 {
 	/* TODO: check string count */
-	p->strings[p->string_count] = strdup(string);
+	p->strings[p->string_count] = Duplicate_String(string, "Save_String");
 	return p->string_offset + p->string_count++;
 }
 
@@ -192,7 +192,7 @@ bool Push_Stack(jc_parser *p, char *name, int smod)
 	/* TODO: check stack size */
 	strncpy(p->stack[p->stack_size].name, name, 5);
 	p->stack[p->stack_size].start = p->scripts[p->script_count - 1].size + smod;
-	p->stack[p->stack_size].offsets = szalloc(MAX_STACK_OFFSETS, int);
+	p->stack[p->stack_size].offsets = SzAlloc(MAX_STACK_OFFSETS, int, "Push_Stack");
 	p->stack[p->stack_size].offset_count = 0;
 
 	p->stack_size++;
@@ -241,7 +241,7 @@ bool Pop_Stack(jc_parser *p)
 	if (p->stack_size == 0) return false;
 	p->stack_size--;
 
-	free(p->stack[p->stack_size].offsets);
+	Free(p->stack[p->stack_size].offsets);
 	return true;
 }
 
@@ -292,8 +292,8 @@ bool Begin_Script_State(jc_parser *p)
 	CONSUME();
 	ident = CONSUME();
 
-	p->scripts[p->script_count].name = strdup(ident->value);
-	p->scripts[p->script_count].code = malloc(MAX_BYTES_PER_SCRIPT);
+	p->scripts[p->script_count].name = Duplicate_String(ident->value, "Begin_Script_State");
+	p->scripts[p->script_count].code = SzAlloc(MAX_BYTES_PER_SCRIPT, bytecode, "Begin_Script_State");
 	p->scripts[p->script_count].size = 0;
 	Save_Constant(p, ident->value, p->script_count++);
 
@@ -562,21 +562,21 @@ bool Identifier_State(jc_parser *p)
 
 void Initialise_Parser(jc_parser *p)
 {
-	p->vars = szalloc(MAX_GLOBALS + MAX_LOCALS + MAX_TEMPS + MAX_CONSTS, jc_var);
+	p->vars = SzAlloc(MAX_GLOBALS + MAX_LOCALS + MAX_TEMPS + MAX_CONSTS, jc_var, "Initialise_Parser.vars");
 	p->global_count = 0;
 	p->local_count = 0;
 	p->temp_count = 0;
 	p->var_count = 0;
 
-	p->scripts = szalloc(MAX_SCRIPTS, jc_script);
+	p->scripts = SzAlloc(MAX_SCRIPTS, jc_script, "Initialise_Parser.scripts");
 	p->script_count = 0;
 	p->in_script = false;
 
-	p->strings = szalloc(MAX_STRINGS, char *);
+	p->strings = SzAlloc(MAX_STRINGS, char *, "Initialise_Parser.strings");
 	p->string_count = 0;
 	p->string_offset = 0;
 
-	p->stack = szalloc(MAX_STACK, jc_stack);
+	p->stack = SzAlloc(MAX_STACK, jc_stack, "Initialise_Parser.stack");
 	p->stack_size = 0;
 }
 
@@ -585,22 +585,26 @@ void Free_Parser(jc_parser *p)
 	int i;
 
 	for (i = 0; i < p->var_count; i++) {
-		free(p->vars[i].name);
+		Free(p->vars[i].name);
 	}
-	nullfree(p->vars);
+	Free(p->vars);
+	p->var_count = 0;
 
 	for (i = 0; i < p->script_count; i++) {
-		free(p->scripts[i].name);
-		free(p->scripts[i].code);
+		Free(p->scripts[i].name);
+		Free(p->scripts[i].code);
 	}
-	nullfree(p->scripts);
+	Free(p->scripts);
+	p->script_count = 0;
 
 	for (i = 0; i < p->string_count; i++) {
-		free(p->strings[i]);
+		Free(p->strings[i]);
 	}
-	nullfree(p->strings);
+	Free(p->strings);
+	p->string_count = 0;
 
-	nullfree(p->stack);
+	Free(p->stack);
+	p->stack_size = 0;
 }
 
 void Dump_Parser_State(jc_parser *p)

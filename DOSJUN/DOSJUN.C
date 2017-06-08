@@ -229,4 +229,5 @@ void main(void)
 	Delete_Double_Buffer();
 
 	printf("OK!\n");
+	Stop_Memory_Tracking();
 }

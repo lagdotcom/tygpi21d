@@ -18,7 +18,7 @@ char *Read_LengthString(FILE *fp)
 	length len;
 
 	fread(&len, sizeof(length), 1, fp);
-	string = malloc(len + 1);
+	string = SzAlloc(len + 1, char, "Read_LengthString");
 	fread(string, 1, len + 1, fp);
 	return string;
 }
@@ -44,12 +44,12 @@ char **Get_Directory_Listing(char *pattern, int *count)
 	struct ffblk ff;
 	int i, done;
 
-	filenames = szalloc(MAX_FILES, char *);
+	filenames = SzAlloc(MAX_FILES, char *, "Get_Directory_Listing");
 
 	i = 0;
 	done = findfirst(pattern, &ff, 0);
 	while (!done) {
-		filenames[i++] = strdup(ff.ff_name);
+		filenames[i++] = Duplicate_String(ff.ff_name, "Get_Directory_Listing");
 		done = findnext(&ff);
 
 		if (i == MAX_FILES) break;
@@ -64,7 +64,7 @@ void Free_Directory_Listing(char **listing, int count)
 	int i;
 
 	for (i = 0; i < count; i++) {
-		free(listing[i]);
+		Free(listing[i]);
 	}
-	free(listing);
+	Free(listing);
 }

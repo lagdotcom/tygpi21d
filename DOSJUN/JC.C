@@ -68,7 +68,7 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 {
 	bool success;
 	char line[JC_LINE_LENGTH];
-	jc_token *tokens = szalloc(MAX_TOKENS_PER_LINE, jc_token);
+	jc_token *tokens = SzAlloc(MAX_TOKENS_PER_LINE, jc_token, "Compile_JC");
 	int count,
 		i,
 		err = 0,
@@ -92,9 +92,7 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 		}
 
 		for (i = 0; i < count; i++) {
-			if (tokens[i].value != null) {
-				free(tokens[i].value);
-			}
+			Free(tokens[i].value);
 		}
 
 		if (!success) {
@@ -106,7 +104,7 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 	fclose(fp);
 
 	if (toplevel) Dump_Parser_State(parser);
-	free(tokens);
+	Free(tokens);
 	return err;
 }
 
