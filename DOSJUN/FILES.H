@@ -212,7 +212,7 @@ typedef struct {
 
 	tile *tiles;
 	char **strings;
-	unsigned char **scripts;
+	bytecode **scripts;
 	length *script_lengths;
 	encounter* encounters;
 } zone;

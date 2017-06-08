@@ -24,6 +24,7 @@ typedef enum {
 	rRight
 } relative;
 
+typedef unsigned char bytecode;
 typedef unsigned char colour;
 typedef unsigned char coord;
 typedef unsigned char direction;

@@ -168,7 +168,7 @@ int Save_String(jc_parser *p, char *string)
 	return p->string_offset + p->string_count++;
 }
 
-void Emit_Code(jc_parser *p, char code)
+void Emit_Code(jc_parser *p, bytecode code)
 {
 	/* TODO: check code size */
 	jc_script *scr = &p->scripts[p->script_count - 1];

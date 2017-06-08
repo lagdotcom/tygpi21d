@@ -49,7 +49,7 @@ typedef struct {
 
 typedef struct {
 	char *name;
-	unsigned char *code;
+	bytecode *code;
 	int size;
 } jc_script;
 

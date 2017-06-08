@@ -41,7 +41,7 @@ void Load_Zone(char *filename, zone *z)
 		z->script_lengths = malloc(sizeof(length) * h->num_scripts);
 		for (i = 0; i < h->num_scripts; i++) {
 			fread(&z->script_lengths[i], sizeof(length), 1, fp);
-			z->scripts[i] = malloc(z->script_lengths[i]);
+			z->scripts[i] = malloc(sizeof(bytecode) * z->script_lengths[i]);
 			fread(&z->scripts[i], 1, z->script_lengths[i], fp);
 		}
 	} else {
