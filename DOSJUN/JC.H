@@ -11,8 +11,6 @@
 #define MAX_SCRIPTS				100
 #define MAX_BYTES_PER_SCRIPT	1000
 #define MAX_STRINGS				200
-#define MAX_STACK				10
-#define MAX_STACK_OFFSETS		20
 
 typedef enum {
 	ttUnknown,

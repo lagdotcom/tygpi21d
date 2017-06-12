@@ -24,7 +24,7 @@ entry *entries = null;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Add_Entry(void *mem, size_t size, char *tag)
+noexport void Add_Entry(void *mem, size_t size, char *tag)
 {
 	if (entry_count == allocated_entries) {
 		allocated_entries += 20;
@@ -39,7 +39,7 @@ void Add_Entry(void *mem, size_t size, char *tag)
 	entry_count++;
 }
 
-void Mark_Entry_Freed(void *mem)
+noexport void Mark_Entry_Freed(void *mem)
 {
 	int i;
 	for (i = 0; i < entry_count; i++) {
@@ -52,7 +52,7 @@ void Mark_Entry_Freed(void *mem)
 	fprintf(stderr, "WARNING: Cannot free %p - not found.\n", mem);
 }
 
-void Update_Entry_Size(void *mem, size_t size)
+noexport void Update_Entry_Size(void *mem, size_t size)
 {
 	int i;
 	for (i = 0; i < entry_count; i++) {
@@ -64,6 +64,8 @@ void Update_Entry_Size(void *mem, size_t size)
 
 	fprintf(stderr, "WARNING: Cannot update %p - not found.\n", mem);
 }
+
+/* M A I N /////////////////////////////////////////////////////////////// */
 
 void *Allocate(size_t count, size_t size, char *tag)
 {

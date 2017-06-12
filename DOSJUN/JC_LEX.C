@@ -44,13 +44,9 @@ typedef enum {
 #define caseEol \
 	case '\n': case '\r': case '\0'
 
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
-/* G L O B A L S ///////////////////////////////////////////////////////// */
-
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-lex_state Get_Lexer_State(char source)
+noexport lex_state Get_Lexer_State(char source)
 {
 	switch (source) {
 		case '#':		return lsCommentStart;
@@ -72,7 +68,7 @@ lex_state Get_Lexer_State(char source)
 	return lsNone;
 }
 
-void Lexer_Error(char *line, int offset, char *message)
+noexport void Lexer_Error(char *line, int offset, char *message)
 {
 	printf("-- LEXER ERROR --\n");
 	printf("%s%s at column %d\n", line, message, offset);
@@ -88,7 +84,7 @@ void Lexer_Error(char *line, int offset, char *message)
 	state = lsNone; \
 }
 
-void Add_Lexer_Token(jc_token *tokens, int *count, char *buffer, int *buffer_offset, jc_token_type tt)
+noexport void Add_Lexer_Token(jc_token *tokens, int *count, char *buffer, int *buffer_offset, jc_token_type tt)
 {
 	int index = *count;
 	int bo = *buffer_offset;

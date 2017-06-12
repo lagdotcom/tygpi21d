@@ -9,6 +9,9 @@
 
 #define UNKNOWN_JUMP	0xFACE
 
+#define STACK_SIZE		10
+#define OFFSET_SIZE		20
+
 #define PEEK()		Peek_Token(p)
 #define CONSUME()	Consume_Token(p)
 #define MATCH(c)	Token_Matches(p, c)
@@ -67,13 +70,9 @@
 
 #define RESOLVE(n)	Resolve_Variable(p, n)
 
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
-/* G L O B A L S ///////////////////////////////////////////////////////// */
-
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-char Get_Scope_Char(jc_scope sc)
+noexport char Get_Scope_Char(jc_scope sc)
 {
 	switch (sc) {
 		case scGlobal: return 'G';
@@ -84,23 +83,23 @@ char Get_Scope_Char(jc_scope sc)
 	}
 }
 
-jc_token *Peek_Token(jc_parser *p)
+noexport jc_token *Peek_Token(jc_parser *p)
 {
 	return &p->tokens[p->position];
 }
 
-jc_token *Consume_Token(jc_parser *p)
+noexport jc_token *Consume_Token(jc_parser *p)
 {
 	return &p->tokens[p->position++];
 }
 
-bool Token_Matches(jc_parser *p, char *check)
+noexport bool Token_Matches(jc_parser *p, char *check)
 {
 	if (p->tokens[p->position].value == null) return false;
 	return !strcmp(p->tokens[p->position].value, check);
 }
 
-bool Parse_Error(jc_parser *p, char *message)
+noexport bool Parse_Error(jc_parser *p, char *message)
 {
 	printf("-- PARSE ERROR --\n");
 	printf("%s\n", message);
@@ -108,7 +107,7 @@ bool Parse_Error(jc_parser *p, char *message)
 	return false;
 }
 
-bool Save_Variable(jc_parser *p, jc_scope sc, char *name)
+noexport bool Save_Variable(jc_parser *p, jc_scope sc, char *name)
 {
 	int *count;
 
@@ -139,7 +138,7 @@ bool Save_Variable(jc_parser *p, jc_scope sc, char *name)
 	return true;
 }
 
-jc_var *Resolve_Variable(jc_parser *p, char *name)
+noexport jc_var *Resolve_Variable(jc_parser *p, char *name)
 {
 	int i = 0;
 
@@ -151,7 +150,7 @@ jc_var *Resolve_Variable(jc_parser *p, char *name)
 	return null;
 }
 
-void Save_Constant(jc_parser *p, char *name, int value)
+noexport void Save_Constant(jc_parser *p, char *name, int value)
 {
 	/* TODO: check var count */
 	p->vars[p->var_count].scope = scConst;
@@ -161,21 +160,21 @@ void Save_Constant(jc_parser *p, char *name, int value)
 	p->var_count++;
 }
 
-int Save_String(jc_parser *p, char *string)
+noexport int Save_String(jc_parser *p, char *string)
 {
 	/* TODO: check string count */
 	p->strings[p->string_count] = Duplicate_String(string, "Save_String");
 	return p->string_count++;
 }
 
-void Emit_Code(jc_parser *p, bytecode code)
+noexport void Emit_Code(jc_parser *p, bytecode code)
 {
 	/* TODO: check code size */
 	jc_script *scr = &p->scripts[p->script_count - 1];
 	scr->code[scr->size++] = code;
 }
 
-void Emit_Int(jc_parser *p, int value)
+noexport void Emit_Int(jc_parser *p, int value)
 {
 	/* TODO: check code size */
 	jc_script *scr = &p->scripts[p->script_count - 1];
@@ -187,24 +186,24 @@ void Emit_Int(jc_parser *p, int value)
 
 /* Scope Stack */
 
-bool Push_Stack(jc_parser *p, char *name, int smod)
+noexport bool Push_Stack(jc_parser *p, char *name, int smod)
 {
 	/* TODO: check stack size */
 	strncpy(p->stack[p->stack_size].name, name, 5);
 	p->stack[p->stack_size].start = p->scripts[p->script_count - 1].size + smod;
-	p->stack[p->stack_size].offsets = SzAlloc(MAX_STACK_OFFSETS, int, "Push_Stack");
+	p->stack[p->stack_size].offsets = SzAlloc(OFFSET_SIZE, int, "Push_Stack");
 	p->stack[p->stack_size].offset_count = 0;
 
 	p->stack_size++;
 	return true;
 }
 
-void Renew_Stack(jc_parser *p, int smod)
+noexport void Renew_Stack(jc_parser *p, int smod)
 {
 	p->stack[p->stack_size - 1].start = p->scripts[p->script_count - 1].size + smod;
 }
 
-bool Add_Stack_Offset(jc_parser *p, int omod)
+noexport bool Add_Stack_Offset(jc_parser *p, int omod)
 {
 	/* TODO: check offsets size */
 	jc_stack *s = &p->stack[p->stack_size - 1];
@@ -215,7 +214,7 @@ bool Add_Stack_Offset(jc_parser *p, int omod)
 	return true;
 }
 
-void Resolve_Stack_Jump(jc_parser *p, int omod)
+noexport void Resolve_Stack_Jump(jc_parser *p, int omod)
 {
 	jc_stack *s = &p->stack[p->stack_size - 1];
 	jc_script *scr = &p->scripts[p->script_count - 1];
@@ -224,7 +223,7 @@ void Resolve_Stack_Jump(jc_parser *p, int omod)
 	*loc = scr->size + omod;
 }
 
-void Resolve_Stack_Offsets(jc_parser *p)
+noexport void Resolve_Stack_Offsets(jc_parser *p)
 {
 	jc_stack *s = &p->stack[p->stack_size - 1];
 	jc_script *scr = &p->scripts[p->script_count - 1];
@@ -236,7 +235,7 @@ void Resolve_Stack_Offsets(jc_parser *p)
 	}
 }
 
-bool Pop_Stack(jc_parser *p)
+noexport bool Pop_Stack(jc_parser *p)
 {
 	if (p->stack_size == 0) return false;
 	p->stack_size--;
@@ -247,7 +246,7 @@ bool Pop_Stack(jc_parser *p)
 
 /* P A R S E R  S T A T E S ////////////////////////////////////////////// */
 
-bool Define_Const_State(jc_parser *p)
+noexport bool Define_Const_State(jc_parser *p)
 {
 	jc_token *ident;
 	jc_token *val;
@@ -265,7 +264,7 @@ bool Define_Const_State(jc_parser *p)
 	return true;
 }
 
-bool Define_Global_State(jc_parser *p)
+noexport bool Define_Global_State(jc_parser *p)
 {
 	jc_token *ident;
 
@@ -275,7 +274,7 @@ bool Define_Global_State(jc_parser *p)
 	return Save_Variable(p, scGlobal, ident->value);
 }
 
-bool Define_Local_State(jc_parser *p)
+noexport bool Define_Local_State(jc_parser *p)
 {
 	jc_token *ident;
 
@@ -285,7 +284,7 @@ bool Define_Local_State(jc_parser *p)
 	return Save_Variable(p, scLocal, ident->value);
 }
 
-bool Begin_Script_State(jc_parser *p)
+noexport bool Begin_Script_State(jc_parser *p)
 {
 	jc_token *ident;
 
@@ -301,7 +300,7 @@ bool Begin_Script_State(jc_parser *p)
 	return true;
 }
 
-bool Call_PcSpeak_State(jc_parser *p)
+noexport bool Call_PcSpeak_State(jc_parser *p)
 {
 	jc_token *pc, *val;
 	jc_var *pc_var;
@@ -332,7 +331,7 @@ bool Call_PcSpeak_State(jc_parser *p)
 	return true;
 }
 
-bool Call_Text_State(jc_parser *p)
+noexport bool Call_Text_State(jc_parser *p)
 {
 	jc_token *val;
 	int sindex;
@@ -353,7 +352,7 @@ bool Call_Text_State(jc_parser *p)
 	return true;
 }
 
-bool End_Script_State(jc_parser *p)
+noexport bool End_Script_State(jc_parser *p)
 {
 	/* TODO: resize code alloc? */
 	if (p->stack_size > 0) return Parse_Error(p, "Unclosed scope");
@@ -364,7 +363,7 @@ bool End_Script_State(jc_parser *p)
 	return true;
 }
 
-bool Start_If_State(jc_parser *p)
+noexport bool Start_If_State(jc_parser *p)
 {
 	/* TODO: expressions */
 	jc_token *left, *right, *cmp;
@@ -408,7 +407,7 @@ bool Start_If_State(jc_parser *p)
 	return true;
 }
 
-bool Start_ElseIf_State(jc_parser *p)
+noexport bool Start_ElseIf_State(jc_parser *p)
 {
 	/* TODO: expressions */
 	jc_token *left, *right, *cmp;
@@ -459,7 +458,7 @@ bool Start_ElseIf_State(jc_parser *p)
 	return true;
 }
 
-bool End_If_State(jc_parser *p)
+noexport bool End_If_State(jc_parser *p)
 {
 	int i;
 
@@ -473,13 +472,13 @@ bool End_If_State(jc_parser *p)
 	return true;
 }
 
-bool Return_State(jc_parser *p)
+noexport bool Return_State(jc_parser *p)
 {
 	EMIT(coReturn);
 	return true;
 }
 
-bool Call_Combat_State(jc_parser *p)
+noexport bool Call_Combat_State(jc_parser *p)
 {
 	/* TODO: expressions */
 	jc_token *val;
@@ -502,7 +501,7 @@ bool Call_Combat_State(jc_parser *p)
 	return true;
 }
 
-bool Keyword_State(jc_parser *p)
+noexport bool Keyword_State(jc_parser *p)
 {
 	if (!p->in_script) {
 		if (MATCH("Const")) return Define_Const_State(p);
@@ -526,7 +525,7 @@ bool Keyword_State(jc_parser *p)
 	return Parse_Error(p, "Unexpected keyword");
 }
 
-bool Identifier_State(jc_parser *p)
+noexport bool Identifier_State(jc_parser *p)
 {
 	/* TODO: Expressions */
 	jc_token *targ, *value;
@@ -575,7 +574,7 @@ void Initialise_Parser(jc_parser *p)
 	p->strings = SzAlloc(MAX_STRINGS, char *, "Initialise_Parser.strings");
 	p->string_count = 0;
 
-	p->stack = SzAlloc(MAX_STACK, jc_stack, "Initialise_Parser.stack");
+	p->stack = SzAlloc(STACK_SIZE, jc_stack, "Initialise_Parser.stack");
 	p->stack_size = 0;
 }
 
