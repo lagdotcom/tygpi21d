@@ -11,6 +11,7 @@
 #define MAX_LOCALS		20
 #define MAX_TEMPS		20
 #define MAX_CONSTS		200
+#define MAX_STACK		20
 
 typedef enum {
 	coNOP,
@@ -46,6 +47,19 @@ typedef enum {
 } code_op;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
+
+typedef struct {
+	bytecode* code;
+	int* globals;
+	int* locals;
+	int* temps;
+	int* stack;
+
+	int pc, next_pc;
+	int sp;
+	bool running;
+	int result;
+} host;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 

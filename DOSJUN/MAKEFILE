@@ -24,6 +24,10 @@ campaign.obj: campaign.c $(HEADERS)
 	TCC $(CFLAGS) -c campaign.c
 	TLIB DOSJUN.LIB +-campaign.obj, DOSJUN.TXT
 
+code.obj: code.c $(HEADERS)
+	TCC $(CFLAGS) -c code.c
+	TLIB DOSJUN.LIB +-code.obj, DOSJUN.TXT
+
 dosjun.obj: dosjun.c $(HEADERS)
 	TCC $(CFLAGS) -c dosjun.c
 
