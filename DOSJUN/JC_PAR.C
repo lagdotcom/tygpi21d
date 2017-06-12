@@ -165,7 +165,7 @@ int Save_String(jc_parser *p, char *string)
 {
 	/* TODO: check string count */
 	p->strings[p->string_count] = Duplicate_String(string, "Save_String");
-	return p->string_offset + p->string_count++;
+	return p->string_count++;
 }
 
 void Emit_Code(jc_parser *p, bytecode code)
@@ -574,7 +574,6 @@ void Initialise_Parser(jc_parser *p)
 
 	p->strings = SzAlloc(MAX_STRINGS, char *, "Initialise_Parser.strings");
 	p->string_count = 0;
-	p->string_offset = 0;
 
 	p->stack = SzAlloc(MAX_STACK, jc_stack, "Initialise_Parser.stack");
 	p->stack_size = 0;

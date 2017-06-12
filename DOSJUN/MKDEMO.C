@@ -58,13 +58,13 @@ void Demo_Campaign(char *filename)
 	c.header.num_zones = 1;
 	Zero(c.header.unused, CAMPAIGN_HEADER_PADDING);
 
-	c.zones = szalloc(1, char *);
+	c.zones = SzAlloc(1, char *, "Demo_Campaign");
 	c.zones[0] = "DEMO";
 
 	Save_Campaign(filename, &c);
 	printf("Wrote %s\n", filename);
 
-	free(c.zones);
+	Free(c.zones);
 }
 
 void Demo_Items(char *filename)
@@ -74,7 +74,7 @@ void Demo_Items(char *filename)
 	i.header.num_items = 8;
 	Zero(i.header.unused, ITEMS_HEADER_PADDING);
 
-	i.items = szalloc(8, item);
+	i.items = SzAlloc(8, item, "Demo_Items");
 
 	Set_Item( 0, 0x100, "Longsword", itPrimaryWeapon, ifHeavy, 100);
 	Set_ItemStat( 0, sMinDamage, 4);
@@ -107,7 +107,7 @@ void Demo_Items(char *filename)
 	Save_Items(filename, &i);
 	printf("Wrote %s\n", filename);
 
-	free(i.items);
+	Free(i.items);
 }
 
 void Demo_Monsters(char *filename)
@@ -117,7 +117,7 @@ void Demo_Monsters(char *filename)
 	m.header.num_monsters = 1;
 	Zero(m.header.unused, MONSTERS_HEADER_PADDING);
 
-	m.monsters = szalloc(1, monster);
+	m.monsters = SzAlloc(1, monster, "Demo_Monsters");
 
 	Set_Monster(0, RAT, "Large Rat");
 	Set_MonsterStat(0, sMaxHP, 3);
@@ -132,7 +132,7 @@ void Demo_Monsters(char *filename)
 	Save_Monsters(filename, &m);
 	printf("Wrote %s\n", filename);
 
-	free(m.monsters);
+	Free(m.monsters);
 }
 
 void Demo_Zone(char *filename)
@@ -144,7 +144,7 @@ void Demo_Zone(char *filename)
 	strcpy(z.header.campaign_name, "DEMO");
 	z.header.width = 10;
 	z.header.height = 10;
-	z.tiles = szalloc(10 * 10, tile);
+	z.tiles = SzAlloc(10 * 10, tile, "Demo_Zone.tiles");
 	/*        I   C   F  WN  WE  WS  WW  S */
 	Set_Tile( 0, 10,  9, 11,  0, 11, 11, 0);
 	Set_Tile( 1, 10,  9, 11,  0, 11,  0, 0);
@@ -156,7 +156,7 @@ void Demo_Zone(char *filename)
 	Set_Tile(21, 10,  9, 15,  0, 15, 15, 0);
 
 	z.header.num_strings = 3;
-	z.strings = szalloc(3, char*);
+	z.strings = SzAlloc(3, char *, "Demo_Zone.strings");
 	z.strings[0] = "Other than its ridiculous colour,\nthere's nothing particularly\ninteresting about this corridor.";
 	z.strings[1] = "New text.";
 	z.strings[2] = "Another line of text!\nOne day this will be a REAL GAME.";
@@ -166,7 +166,7 @@ void Demo_Zone(char *filename)
 	z.script_lengths = null;
 
 	z.header.num_encounters = 1;
-	z.encounters = szalloc(1, encounter);
+	z.encounters = SzAlloc(1, encounter, "Demo_Zone.encounters");
 	Set_Encounter( 0, 0, RAT, 1, 3);
 
 	Save_Zone(filename, &z);
@@ -183,4 +183,6 @@ void main(void)
 	Demo_Items("DEMO.ITM");
 	Demo_Monsters("DEMO.MON");
 	Demo_Zone("DEMO.ZON");
+
+	Stop_Memory_Tracking();
 }

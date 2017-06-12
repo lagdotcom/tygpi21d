@@ -1,4 +1,4 @@
-#ifndef NO_MEMORY_DEBUG
+#ifdef MEMORY_DEBUG
 
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 

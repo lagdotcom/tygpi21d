@@ -11,12 +11,14 @@ void Initialise_Zone(zone *z)
 	z->header.num_strings = 0;
 	z->header.num_scripts = 0;
 	z->header.num_encounters = 0;
+	z->header.num_code_strings = 0;
 
 	z->tiles = null;
 	z->strings = null;
 	z->scripts = null;
 	z->script_lengths = null;
 	z->encounters = null;
+	z->code_strings = null;
 }
 
 void Load_Zone(char *filename, zone *z)
@@ -60,6 +62,14 @@ void Load_Zone(char *filename, zone *z)
 		z->encounters = null;
 	}
 
+	if (h->num_code_strings > 0) {
+		z->code_strings = SzAlloc(h->num_code_strings, char *, "Load_Zone.code_strings");
+		for (i = 0; i < h->num_code_strings; i++)
+			z->code_strings[i] = Read_LengthString(fp);
+	} else {
+		z->code_strings = null;
+	}
+
 	fclose(fp);
 }
 
@@ -85,6 +95,13 @@ void Free_Zone(zone *z)
 	}
 
 	Free(z->encounters);
+
+	if (z->code_strings != null) {
+		for (i = 0; i < z->header.num_code_strings; i++) {
+			Free(z->code_strings[i]);
+		}
+		Free(z->code_strings);
+	}
 }
 
 void Save_Zone(char *filename, zone *z)
@@ -107,6 +124,10 @@ void Save_Zone(char *filename, zone *z)
 	}
 
 	fwrite(z->encounters, sizeof(encounter), h->num_encounters, fp);
+
+	for (i = 0; i < h->num_code_strings; i++) {
+		Write_LengthString(z->code_strings[i], fp);
+	}
 
 	fclose(fp);
 }

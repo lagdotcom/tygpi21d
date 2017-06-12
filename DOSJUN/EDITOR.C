@@ -106,6 +106,14 @@ void Draw_Details(void)
 	if (t->description)
 		Draw_Bounded_String(8, 160, 38, 4, 15, Z.strings[t->description - 1], 0);
 
+	if (t->on_enter) {
+		if (parser.script_count) sprintf(buf, "S: %6s", parser.scripts[t->on_enter - 1].name);
+		else sprintf(buf, "S: #%d", t->on_enter - 1);
+		Blit_String_DB(DX, 96, 15, buf, 0);
+	} else {
+		Blit_String_DB(DX, 96, 15, "         ", 0);
+	}
+
 	redraw_details = false;
 }
 
@@ -164,93 +172,109 @@ string_id Add_Description(void)
 		Z.strings = Reallocate(Z.strings, Z.header.num_strings + 1, sizeof(char *), "Add_Description.strings");
 		Z.strings[Z.header.num_strings] = Duplicate_String(buffer, "Add_Description.strings[i]");
 		Z.header.num_strings++;
-		Z.header.start_script_strings++;
 		return Z.header.num_strings;
 	}
 
 	return 0;
 }
 
-void Change_Description(void)
+#define PER_MENU_PAGE	10
+#define MENU_CANCEL		-1
+#define MENU_DELETE		-2
+#define MENU_ADD		-3
+int Input_Scroller_Menu(char **options, int count)
 {
+	char buffer[50];
 	int offset = 0,
 		i;
 
-	char buffer[50],
-		*allocd,
-		ch;
-
-	tile *under = TILE(Z, sel_x, sel_y);
-
 	/* We're drawing over everything, so... */
 	clear_screen = true;
-	redraw_details = true;
-	redraw_zone = true;
+
+	while (true) {
+		Draw_Square_DB(0, 8, 8, 39*8, 88, true);
+		for (i = 0; i < PER_MENU_PAGE; i++) {
+			if (offset + i >= count) break;
+
+			sprintf(buffer, "%d: ", i);
+			strncat(buffer, options[i], 34);
+
+			Blit_String_DB(8, 8 + i*8, 15, buffer, 0);
+		}
+
+		Show_Double_Buffer();
+		switch (Get_Scan_Code()) {
+			case SCAN_PGUP:
+				if (offset > 0) {
+					offset -= PER_MENU_PAGE;
+				}
+				break;
+
+			case SCAN_PGDWN:
+				if (offset + PER_MENU_PAGE < count) {
+					offset += PER_MENU_PAGE;
+				}
+				break;
+
+			case SCAN_ESC:	return MENU_CANCEL;
+			case SCAN_DEL:	return MENU_DELETE;
+			case SCAN_INS:	return MENU_ADD;
+
+			case SCAN_0: return offset;
+			case SCAN_1: return offset + 1;
+			case SCAN_2: return offset + 2;
+			case SCAN_3: return offset + 3;
+			case SCAN_4: return offset + 4;
+			case SCAN_5: return offset + 5;
+			case SCAN_6: return offset + 6;
+			case SCAN_7: return offset + 7;
+			case SCAN_8: return offset + 8;
+			case SCAN_9: return offset + 9;
+		}
+	}
+}
+
+void Change_Description(void)
+{
+	int result;
+	tile *under = TILE(Z, sel_x, sel_y);
 
 	if (Z.header.num_strings == 0) {
 		under->description = Add_Description();
 		return;
 	}
 
-	while (true) {
-		Draw_Square_DB(0, 8, 8, 39*8, 88, true);
-		for (i = 0; i < 10; i++) {
-			if (offset + i >= Z.header.num_strings) break;
+	switch (result = Input_Scroller_Menu(Z.strings, Z.header.num_strings)) {
+		case MENU_CANCEL: return;
 
-			sprintf(buffer, "%d: ", i);
-			strncat(buffer, Z.strings[offset + i], 34);
+		case MENU_DELETE:
+			under->description = 0;
+			return;
 
-			Blit_String_DB(8, 8 + i*8, 15, buffer, 0);
-		}
+		case MENU_ADD:
+			under->description = Add_Description();
+			return;
 
-		Show_Double_Buffer();
-		ch = getch();
-		switch (ch) {
-			case ',':
-				if (offset > 0) {
-					offset -= 10;
-					break;
-				}
-
-			case '.':
-				if (offset + 10 < Z.header.num_strings) {
-					offset += 10;
-					break;
-				}
-
-			case 'q':
-				under->description = 0;
-				return;
-
-			case 'n':
-				under->description = Add_Description();
-
-				return;
-
-			case '0': case '1':	case '2': case '3': case '4':
-			case '5': case '6':	case '7': case '8': case '9':
-				under->description = offset + ch - '0' + 1;
-				return;
-		}
+		default:
+			under->description = result + 1;
+			return;
 	}
 }
 
 void Import_Code_Strings(void)
 {
-	int i, total;
-
-	total = Z.header.start_script_strings + parser.string_count;
+	int i;
 
 	/* In case we're re-importing, free old string entries */
-	for (i = Z.header.start_script_strings; i < Z.header.num_strings; i++) {
-		Free(Z.strings[i]);
+	for (i = 0; i < Z.header.num_code_strings; i++) {
+		Free(Z.code_strings[i]);
 	}
 
 	/* Import strings */
-	Z.header.num_strings = total;
-	Z.strings = Reallocate(Z.strings, total, sizeof(char *), "Import_Code_Strings.strings");
+	Z.header.num_code_strings = parser.string_count;
+	Z.code_strings = Reallocate(Z.code_strings, parser.string_count, sizeof(char *), "Import_Code_Strings.code_strings");
 	for (i = 0; i < parser.string_count; i++) {
-		Z.strings[i + parser.string_offset] = Duplicate_String(parser.strings[i], "Import_Code_Strings.strings[i]");
+		Z.code_strings[i] = Duplicate_String(parser.strings[i], "Import_Code_Strings.code_strings[i]");
 	}
 }
 
@@ -288,7 +312,6 @@ void Load_Code(void)
 	dot = strchr(buffer, '.');
 	strcpy(dot, ".JC");
 
-	parser.string_offset = Z.header.start_script_strings;
 	if (Compile_JC(&parser, buffer, true) == 0) {
 		Import_Code_Strings();
 		Import_Code_Scripts();
@@ -298,6 +321,44 @@ void Load_Code(void)
 	}
 }
 
+void Change_Script(script_id *script)
+{
+	char **menu;
+	int result,
+		i;
+
+	if (parser.script_count == 0) return;
+
+	menu = SzAlloc(parser.script_count, char *, "Change_Script");
+	for (i = 0; i < parser.script_count; i++) {
+		/* note: NOT strdup */
+		menu[i] = parser.scripts[i].name;
+	}
+
+	switch (result = Input_Scroller_Menu(menu, parser.script_count)) {
+		case MENU_CANCEL:
+		case MENU_ADD:
+			break;
+
+		case MENU_DELETE:
+			*script = 0;
+			break;
+
+		default:
+			*script = result + 1;
+			break;
+	}
+
+	Free(menu);
+}
+
+void Change_Enter_Script(void)
+{
+	tile *under = TILE(Z, sel_x, sel_y);
+
+	Change_Script(&under->on_enter);
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 void Main_Editor_Loop(void)
@@ -305,8 +366,7 @@ void Main_Editor_Loop(void)
 	unsigned char scan;
 	int done = 0;
 
-	redraw_details = true;
-	redraw_zone = true;
+	clear_screen = true;
 	sel_x = 0;
 	sel_y = 0;
 
@@ -392,6 +452,9 @@ void Main_Editor_Loop(void)
 
 			case SCAN_D:
 				Change_Description();
+				break;
+			case SCAN_TAB:
+				Change_Enter_Script();
 				break;
 
 			case SCAN_TILDE:

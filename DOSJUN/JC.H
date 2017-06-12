@@ -77,7 +77,6 @@ typedef struct {
 
 	char **strings;
 	int string_count;
-	int string_offset;
 
 	jc_stack *stack;
 	int stack_size;

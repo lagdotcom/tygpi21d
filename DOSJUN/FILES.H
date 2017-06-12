@@ -65,7 +65,13 @@ typedef enum {
 typedef enum {
 	ifLight = 1,
 	ifHeavy = 2,
-} itemflag;
+} itemflags;
+
+typedef enum {
+	wtNormal,
+	wtDoor,
+	wtLockedDoor
+} walltypes;
 
 #define Set_Version_Header(h) strncpy(h.magic, FILE_MAGIC, 3); h.version = VERSION_1
 
@@ -79,6 +85,9 @@ typedef enum {
 #define MONSTERS_HEADER_PADDING		27
 #define SAVE_HEADER_PADDING			15
 #define ZONE_HEADER_PADDING			10
+
+#define WALL_PADDING				2
+#define TILE_PADDING				10
 
 /* Campaign */
 
@@ -105,7 +114,7 @@ typedef struct {
 	char name[NAME_SIZE];
 	item_id id;
 	item_type type;
-	item_flags flags;
+	item_flag flags;
 	unsigned long value;
 	unsigned char unused[ITEM_PADDING];
 	unsigned short stats[NUM_STATS];
@@ -179,12 +188,18 @@ typedef struct {
 
 typedef struct {
 	colour texture;
+	wall_type type;
+
+	unsigned char unused[WALL_PADDING];
 } wall;
 
 typedef struct {
-	colour floor, ceil;
 	wall walls[4];
+	colour floor, ceil;
 	string_id description;
+	script_id on_enter;
+
+	unsigned char unused[TILE_PADDING];
 } tile;
 
 typedef struct {
@@ -201,7 +216,7 @@ typedef struct {
 	string_id num_strings;
 	script_id num_scripts;
 	encounter_id num_encounters;
-	string_id start_script_strings;
+	string_id num_code_strings;
 
 	unsigned char unused[ZONE_HEADER_PADDING];
 } zone_header;
@@ -214,6 +229,7 @@ typedef struct {
 	bytecode **scripts;
 	length *script_lengths;
 	encounter *encounters;
+	char **code_strings;
 } zone;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
