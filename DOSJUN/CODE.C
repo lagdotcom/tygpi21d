@@ -1,6 +1,5 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <stdio.h>
 #include "dosjun.h"
 #include "code.h"
 
@@ -12,6 +11,7 @@
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 #ifdef TRACE_CODE
+#include <stdio.h>
 FILE *trace;
 #endif
 
