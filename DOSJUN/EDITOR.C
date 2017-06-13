@@ -203,7 +203,7 @@ int Input_Scroller_Menu(char **options, int count)
 		}
 
 		Show_Double_Buffer();
-		switch (Get_Scan_Code()) {
+		switch (Get_Next_Scan_Code()) {
 			case SCAN_PGUP:
 				if (offset > 0) {
 					offset -= PER_MENU_PAGE;
@@ -384,7 +384,7 @@ void Main_Editor_Loop(void)
 
 		Show_Double_Buffer();
 
-		scan = Get_Scan_Code();
+		scan = Get_Next_Scan_Code();
 		switch (scan) {
 			case SCAN_Q:
 				done = 1;

@@ -26,6 +26,7 @@ extern save S;
 extern zone Z;
 
 extern bool
+	trigger_on_enter,
 	redraw_description,
 	redraw_fp,
 	redraw_party;

@@ -68,3 +68,11 @@ void Free_Directory_Listing(char **listing, int count)
 	}
 	Free(listing);
 }
+
+unsigned char Get_Next_Scan_Code(void)
+{
+	unsigned char scan = 0;
+
+	while (scan == 0) scan = Get_Scan_Code();
+	return scan;
+}

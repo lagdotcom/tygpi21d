@@ -18,6 +18,7 @@ save S;
 zone Z;
 
 bool redraw_description;
+bool trigger_on_enter;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -96,6 +97,20 @@ wall* Get_Wall(coord x, coord y, direction dir, relative rel)
 	return null;
 }
 
+void Show_Game_String(char *string, bool wait_for_key)
+{
+	Draw_Square_DB(0, 12, 148, 12 + 37*8, 148 + 5*8, 1);
+	Draw_Bounded_String(12, 148, 37, 5, 15, string, 0);
+
+	if (wait_for_key) {
+		Show_Double_Buffer();
+		Delay(5);
+		Get_Next_Scan_Code();
+	}
+
+	redraw_description = true;
+}
+
 void Draw_Description(void)
 {
 	tile* under = TILE(Z, S.header.x, S.header.y);
@@ -126,8 +141,20 @@ bool Try_Move_Forward(void)
 	S.header.y = ay;
 	redraw_description = true;
 	redraw_fp = true;
+	trigger_on_enter = true;
 
 	return true;
+}
+
+void Trigger_Enter_Script(void)
+{
+	tile* under = TILE(Z, S.header.x, S.header.y);
+
+	if (under->on_enter) {
+		Run_Code(under->on_enter - 1);
+	}
+
+	trigger_on_enter = false;
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -146,38 +173,38 @@ void Show_Dungeon_Screen(void)
 	redraw_party = true;
 
 	while (!done) {
-		if (kbhit()) {
-			switch (getch()) {
-				/* TODO: replace later */
-				case 'q':
-					G = gsQuit;
-					done = 1;
-					break;
-
-				case 'a':
-					if (S.header.facing == North) S.header.facing = West;
-					else S.header.facing--;
-					redraw_fp = true;
-					break;
-
-				case 'd':
-					if (S.header.facing == West) S.header.facing = North;
-					else S.header.facing++;
-					redraw_fp = true;
-					break;
-
-				case 'w':
-					Try_Move_Forward();
-					break;
-			}
-		}
-
-		if (redraw_description) Draw_Description();
 		if (redraw_fp) Draw_FP();
 		if (redraw_party) Draw_Party_Status();
+		if (trigger_on_enter) Trigger_Enter_Script();
 
+		if (redraw_description) Draw_Description();
 		Show_Double_Buffer();
 		Delay(1);
+
+		switch (Get_Next_Scan_Code()) {
+			case SCAN_Q:
+				G = gsQuit;
+				done = 1;
+				break;
+
+			case SCAN_LEFT:
+				if (S.header.facing == North) S.header.facing = West;
+				else S.header.facing--;
+				trigger_on_enter = true;
+				redraw_fp = true;
+				break;
+
+			case SCAN_RIGHT:
+				if (S.header.facing == West) S.header.facing = North;
+				else S.header.facing++;
+				trigger_on_enter = true;
+				redraw_fp = true;
+				break;
+
+			case SCAN_UP:
+				Try_Move_Forward();
+				break;
+		}
 	}
 
 	/* Cleanup */

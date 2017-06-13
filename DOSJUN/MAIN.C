@@ -2,6 +2,7 @@
 
 #include "gamelib.h"
 #include "dosjun.h"
+#include "code.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -49,6 +50,7 @@ void Load_Campaign_Data()
 void Start_Campaign(char *name)
 {
 	char buffer[13];
+	int i;
 
 	strncpy(S.header.campaign_name, name, 8);
 
@@ -60,6 +62,13 @@ void Start_Campaign(char *name)
 	S.header.x = C.header.start_x;
 	S.header.y = C.header.start_y;
 	S.header.facing = C.header.start_facing;
+	S.header.num_zones = C.header.num_zones;
+
+	S.script_globals = SzAlloc(MAX_GLOBALS, int, "Start_Campaign.globals");
+	S.script_locals = SzAlloc(S.header.num_zones, int *, "Start_Campaign.locals");
+	for (i = 0; i < S.script_locals; i++) {
+		S.script_locals[i] = SzAlloc(MAX_LOCALS, int, "Start_Campaign.locals[i]");
+	}
 
 	Load_Campaign_Data();
 }
@@ -98,10 +107,11 @@ void Start_New_Game()
 	Input_String(128, 120, &S.characters[5].name, NAME_SIZE);
 	Initialise_Character(&S.characters[5], jRanger,  13,  8, 13, 13, 0);
 
-	Start_Campaign("DEMO");
+	Start_Campaign("ETR");
 	G = gsDungeon;
-	
-	Save_Savefile("DEMO.SAV", &S);
+	trigger_on_enter = true;
+
+	Save_Savefile("ETR.SAV", &S);
 }
 
 bool Load_Game()
@@ -126,6 +136,7 @@ bool Load_Game()
 
 	Load_Campaign_Data();
 	G = gsDungeon;
+	trigger_on_enter = false;
 
 	Free_Directory_Listing(filenames, count);
 

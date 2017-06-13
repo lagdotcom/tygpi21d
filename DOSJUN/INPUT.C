@@ -178,7 +178,7 @@ int Input_Menu(char **menu, int choices, int x, int y)
 	Show_Double_Buffer();
 
 	while (true) {
-		key = Get_Scan_Code();
+		key = Get_Next_Scan_Code();
 
 		switch (key) {
 			case SCAN_DOWN:

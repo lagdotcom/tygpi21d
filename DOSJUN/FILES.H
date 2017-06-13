@@ -84,7 +84,7 @@ typedef enum {
 #define ITEM_PADDING				11
 #define MONSTERS_HEADER_PADDING		27
 #define MONSTER_PADDING				18
-#define SAVE_HEADER_PADDING			15
+#define SAVE_HEADER_PADDING			14
 #define ZONE_HEADER_PADDING			10
 
 #define WALL_PADDING				2
@@ -177,6 +177,7 @@ typedef struct {
 	direction facing;
 	coord x, y;
 	unsigned char num_characters;
+	zone_id num_zones;
 
 	unsigned char unused[SAVE_HEADER_PADDING];
 } save_header;
@@ -185,6 +186,8 @@ typedef struct {
 	save_header header;
 
 	character characters[PARTY_SIZE];
+	int *script_globals;
+	int **script_locals;
 } save;
 
 /* Zone */
