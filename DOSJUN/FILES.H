@@ -83,6 +83,7 @@ typedef enum {
 #define ITEMS_HEADER_PADDING		27
 #define ITEM_PADDING				11
 #define MONSTERS_HEADER_PADDING		27
+#define MONSTER_PADDING				18
 #define SAVE_HEADER_PADDING			15
 #define ZONE_HEADER_PADDING			10
 
@@ -140,6 +141,8 @@ typedef struct {
 	char name[NAME_SIZE];
 	monster_id id;
 	unsigned short stats[NUM_STATS];
+
+	unsigned char unused[MONSTER_PADDING];
 } monster;
 
 typedef struct {

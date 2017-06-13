@@ -168,29 +168,41 @@ noexport void Return(host *h)
 
 noexport void Combat(host *h)
 {
+	char buffer[300];
 	encounter_id combat = Pop_Stack(h);
+
 	/* TODO */
+	sprintf(buffer, "-- COMBAT #%d --", combat);
+	Show_Game_String(buffer, true);
 }
 
 noexport void PcSpeak(host *h)
 {
+	char buffer[300];
 	int pc = Pop_Stack(h);
 	string_id string = Pop_Stack(h);
-	/* TODO */
+	
+	sprintf(buffer, "%s:\n%s", S.characters[pc].name, Z.code_strings[string]);
+	Show_Game_String(buffer, true);
 }
 
 noexport void Text(host *h)
 {
 	string_id string = Pop_Stack(h);
-	/* TODO */
+
+	Show_Game_String(Z.code_strings[string], true);
 }
 
 noexport void Unlock(host *h)
 {
+	char buffer[300];
 	coord x = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	direction dir = Pop_Stack(h);
+
 	/* TODO */
+	sprintf(buffer, "-- UNLOCK %d, %d, %d --", x, y, dir);
+	Show_Game_String(buffer, true);
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -222,10 +234,10 @@ noexport void Run_Code_Instruction(host *h, bytecode op)
 		case coJumpFalse:	JumpFalse(h); return;
 		case coReturn:		Return(h); return;
 
-		/*case coCombat:		Combat(h); return;*/
-		/*case coPcSpeak:		PcSpeak(h); return;*/
-		/*case coText:		Text(h); return;*/
-		/*case coUnlock:		Unlock(h); return;*/
+		case coCombat:		Combat(h); return;
+		case coPcSpeak:		PcSpeak(h); return;
+		case coText:		Text(h); return;
+		case coUnlock:		Unlock(h); return;
 	}
 
 	h->running = false;
@@ -262,7 +274,7 @@ bool Run_Code(script_id id)
 	h.result = 0;
 	h.sp = 0;
 
-	result = Run_Script_Host(&h);
+	result = Run_Code_Host(&h);
 
 	Free(h.temps);
 	Free(h.stack);

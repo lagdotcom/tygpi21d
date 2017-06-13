@@ -169,10 +169,77 @@ void Demo_Zone(char *filename)
 	z.encounters = SzAlloc(1, encounter, "Demo_Zone.encounters");
 	Set_Encounter( 0, 0, RAT, 1, 3);
 
+	z.header.num_code_strings = 0;
+	z.code_strings = null;
+
 	Save_Zone(filename, &z);
 	printf("Wrote %s\n", filename);
 
 	Free_Zone(&z);
+}
+
+void Etr_Campaign(char *filename)
+{
+	campaign c;
+
+	c.header.start_zone = 0;
+	c.header.start_x = 0;
+	c.header.start_y = 4;
+	c.header.start_facing = East;
+	c.header.num_zones = 1;
+	Zero(c.header.unused, CAMPAIGN_HEADER_PADDING);
+
+	c.zones = SzAlloc(1, char *, "Etr_Campaign");
+	c.zones[0] = "ETR_1";
+
+	Save_Campaign(filename, &c);
+	printf("Wrote %s\n", filename);
+
+	Free(c.zones);
+}
+
+void Etr_Items(char *filename)
+{
+	items i;
+
+	i.header.num_items = 1;
+	Zero(i.header.unused, ITEMS_HEADER_PADDING);
+
+	i.items = SzAlloc(1, item, "Etr_Items");
+
+	Set_Item( 0, 0x100, "Longsword", itPrimaryWeapon, ifHeavy, 100);
+	Set_ItemStat( 0, sMinDamage, 4);
+	Set_ItemStat( 0, sMaxDamage, 8);
+
+	Save_Items(filename, &i);
+	printf("Wrote %s\n", filename);
+
+	Free(i.items);
+}
+
+void Etr_Monsters(char *filename)
+{
+	monsters m;
+
+	m.header.num_monsters = 1;
+	Zero(m.header.unused, MONSTERS_HEADER_PADDING);
+
+	m.monsters = SzAlloc(1, monster, "Etr_Monsters");
+
+	Set_Monster(0, RAT, "Large Rat");
+	Set_MonsterStat(0, sMaxHP, 3);
+	Set_MonsterStat(0, sMaxMP, 0);
+	Set_MonsterStat(0, sMinDamage, 1);
+	Set_MonsterStat(0, sMaxDamage, 1);
+	Set_MonsterStat(0, sArmour, 0);
+	Set_MonsterStat(0, sStrength, 2);
+	Set_MonsterStat(0, sDexterity, 5);
+	Set_MonsterStat(0, sIntelligence, 1);
+
+	Save_Monsters(filename, &m);
+	printf("Wrote %s\n", filename);
+
+	Free(m.monsters);
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -183,6 +250,10 @@ void main(void)
 	Demo_Items("DEMO.ITM");
 	Demo_Monsters("DEMO.MON");
 	Demo_Zone("DEMO.ZON");
+
+	Etr_Campaign("ETR.CMP");
+	Etr_Items("ETR.ITM");
+	Etr_Monsters("ETR.MON");
 
 	Stop_Memory_Tracking();
 }
