@@ -70,6 +70,10 @@
 
 #define RESOLVE(n)	Resolve_Variable(p, n)
 
+/* P R O T O T Y P E S /////////////////////////////////////////////////// */
+
+char *Get_Token_Name(jc_token_type tt);
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 noexport char Get_Scope_Char(jc_scope sc)
@@ -160,7 +164,7 @@ noexport void Save_Constant(jc_parser *p, char *name, int value)
 	p->var_count++;
 }
 
-noexport int Save_String(jc_parser *p, char *string)
+noexport string_id Save_String(jc_parser *p, char *string)
 {
 	/* TODO: check string count */
 	p->strings[p->string_count] = Duplicate_String(string, "Save_String");
@@ -244,6 +248,72 @@ noexport bool Pop_Stack(jc_parser *p)
 	return true;
 }
 
+noexport bool Emit_Argument(jc_parser *p, jc_token *token)
+{
+	jc_var *var;
+	string_id sindex;
+	internal_id iindex;
+
+	switch (token->type) {
+		case ttNumber:
+			EMIT_ARG(coPushLiteral, atoi(token->value));
+			return true;
+
+		case ttString:
+			sindex = Save_String(p, token->value);
+			EMIT_ARG(coPushLiteral, sindex);
+			return true;
+
+		case ttIdentifier:
+			var = RESOLVE(token->value);
+			if (var == null) return Parse_Error(p, "Unknown identifier");
+			EMIT_PUSH_VAR(var);
+			return true;
+
+		case ttInternal:
+			iindex = Get_Internal_Id(token->value);
+			if (iindex == internalInvalid) return Parse_Error(p, "Unknown internal");
+			EMIT(coPushInternal);
+			EMIT(iindex);
+			return true;
+
+		default:
+			printf("Emit_Argument() type=%s val=%s\n", Get_Token_Name(token->type), token->value);
+			return false;
+	}
+}
+
+noexport bool Emit_Comparison(jc_parser *p, jc_token *token)
+{
+	switch (token->type) {
+		case ttEquals:
+			EMIT(coEQ);
+			return true;
+
+		case ttNotEqual:
+			EMIT(coNEQ);
+			return true;
+
+		case ttLT:
+			EMIT(coLT);
+			return true;
+
+		case ttLTE:
+			EMIT(coLTE);
+			return true;
+
+		case ttGT:
+			EMIT(coGT);
+			return true;
+
+		case ttGTE:
+			EMIT(coGTE);
+			return true;
+
+		default: return Parse_Error(p, "Unknown comparison");
+	}
+}
+
 /* P A R S E R  S T A T E S ////////////////////////////////////////////// */
 
 noexport bool Define_Const_State(jc_parser *p)
@@ -310,23 +380,8 @@ noexport bool Call_PcSpeak_State(jc_parser *p)
 	pc = CONSUME();
 	val = CONSUME();
 
-	if (val->type == ttNumber) {
-		EMIT_ARG(coPushLiteral, atoi(val->value));
-	} else if (val->type == ttString) {
-		sindex = Save_String(p, val->value);
-		EMIT_ARG(coPushLiteral, sindex);
-	}
-
-	if (pc->type == ttNumber) {
-		EMIT_ARG(coPushLiteral, atoi(pc->value));
-	} else if (pc->type == ttIdentifier) {
-		pc_var = RESOLVE(pc->value);
-		if (pc_var == null) return Parse_Error(p, "Unknown identifier");
-		EMIT_PUSH_VAR(pc_var);
-	} else {
-		return Parse_Error(p, "Invalid first argument to PcSpeak");
-	}
-
+	if (!Emit_Argument(p, val)) return false;
+	if (!Emit_Argument(p, pc)) return false;
 	EMIT(coPcSpeak);
 	return true;
 }
@@ -374,33 +429,9 @@ noexport bool Start_If_State(jc_parser *p)
 	cmp = CONSUME();
 	right = CONSUME();
 
-	if (left->type == ttNumber) {
-		EMIT_ARG(coPushLiteral, atoi(left->value));
-	} else if (left->type == ttIdentifier) {
-		left_v = RESOLVE(left->value);
-		if (left_v == null) return Parse_Error(p, "Unknown left identifier");
-		EMIT_PUSH_VAR(left_v);
-	} else {
-		return Parse_Error(p, "Invalid left argument to If");
-	}
-
-	if (right->type == ttNumber) {
-		EMIT_ARG(coPushLiteral, atoi(right->value));
-	} else if (right->type == ttIdentifier) {
-		right_v = RESOLVE(right->value);
-		if (right_v == null) return Parse_Error(p, "Unknown right identifier");
-		EMIT_PUSH_VAR(right_v);
-	} else {
-		return Parse_Error(p, "Invalid right argument to If");
-	}
-
-	if (cmp->type == ttEquals) {
-		EMIT(coEQ);
-	} else if (cmp->type == ttNotEqual) {
-		EMIT(coNEQ);
-	} else {
-		return Parse_Error(p, "Unknown comparison");
-	}
+	if (!Emit_Argument(p, right)) return Parse_Error(p, "If right argument invalid");
+	if (!Emit_Argument(p, left)) return Parse_Error(p, "If left argument invalid");
+	if (!Emit_Comparison(p, cmp)) return false;
 
 	EMIT_ARG(coJumpFalse, UNKNOWN_JUMP);
 	Push_Stack(p, "If", -2);
@@ -425,33 +456,9 @@ noexport bool Start_ElseIf_State(jc_parser *p)
 	cmp = CONSUME();
 	right = CONSUME();
 
-	if (left->type == ttNumber) {
-		EMIT_ARG(coPushLiteral, atoi(left->value));
-	} else if (left->type == ttIdentifier) {
-		left_v = RESOLVE(left->value);
-		if (left_v == null) return Parse_Error(p, "Unknown left identifier");
-		EMIT_PUSH_VAR(left_v);
-	} else {
-		return Parse_Error(p, "Invalid left argument to ElseIf");
-	}
-
-	if (right->type == ttNumber) {
-		EMIT_ARG(coPushLiteral, atoi(right->value));
-	} else if (right->type == ttIdentifier) {
-		right_v = RESOLVE(right->value);
-		if (right_v == null) return Parse_Error(p, "Unknown right identifier");
-		EMIT_PUSH_VAR(right_v);
-	} else {
-		return Parse_Error(p, "Invalid right argument to ElseIf");
-	}
-
-	if (cmp->type == ttEquals) {
-		EMIT(coEQ);
-	} else if (cmp->type == ttNotEqual) {
-		EMIT(coNEQ);
-	} else {
-		return Parse_Error(p, "Unknown comparison");
-	}
+	if (!Emit_Argument(p, right)) return false;
+	if (!Emit_Argument(p, left)) return false;
+	if (!Emit_Comparison(p, cmp)) return false;
 
 	EMIT_ARG(coJumpFalse, UNKNOWN_JUMP);
 	Renew_Stack(p, -2);
@@ -487,17 +494,61 @@ noexport bool Call_Combat_State(jc_parser *p)
 	CONSUME();
 	val = CONSUME();
 
-	if (val->type == ttNumber) {
-		EMIT_ARG(coPushLiteral, atoi(val->value));
-	} else if (val->type == ttIdentifier) {
-		val_v = RESOLVE(val->value);
-		if (val_v == null) return Parse_Error(p, "Unknown identifier");
-		EMIT_PUSH_VAR(val_v);
-	} else {
-		return Parse_Error(p, "Invalid argument to Text");
-	}
+	if (!Emit_Argument(p, val)) return false;
 
 	EMIT(coCombat);
+	return true;
+}
+
+noexport bool Call_Unlock_State(jc_parser *p)
+{
+	/* TODO: expressions */
+	jc_token *x, *y, *dir;
+
+	CONSUME();
+	x = CONSUME();
+	y = CONSUME();
+	dir = CONSUME();
+
+	if (!Emit_Argument(p, dir)) return false;
+	if (!Emit_Argument(p, y)) return false;
+	if (!Emit_Argument(p, x)) return false;
+
+	EMIT(coUnlock);
+	return true;
+}
+
+noexport bool Call_GiveItem_State(jc_parser *p)
+{
+	/* TODO: expressions */
+	jc_token *pc, *item, *qty;
+
+	CONSUME();
+	pc = CONSUME();
+	item = CONSUME();
+	qty = CONSUME();
+
+	if (!Emit_Argument(p, qty)) return false;
+	if (!Emit_Argument(p, item)) return false;
+	if (!Emit_Argument(p, pc)) return false;
+
+	EMIT(coGiveItem);
+	return true;
+}
+
+noexport bool Call_EquipItem_State(jc_parser *p)
+{
+	/* TODO: expressions */
+	jc_token *pc, *item;
+
+	CONSUME();
+	pc = CONSUME();
+	item = CONSUME();
+
+	if (!Emit_Argument(p, item)) return false;
+	if (!Emit_Argument(p, pc)) return false;
+
+	EMIT(coEquipItem);
 	return true;
 }
 
@@ -513,6 +564,9 @@ noexport bool Keyword_State(jc_parser *p)
 		if (MATCH("Combat")) return Call_Combat_State(p);
 		if (MATCH("PcSpeak")) return Call_PcSpeak_State(p);
 		if (MATCH("Text")) return Call_Text_State(p);
+		if (MATCH("Unlock")) return Call_Unlock_State(p);
+		if (MATCH("GiveItem")) return Call_GiveItem_State(p);
+		if (MATCH("EquipItem")) return Call_EquipItem_State(p);
 
 		if (MATCH("If")) return Start_If_State(p);
 		if (MATCH("ElseIf")) return Start_ElseIf_State(p);

@@ -5,7 +5,6 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define Code_Error printf
 /*#define TRACE_CODE*/
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
@@ -13,6 +12,23 @@
 #ifdef TRACE_CODE
 #include <stdio.h>
 FILE *trace;
+
+noexport void Code_Error(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+
+	fputs("[ERROR] ", trace);
+	vfprintf(trace, format, args);
+	fputs("\n", trace);
+
+	va_end(args);
+}
+
+#else
+
+#define Code_Error printf
+
 #endif
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
@@ -80,6 +96,30 @@ noexport void Push_Temp(host *h)
 	fprintf(trace, "push temp.%d", index);
 #endif
 	Push_Stack(h, h->temps[index]);
+}
+
+noexport void Push_Internal(host *h)
+{
+	internal_id index = Next_Op(h);
+#ifdef TRACE_CODE
+	fprintf(trace, "push internal.%d", index);
+#endif
+
+	switch (index) {
+		case internalX:
+			Push_Stack(h, S.header.x);
+			return;
+
+		case internalY:
+			Push_Stack(h, S.header.y);
+			return;
+
+		case internalFacing:
+			Push_Stack(h, S.header.facing);
+			return;
+	}
+
+	Code_Error("Unknown internal #%d", index);
 }
 
 noexport void Push_Literal(host *h)
@@ -299,6 +339,37 @@ noexport void Unlock(host *h)
 	Show_Game_String(buffer, true);
 }
 
+noexport void GiveItem(host *h)
+{
+	char buffer[300];
+	int pc = Pop_Stack(h);
+	item_id item = Pop_Stack(h);
+	int qty = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "giveitem %d, %d, %d", pc, item, qty);
+#endif
+
+	/* TODO */
+	sprintf(buffer, "-- GIVE ITEM %d, %d, %d --", pc, item, qty);
+	Show_Game_String(buffer, true);
+}
+
+noexport void EquipItem(host *h)
+{
+	char buffer[300];
+	int pc = Pop_Stack(h);
+	item_id item = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "equipitem %d, %d", pc, item);
+#endif
+
+	/* TODO */
+	sprintf(buffer, "-- EQUIP ITEM %d, %d --", pc, item);
+	Show_Game_String(buffer, true);
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(host *h, bytecode op)
@@ -311,6 +382,7 @@ noexport void Run_Code_Instruction(host *h, bytecode op)
 		case coPushGlobal:	Push_Global(h); return;
 		case coPushLocal:	Push_Local(h); return;
 		case coPushTemp:	Push_Temp(h); return;
+		case coPushInternal:Push_Internal(h); return;
 		case coPushLiteral:	Push_Literal(h); return;
 		case coPopGlobal:	Pop_Global(h); return;
 		case coPopLocal:	Pop_Local(h); return;
@@ -336,6 +408,8 @@ noexport void Run_Code_Instruction(host *h, bytecode op)
 		case coPcSpeak:		PcSpeak(h); return;
 		case coText:		Text(h); return;
 		case coUnlock:		Unlock(h); return;
+		case coGiveItem:	GiveItem(h); return;
+		case coEquipItem:	EquipItem(h); return;
 	}
 
 	h->running = false;

@@ -34,6 +34,12 @@
 #define Set_ItemStat(ix, st, sv) i.items[ix].stats[st] = sv
 #define Set_MonsterStat(ix, st, sv) m.monsters[ix].stats[st] = sv
 
+#define Set_ItemSpecial(ix, spec, sa1, sa2) { \
+	i.items[ix].special = spec; \
+	i.items[ix].special_argument1 = sa1; \
+	i.items[ix].special_argument2 = sa2; \
+}
+
 #define Set_Encounter(ix, slot, mon, min, max) { \
 	z.encounters[ix].monsters[slot] = mon; \
 	z.encounters[ix].minimum[slot] = min; \
@@ -202,14 +208,21 @@ void Etr_Items(char *filename)
 {
 	items i;
 
-	i.header.num_items = 1;
+	i.header.num_items = 3;
 	Zero(i.header.unused, ITEMS_HEADER_PADDING);
 
-	i.items = SzAlloc(1, item, "Etr_Items");
+	i.items = SzAlloc(3, item, "Etr_Items");
 
-	Set_Item( 0, 0x100, "Longsword", itPrimaryWeapon, ifHeavy, 100);
-	Set_ItemStat( 0, sMinDamage, 4);
-	Set_ItemStat( 0, sMaxDamage, 8);
+	Set_Item( 0, 0x100, "Knuckleduster", itPrimaryWeapon, ifLight, 0);
+	Set_ItemStat( 0, sMinDamage, 2);
+	Set_ItemStat( 0, sMaxDamage, 2);
+
+	Set_Item( 1, 0x101, "Penknife", itSmallWeapon, ifLight, 0);
+	Set_ItemStat( 1, sMinDamage, 1);
+	Set_ItemStat( 1, sMaxDamage, 2);
+
+	Set_Item( 2, 0xA00, "Plaster", itPotion, ifStacked, 0);
+	Set_ItemSpecial( 2, spHeal, 2, 4);
 
 	Save_Items(filename, &i);
 	printf("Wrote %s\n", filename);

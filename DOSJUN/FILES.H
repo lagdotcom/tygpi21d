@@ -63,9 +63,21 @@ typedef enum {
 } jobs;
 
 typedef enum {
+	ifNone = 0,
 	ifLight = 1,
 	ifHeavy = 2,
+	ifStacked = 4
 } itemflags;
+
+typedef enum {
+	spNone,
+	spHeal
+} itemspecials;
+
+typedef enum {
+	vfNone = 0,
+	vfEquipped = 1
+} inventoryflags;
 
 typedef enum {
 	wtNormal,
@@ -81,7 +93,7 @@ typedef enum {
 
 #define CAMPAIGN_HEADER_PADDING		23
 #define ITEMS_HEADER_PADDING		27
-#define ITEM_PADDING				11
+#define ITEM_PADDING				6
 #define MONSTERS_HEADER_PADDING		27
 #define MONSTER_PADDING				18
 #define SAVE_HEADER_PADDING			14
@@ -117,8 +129,11 @@ typedef struct {
 	item_type type;
 	item_flag flags;
 	unsigned long value;
+	special_id special;
+	int special_argument1;
+	int special_argument2;
 	unsigned char unused[ITEM_PADDING];
-	unsigned short stats[NUM_STATS];
+	unsigned int stats[NUM_STATS];
 } item;
 
 typedef struct {
@@ -140,7 +155,7 @@ typedef struct {
 typedef struct {
 	char name[NAME_SIZE];
 	monster_id id;
-	unsigned short stats[NUM_STATS];
+	unsigned int stats[NUM_STATS];
 
 	unsigned char unused[MONSTER_PADDING];
 } monster;
@@ -162,11 +177,17 @@ typedef struct {
 /* Save */
 
 typedef struct {
+	item_id item;
+	inventory_flag flags;
+	unsigned char quantity;
+} inventory;
+
+typedef struct {
 	char name[NAME_SIZE];
 	job_id job;
 	unsigned char level;
-	unsigned short stats[NUM_STATS];
-	item_id items[ITEM_SLOTS];
+	unsigned int stats[NUM_STATS];
+	inventory items[ITEM_SLOTS];
 } character;
 
 typedef struct {

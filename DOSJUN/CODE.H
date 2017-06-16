@@ -19,6 +19,7 @@ typedef enum {
 	coPushGlobal = 0x10,
 	coPushLocal = 0x11,
 	coPushTemp = 0x12,
+	coPushInternal = 0x13,
 	coPushLiteral = 0x1F,
 	coPopGlobal = 0x20,
 	coPopLocal = 0x21,
@@ -43,8 +44,18 @@ typedef enum {
 	coCombat = 0xA0,
 	coPcSpeak = 0xA1,
 	coText = 0xA2,
-	coUnlock = 0xA3
+	coUnlock = 0xA3,
+	coGiveItem = 0xA4,
+	coEquipItem = 0xA5
 } code_op;
+
+typedef enum {
+	internalX,
+	internalY,
+	internalFacing,
+
+	internalInvalid = 0xFF
+} internal;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 

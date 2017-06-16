@@ -17,11 +17,16 @@ typedef enum {
 	ttComment,
 	ttKeyword,
 	ttIdentifier,
+	ttInternal,
 	ttString,
 	ttNumber,
 	ttAssignment,
 	ttEquals,
-	ttNotEqual
+	ttNotEqual,
+	ttLT,
+	ttLTE,
+	ttGT,
+	ttGTE
 } jc_token_type;
 
 typedef enum {

@@ -1,5 +1,11 @@
 #JUNCODE
 
+# Directions
+Const North = 0
+Const East = 1
+Const South = 2
+Const West = 3
+
 # NPC IDs
 Const leader = 0
 Const strong = 1
@@ -7,3 +13,8 @@ Const nerd = 2
 Const shifty = 3
 Const liberal = 4
 Const nra = 5
+
+# Item IDs
+Const itKnuckleduster = 256
+Const itPenknife = 257
+Const itPlaster = 2560

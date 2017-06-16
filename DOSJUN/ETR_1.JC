@@ -15,19 +15,30 @@ Script wake_up
 		Return
 	EndIf
 
-	Text "You slowly come to your senses, and find yourself in unfamiliar surroundings. You rouse your friends."
+	# Set up party equipment
+	GiveItem strong, itKnuckleduster, 0
+	EquipItem strong, itKnuckleduster
+	GiveItem shifty, itPenknife, 0
+	EquipItem shifty, itPenknife
+	GiveItem liberal, itPlaster, 4
+
+	Text "You slowly come to your senses, and\nfind yourself in unfamiliar\nsurroundings. You rouse your friends."
 	PcSpeak strong, "Ugh... where are we?"
-	PcSpeak nerd, "I don't think it matters. We're supposed to escape, right?"
+	PcSpeak nerd, "I don't think it matters. We're\nsupposed to escape, right?"
 	PcSpeak leader, "Let's look around."
-	Text "The walls are newly whitewashed, and the room seems nearly featureless save for a door a few paces away."
+	Text "The walls are newly whitewashed, and\nthe room seems nearly featureless\nsave for a door a few paces away."
 	PcSpeak strong, "Whose idea was this, again?"
 
 	q_status = q_init
 EndScript
 
 Script facing_door
+	If @Facing != East
+		Return
+	EndIf
+
 	If q_status == q_init
-		Text "You find a door. It looks quite strong, and there's an imposing lock hanging off it."
+		Text "You find a door. It looks quite\nstrong, and there's an imposing lock hanging off it."
 		PcSpeak liberal, "This looks like the way out!"
 		PcSpeak shifty, "Hmm... it's locked. Good lock, too."
 		PcSpeak leader, "There has to be something in here."
@@ -37,18 +48,18 @@ Script facing_door
 		PcSpeak nerd, "With what?"
 	ElseIf q_status == q_key_found
 		PcSpeak shifty, "Let me try the key."
-		Text "The lock rattles around a bit, then gives."
+		Text "The lock rattles around a bit, then\ngives."
 		PcSpeak liberal, "Great... can we leave now?"
-		#Unlock PartyX, PartyY, East
+		Unlock @X, @Y, East
 		q_status = q_door_unlocked
 	EndIf
 EndScript
 
 Script at_key
-	If q_status == q_init
-		Text "At first, this corner of the room seems as empty of the others, but a glint catches your eye."
+	If q_status < q_key_found
+		Text "At first, this corner of the room\nseems as empty of the others, but a\nglint catches your eye."
 		PcSpeak leader, "I think I saw something."
-		PcSpeak nra, "It's a key. At least we're getting somewhere."
+		PcSpeak nra, "It's a key. At least we're getting\nsomewhere."
 		Text "You pocket the key."
 		PcSpeak liberal, "Not much of a puzzle, was it?"
 		q_status = q_key_found

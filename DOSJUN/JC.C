@@ -21,6 +21,10 @@ jc_token_type Parse_Operator(char *string)
 {
 	if (!strncmp(string, "==", 2)) return ttEquals;
 	if (!strncmp(string, "!=", 2)) return ttNotEqual;
+	if (!strncmp(string, "<=", 2)) return ttLTE;
+	if (!strncmp(string, ">=", 2)) return ttGTE;
+	if (!strncmp(string, "<", 1)) return ttLT;
+	if (!strncmp(string, ">", 1)) return ttGT;
 	if (!strncmp(string, "=", 1)) return ttAssignment;
 
 	return ttUnknown;
@@ -28,23 +32,34 @@ jc_token_type Parse_Operator(char *string)
 
 bool Is_Code_Keyword(char *string)
 {
-	if (!strncmp(string, "Combat", 6)) return true;
-	if (!strncmp(string, "Const", 5)) return true;
-	if (!strncmp(string, "Else", 4)) return true;
-	if (!strncmp(string, "ElseIf", 6)) return true;
-	if (!strncmp(string, "EndIf", 5)) return true;
-	if (!strncmp(string, "EndScript", 9)) return true;
-	if (!strncmp(string, "Global", 6)) return true;
-	if (!strncmp(string, "If", 2)) return true;
-	if (!strncmp(string, "Include", 7)) return true;
-	if (!strncmp(string, "Local", 5)) return true;
-	if (!strncmp(string, "PcSpeak", 7)) return true;
-	if (!strncmp(string, "Return", 6)) return true;
-	if (!strncmp(string, "Script", 6)) return true;
-	if (!strncmp(string, "Text", 4)) return true;
-	if (!strncmp(string, "Unlock", 6)) return true;
+	if (!strcmp(string, "Combat")) return true;
+	if (!strcmp(string, "Const")) return true;
+	if (!strcmp(string, "Else")) return true;
+	if (!strcmp(string, "ElseIf")) return true;
+	if (!strcmp(string, "EndIf")) return true;
+	if (!strcmp(string, "EndScript")) return true;
+	if (!strcmp(string, "EquipItem")) return true;
+	if (!strcmp(string, "GiveItem")) return true;
+	if (!strcmp(string, "Global")) return true;
+	if (!strcmp(string, "If")) return true;
+	if (!strcmp(string, "Include")) return true;
+	if (!strcmp(string, "Local")) return true;
+	if (!strcmp(string, "PcSpeak")) return true;
+	if (!strcmp(string, "Return")) return true;
+	if (!strcmp(string, "Script")) return true;
+	if (!strcmp(string, "Text")) return true;
+	if (!strcmp(string, "Unlock")) return true;
 
 	return false;
+}
+
+internal_id Get_Internal_Id(char *string)
+{
+	if (!strcmp(string, "Facing")) return internalFacing;
+	if (!strcmp(string, "X")) return internalX;
+	if (!strcmp(string, "Y")) return internalY;
+
+	return internalInvalid;
 }
 
 char *Get_Token_Name(jc_token_type tt)
@@ -52,6 +67,7 @@ char *Get_Token_Name(jc_token_type tt)
 	switch (tt) {
 		case ttUnknown: return "UNK";
 		case ttComment: return "COM";
+		case ttInternal: return "INT";
 		case ttKeyword: return "KEY";
 		case ttIdentifier: return "VAR";
 		case ttString: return "STR";
@@ -59,6 +75,10 @@ char *Get_Token_Name(jc_token_type tt)
 		case ttAssignment: return "SET";
 		case ttEquals: return "EQU";
 		case ttNotEqual: return "NEQ";
+		case ttLT: return "LT ";
+		case ttLTE: return "LTE";
+		case ttGT: return "GT ";
+		case ttGTE: return "GTE";
 
 		default: return "???";
 	}
@@ -126,6 +146,7 @@ void Dump_Compiled_JC(jc_parser *p, char *filename)
 				case coPushGlobal:
 				case coPushLocal:
 				case coPushTemp:
+				case coPushInternal:
 				case coPopGlobal:
 				case coPopLocal:
 				case coPopTemp:

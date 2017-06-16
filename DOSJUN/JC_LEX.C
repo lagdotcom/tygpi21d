@@ -16,6 +16,7 @@ typedef enum {
 	lsString,
 	lsStringEscape,
 	lsKeywordOrIdent,
+	lsInternal,
 	lsOperator,
 	lsWhitespace,
 	lsEndOfLine
@@ -44,6 +45,10 @@ typedef enum {
 #define caseEol \
 	case '\n': case '\r': case '\0'
 
+/* P R O T O T Y P E S /////////////////////////////////////////////////// */
+
+bool Is_Code_Keyword(char *string);
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 noexport lex_state Get_Lexer_State(char source)
@@ -52,6 +57,7 @@ noexport lex_state Get_Lexer_State(char source)
 		case '#':		return lsCommentStart;
 		case '\\':		return lsStringEscape;
 		case '"': 		return lsString;
+		case '@':		return lsInternal;
 		caseNumeric:	return lsNumber;
 
 		case '=':
@@ -134,6 +140,7 @@ bool Tokenize_Code_String(char *source, jc_token *tokens, int *count)
 
 					/* change state */
 					case lsString:
+					case lsInternal:
 						state = guess;
 						continue;
 
@@ -179,6 +186,27 @@ bool Tokenize_Code_String(char *source, jc_token *tokens, int *count)
 				}
 				state = lsString;
 				continue;
+
+			case lsInternal:
+				switch (guess) {
+					case lsKeywordOrIdent:
+					case lsNumber:
+						Lex_Push(ch);
+						continue;
+
+					case lsEndOfLine:
+					case lsWhitespace:
+						Lex_Push('\0');
+						Lex_AddToken(ttInternal);
+						continue;
+
+					case lsCommentStart:
+						Lex_Push('\0');
+						Lex_AddToken(ttInternal);
+						return true;
+
+					default: Lex_Error("Invalid character in internal");
+				}
 
 			case lsNumber:
 				switch (ch) {
