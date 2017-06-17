@@ -37,3 +37,13 @@ void Save_Monsters(char *filename, monsters *m)
 	fwrite(m->monsters, sizeof(monster), m->header.num_monsters, fp);
 	fclose(fp);
 }
+
+monster *Lookup_Monster(monsters *lib, monster_id id)
+{
+	int i;
+	for (i = 0; i < lib->header.num_monsters; i++) {
+		if (lib->monsters[i].id == id) return &lib->monsters[i];
+	}
+
+	return null;
+}

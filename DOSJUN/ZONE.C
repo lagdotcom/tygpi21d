@@ -12,12 +12,14 @@ void Initialise_Zone(zone *z)
 	z->header.num_scripts = 0;
 	z->header.num_encounters = 0;
 	z->header.num_code_strings = 0;
+	z->header.num_etables = 0;
 
 	z->tiles = null;
 	z->strings = null;
 	z->scripts = null;
 	z->script_lengths = null;
 	z->encounters = null;
+	z->etables = null;
 	z->code_strings = null;
 }
 
@@ -70,6 +72,13 @@ void Load_Zone(char *filename, zone *z)
 		z->code_strings = null;
 	}
 
+	if (h->num_etables > 0) {
+		z->etables = SzAlloc(h->num_etables, encounter, "Load_Zone.etables");
+		fread(z->etables, sizeof(etable), h->num_etables, fp);
+	} else {
+		z->etables = null;
+	}
+
 	fclose(fp);
 }
 
@@ -102,6 +111,8 @@ void Free_Zone(zone *z)
 		}
 		Free(z->code_strings);
 	}
+
+	Free(z->etables);
 }
 
 void Save_Zone(char *filename, zone *z)
@@ -128,6 +139,8 @@ void Save_Zone(char *filename, zone *z)
 	for (i = 0; i < h->num_code_strings; i++) {
 		Write_LengthString(z->code_strings[i], fp);
 	}
+
+	fwrite(z->etables, sizeof(etable), h->num_etables, fp);
 
 	fclose(fp);
 }

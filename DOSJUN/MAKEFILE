@@ -1,7 +1,7 @@
 CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc
 DEMO_OBJS = mkdemo.obj campaign.obj io.obj items.obj monsters.obj save.obj zone.obj
-MAIN_OBJS = dosjun.obj campaign.obj code.obj fp.obj gfx.obj input.obj io.obj items.obj main.obj mem.obj monsters.obj party.obj save.obj zone.obj
-EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj jc.obj jc_lex.obj jc_par.obj mem.obj save.obj zone.obj
+MAIN_OBJS = dosjun.obj campaign.obj chars.obj code.obj fp.obj gfx.obj input.obj io.obj items.obj main.obj mem.obj monsters.obj party.obj save.obj zone.obj
+EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj items.obj jc.obj jc_lex.obj jc_par.obj mem.obj monsters.obj save.obj zone.obj
 JCC_OBJS = jcc.obj jc.obj jc_lex.obj jc_par.obj mem.obj
 HEADERS = code.h common.h dosjun.h files.h jc.h
 
@@ -27,6 +27,10 @@ campaign.obj: campaign.c $(HEADERS)
 code.obj: code.c $(HEADERS)
 	TCC $(CFLAGS) -c code.c
 	TLIB DOSJUN.LIB +-code.obj, DOSJUN.TXT
+
+chars.obj: chars.c $(HEADERS)
+	TCC $(CFLAGS) -c chars.c
+	TLIB DOSJUN.LIB +-chars.obj, DOSJUN.TXT
 
 dosjun.obj: dosjun.c $(HEADERS)
 	TCC $(CFLAGS) -c dosjun.c
@@ -95,7 +99,3 @@ save.obj: save.c $(HEADERS)
 zone.obj: zone.c $(HEADERS)
 	TCC $(CFLAGS) -c zone.c
 	TLIB DOSJUN.LIB +-zone.obj, DOSJUN.TXT
-
-clean:
-	-DEL *.OBJ
-	-DEL *.EXE

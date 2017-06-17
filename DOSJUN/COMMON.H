@@ -35,6 +35,7 @@ typedef unsigned char colour;
 typedef unsigned char coord;
 typedef unsigned char direction;
 typedef unsigned int encounter_id;
+typedef unsigned int etable_id;
 typedef unsigned char inventory_flag;
 typedef unsigned char internal_id;
 typedef unsigned int item_id;

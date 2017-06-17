@@ -15,6 +15,7 @@
 #define NAME_SIZE		24
 #define PARTY_SIZE		6
 #define ENCOUNTER_SIZE	6
+#define ETABLE_SIZE		6
 
 typedef enum {
 	slWeapon,
@@ -24,7 +25,8 @@ typedef enum {
 	slFeet,
 	slAccessory
 } slot_id;
-#define ITEM_SLOTS		6
+#define NUM_SLOTS		6
+#define INVENTORY_SIZE	10
 
 typedef enum {
 	sMaxHP,
@@ -95,12 +97,12 @@ typedef enum {
 #define ITEMS_HEADER_PADDING		27
 #define ITEM_PADDING				6
 #define MONSTERS_HEADER_PADDING		27
-#define MONSTER_PADDING				18
+#define MONSTER_PADDING				10
 #define SAVE_HEADER_PADDING			14
-#define ZONE_HEADER_PADDING			10
+#define ZONE_HEADER_PADDING			8
 
 #define WALL_PADDING				2
-#define TILE_PADDING				10
+#define TILE_PADDING				8
 
 /* Campaign */
 
@@ -154,6 +156,7 @@ typedef struct {
 
 typedef struct {
 	char name[NAME_SIZE];
+	char image[8];
 	monster_id id;
 	unsigned int stats[NUM_STATS];
 
@@ -187,7 +190,7 @@ typedef struct {
 	job_id job;
 	unsigned char level;
 	unsigned int stats[NUM_STATS];
-	inventory items[ITEM_SLOTS];
+	inventory items[INVENTORY_SIZE];
 } character;
 
 typedef struct {
@@ -225,6 +228,7 @@ typedef struct {
 	colour floor, ceil;
 	string_id description;
 	script_id on_enter;
+	etable_id etable;
 
 	unsigned char unused[TILE_PADDING];
 } tile;
@@ -236,6 +240,12 @@ typedef struct {
 } encounter;
 
 typedef struct {
+	unsigned char possibilities;
+	encounter_id encounters[ETABLE_SIZE];
+	unsigned char percentages[ETABLE_SIZE];
+} etable;
+
+typedef struct {
 	VERSION_HEADER;
 
 	char campaign_name[8];
@@ -244,6 +254,7 @@ typedef struct {
 	script_id num_scripts;
 	encounter_id num_encounters;
 	string_id num_code_strings;
+	etable_id num_etables;
 
 	unsigned char unused[ZONE_HEADER_PADDING];
 } zone_header;
@@ -257,6 +268,7 @@ typedef struct {
 	length *script_lengths;
 	encounter *encounters;
 	char **code_strings;
+	etable *etables;
 } zone;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */

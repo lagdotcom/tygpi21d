@@ -130,8 +130,15 @@ bool Try_Move_Forward(void)
 
 	centre = Get_Wall(S.header.x, S.header.y, S.header.facing, rAhead);
 	if (centre->texture) {
-		/* TODO: ow! */
-		return false;
+		switch (centre->type) {
+			case wtNormal:
+				Show_Game_String("Ow!", true);
+				return false;
+
+			case wtLockedDoor:
+				Show_Game_String("The door is locked.", true);
+				return false;
+		}
 	}
 
 	ax = S.header.x + Get_X_Offset(S.header.facing);
@@ -252,6 +259,7 @@ void main(void)
 	Free_Monsters(&M);
 	Free_Savefile(&S);
 	Free_Zone(&Z);
+	Delete_Picture();
 
 	Delete_Double_Buffer();
 

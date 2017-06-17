@@ -293,9 +293,7 @@ noexport void Combat(host *h)
 	fprintf(trace, "combat #%d", combat);
 #endif
 
-	/* TODO */
-	sprintf(buffer, "-- COMBAT #%d --", combat);
-	Show_Game_String(buffer, true);
+	Start_Combat(combat);
 }
 
 noexport void PcSpeak(host *h)
@@ -325,6 +323,7 @@ noexport void Text(host *h)
 
 noexport void Unlock(host *h)
 {
+	tile *tile;
 	char buffer[300];
 	coord x = Pop_Stack(h);
 	coord y = Pop_Stack(h);
@@ -334,14 +333,16 @@ noexport void Unlock(host *h)
 	fprintf(trace, "unlock %d, %d, %d", x, y, dir);
 #endif
 
-	/* TODO */
-	sprintf(buffer, "-- UNLOCK %d, %d, %d --", x, y, dir);
-	Show_Game_String(buffer, true);
+	tile = TILE(Z, x, y);
+	tile->walls[dir].type = wtDoor;
+
+	/* TODO: unlock wall on other side too? */
 }
 
 noexport void GiveItem(host *h)
 {
 	char buffer[300];
+	bool result;
 	int pc = Pop_Stack(h);
 	item_id item = Pop_Stack(h);
 	int qty = Pop_Stack(h);
@@ -350,14 +351,14 @@ noexport void GiveItem(host *h)
 	fprintf(trace, "giveitem %d, %d, %d", pc, item, qty);
 #endif
 
-	/* TODO */
-	sprintf(buffer, "-- GIVE ITEM %d, %d, %d --", pc, item, qty);
-	Show_Game_String(buffer, true);
+	result = Add_To_Inventory(pc, item, qty);
+	Push_Stack(h, result);
 }
 
 noexport void EquipItem(host *h)
 {
 	char buffer[300];
+	bool result;
 	int pc = Pop_Stack(h);
 	item_id item = Pop_Stack(h);
 
@@ -365,9 +366,8 @@ noexport void EquipItem(host *h)
 	fprintf(trace, "equipitem %d, %d", pc, item);
 #endif
 
-	/* TODO */
-	sprintf(buffer, "-- EQUIP ITEM %d, %d --", pc, item);
-	Show_Game_String(buffer, true);
+	result = Equip_Item(pc, item);
+	Push_Stack(h, result);
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */

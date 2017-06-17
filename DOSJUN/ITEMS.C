@@ -37,3 +37,13 @@ void Save_Items(char *filename, items *i)
 	fwrite(i->items, sizeof(item), i->header.num_items, fp);
 	fclose(fp);
 }
+
+item *Lookup_Item(items *lib, item_id id)
+{
+	int i;
+	for (i = 0; i < lib->header.num_items; i++) {
+		if (lib->items[i].id == id) return &lib->items[i];
+	}
+
+	return null;
+}

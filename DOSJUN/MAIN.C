@@ -66,7 +66,7 @@ void Start_Campaign(char *name)
 
 	S.script_globals = SzAlloc(MAX_GLOBALS, int, "Start_Campaign.globals");
 	S.script_locals = SzAlloc(S.header.num_zones, int *, "Start_Campaign.locals");
-	for (i = 0; i < S.script_locals; i++) {
+	for (i = 0; i < S.header.num_zones; i++) {
 		S.script_locals[i] = SzAlloc(MAX_LOCALS, int, "Start_Campaign.locals[i]");
 	}
 

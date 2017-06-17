@@ -71,26 +71,26 @@ Script just_outside
 		Return
 	EndIf
 
-	Text "The contrast between the room you just left and this corridor is sharp. Everything around you is made of dry stone."
-	Text "Everyone seems confused. You look at each other for a while before someone speaks."
-	PcSpeak nerd, "Aren't we supposed to be in a warehouse?"
-	PcSpeak liberal, "I heard something! Ugh, something unpleasant."
-	Text "You hear it too; a quiet skittering sound. It doesn't take long before the culprit is revealed."
+	Text "The contrast between the room you\njust left and this corridor is sharp. Everything around you is made of dry stone."
+	Text "Everyone seems confused. You look at\neach other for a while before someone speaks."
+	PcSpeak nerd, "Aren't we supposed to be in a\nwarehouse?"
+	PcSpeak liberal, "I heard something! Ugh, something\nunpleasant."
+	Text "You hear it too; a quiet skittering\nsound. It doesn't take long before\nthe culprit is revealed."
 	# Show the rat somehow?
-	Text "A very large rat slowly approaches your group. It lifts its nose and sniffs the air, then makes a strange hissing noise."
-	PcSpeak nra, "That's the second largest rat I've ever seen."
-	Text "You don't have time to rebuke your friend; the rat suddenly charges at you!"
+	Text "A very large rat slowly approaches\nyour group. It lifts its nose and\nsniffs the air, then makes a strange hissing noise."
+	PcSpeak nra, "That's the second largest rat I've\never seen."
+	Text "You don't have time to rebuke your\nfriend; the rat suddenly charges at\nyou!"
 	Combat 0
 	q_status = q_fought_rat
 
 	PcSpeak strong, "Was that thing rabid?"
-	PcSpeak shifty, "I don't want to know. I want to know if this place is licensed."
-	Text "You check your watch. It's only been half an hour since you arrived at the leisure centre, but you feel somewhat ill."
-	Text "Your head is foggy, but you blame it on the anaesthetic they injected you with shortly after your names were called."
-	Text "You're not sure that's standard procedure for these games..."
+	PcSpeak shifty, "I don't want to know. I want to know\nif this place is licensed."
+	Text "You check your watch. It's only been\nhalf an hour since you arrived at the leisure centre, but you feel somewhat ill."
+	Text "Your head is foggy, but you blame it\non the anaesthetic they injected you\nwith shortly after your names were\ncalled."
+	Text "You're not sure that's standard\nprocedure for these games..."
 	PcSpeak leader, "Something is wrong."
 	Text "You take out your phone, but it isn't turned on. It won't even turn on."
-	PcSpeak nerd, "Mine's out too. I charged it this morning... should last a day, at least."
+	PcSpeak nerd, "Mine's out too. I charged it this\nmorning... should last a day, at\nleast."
 	Text "Everyone is silent."
 	PcSpeak liberal, "What are we going to do?"
 	PcSpeak nra, "Let's just keep looking. There has to be an exit."

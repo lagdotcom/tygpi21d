@@ -12,15 +12,24 @@
 
 #define MAX_STRING_LIST 1000
 
+typedef enum {
+	esWall,
+	esDoor,
+	esEncounter
+} editorstate;
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 pcx_picture explore_bg;
 jc_parser parser;
 zone Z;
+items I;
+monsters M;
 
 char *zone_filename;
 bool redraw_details, redraw_zone, clear_screen;
 int sel_x, sel_y;
+editorstate state;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
@@ -32,6 +41,7 @@ void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled);
 void Free_Zone(zone *z);
 void Initialise_Zone(zone *z);
 void Load_Zone(char *filename, zone *z);
+monster *Lookup_Monster(monsters *lib, monster_id id);
 void Save_Zone(char *filename, zone *z);
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
@@ -74,6 +84,40 @@ void Draw_Zone(void)
 
 #define DX 250
 
+char Get_Walltype_Char(wall_type type)
+{
+	switch (type) {
+		case wtNormal: return 'W';
+		case wtDoor: return 'D';
+		case wtLockedDoor: return 'L';
+		default: return '?';
+	}
+}
+
+char Get_Direction_Char(direction dir)
+{
+	switch (dir) {
+		case North: return 'N';
+		case East: return 'E';
+		case South: return 'S';
+		case West: return 'W';
+		default: return '?';
+	}
+}
+
+void Draw_Wall(tile *t, direction dir, int y)
+{
+	char buf[100];
+
+	sprintf(buf, "%c%c: %4d",
+		Get_Walltype_Char(t->walls[dir].type),
+		Get_Direction_Char(dir),
+		t->walls[dir].texture
+	);
+
+	Blit_String_DB(DX, y, t->walls[dir].texture, buf, 0);
+}
+
 void Draw_Details(void)
 {
 	tile* t = TILE(Z, sel_x, sel_y);
@@ -88,17 +132,10 @@ void Draw_Details(void)
 	sprintf(buf, "F: %5d", t->floor);
 	Blit_String_DB(DX, 32, t->floor, buf, 0);
 
-	sprintf(buf, "WN: %4d", t->walls[North].texture);
-	Blit_String_DB(DX, 48, t->walls[North].texture, buf, 0);
-
-	sprintf(buf, "WE: %4d", t->walls[East].texture);
-	Blit_String_DB(DX, 56, t->walls[East].texture, buf, 0);
-
-	sprintf(buf, "WS: %4d", t->walls[South].texture);
-	Blit_String_DB(DX, 64, t->walls[South].texture, buf, 0);
-
-	sprintf(buf, "WW: %4d", t->walls[West].texture);
-	Blit_String_DB(DX, 72, t->walls[West].texture, buf, 0);
+	Draw_Wall(t, North, 48);
+	Draw_Wall(t, East,  56);
+	Draw_Wall(t, South, 64);
+	Draw_Wall(t, West,  72);
 
 	sprintf(buf, "D: %5d", t->description);
 	Blit_String_DB(DX, 88, 15, buf, 0);
@@ -108,10 +145,17 @@ void Draw_Details(void)
 
 	if (t->on_enter) {
 		if (parser.script_count) sprintf(buf, "S: %6s", parser.scripts[t->on_enter - 1].name);
-		else sprintf(buf, "S: #%d", t->on_enter - 1);
+		else sprintf(buf, "S: #%-4d", t->on_enter - 1);
 		Blit_String_DB(DX, 96, 15, buf, 0);
 	} else {
 		Blit_String_DB(DX, 96, 15, "         ", 0);
+	}
+
+	if (t->etable) {
+		sprintf(buf, "E: #%-4d", t->etable - 1);
+		Blit_String_DB(DX, 104, 15, buf, 0);
+	} else {
+		Blit_String_DB(DX, 104, 15, "         ", 0);
 	}
 
 	redraw_details = false;
@@ -157,6 +201,15 @@ void Change_Wall(direction dir)
 		Draw_Tile(sel_x, sel_y);
 		redraw_details = true;
 	}
+}
+
+void Change_Door(direction dir)
+{
+	wall *w = &(TILE(Z, sel_x, sel_y)->walls[dir]);
+
+	w->type++;
+	if (w->type > wtLockedDoor) w->type = wtNormal;
+	redraw_details = true;
 }
 
 #undef DX
@@ -342,10 +395,12 @@ void Change_Script(script_id *script)
 
 		case MENU_DELETE:
 			*script = 0;
+			redraw_details = true;
 			break;
 
 		default:
 			*script = result + 1;
+			redraw_details = true;
 			break;
 	}
 
@@ -357,6 +412,194 @@ void Change_Enter_Script(void)
 	tile *under = TILE(Z, sel_x, sel_y);
 
 	Change_Script(&under->on_enter);
+}
+
+char *Describe_Encounter(encounter_id id)
+{
+	char buffer[1000],
+		buffer2[1000];
+	encounter *en = &Z.encounters[id];
+	monster *m;
+	int i;
+
+	buffer[0] = 0;
+	for (i = 0; i < ENCOUNTER_SIZE; i++) {
+		if (en->monsters[i] == 0) continue;
+		m = Lookup_Monster(&M, en->monsters[i]);
+
+		if (m == null) sprintf(buffer2, "%d-%dx??? ", en->minimum[i], en->maximum[i]);
+		else sprintf(buffer2, "%d-%dx%s ", en->minimum[i], en->maximum[i], m->name);
+		
+		strcat(buffer, buffer2);
+	}
+
+	return buffer;
+}
+
+void Edit_Encounter(encounter_id id)
+{
+	/* TODO */
+}
+
+void New_Encounter(encounter_id *id)
+{
+	*id = Z.header.num_encounters;
+
+	Z.header.num_encounters++;
+	Z.encounters = Reallocate(Z.encounters, Z.header.num_encounters, sizeof(encounter), "New_Encounter");
+
+	Edit_Encounter(*id);
+}
+
+void Edit_EncounterTable(etable_id id)
+{
+	char buffer[100];
+	unsigned char scan;
+	int cursor,
+		i;
+	bool redraw = true;
+	etable *et = &Z.etables[id];
+
+	clear_screen = true;
+	cursor = 0;
+
+	while (true) {
+		if (redraw) {
+			redraw = false;
+			Fill_Double_Buffer(0);
+
+			sprintf(buffer, "Editing etable #%d", id);
+			Blit_String_DB(0, 0, 15, buffer, 0);
+
+			for (i = 0; i < et->possibilities; i++) {
+				sprintf(buffer, "%d%%: %s", et->percentages[i], Describe_Encounter(et->encounters[i]));
+				Blit_String_DB(8, 16 + i*8, 15, buffer, 0);
+			}
+			Blit_Char_DB(0, 16 + cursor*8, '>', 15, 0);
+
+			Blit_String_DB(0, 100, 15, "Press + to add line.", 0);
+			Blit_String_DB(0, 108, 15, "Press - to remove last.", 0);
+		}
+
+		Show_Double_Buffer();
+
+		scan = Get_Next_Scan_Code();
+		switch (scan) {
+			case SCAN_Q: return;
+
+			case SCAN_DOWN:
+				Blit_Char_DB(0, 16 + cursor*8, ' ', 15, 0);
+				cursor++;
+				if (cursor >= et->possibilities) cursor = 0;
+				Blit_Char_DB(0, 16 + cursor*8, '>', 15, 0);
+				break;
+
+			case SCAN_UP:
+				Blit_Char_DB(0, 16 + cursor*8, ' ', 15, 0);
+				cursor--;
+				if (cursor < 0) cursor = et->possibilities - 1;
+				Blit_Char_DB(0, 16 + cursor*8, '>', 15, 0);
+				break;
+
+			case SCAN_EQUALS:
+				if (et->possibilities < ETABLE_SIZE) {
+					et->possibilities++;
+					redraw = true;
+				}
+				break;
+
+			case SCAN_MINUS:
+				if (et->possibilities > 1) {
+					et->possibilities--;
+					redraw = true;
+				}
+				break;
+		}
+	}
+}
+
+void New_EncounterTable(etable_id *id)
+{
+	*id = Z.header.num_etables;
+
+	Z.header.num_etables++;
+	Z.etables = Reallocate(Z.etables, Z.header.num_etables, sizeof(etable), "New_EncounterTable");
+	Z.etables[*id].possibilities = 1;
+
+	if (Z.header.num_encounters == 0) {
+		New_Encounter(&Z.etables[*id].encounters[0]);
+		Z.etables[*id].percentages[0] = 100;
+	}
+
+	Edit_EncounterTable(*id);
+}
+
+char *Describe_EncounterTable(etable_id id)
+{
+	char buffer[1000],
+		buffer2[1000];
+	etable *et = &Z.etables[id];
+	int i;
+
+	buffer[0] = 0;
+	for (i = 0; i < et->possibilities; i++) {
+		sprintf(buffer2, "%d%%: %s ", et->percentages[i], Describe_Encounter(et->encounters[i]));
+		strcat(buffer, buffer2);
+	}
+
+	return buffer;
+}
+
+void Change_EncounterTable(void)
+{
+	char **menu;
+	int result,
+		i;
+	tile *under = TILE(Z, sel_x, sel_y);
+
+	if (Z.header.num_etables == 0) {
+		New_EncounterTable(&under->etable);
+		return;
+	}
+
+	menu = SzAlloc(Z.header.num_etables, char *, "Change_EncounterTable");
+	for (i = 0; i < Z.header.num_etables; i++) {
+		menu[i] = strdup(Describe_EncounterTable(i));
+	}
+
+	switch (result = Input_Scroller_Menu(menu, Z.header.num_etables)) {
+		case MENU_CANCEL:
+			break;
+
+		case MENU_ADD:
+			New_EncounterTable(&under->etable);
+			break;
+
+		case MENU_DELETE:
+			under->etable = 0;
+			redraw_details = true;
+			break;
+
+		default:
+			under->etable = result + 1;
+			redraw_details = true;
+			break;
+	}
+
+	for (i = 0; i < Z.header.num_etables; i++) {
+		Free(menu[i]);
+	}
+	Free(menu);
+}
+
+char *Editor_State_String(void)
+{
+	switch (state) {
+		case esWall: return "Editing Walls     ";
+		case esDoor: return "Editing Doors     ";
+		case esEncounter: return "Editing Encounters";
+		default: return "???";
+	}
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -382,6 +625,7 @@ void Main_Editor_Loop(void)
 		if (redraw_zone) Draw_Zone();
 		if (redraw_details) Draw_Details();
 
+		Blit_String_DB(0, 0, 15, Editor_State_String(), 0);
 		Show_Double_Buffer();
 
 		scan = Get_Next_Scan_Code();
@@ -432,16 +676,21 @@ void Main_Editor_Loop(void)
 				break;
 
 			case SCAN_N:
-				Change_Wall(North);
+				if (state == esDoor) Change_Door(North);
+				else if (state == esWall) Change_Wall(North);
 				break;
 			case SCAN_E:
-				Change_Wall(East);
+				if (state == esDoor) Change_Door(East);
+				else if (state == esWall) Change_Wall(East);
+				else if (state == esEncounter) Change_EncounterTable();
 				break;
 			case SCAN_S:
-				Change_Wall(South);
+				if (state == esDoor) Change_Door(South);
+				else if (state == esWall) Change_Wall(South);
 				break;
 			case SCAN_W:
-				Change_Wall(West);
+				if (state == esDoor) Change_Door(West);
+				else if (state == esWall) Change_Wall(West);
 				break;
 			case SCAN_C:
 				Change_Ceiling();
@@ -455,6 +704,16 @@ void Main_Editor_Loop(void)
 				break;
 			case SCAN_TAB:
 				Change_Enter_Script();
+				break;
+
+			case SCAN_F1:
+				state = esWall;
+				break;
+			case SCAN_F2:
+				state = esDoor;
+				break;
+			case SCAN_F3:
+				state = esEncounter;
 				break;
 
 			case SCAN_TILDE:
@@ -501,6 +760,19 @@ void Edit_Zone(char *filename)
 	zone_filename = Duplicate_String(filename, "Edit_Zone.name");
 }
 
+void Load_Tables(void)
+{
+	char filename[13];
+
+	strncpy(filename, Z.header.campaign_name, 8);
+	strcat(filename, ".ITM");
+	Load_Items(filename, &I);
+
+	strncpy(filename, Z.header.campaign_name, 8);
+	strcat(filename, ".MON");
+	Load_Monsters(filename, &M);
+}
+
 void main(int argc, char **argv)
 {
 	if (argc < 2) {
@@ -510,6 +782,7 @@ void main(int argc, char **argv)
 	}
 
 	Initialise_Parser(&parser);
+	Load_Tables();
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
 		printf("\nNot enough memory to create double buffer.");
@@ -523,6 +796,7 @@ void main(int argc, char **argv)
 	PCX_Load("BACK.PCX", &explore_bg, 1);
 	PCX_Delete(&explore_bg);
 
+	state = esWall;
 	Main_Editor_Loop();
 
 	/* Cleanup */
@@ -531,6 +805,8 @@ void main(int argc, char **argv)
 
 	Free_Zone(&Z);
 	Free_Parser(&parser);
+	Free_Items(&I);
+	Free_Monsters(&M);
 	Free(zone_filename);
 
 	Stop_Memory_Tracking();

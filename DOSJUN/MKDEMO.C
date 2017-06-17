@@ -26,9 +26,10 @@
 	i.items[ix].value = v; \
 }
 
-#define Set_Monster(ix, x, n) { \
+#define Set_Monster(ix, x, n, im) { \
 	strncpy(m.monsters[ix].name, n, NAME_SIZE - 1); \
 	m.monsters[ix].id = x; \
+	strncpy(m.monsters[ix].image, im, 8); \
 }
 
 #define Set_ItemStat(ix, st, sv) i.items[ix].stats[st] = sv
@@ -125,7 +126,7 @@ void Demo_Monsters(char *filename)
 
 	m.monsters = SzAlloc(1, monster, "Demo_Monsters");
 
-	Set_Monster(0, RAT, "Large Rat");
+	Set_Monster(0, RAT, "Large Rat", "RAT");
 	Set_MonsterStat(0, sMaxHP, 3);
 	Set_MonsterStat(0, sMaxMP, 0);
 	Set_MonsterStat(0, sMinDamage, 1);
@@ -239,7 +240,7 @@ void Etr_Monsters(char *filename)
 
 	m.monsters = SzAlloc(1, monster, "Etr_Monsters");
 
-	Set_Monster(0, RAT, "Large Rat");
+	Set_Monster(0, RAT, "Large Rat", "RAT");
 	Set_MonsterStat(0, sMaxHP, 3);
 	Set_MonsterStat(0, sMaxMP, 0);
 	Set_MonsterStat(0, sMinDamage, 1);

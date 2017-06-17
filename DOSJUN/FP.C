@@ -1,5 +1,6 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
+#include <alloc.h>
 #include "gamelib.h"
 #include "dosjun.h"
 
@@ -27,6 +28,8 @@
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 bool redraw_fp;
+pcx_picture current_pic;
+bool picture_loaded = false;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -97,4 +100,35 @@ void Draw_FP(void)
 	}
 
 	redraw_fp = false;
+}
+
+void Delete_Picture(void)
+{
+	if (picture_loaded) {
+		picture_loaded = false;
+		PCX_Delete(&current_pic);
+	}
+}
+
+void Show_Picture(char *name)
+{
+	int x, y;
+	unsigned char *output, *input;
+	char filename[20];
+	sprintf(filename, "PICS\\%s.PCX", name);
+
+	Delete_Picture();
+	current_pic.buffer = farmalloc(128 * 128);
+	PCX_Load(filename, &current_pic, 0);
+
+	/* draw that thing */
+	output = &video_buffer[8 * SCREEN_WIDTH + 8];
+	input = current_pic.buffer;
+	for (y = 0; y < 128; y++) {
+		memcpy(output, input, 128);
+		input += 128;
+		output += SCREEN_WIDTH;
+	}
+
+	picture_loaded = true;
 }
