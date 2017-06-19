@@ -34,7 +34,7 @@ void Write_LengthString(char *string, FILE *fp)
 
 void IO_Error(char *message)
 {
-	printf(message);
+	printf("IO ERROR: %s", message);
 	exit(1);
 }
 

@@ -42,8 +42,8 @@ char Get_Y_Offset(direction dir)
 
 bool Is_Coord_Valid(coord x, coord y)
 {
-	if (x < 0 || x >= gZone.header.width) return false;
-	if (y < 0 || y >= gZone.header.height) return false;
+	if (x >= gZone.header.width) return false;
+	if (y >= gZone.header.height) return false;
 	return true;
 }
 
@@ -129,6 +129,11 @@ bool Try_Move_Forward(void)
 	coord ax, ay;
 
 	centre = Get_Wall(gSave.header.x, gSave.header.y, gSave.header.facing, rAhead);
+	if (centre == null) {
+		Show_Game_String("There's nothing to walk onto.", true);
+		return false;
+	}
+
 	if (centre->texture) {
 		switch (centre->type) {
 			case wtNormal:

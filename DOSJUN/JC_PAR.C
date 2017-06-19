@@ -130,6 +130,8 @@ noexport bool Save_Variable(jc_parser *p, jc_scope sc, char *name)
 			count = &p->temp_count;
 			if (*count == MAX_TEMPS) return Parse_Error(p, "Too many temps");
 			break;
+
+		case scConst: return true;
 	}
 
 	p->vars[p->var_count].scope = sc;
@@ -137,7 +139,7 @@ noexport bool Save_Variable(jc_parser *p, jc_scope sc, char *name)
 	p->vars[p->var_count].index = *count;
 
 	p->var_count++;
-	*count++;
+	(*count)++;
 
 	return true;
 }

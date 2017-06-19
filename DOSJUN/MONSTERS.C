@@ -9,6 +9,8 @@
 void Load_Monsters(char *filename, monsters *m)
 {
 	FILE *fp = fopen(filename, "rb");
+	if (!fp) IO_Error("Could not open monsters");
+
 	fread(&m->header, sizeof(monsters_header), 1, fp);
 	/* TODO: Check magic/version */
 
@@ -31,6 +33,7 @@ void Initialise_Monsters(monsters *m)
 void Save_Monsters(char *filename, monsters *m)
 {
 	FILE *fp = fopen(filename, "wb");
+	if (!fp) IO_Error("Could not open monsters for writing");
 
 	Set_Version_Header(m->header);
 	fwrite(&m->header, sizeof(monsters_header), 1, fp);

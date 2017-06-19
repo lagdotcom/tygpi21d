@@ -260,6 +260,8 @@ bool Tokenize_Code_String(char *source, jc_token *tokens, int *count)
 					case lsKeywordOrIdent:
 					case lsNumber:
 					case lsString:
+					case lsInternal:
+					case lsCommentStart:
 						ptr--;
 						/* FALL THROUGH */
 
@@ -269,6 +271,8 @@ bool Tokenize_Code_String(char *source, jc_token *tokens, int *count)
 						if (token_type == ttUnknown) Lex_Error("Unknown operator");
 						Lex_AddToken(token_type);
 						continue;
+
+					default: Lex_Error("Invalid character in operator");
 				}
 
 			default: Lex_Error("Unknown state");

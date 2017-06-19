@@ -15,8 +15,7 @@ bool Input_Number(int x, int y, int *number, int min, int max)
 {
 	int cx = 0,
 		cy = y,
-		i,
-		done = 0;
+		i;
 	char ch,
 		buffer[10];
 
@@ -29,7 +28,7 @@ bool Input_Number(int x, int y, int *number, int min, int max)
 	Blit_Char_DB(cx, cy, '_', 15, 0);
 	Show_Double_Buffer();
 
-	while (!done) {
+	while (true) {
 		/* TODO: cancel by hitting escape */
 		ch = getch();
 
@@ -73,15 +72,14 @@ bool Input_String(int x, int y, char *string, int max)
 {
 	int cx = x,
 		cy = y,
-		i = 0,
-		done = 0;
+		i = 0;
 	char ch;
 
 	string[i] = 0;
 	Blit_Char_DB(cx, cy, '_', 15, 0);
 	Show_Double_Buffer();
 
-	while (!done) {
+	while (true) {
 		ch = getch();
 
 		if (ch == '\r') {
@@ -121,15 +119,14 @@ bool Input_Multiline_String(int x, int y, char *string, int max)
 {
 	int cx = x,
 		cy = y,
-		i = 0,
-		done = 0;
+		i = 0;
 	char lastch = 0, ch;
 
 	string[i] = 0;
 	Blit_Char_DB(cx, cy, '_', 15, 0);
 	Show_Double_Buffer();
 
-	while (!done) {
+	while (true) {
 		ch = getch();
 
 		if (ch == '\r') {

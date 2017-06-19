@@ -25,11 +25,11 @@ void Draw_Character_Status(int index, int x, int y)
 	buffer[10] = 0;
 	Blit_String_DB(x, y, 15, buffer, 0);
 
-	sprintf(buffer, "%4d/%d", ch->stats[sHP], ch->stats[sMaxHP]);
+	sprintf(buffer, "%4u/%u", ch->stats[sHP], ch->stats[sMaxHP]);
 	Blit_String_DB(x, y + 8, 15, buffer, 0);
 
 	if (ch->stats[sMaxMP] > 0) {
-		sprintf(buffer, "%4d/%d", ch->stats[sMP], ch->stats[sMaxMP]);
+		sprintf(buffer, "%4u/%u", ch->stats[sMP], ch->stats[sMaxMP]);
 		Blit_String_DB(x, y + 16, 15, buffer, 0);
 	}
 }

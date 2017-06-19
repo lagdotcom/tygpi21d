@@ -286,7 +286,6 @@ noexport void Return(host *h)
 
 noexport void Combat(host *h)
 {
-	char buffer[300];
 	encounter_id combat = Pop_Stack(h);
 
 #ifdef TRACE_CODE
@@ -324,7 +323,6 @@ noexport void Text(host *h)
 noexport void Unlock(host *h)
 {
 	tile *tile;
-	char buffer[300];
 	coord x = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	direction dir = Pop_Stack(h);
@@ -341,7 +339,6 @@ noexport void Unlock(host *h)
 
 noexport void GiveItem(host *h)
 {
-	char buffer[300];
 	bool result;
 	int pc = Pop_Stack(h);
 	item_id item = Pop_Stack(h);
@@ -357,7 +354,6 @@ noexport void GiveItem(host *h)
 
 noexport void EquipItem(host *h)
 {
-	char buffer[300];
 	bool result;
 	int pc = Pop_Stack(h);
 	item_id item = Pop_Stack(h);

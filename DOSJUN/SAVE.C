@@ -16,6 +16,7 @@ void Load_Savefile(char *filename, save *s)
 {
 	int i;
 	FILE *fp = fopen(filename, "rb");
+	if (!fp) IO_Error("Could not open savefile");
 
 	fread(&s->header, sizeof(save_header), 1, fp);
 	/* TODO: Check magic/version */
@@ -47,6 +48,7 @@ void Save_Savefile(char *filename, save *s)
 {
 	int i;
 	FILE *fp = fopen(filename, "wb");
+	if (!fp) IO_Error("Could not open savefile for writing");
 
 	Set_Version_Header(s->header);
 	fwrite(&s->header, sizeof(save_header), 1, fp);

@@ -120,6 +120,7 @@ void Save_Zone(char *filename, zone *z)
 	int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "wb");
+	if (!fp) IO_Error("Could not open zone for writing");
 
 	Set_Version_Header(z->header);
 	fwrite(h, sizeof(zone_header), 1, fp);

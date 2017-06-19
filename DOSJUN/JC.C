@@ -96,8 +96,9 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 	FILE *fp;
 
 	printf("%s:\n", filename);
-
 	fp = fopen(filename, "r");
+	if (!fp) IO_Error("Could not open JC");
+
 	while (fgets(line, JC_LINE_LENGTH, fp)) {
 		line_no++;
 		success = Tokenize_Code_String(line, tokens, &count);
@@ -135,6 +136,7 @@ void Dump_Compiled_JC(jc_parser *p, char *filename)
 
 	printf("jcc: dumping progress to %s\n", filename);
 	fp = fopen(filename, "w");
+	if (!fp) IO_Error("Could not open jcc for writing");
 
 	for (i = 0; i < p->script_count; i++) {
 		fprintf(fp, "\n[%s]\n", p->scripts[i].name);

@@ -9,6 +9,7 @@
 void Load_Items(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "rb");
+	if (!fp) IO_Error("Could not open items");
 	fread(&i->header, sizeof(items_header), 1, fp);
 	/* TODO: Check magic/version */
 
@@ -31,6 +32,7 @@ void Initialise_Items(items *i)
 void Save_Items(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "wb");
+	if (!fp) IO_Error("Could not open items for writing");
 
 	Set_Version_Header(i->header);
 	fwrite(&i->header, sizeof(items_header), 1, fp);
