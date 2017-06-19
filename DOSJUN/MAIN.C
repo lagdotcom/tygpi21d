@@ -31,20 +31,20 @@ void Load_Campaign_Data()
 {
 	char buffer[13];
 
-	strcpy(buffer, S.header.campaign_name);
+	strcpy(buffer, gSave.header.campaign_name);
 	strcat(buffer, ".ITM");
-	Free_Items(&I);
-	Load_Items(buffer, &I);
+	Free_Items(&gItems);
+	Load_Items(buffer, &gItems);
 
-	strcpy(buffer, S.header.campaign_name);
+	strcpy(buffer, gSave.header.campaign_name);
 	strcat(buffer, ".MON");
-	Free_Monsters(&M);
-	Load_Monsters(buffer, &M);
+	Free_Monsters(&gMonsters);
+	Load_Monsters(buffer, &gMonsters);
 
-	strcpy(buffer, C.zones[S.header.zone]);
+	strcpy(buffer, gCampaign.zones[gSave.header.zone]);
 	strcat(buffer, ".ZON");
-	Free_Zone(&Z);
-	Load_Zone(buffer, &Z);
+	Free_Zone(&gZone);
+	Load_Zone(buffer, &gZone);
 }
 
 void Start_Campaign(char *name)
@@ -52,22 +52,22 @@ void Start_Campaign(char *name)
 	char buffer[13];
 	int i;
 
-	strncpy(S.header.campaign_name, name, 8);
+	strncpy(gSave.header.campaign_name, name, 8);
 
 	strcpy(buffer, name);
 	strcat(buffer, ".CMP");
-	Load_Campaign(buffer, &C);
+	Load_Campaign(buffer, &gCampaign);
 
-	S.header.zone = C.header.start_zone;
-	S.header.x = C.header.start_x;
-	S.header.y = C.header.start_y;
-	S.header.facing = C.header.start_facing;
-	S.header.num_zones = C.header.num_zones;
+	gSave.header.zone = gCampaign.header.start_zone;
+	gSave.header.x = gCampaign.header.start_x;
+	gSave.header.y = gCampaign.header.start_y;
+	gSave.header.facing = gCampaign.header.start_facing;
+	gSave.header.num_zones = gCampaign.header.num_zones;
 
-	S.script_globals = SzAlloc(MAX_GLOBALS, int, "Start_Campaign.globals");
-	S.script_locals = SzAlloc(S.header.num_zones, int *, "Start_Campaign.locals");
-	for (i = 0; i < S.header.num_zones; i++) {
-		S.script_locals[i] = SzAlloc(MAX_LOCALS, int, "Start_Campaign.locals[i]");
+	gSave.script_globals = SzAlloc(MAX_GLOBALS, int, "Start_Campaign.globals");
+	gSave.script_locals = SzAlloc(gSave.header.num_zones, int *, "Start_Campaign.locals");
+	for (i = 0; i < gSave.header.num_zones; i++) {
+		gSave.script_locals[i] = SzAlloc(MAX_LOCALS, int, "Start_Campaign.locals[i]");
 	}
 
 	Load_Campaign_Data();
@@ -81,37 +81,37 @@ void Start_New_Game()
 	Blit_String_DB(0,  8, 15, "those 'Escape the Room' games, so you", 0);
 	Blit_String_DB(0, 16, 15, "get together a group of friends and go", 0);
 	Blit_String_DB(0, 24, 15, "to a local one.", 0);
-	S.header.num_characters = 6;
+	gSave.header.num_characters = 6;
 
 	Blit_String_DB(0, 40, 15, "Who are you?", 0);
-	Input_String(104, 40, &S.characters[0].name, NAME_SIZE);
-	Initialise_Character(&S.characters[0], jBard,     8, 13, 13, 10, 0);
+	Input_String(104, 40, &gSave.characters[0].name, NAME_SIZE);
+	Initialise_Character(&gSave.characters[0], jBard,     8, 13, 13, 10, 0);
 
 	Blit_String_DB(0, 56, 15, "Who's the strong one?", 0);
-	Input_String(176, 56, &S.characters[1].name, NAME_SIZE);
-	Initialise_Character(&S.characters[1], jFighter, 14,  9, 11, 20, 0);
+	Input_String(176, 56, &gSave.characters[1].name, NAME_SIZE);
+	Initialise_Character(&gSave.characters[1], jFighter, 14,  9, 11, 20, 0);
 
 	Blit_String_DB(0, 72, 15, "Who's the nerd?", 0);
-	Input_String(128, 72, &S.characters[2].name, NAME_SIZE);
-	Initialise_Character(&S.characters[2], jMage,     9, 14, 11,  8, 8);
+	Input_String(128, 72, &gSave.characters[2].name, NAME_SIZE);
+	Initialise_Character(&gSave.characters[2], jMage,     9, 14, 11,  8, 8);
 
 	Blit_String_DB(0, 88, 15, "Who's kinda shifty?", 0);
-	Input_String(160, 88, &S.characters[3].name, NAME_SIZE);
-	Initialise_Character(&S.characters[3], jRogue,    9, 11, 14, 12, 0);
+	Input_String(160, 88, &gSave.characters[3].name, NAME_SIZE);
+	Initialise_Character(&gSave.characters[3], jRogue,    9, 11, 14, 12, 0);
 
 	Blit_String_DB(0, 104, 15, "Who cares a lot?", 0);
-	Input_String(136, 104, &S.characters[4].name, NAME_SIZE);
-	Initialise_Character(&S.characters[4], jCleric,  13, 13,  8, 14, 6);
+	Input_String(136, 104, &gSave.characters[4].name, NAME_SIZE);
+	Initialise_Character(&gSave.characters[4], jCleric,  13, 13,  8, 14, 6);
 
 	Blit_String_DB(0, 120, 15, "Who likes guns?", 0);
-	Input_String(128, 120, &S.characters[5].name, NAME_SIZE);
-	Initialise_Character(&S.characters[5], jRanger,  13,  8, 13, 13, 0);
+	Input_String(128, 120, &gSave.characters[5].name, NAME_SIZE);
+	Initialise_Character(&gSave.characters[5], jRanger,  13,  8, 13, 13, 0);
 
 	Start_Campaign("ETR");
-	G = gsDungeon;
+	gState = gsDungeon;
 	trigger_on_enter = true;
 
-	Save_Savefile("ETR.SAV", &S);
+	Save_Savefile("ETR.SAV", &gSave);
 }
 
 bool Load_Game()
@@ -128,14 +128,14 @@ bool Load_Game()
 	filenames = Get_Directory_Listing("*.SAV", &count);
 	choice = Input_Menu(filenames, count, 0, 0);
 
-	Load_Savefile(filenames[choice], &S);
+	Load_Savefile(filenames[choice], &gSave);
 
-	strcpy(buffer, S.header.campaign_name);
+	strcpy(buffer, gSave.header.campaign_name);
 	strcat(buffer, ".CMP");
-	Load_Campaign(buffer, &C);
+	Load_Campaign(buffer, &gCampaign);
 
 	Load_Campaign_Data();
-	G = gsDungeon;
+	gState = gsDungeon;
 	trigger_on_enter = false;
 
 	Free_Directory_Listing(filenames, count);
@@ -172,7 +172,7 @@ void Show_Main_Menu(void)
 				break;
 
 			case 2:
-				G = gsQuit;
+				gState = gsQuit;
 				done = true;
 				break;
 		}

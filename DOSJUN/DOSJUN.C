@@ -10,12 +10,12 @@
 
 pcx_picture explore_bg;
 
-campaign C;
-gamestate G;
-items I;
-monsters M;
-save S;
-zone Z;
+campaign gCampaign;
+gamestate gState;
+items gItems;
+monsters gMonsters;
+save gSave;
+zone gZone;
 
 bool redraw_description;
 bool trigger_on_enter;
@@ -42,8 +42,8 @@ char Get_Y_Offset(direction dir)
 
 bool Is_Coord_Valid(coord x, coord y)
 {
-	if (x < 0 || x >= Z.header.width) return false;
-	if (y < 0 || y >= Z.header.height) return false;
+	if (x < 0 || x >= gZone.header.width) return false;
+	if (y < 0 || y >= gZone.header.height) return false;
 	return true;
 }
 
@@ -52,13 +52,13 @@ tile* Get_Adjacent_Tile(coord x, coord y, direction dir, char multiple)
 	coord ax = x + Get_X_Offset(dir) * multiple;
 	coord ay = y + Get_Y_Offset(dir) * multiple;
 	
-	if (Is_Coord_Valid(ax, ay)) return TILE(Z, ax, ay);
+	if (Is_Coord_Valid(ax, ay)) return TILE(gZone, ax, ay);
 	return (tile*)null;
 }
 
 wall* Get_Wall(coord x, coord y, direction dir, relative rel)
 {
-	tile* under = TILE(Z, x, y);
+	tile* under = TILE(gZone, x, y);
 
 	switch (dir) {
 		case North:
@@ -113,11 +113,11 @@ void Show_Game_String(char *string, bool wait_for_key)
 
 void Draw_Description(void)
 {
-	tile* under = TILE(Z, S.header.x, S.header.y);
+	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
 
 	Draw_Square_DB(0, 12, 148, 12 + 37*8, 148 + 5*8, 1);
 	if (under->description > 0) {
-		Draw_Bounded_String(12, 148, 37, 5, 15, Z.strings[under->description - 1], 0);
+		Draw_Bounded_String(12, 148, 37, 5, 15, gZone.strings[under->description - 1], 0);
 	}
 
 	redraw_description = false;
@@ -128,7 +128,7 @@ bool Try_Move_Forward(void)
 	wall *centre;
 	coord ax, ay;
 
-	centre = Get_Wall(S.header.x, S.header.y, S.header.facing, rAhead);
+	centre = Get_Wall(gSave.header.x, gSave.header.y, gSave.header.facing, rAhead);
 	if (centre->texture) {
 		switch (centre->type) {
 			case wtNormal:
@@ -141,11 +141,11 @@ bool Try_Move_Forward(void)
 		}
 	}
 
-	ax = S.header.x + Get_X_Offset(S.header.facing);
-	ay = S.header.y + Get_Y_Offset(S.header.facing);
+	ax = gSave.header.x + Get_X_Offset(gSave.header.facing);
+	ay = gSave.header.y + Get_Y_Offset(gSave.header.facing);
 
-	S.header.x = ax;
-	S.header.y = ay;
+	gSave.header.x = ax;
+	gSave.header.y = ay;
 	redraw_description = true;
 	redraw_fp = true;
 	trigger_on_enter = true;
@@ -155,7 +155,7 @@ bool Try_Move_Forward(void)
 
 void Trigger_Enter_Script(void)
 {
-	tile* under = TILE(Z, S.header.x, S.header.y);
+	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
 
 	if (under->on_enter) {
 		Run_Code(under->on_enter - 1);
@@ -190,20 +190,20 @@ void Show_Dungeon_Screen(void)
 
 		switch (Get_Next_Scan_Code()) {
 			case SCAN_Q:
-				G = gsQuit;
+				gState = gsQuit;
 				done = 1;
 				break;
 
 			case SCAN_LEFT:
-				if (S.header.facing == North) S.header.facing = West;
-				else S.header.facing--;
+				if (gSave.header.facing == North) gSave.header.facing = West;
+				else gSave.header.facing--;
 				trigger_on_enter = true;
 				redraw_fp = true;
 				break;
 
 			case SCAN_RIGHT:
-				if (S.header.facing == West) S.header.facing = North;
-				else S.header.facing++;
+				if (gSave.header.facing == West) gSave.header.facing = North;
+				else gSave.header.facing++;
 				trigger_on_enter = true;
 				redraw_fp = true;
 				break;
@@ -221,11 +221,11 @@ void Show_Dungeon_Screen(void)
 void main(void)
 {
 	printf("Initialising DOSJUN...");
-	Initialise_Campaign(&C);
-	Initialise_Items(&I);
-	Initialise_Monsters(&M);
-	Initialise_Savefile(&S);
-	Initialise_Zone(&Z);
+	Initialise_Campaign(&gCampaign);
+	Initialise_Items(&gItems);
+	Initialise_Monsters(&gMonsters);
+	Initialise_Savefile(&gSave);
+	Initialise_Zone(&gZone);
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
 		printf("\nNot enough memory to create double buffer.");
@@ -236,10 +236,10 @@ void main(void)
 
 	Set_Video_Mode(VGA256);
 
-	G = gsMainMenu;
+	gState = gsMainMenu;
 
-	while (G != gsQuit) {
-		switch (G) {
+	while (gState != gsQuit) {
+		switch (gState) {
 			case gsMainMenu:
 				Show_Main_Menu();
 				break;
@@ -254,11 +254,11 @@ void main(void)
 
 	printf("Cleaning up after DOSJUN...");
 
-	Free_Campaign(&C);
-	Free_Items(&I);
-	Free_Monsters(&M);
-	Free_Savefile(&S);
-	Free_Zone(&Z);
+	Free_Campaign(&gCampaign);
+	Free_Items(&gItems);
+	Free_Monsters(&gMonsters);
+	Free_Savefile(&gSave);
+	Free_Zone(&gZone);
 	Delete_Picture();
 
 	Delete_Double_Buffer();

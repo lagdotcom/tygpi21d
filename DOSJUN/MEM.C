@@ -18,17 +18,24 @@ typedef struct {
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-int entry_count = 0;
-int allocated_entries = 0;
+unsigned int entry_count = 0;
+unsigned int allocated_entries = 0;
 entry *entries = null;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 noexport void Add_Entry(void *mem, size_t size, char *tag)
 {
+	entry *old_entries = entries;
 	if (entry_count == allocated_entries) {
 		allocated_entries += 20;
-		entries = realloc(entries, sizeof(entry) * allocated_entries);
+		entries = realloc(old_entries, sizeof(entry) * allocated_entries);
+		if (!entries) {
+			printf("MEM: Could not allocate another entry.");
+			Stop_Memory_Tracking();
+			abort();
+			return;
+		}
 	}
 
 	entries[entry_count].tag = tag;
@@ -90,6 +97,12 @@ void *Reallocate(void *mem, size_t count, size_t size, char *tag)
 char *Duplicate_String(const char *src, char *tag)
 {
 	void *mem = Allocate(strlen(src) + 1, sizeof(char), tag);
+	if (!mem) {
+		printf("MEM: Duplicate_String[%s] failed on: %s", tag, src);
+		Stop_Memory_Tracking();
+		abort();
+		return null;
+	}
 	strcpy(mem, src);
 	return mem;
 }
@@ -106,15 +119,15 @@ void Free(void *mem)
 
 void Stop_Memory_Tracking(void)
 {
-	int i;
+	unsigned int i;
 	for (i = 0; i < entry_count; i++) {
 		if (entries[i].freed == false) {
-			printf("#%d [%s]: @%p, %d bytes not freed\n", i, entries[i].tag, entries[i].address, entries[i].size);
+			printf("#%u [%s]: @%p, %u bytes not freed\n", i, entries[i].tag, entries[i].address, entries[i].size);
 			free(entries[i].address);
 		}
 	}
 
-	printf("Tracked %d memory entries overall.\n", entry_count);
+	printf("Tracked %u memory entries overall.\n", entry_count);
 
 	free(entries);
 }

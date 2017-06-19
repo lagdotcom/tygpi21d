@@ -176,6 +176,9 @@ void Demo_Zone(char *filename)
 	z.encounters = SzAlloc(1, encounter, "Demo_Zone.encounters");
 	Set_Encounter( 0, 0, RAT, 1, 3);
 
+	z.header.num_etables = 0;
+	z.etables = null;
+
 	z.header.num_code_strings = 0;
 	z.code_strings = null;
 

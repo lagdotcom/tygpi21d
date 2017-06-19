@@ -22,9 +22,9 @@ typedef enum {
 
 pcx_picture explore_bg;
 jc_parser parser;
-zone Z;
-items I;
-monsters M;
+zone gZone;
+items gItems;
+monsters gMonsters;
 
 char *zone_filename;
 bool redraw_details, redraw_zone, clear_screen;
@@ -51,7 +51,7 @@ void Save_Zone(char *filename, zone *z);
 
 void Draw_Tile(coord x, coord y)
 {
-	tile* t = TILE(Z, x, y);
+	tile* t = TILE(gZone, x, y);
 
 	if (x == sel_x && y == sel_y) {
 		Draw_Square_DB(15, TX, TY, TX + 6, TY + 6, 0);
@@ -70,8 +70,8 @@ void Draw_Zone(void)
 {
 	int x, y;
 
-	for (x = 0; x < Z.header.width; x++) {
-		for (y = 0; y < Z.header.height; y++) {
+	for (x = 0; x < gZone.header.width; x++) {
+		for (y = 0; y < gZone.header.height; y++) {
 			Draw_Tile(x, y);
 		}
 	}
@@ -120,7 +120,7 @@ void Draw_Wall(tile *t, direction dir, int y)
 
 void Draw_Details(void)
 {
-	tile* t = TILE(Z, sel_x, sel_y);
+	tile* t = TILE(gZone, sel_x, sel_y);
 	char buf[100];
 
 	sprintf(buf, "%3d,%-3d", sel_x, sel_y);
@@ -137,22 +137,22 @@ void Draw_Details(void)
 	Draw_Wall(t, South, 64);
 	Draw_Wall(t, West,  72);
 
-	sprintf(buf, "D: %5d", t->description);
+	sprintf(buf, "D: %5u", t->description);
 	Blit_String_DB(DX, 88, 15, buf, 0);
 	Draw_Square_DB(0, 8, 160, 8 + 38*8, 160 + 4*8, 1);
 	if (t->description)
-		Draw_Bounded_String(8, 160, 38, 4, 15, Z.strings[t->description - 1], 0);
+		Draw_Bounded_String(8, 160, 38, 4, 15, gZone.strings[t->description - 1], 0);
 
 	if (t->on_enter) {
 		if (parser.script_count) sprintf(buf, "S: %6s", parser.scripts[t->on_enter - 1].name);
-		else sprintf(buf, "S: #%-4d", t->on_enter - 1);
+		else sprintf(buf, "S: #%-4u", t->on_enter - 1);
 		Blit_String_DB(DX, 96, 15, buf, 0);
 	} else {
 		Blit_String_DB(DX, 96, 15, "         ", 0);
 	}
 
 	if (t->etable) {
-		sprintf(buf, "E: #%-4d", t->etable - 1);
+		sprintf(buf, "E: #%-4u", t->etable - 1);
 		Blit_String_DB(DX, 104, 15, buf, 0);
 	} else {
 		Blit_String_DB(DX, 104, 15, "         ", 0);
@@ -181,7 +181,7 @@ bool Get_Colour(colour *value)
 
 void Change_Ceiling()
 {
-	if (Get_Colour(&TILE(Z, sel_x, sel_y)->ceil)) {
+	if (Get_Colour(&TILE(gZone, sel_x, sel_y)->ceil)) {
 		Draw_Tile(sel_x, sel_y);
 		redraw_details = true;
 	}
@@ -189,7 +189,7 @@ void Change_Ceiling()
 
 void Change_Floor()
 {
-	if (Get_Colour(&TILE(Z, sel_x, sel_y)->floor)) {
+	if (Get_Colour(&TILE(gZone, sel_x, sel_y)->floor)) {
 		Draw_Tile(sel_x, sel_y);
 		redraw_details = true;
 	}
@@ -197,7 +197,7 @@ void Change_Floor()
 
 void Change_Wall(direction dir)
 {
-	if (Get_Colour(&TILE(Z, sel_x, sel_y)->walls[dir].texture)) {
+	if (Get_Colour(&TILE(gZone, sel_x, sel_y)->walls[dir].texture)) {
 		Draw_Tile(sel_x, sel_y);
 		redraw_details = true;
 	}
@@ -205,7 +205,7 @@ void Change_Wall(direction dir)
 
 void Change_Door(direction dir)
 {
-	wall *w = &(TILE(Z, sel_x, sel_y)->walls[dir]);
+	wall *w = &(TILE(gZone, sel_x, sel_y)->walls[dir]);
 
 	w->type++;
 	if (w->type > wtLockedDoor) w->type = wtNormal;
@@ -220,12 +220,12 @@ string_id Add_Description(void)
 
 	Draw_Square_DB(0, 8, 8, 39*8, 88, true);
 	Blit_String_DB(8, 8, 15, "- Hit enter twice to finish:", 0);
+	clear_screen = true;
 	if (Input_Multiline_String(8, 16, buffer, MAX_STRING_LIST)) {
-		/* TODO: account for adding a string after importing code */
-		Z.strings = Reallocate(Z.strings, Z.header.num_strings + 1, sizeof(char *), "Add_Description.strings");
-		Z.strings[Z.header.num_strings] = Duplicate_String(buffer, "Add_Description.strings[i]");
-		Z.header.num_strings++;
-		return Z.header.num_strings;
+		gZone.strings = Reallocate(gZone.strings, gZone.header.num_strings + 1, sizeof(char *), "Add_Description.strings");
+		gZone.strings[gZone.header.num_strings] = Duplicate_String(buffer, "Add_Description.strings[i]");
+		gZone.header.num_strings++;
+		return gZone.header.num_strings;
 	}
 
 	return 0;
@@ -245,7 +245,9 @@ int Input_Scroller_Menu(char **options, int count)
 	clear_screen = true;
 
 	while (true) {
-		Draw_Square_DB(0, 8, 8, 39*8, 88, true);
+		Draw_Square_DB(0, 4, 4, 39*8 + 4, 92, true);
+		Draw_Square_DB(15, 4, 4, 39*8 + 4, 92, false);
+		Draw_Square_DB(15, 6, 6, 39*8 + 2, 90, false);
 		for (i = 0; i < PER_MENU_PAGE; i++) {
 			if (offset + i >= count) break;
 
@@ -254,6 +256,11 @@ int Input_Scroller_Menu(char **options, int count)
 
 			Blit_String_DB(8, 8 + i*8, 15, buffer, 0);
 		}
+
+		#define _num_scan(n, sc) \
+			case sc: \
+				if (i <= n) continue; \
+				return offset + n;
 
 		Show_Double_Buffer();
 		switch (Get_Next_Scan_Code()) {
@@ -269,20 +276,23 @@ int Input_Scroller_Menu(char **options, int count)
 				}
 				break;
 
-			case SCAN_ESC:	return MENU_CANCEL;
+			case SCAN_ESC:
+			case SCAN_Q:	return MENU_CANCEL;
+
 			case SCAN_DEL:	return MENU_DELETE;
+
 			case SCAN_INS:	return MENU_ADD;
 
 			case SCAN_0: return offset;
-			case SCAN_1: return offset + 1;
-			case SCAN_2: return offset + 2;
-			case SCAN_3: return offset + 3;
-			case SCAN_4: return offset + 4;
-			case SCAN_5: return offset + 5;
-			case SCAN_6: return offset + 6;
-			case SCAN_7: return offset + 7;
-			case SCAN_8: return offset + 8;
-			case SCAN_9: return offset + 9;
+			_num_scan(1, SCAN_1)
+			_num_scan(2, SCAN_2)
+			_num_scan(3, SCAN_3)
+			_num_scan(4, SCAN_4)
+			_num_scan(5, SCAN_5)
+			_num_scan(6, SCAN_6)
+			_num_scan(7, SCAN_7)
+			_num_scan(8, SCAN_8)
+			_num_scan(9, SCAN_9)
 		}
 	}
 }
@@ -290,14 +300,14 @@ int Input_Scroller_Menu(char **options, int count)
 void Change_Description(void)
 {
 	int result;
-	tile *under = TILE(Z, sel_x, sel_y);
+	tile *under = TILE(gZone, sel_x, sel_y);
 
-	if (Z.header.num_strings == 0) {
+	if (gZone.header.num_strings == 0) {
 		under->description = Add_Description();
 		return;
 	}
 
-	switch (result = Input_Scroller_Menu(Z.strings, Z.header.num_strings)) {
+	switch (result = Input_Scroller_Menu(gZone.strings, gZone.header.num_strings)) {
 		case MENU_CANCEL: return;
 
 		case MENU_DELETE:
@@ -319,15 +329,15 @@ void Import_Code_Strings(void)
 	int i;
 
 	/* In case we're re-importing, free old string entries */
-	for (i = 0; i < Z.header.num_code_strings; i++) {
-		Free(Z.code_strings[i]);
+	for (i = 0; i < gZone.header.num_code_strings; i++) {
+		Free(gZone.code_strings[i]);
 	}
 
 	/* Import strings */
-	Z.header.num_code_strings = parser.string_count;
-	Z.code_strings = Reallocate(Z.code_strings, parser.string_count, sizeof(char *), "Import_Code_Strings.code_strings");
+	gZone.header.num_code_strings = parser.string_count;
+	gZone.code_strings = Reallocate(gZone.code_strings, parser.string_count, sizeof(char *), "Import_Code_Strings.code_strings");
 	for (i = 0; i < parser.string_count; i++) {
-		Z.code_strings[i] = Duplicate_String(parser.strings[i], "Import_Code_Strings.code_strings[i]");
+		gZone.code_strings[i] = Duplicate_String(parser.strings[i], "Import_Code_Strings.code_strings[i]");
 	}
 }
 
@@ -337,19 +347,19 @@ void Import_Code_Scripts(void)
 	bytecode *code;
 
 	/* Free old scripts */
-	for (i = 0; i < Z.header.num_scripts; i++) {
-		Free(Z.scripts[i]);
+	for (i = 0; i < gZone.header.num_scripts; i++) {
+		Free(gZone.scripts[i]);
 	}
 
 	/* Import scripts */
-	Z.header.num_scripts = parser.script_count;
-	Z.scripts = Reallocate(Z.scripts, parser.script_count, sizeof(bytecode *), "Import_Code_Scripts.scripts");
-	Z.script_lengths = Reallocate(Z.script_lengths, parser.script_count, sizeof(length), "Import_Code_Scripts.script_lengths");
+	gZone.header.num_scripts = parser.script_count;
+	gZone.scripts = Reallocate(gZone.scripts, parser.script_count, sizeof(bytecode *), "Import_Code_Scripts.scripts");
+	gZone.script_lengths = Reallocate(gZone.script_lengths, parser.script_count, sizeof(length), "Import_Code_Scripts.script_lengths");
 	for (i = 0; i < parser.script_count; i++) {
-		Z.script_lengths[i] = parser.scripts[i].size;
+		gZone.script_lengths[i] = parser.scripts[i].size;
 		code = SzAlloc(parser.scripts[i].size, bytecode, "Import_Code_Scripts.code");
 		memcpy(code, parser.scripts[i].code, parser.scripts[i].size);
-		Z.scripts[i] = code;
+		gZone.scripts[i] = code;
 	}
 }
 
@@ -409,7 +419,7 @@ void Change_Script(script_id *script)
 
 void Change_Enter_Script(void)
 {
-	tile *under = TILE(Z, sel_x, sel_y);
+	tile *under = TILE(gZone, sel_x, sel_y);
 
 	Change_Script(&under->on_enter);
 }
@@ -418,14 +428,14 @@ char *Describe_Encounter(encounter_id id)
 {
 	char buffer[1000],
 		buffer2[1000];
-	encounter *en = &Z.encounters[id];
+	encounter *en = &gZone.encounters[id];
 	monster *m;
 	int i;
 
 	buffer[0] = 0;
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
 		if (en->monsters[i] == 0) continue;
-		m = Lookup_Monster(&M, en->monsters[i]);
+		m = Lookup_Monster(&gMonsters, en->monsters[i]);
 
 		if (m == null) sprintf(buffer2, "%d-%dx??? ", en->minimum[i], en->maximum[i]);
 		else sprintf(buffer2, "%d-%dx%s ", en->minimum[i], en->maximum[i], m->name);
@@ -433,32 +443,47 @@ char *Describe_Encounter(encounter_id id)
 		strcat(buffer, buffer2);
 	}
 
-	return buffer;
+	return Duplicate_String(buffer, "Describe_Encounter");
+}
+
+monster_id Choose_Monster(monster_id current)
+{
+	char **menu;
+	int i, result;
+
+	menu = SzAlloc(gMonsters.header.num_monsters, char *, "Choose_Monster");
+	for (i = 0; i < gMonsters.header.num_monsters; i++) {
+		/* note: not strdup */
+		menu[i] = gMonsters.monsters[i].name;
+	}
+
+	Fill_Double_Buffer(0);
+	switch (result = Input_Scroller_Menu(menu, gMonsters.header.num_monsters)) {
+		case MENU_ADD:
+		case MENU_CANCEL:
+			result = current;
+			break;
+
+		case MENU_DELETE:
+			result = 0;
+			break;
+
+		default:
+			result = gMonsters.monsters[result].id;
+			break;
+	}
+
+	Free(menu);
+	return result;
 }
 
 void Edit_Encounter(encounter_id id)
 {
-	/* TODO */
-}
-
-void New_Encounter(encounter_id *id)
-{
-	*id = Z.header.num_encounters;
-
-	Z.header.num_encounters++;
-	Z.encounters = Reallocate(Z.encounters, Z.header.num_encounters, sizeof(encounter), "New_Encounter");
-
-	Edit_Encounter(*id);
-}
-
-void Edit_EncounterTable(etable_id id)
-{
 	char buffer[100];
 	unsigned char scan;
-	int cursor,
-		i;
+	int cursor, i, result;
 	bool redraw = true;
-	etable *et = &Z.etables[id];
+	encounter *en = &gZone.encounters[id];
 
 	clear_screen = true;
 	cursor = 0;
@@ -468,11 +493,103 @@ void Edit_EncounterTable(etable_id id)
 			redraw = false;
 			Fill_Double_Buffer(0);
 
-			sprintf(buffer, "Editing etable #%d", id);
+			sprintf(buffer, "Editing encounter #%u", id);
 			Blit_String_DB(0, 0, 15, buffer, 0);
 
-			for (i = 0; i < et->possibilities; i++) {
-				sprintf(buffer, "%d%%: %s", et->percentages[i], Describe_Encounter(et->encounters[i]));
+			for (i = 0; i < ENCOUNTER_SIZE; i++) {
+				sprintf(buffer, "%d-%dx#%u", en->minimum[i], en->maximum[i], en->monsters[i]);
+				Blit_String_DB(8, 16 + i*8, 15, buffer, 0);
+			}
+			Blit_Char_DB(0, 16 + cursor*8, '>', 15, 0);
+
+			Blit_String_DB(0, 100, 15, "Press < to edit minimum.", 0);
+			Blit_String_DB(0, 108, 15, "Press > to edit maximum.", 0);
+			Blit_String_DB(0, 116, 15, "Press enter to edit monster.", 0);
+		}
+
+		Show_Double_Buffer();
+
+		scan = Get_Next_Scan_Code();
+		switch (scan) {
+			case SCAN_ESC:
+			case SCAN_Q: return;
+
+			case SCAN_DOWN:
+				Blit_Char_DB(0, 16 + cursor*8, ' ', 15, 0);
+				cursor++;
+				if (cursor >= ENCOUNTER_SIZE) cursor = 0;
+				Blit_Char_DB(0, 16 + cursor*8, '>', 15, 0);
+				break;
+
+			case SCAN_UP:
+				Blit_Char_DB(0, 16 + cursor*8, ' ', 15, 0);
+				cursor--;
+				if (cursor < 0) cursor = ENCOUNTER_SIZE - 1;
+				Blit_Char_DB(0, 16 + cursor*8, '>', 15, 0);
+				break;
+
+			case SCAN_COMMA:
+				result = en->minimum[cursor];
+				if (Input_Number(0, 130, &result, 0, 255)) {
+					en->minimum[cursor] = result;
+					redraw = true;
+				}
+				break;
+
+			case SCAN_PERIOD:
+				result = en->maximum[cursor];
+				if (Input_Number(0, 130, &result, 0, 255)) {
+					en->maximum[cursor] = result;
+					redraw = true;
+				}
+				break;
+
+			case SCAN_ENTER:
+				result = Choose_Monster(en->monsters[cursor]);
+				if (result) {
+					en->monsters[cursor] = result;
+				}
+				redraw = true;
+				break;
+		}
+	}
+}
+
+void New_Encounter(encounter_id *id)
+{
+	*id = gZone.header.num_encounters;
+
+	gZone.header.num_encounters++;
+	gZone.encounters = Reallocate(gZone.encounters, gZone.header.num_encounters, sizeof(encounter), "New_Encounter");
+
+	memset(&gZone.encounters[*id], 0, sizeof(encounter));
+	Edit_Encounter(*id);
+}
+
+void Edit_EncounterTable(etable_id id)
+{
+	char buffer[100];
+	char *temp;
+	unsigned char scan;
+	int cursor, i;
+	bool redraw = true;
+	etable *et = &gZone.etables[id];
+
+	clear_screen = true;
+	cursor = 0;
+
+	while (true) {
+		if (redraw) {
+			redraw = false;
+			Fill_Double_Buffer(0);
+
+			sprintf(buffer, "Editing etable #%u", id);
+			Blit_String_DB(0, 0, 15, buffer, 0);
+
+			for (i = 0; i < et->possibilities && i < ENCOUNTER_SIZE; i++) {
+				temp = Describe_Encounter(et->encounters[i]);
+				sprintf(buffer, "%d%%: %s", et->percentages[i], temp);
+				Free(temp);
 				Blit_String_DB(8, 16 + i*8, 15, buffer, 0);
 			}
 			Blit_Char_DB(0, 16 + cursor*8, '>', 15, 0);
@@ -485,6 +602,7 @@ void Edit_EncounterTable(etable_id id)
 
 		scan = Get_Next_Scan_Code();
 		switch (scan) {
+			case SCAN_ESC:
 			case SCAN_Q: return;
 
 			case SCAN_DOWN:
@@ -499,6 +617,11 @@ void Edit_EncounterTable(etable_id id)
 				cursor--;
 				if (cursor < 0) cursor = et->possibilities - 1;
 				Blit_Char_DB(0, 16 + cursor*8, '>', 15, 0);
+				break;
+
+			case SCAN_E:
+				Edit_Encounter(et->encounters[cursor]);
+				redraw = true;
 				break;
 
 			case SCAN_EQUALS:
@@ -520,17 +643,13 @@ void Edit_EncounterTable(etable_id id)
 
 void New_EncounterTable(etable_id *id)
 {
-	*id = Z.header.num_etables;
+	*id = gZone.header.num_etables;
 
-	Z.header.num_etables++;
-	Z.etables = Reallocate(Z.etables, Z.header.num_etables, sizeof(etable), "New_EncounterTable");
-	Z.etables[*id].possibilities = 1;
+	gZone.header.num_etables++;
+	gZone.etables = Reallocate(gZone.etables, gZone.header.num_etables, sizeof(etable), "New_EncounterTable");
+	gZone.etables[*id].possibilities = 1;
 
-	if (Z.header.num_encounters == 0) {
-		New_Encounter(&Z.etables[*id].encounters[0]);
-		Z.etables[*id].percentages[0] = 100;
-	}
-
+	memset(&gZone.etables[*id], 0, sizeof(etable));
 	Edit_EncounterTable(*id);
 }
 
@@ -538,7 +657,7 @@ char *Describe_EncounterTable(etable_id id)
 {
 	char buffer[1000],
 		buffer2[1000];
-	etable *et = &Z.etables[id];
+	etable *et = &gZone.etables[id];
 	int i;
 
 	buffer[0] = 0;
@@ -547,7 +666,7 @@ char *Describe_EncounterTable(etable_id id)
 		strcat(buffer, buffer2);
 	}
 
-	return buffer;
+	return Duplicate_String(buffer, "Describe_EncounterTable");
 }
 
 void Change_EncounterTable(void)
@@ -555,19 +674,19 @@ void Change_EncounterTable(void)
 	char **menu;
 	int result,
 		i;
-	tile *under = TILE(Z, sel_x, sel_y);
+	tile *under = TILE(gZone, sel_x, sel_y);
 
-	if (Z.header.num_etables == 0) {
+	if (gZone.header.num_etables == 0) {
 		New_EncounterTable(&under->etable);
 		return;
 	}
 
-	menu = SzAlloc(Z.header.num_etables, char *, "Change_EncounterTable");
-	for (i = 0; i < Z.header.num_etables; i++) {
-		menu[i] = strdup(Describe_EncounterTable(i));
+	menu = SzAlloc(gZone.header.num_etables, char *, "Change_EncounterTable");
+	for (i = 0; i < gZone.header.num_etables; i++) {
+		menu[i] = Describe_EncounterTable(i);
 	}
 
-	switch (result = Input_Scroller_Menu(menu, Z.header.num_etables)) {
+	switch (result = Input_Scroller_Menu(menu, gZone.header.num_etables)) {
 		case MENU_CANCEL:
 			break;
 
@@ -582,11 +701,12 @@ void Change_EncounterTable(void)
 
 		default:
 			under->etable = result + 1;
+			Edit_EncounterTable(result);
 			redraw_details = true;
 			break;
 	}
 
-	for (i = 0; i < Z.header.num_etables; i++) {
+	for (i = 0; i < gZone.header.num_etables; i++) {
 		Free(menu[i]);
 	}
 	Free(menu);
@@ -635,7 +755,7 @@ void Main_Editor_Loop(void)
 				break;
 
 			case SCAN_SPACE:
-				Save_Zone(zone_filename, &Z);
+				Save_Zone(zone_filename, &gZone);
 				Blit_String_DB(100, 100, 15, "SAVED!", 0);
 				break;
 
@@ -649,7 +769,7 @@ void Main_Editor_Loop(void)
 				break;
 
 			case SCAN_RIGHT:
-				if (sel_x < (Z.header.width - 1)) {
+				if (sel_x < (gZone.header.width - 1)) {
 					sel_x++;
 					Draw_Tile(sel_x - 1, sel_y);
 					Draw_Tile(sel_x, sel_y);
@@ -667,7 +787,7 @@ void Main_Editor_Loop(void)
 				break;
 
 			case SCAN_DOWN:
-				if (sel_y < (Z.header.height - 1)) {
+				if (sel_y < (gZone.header.height - 1)) {
 					sel_y++;
 					Draw_Tile(sel_x, sel_y - 1);
 					Draw_Tile(sel_x, sel_y);
@@ -728,34 +848,34 @@ void Create_Zone(void)
 	char buffer[100];
 	coord size;
 
-	Initialise_Zone(&Z);
+	Initialise_Zone(&gZone);
 	printf("Creating new zone file.\n");
 
 	printf("Zone Name: ");
-	scanf("%8s", &buffer);
+	scanf("%8s", buffer);
 	strcat(buffer, ".ZON");
 	zone_filename = Duplicate_String(buffer, "Create_Zone.name");
 	printf("Zone filename: %s\n", zone_filename);
 
 	printf("Campaign Name: ");
-	scanf("%8s", &buffer);
-	strncpy(Z.header.campaign_name, buffer, 8);
+	scanf("%8s", buffer);
+	strncpy(gZone.header.campaign_name, buffer, 8);
 
 	printf("Width: ");
 	scanf("%hhu", &size);
-	Z.header.width = size;
+	gZone.header.width = size;
 
 	printf("Height: ");
 	scanf("%hhu", &size);
-	Z.header.height = size;
+	gZone.header.height = size;
 
-	Z.tiles = SzAlloc(Z.header.width * Z.header.height, tile, "Create_Zone.tiles");
+	gZone.tiles = SzAlloc(gZone.header.width * gZone.header.height, tile, "Create_Zone.tiles");
 }
 
 void Edit_Zone(char *filename)
 {
 	printf("Loading zone: %s\n", filename);
-	Load_Zone(filename, &Z);
+	Load_Zone(filename, &gZone);
 
 	zone_filename = Duplicate_String(filename, "Edit_Zone.name");
 }
@@ -764,13 +884,13 @@ void Load_Tables(void)
 {
 	char filename[13];
 
-	strncpy(filename, Z.header.campaign_name, 8);
+	strncpy(filename, gZone.header.campaign_name, 8);
 	strcat(filename, ".ITM");
-	Load_Items(filename, &I);
+	Load_Items(filename, &gItems);
 
-	strncpy(filename, Z.header.campaign_name, 8);
+	strncpy(filename, gZone.header.campaign_name, 8);
 	strcat(filename, ".MON");
-	Load_Monsters(filename, &M);
+	Load_Monsters(filename, &gMonsters);
 }
 
 void main(int argc, char **argv)
@@ -803,10 +923,10 @@ void main(int argc, char **argv)
 	Set_Video_Mode(TEXT_MODE);
 	Delete_Double_Buffer();
 
-	Free_Zone(&Z);
+	Free_Zone(&gZone);
 	Free_Parser(&parser);
-	Free_Items(&I);
-	Free_Monsters(&M);
+	Free_Items(&gItems);
+	Free_Monsters(&gMonsters);
 	Free(zone_filename);
 
 	Stop_Memory_Tracking();

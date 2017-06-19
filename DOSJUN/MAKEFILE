@@ -18,7 +18,7 @@ demo: $(DEMO_OBJS)
 	MKDEMO
 
 jcc: $(JCC_OBJS)
-	TCC $(CFLAGS) $(JCC_OBJS)
+	TCC $(CFLAGS) $(JCC_OBJS) DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
 campaign.obj: campaign.c $(HEADERS)
 	TCC $(CFLAGS) -c campaign.c

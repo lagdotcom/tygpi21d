@@ -38,7 +38,7 @@ bool Draw_FP_Tile(coord x, coord y, char ps, char pe, char cmod)
 	tile *under;
 	wall *left, *right, *centre;
 
-	under = TILE(Z, x, y);
+	under = TILE(gZone, x, y);
 	if (under->floor) {
 		Draw_HorzTrapezium_DB(under->floor + cmod, XA, XB, XC - 1, XD + 1, YB, YD + 1, FILLED);
 	}
@@ -47,17 +47,17 @@ bool Draw_FP_Tile(coord x, coord y, char ps, char pe, char cmod)
 		Draw_HorzTrapezium_DB(under->ceil + cmod, XA, XB, XC - 1, XD + 1, YA, YC - 1, FILLED);
 	}
 
-	left = Get_Wall(x, y, S.header.facing, rLeft);
+	left = Get_Wall(x, y, gSave.header.facing, rLeft);
 	if (left->texture) {
 		Draw_VertTrapezium_DB(left->texture + cmod, XA, XC - 1, YA + 1, YB - 1, YC + 1, YD - 1, FILLED);
 	}
 
-	right = Get_Wall(x, y, S.header.facing, rRight);
+	right = Get_Wall(x, y, gSave.header.facing, rRight);
 	if (right->texture) {
 		Draw_VertTrapezium_DB(right->texture + cmod, XB, XD + 1, YA + 1, YB - 1, YC + 1, YD - 1, FILLED);
 	}
 
-	centre = Get_Wall(x, y, S.header.facing, rAhead);
+	centre = Get_Wall(x, y, gSave.header.facing, rAhead);
 	if (centre->texture) {
 		Draw_Square_DB(centre->texture + cmod, XC, YC, XD, YD, FILLED);
 
@@ -84,12 +84,12 @@ void Draw_FP(void)
 
 	Clear_FP();
 
-	ox = Get_X_Offset(S.header.facing);
-	oy = Get_Y_Offset(S.header.facing);
+	ox = Get_X_Offset(gSave.header.facing);
+	oy = Get_Y_Offset(gSave.header.facing);
 
-	if (Draw_FP_Tile(S.header.x, S.header.y, 0, P1, 0)) {
-		x = S.header.x + ox;
-		y = S.header.y + oy;
+	if (Draw_FP_Tile(gSave.header.x, gSave.header.y, 0, P1, 0)) {
+		x = gSave.header.x + ox;
+		y = gSave.header.y + oy;
 
 		if (Draw_FP_Tile(x, y, P1, P2, 16)) {
 			x += ox;

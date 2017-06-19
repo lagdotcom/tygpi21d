@@ -107,15 +107,15 @@ noexport void Push_Internal(host *h)
 
 	switch (index) {
 		case internalX:
-			Push_Stack(h, S.header.x);
+			Push_Stack(h, gSave.header.x);
 			return;
 
 		case internalY:
-			Push_Stack(h, S.header.y);
+			Push_Stack(h, gSave.header.y);
 			return;
 
 		case internalFacing:
-			Push_Stack(h, S.header.facing);
+			Push_Stack(h, gSave.header.facing);
 			return;
 	}
 
@@ -306,7 +306,7 @@ noexport void PcSpeak(host *h)
 	fprintf(trace, "pcspeak %d, #%d", pc, string);
 #endif
 	
-	sprintf(buffer, "%s:\n%s", S.characters[pc].name, Z.code_strings[string]);
+	sprintf(buffer, "%s:\n%s", gSave.characters[pc].name, gZone.code_strings[string]);
 	Show_Game_String(buffer, true);
 }
 
@@ -318,7 +318,7 @@ noexport void Text(host *h)
 	fprintf(trace, "text #%d", string);
 #endif
 
-	Show_Game_String(Z.code_strings[string], true);
+	Show_Game_String(gZone.code_strings[string], true);
 }
 
 noexport void Unlock(host *h)
@@ -333,7 +333,7 @@ noexport void Unlock(host *h)
 	fprintf(trace, "unlock %d, %d, %d", x, y, dir);
 #endif
 
-	tile = TILE(Z, x, y);
+	tile = TILE(gZone, x, y);
 	tile->walls[dir].type = wtDoor;
 
 	/* TODO: unlock wall on other side too? */
@@ -447,9 +447,9 @@ bool Run_Code(script_id id)
 	trace = fopen("JUNTRACE.TXT", "w");
 #endif
 
-	h.code = Z.scripts[id];
-	h.globals = S.script_globals;
-	h.locals = S.script_locals[S.header.zone];
+	h.code = gZone.scripts[id];
+	h.globals = gSave.script_globals;
+	h.locals = gSave.script_locals[gSave.header.zone];
 	h.temps = SzAlloc(MAX_TEMPS, int, "Run_Code.temps");
 	h.stack = SzAlloc(MAX_STACK, int, "Run_Code.stack");
 

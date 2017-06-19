@@ -73,7 +73,7 @@ void Load_Zone(char *filename, zone *z)
 	}
 
 	if (h->num_etables > 0) {
-		z->etables = SzAlloc(h->num_etables, encounter, "Load_Zone.etables");
+		z->etables = SzAlloc(h->num_etables, etable, "Load_Zone.etables");
 		fread(z->etables, sizeof(etable), h->num_etables, fp);
 	} else {
 		z->etables = null;

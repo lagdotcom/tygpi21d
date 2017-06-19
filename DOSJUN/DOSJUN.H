@@ -18,12 +18,12 @@ typedef enum {
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-extern campaign C;
-extern gamestate G;
-extern items I;
-extern monsters M;
-extern save S;
-extern zone Z;
+extern campaign gCampaign;
+extern gamestate gState;
+extern items gItems;
+extern monsters gMonsters;
+extern save gSave;
+extern zone gZone;
 
 extern bool
 	trigger_on_enter,

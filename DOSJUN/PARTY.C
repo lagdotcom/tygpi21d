@@ -18,7 +18,7 @@ bool redraw_party;
 
 void Draw_Character_Status(int index, int x, int y)
 {
-	character* ch = &S.characters[index];
+	character* ch = &gSave.characters[index];
 	char buffer[11];
 
 	strncpy(buffer, ch->name, 10);
