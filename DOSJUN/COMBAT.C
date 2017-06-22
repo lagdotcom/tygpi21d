@@ -4,15 +4,77 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
+#define NUM_ACTIONS	3
+
+typedef enum {
+	tfAlly = 1,
+	tfEnemy = 2,
+	tfDead = 4,
+	tfSelf = 8
+} targetflags;
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
+	bool (*check)(char pc);
+	void (*act)(char pc, int target);
+	char *name;
+	targetflags targeting;
+} action;
+
+typedef struct {
+	action* actions;
 	Declare_Array(monster, monsters);
+	int monsters_alive;
 } combat;
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-combat gCombat;
+noexport combat gCombat;
+
+/* C O M B A T  A C T I O N S //////////////////////////////////////////// */
+
+bool Check_Attack(char pc)
+{
+	bool front = In_Front_Row(pc);
+	item *weapon = Get_Equipped_Weapon(pc);
+	if (weapon == null) return front;
+
+	if (weapon->flags & (ifMediumRange | ifLongRange)) return true;
+	return front;
+}
+
+void Attack(char pc, int target)
+{
+
+}
+
+bool Check_Block(char pc)
+{
+	return true;
+}
+
+void Block(char pc, int target)
+{
+
+}
+
+bool Check_Defend(char pc)
+{
+	char i;
+	/* There must be an alive ally to Defend */
+	for (i = 0; i < PARTY_SIZE; i++) {
+		if (i == pc) continue;
+		if (gSave.characters[i].stats[sHP] > 0) return true;
+	}
+
+	return false;
+}
+
+void Defend(char pc, int target)
+{
+
+}
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -35,16 +97,40 @@ void Add_Monster(monster* template)
 	m->stats[sMP] = m->stats[sMaxMP];
 
 	Add_to_Array(gCombat.monsters, m);
+	gCombat.monsters_alive++;
+}
+
+#define Add_Combat_Action(_index, _name, _check, _act, _targeting) { \
+	gCombat.actions[_index].check = _check; \
+	gCombat.actions[_index].act = _act; \
+	gCombat.actions[_index].name = _name; \
+	gCombat.actions[_index].targeting = _targeting; \
 }
 
 void Initialise_Combat(void)
 {
 	Null_Array(gCombat.monsters);
+
+	gCombat.actions = SzAlloc(NUM_ACTIONS, action, "Initialise_Combat");
+	Add_Combat_Action(0, "Attack", Check_Attack, Attack, tfEnemy);
+	Add_Combat_Action(1, "Block", Check_Block, Block, tfSelf);
+	Add_Combat_Action(2, "Defend", Check_Defend, Defend, tfAlly);
 }
 
-void Enter_Combat_Loop(void)
+void Free_Combat(void)
 {
-	/* TODO */
+	Free(gCombat.actions);
+}
+
+noexport void Enter_Combat_Loop(void)
+{
+	int i;
+
+	while (gCombat.monsters_alive > 0) {
+		for (i = 0; i < PARTY_SIZE; i++) {
+			/* TODO */
+		}
+	}
 
 	Clear_Encounter();
 

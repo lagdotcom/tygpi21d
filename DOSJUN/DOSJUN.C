@@ -264,6 +264,7 @@ void main(void)
 	Free_Monsters(&gMonsters);
 	Free_Savefile(&gSave);
 	Free_Zone(&gZone);
+	Free_Combat();
 	Delete_Picture();
 
 	Delete_Double_Buffer();

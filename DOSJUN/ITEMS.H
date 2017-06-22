@@ -24,7 +24,9 @@ typedef enum {
 	ifNone = 0,
 	ifLight = 1,
 	ifHeavy = 2,
-	ifStacked = 4
+	ifStacked = 4,
+	ifMediumRange = 8,
+	ifLongRange = 16
 } itemflags;
 
 typedef enum {
