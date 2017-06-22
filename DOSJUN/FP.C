@@ -111,7 +111,7 @@ void Delete_Picture(void)
 	}
 }
 
-noexport Load_Picture(char *filename, pcx_picture_ptr image)
+noexport bool Load_Picture(char *filename, pcx_picture_ptr image)
 {
 	FILE *fp;
 	int num_bytes, index, size;
@@ -120,6 +120,10 @@ noexport Load_Picture(char *filename, pcx_picture_ptr image)
 	char far *header;
 
 	fp = fopen(filename, "rb");
+	if (!fp) {
+		printf("Could not open for reading: %s\n", filename);
+		return false;
+	}
 
 	header = (char far*)image;
 	for (index = 0; index < 128; index++) {
@@ -133,7 +137,7 @@ noexport Load_Picture(char *filename, pcx_picture_ptr image)
 	while (count < size) {
 		data = (unsigned char)getc(fp);
 
-		if (data >= 192 && data <= 255) {
+		if (data >= 192) {
 			num_bytes = data - 192;
 			data = (unsigned char)getc(fp);
 			while (num_bytes-- > 0) {
@@ -145,6 +149,7 @@ noexport Load_Picture(char *filename, pcx_picture_ptr image)
 	}
 
 	fclose(fp);
+	return true;
 }
 
 void Show_Picture(char *name)
@@ -155,16 +160,17 @@ void Show_Picture(char *name)
 	sprintf(filename, "PICS\\%s.PCX", name);
 
 	Delete_Picture();
-	Load_Picture(filename, &current_pic);
+	
+	if (Load_Picture(filename, &current_pic)) {
+		/* draw that thing */
+		output = &double_buffer[8 * SCREEN_WIDTH + 8];
+		input = current_pic.buffer;
+		for (y = 0; y < 128; y++) {
+			memcpy(output, input, 128);
+			input += 128;
+			output += SCREEN_WIDTH;
+		}
 
-	/* draw that thing */
-	output = &double_buffer[8 * SCREEN_WIDTH + 8];
-	input = current_pic.buffer;
-	for (y = 0; y < 128; y++) {
-		memcpy(output, input, 128);
-		input += 128;
-		output += SCREEN_WIDTH;
+		picture_loaded = true;
 	}
-
-	picture_loaded = true;
 }

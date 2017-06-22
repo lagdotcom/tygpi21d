@@ -678,7 +678,7 @@ void Dump_Parser_State(jc_parser *p)
 	}
 	printf("\n");
 
-	printf("[STRINGS]: %d\n", p->string_count);
+	printf("[STRINGS]: %u\n", p->string_count);
 }
 
 bool Parse_Tokens(jc_parser *p, jc_token *tokens, int count)
