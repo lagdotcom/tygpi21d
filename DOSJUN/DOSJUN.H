@@ -4,6 +4,8 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "common.h"
+
+#include "array.h"
 #include "campaign.h"
 #include "code.h"
 #include "combat.h"

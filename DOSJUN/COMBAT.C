@@ -1,7 +1,6 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "dosjun.h"
-#include "array.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -15,10 +14,6 @@ typedef struct {
 
 combat gCombat;
 
-/* P R O T O T Y P E S /////////////////////////////////////////////////// */
-
-monster *Lookup_Monster(monsters *lib, monster_id id);
-
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 int randint(int minimum, int maximum)
@@ -26,7 +21,7 @@ int randint(int minimum, int maximum)
 	return minimum + random(maximum - minimum + 1);
 }
 
-void Clear_Encounter(void)
+noexport void Clear_Encounter(void)
 {
 	int i;
 	Free_Array(i, gCombat.monsters);
@@ -60,4 +55,12 @@ void Start_Combat(encounter_id id)
 	}
 
 	gState = gsCombat;
+}
+
+gamestate Continue_Combat(void)
+{
+	Clear_Encounter();
+
+	/* TODO */
+	return gsDungeon;
 }

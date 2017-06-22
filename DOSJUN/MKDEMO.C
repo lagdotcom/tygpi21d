@@ -164,9 +164,9 @@ void Demo_Zone(char *filename)
 
 	z.header.num_strings = 3;
 	z.strings = SzAlloc(3, char *, "Demo_Zone.strings");
-	z.strings[0] = "Other than its ridiculous colour,\nthere's nothing particularly\ninteresting about this corridor.";
-	z.strings[1] = "New text.";
-	z.strings[2] = "Another line of text!\nOne day this will be a REAL GAME.";
+	z.strings[0] = Duplicate_String("Other than its ridiculous colour,\nthere's nothing particularly\ninteresting about this corridor.", "Demo_Zone");
+	z.strings[1] = Duplicate_String("New text.", "Demo_Zone");
+	z.strings[2] = Duplicate_String("Another line of text!\nOne day this will be a REAL GAME.", "Demo_Zone");
 
 	z.header.num_scripts = 0;
 	z.scripts = null;

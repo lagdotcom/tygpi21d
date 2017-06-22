@@ -251,6 +251,10 @@ void main(void)
 			case gsDungeon:
 				gState = Show_Dungeon_Screen();
 				break;
+
+			case gsCombat:
+				gState = Continue_Combat();
+				break;
 		}
 	}
 
