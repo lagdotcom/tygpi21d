@@ -53,7 +53,7 @@ typedef struct {
 typedef struct {
 	char *name;
 	bytecode *code;
-	int size;
+	unsigned int size;
 } jc_script;
 
 typedef struct {
@@ -65,29 +65,35 @@ typedef struct {
 
 typedef struct {
 	jc_token *tokens;
-	int token_count;
-	int position;
+	unsigned int token_count;
+	unsigned int position;
 
 	jc_var *vars;
-	int global_count;
-	int local_count;
-	int temp_count;
-	int var_count;
+	unsigned int global_count;
+	unsigned int local_count;
+	unsigned int temp_count;
+	unsigned int var_count;
 
 	jc_script *scripts;
-	int script_count;
+	unsigned int script_count;
 	bool in_script;
 
 	char **strings;
-	int string_count;
+	unsigned int string_count;
 
 	jc_stack *stack;
-	int stack_size;
+	unsigned int stack_size;
 } jc_parser;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+int Compile_JC(jc_parser *parser, char *filename, bool toplevel);
+bool Dump_Compiled_JC(jc_parser *p, char *filename);
+void Dump_Parser_State(jc_parser *p);
+void Free_Parser(jc_parser *p);
+internal_id Get_Internal_Id(char *string);
+void Initialise_Parser(jc_parser *p);
 jc_token_type Parse_Operator(char *string);
-bool Is_Keyword(char *string);
+bool Parse_Tokens(jc_parser *p, jc_token *tokens, int count);
 
 #endif

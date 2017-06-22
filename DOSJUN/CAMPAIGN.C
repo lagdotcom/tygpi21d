@@ -1,8 +1,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "files.h"
+#include "common.h"
+#include "campaign.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 

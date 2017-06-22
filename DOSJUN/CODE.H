@@ -74,4 +74,6 @@ typedef struct {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+bool Run_Code(script_id id);
+
 #endif

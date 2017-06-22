@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "files.h"
+#include "zone.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -25,7 +25,7 @@ void Initialise_Zone(zone *z)
 
 bool Load_Zone(char *filename, zone *z)
 {
-	int i;
+	unsigned int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "rb");
 	if (!fp) {
@@ -88,7 +88,7 @@ bool Load_Zone(char *filename, zone *z)
 
 void Free_Zone(zone *z)
 {
-	int i;
+	unsigned int i;
 
 	Free(z->tiles);
 
@@ -121,7 +121,7 @@ void Free_Zone(zone *z)
 
 bool Save_Zone(char *filename, zone *z)
 {
-	int i;
+	unsigned int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "wb");
 	if (!fp) {

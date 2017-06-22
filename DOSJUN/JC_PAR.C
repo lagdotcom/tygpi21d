@@ -1,9 +1,10 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "jc.h"
 #include "code.h"
-#include <stdlib.h>
-#include <string.h>
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -113,7 +114,7 @@ noexport bool Parse_Error(jc_parser *p, char *message)
 
 noexport bool Save_Variable(jc_parser *p, jc_scope sc, char *name)
 {
-	int *count;
+	unsigned int *count;
 
 	switch (sc) {
 		case scGlobal:
@@ -146,7 +147,7 @@ noexport bool Save_Variable(jc_parser *p, jc_scope sc, char *name)
 
 noexport jc_var *Resolve_Variable(jc_parser *p, char *name)
 {
-	int i = 0;
+	unsigned int i = 0;
 
 	for (i = 0; i < p->var_count; i++) {
 		if (!strcmp(p->vars[i].name, name))
@@ -184,7 +185,7 @@ noexport void Emit_Int(jc_parser *p, int value)
 {
 	/* TODO: check code size */
 	jc_script *scr = &p->scripts[p->script_count - 1];
-	int *dest = &scr->code[scr->size];
+	int *dest = (int *)&scr->code[scr->size];
 
 	*dest = value;
 	scr->size += 2;
@@ -224,7 +225,7 @@ noexport void Resolve_Stack_Jump(jc_parser *p, int omod)
 {
 	jc_stack *s = &p->stack[p->stack_size - 1];
 	jc_script *scr = &p->scripts[p->script_count - 1];
-	int *loc = &scr->code[s->start];
+	int *loc = (int *)&scr->code[s->start];
 
 	*loc = scr->size + omod;
 }
@@ -236,7 +237,7 @@ noexport void Resolve_Stack_Offsets(jc_parser *p)
 	int i, *loc;
 
 	for (i = 0; i < s->offset_count; i++) {
-		loc = &scr->code[s->offsets[i]];
+		loc = (int *)&scr->code[s->offsets[i]];
 		*loc = scr->size;
 	}
 }
@@ -636,7 +637,7 @@ void Initialise_Parser(jc_parser *p)
 
 void Free_Parser(jc_parser *p)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < p->var_count; i++) {
 		Free(p->vars[i].name);
@@ -663,7 +664,7 @@ void Free_Parser(jc_parser *p)
 
 void Dump_Parser_State(jc_parser *p)
 {
-	int i;
+	unsigned int i;
 
 	printf("[VARS]");
 	for (i = 0; i < p->var_count; i++) {

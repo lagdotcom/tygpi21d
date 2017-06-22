@@ -30,6 +30,13 @@ typedef enum {
 	rRight
 } relative;
 
+typedef enum {
+	gsMainMenu,
+	gsDungeon,
+	gsQuit,
+	gsCombat
+} gamestate;
+
 typedef unsigned char bytecode;
 typedef unsigned char colour;
 typedef unsigned char coord;

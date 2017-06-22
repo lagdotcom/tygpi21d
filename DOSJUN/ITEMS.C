@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "files.h"
+#include "items.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 

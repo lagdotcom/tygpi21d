@@ -135,7 +135,7 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 bool Dump_Compiled_JC(jc_parser *p, char *filename)
 {
 	FILE *fp;
-	int i, j, opbytes = 0;
+	unsigned int i, j, opbytes = 0;
 
 	printf("jcc: dumping progress to %s\n", filename);
 	fp = fopen(filename, "w");

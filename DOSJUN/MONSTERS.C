@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "files.h"
+#include "monsters.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 

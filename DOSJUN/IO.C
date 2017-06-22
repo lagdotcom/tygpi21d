@@ -6,6 +6,7 @@
 #include <string.h>
 #include "common.h"
 #include "files.h"
+#include "gamelib.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 

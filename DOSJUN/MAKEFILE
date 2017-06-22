@@ -1,23 +1,23 @@
-CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc
+CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc -d
 DEMO_OBJS = mkdemo.obj campaign.obj io.obj items.obj monsters.obj save.obj zone.obj
-MAIN_OBJS = dosjun.obj campaign.obj chars.obj code.obj fp.obj gfx.obj input.obj io.obj items.obj main.obj mem.obj monsters.obj party.obj save.obj zone.obj
+MAIN_OBJS = dosjun.obj campaign.obj code.obj combat.obj fp.obj gfx.obj input.obj io.obj items.obj main.obj mem.obj monsters.obj party.obj save.obj zone.obj
 EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj items.obj jc.obj jc_lex.obj jc_par.obj mem.obj monsters.obj save.obj zone.obj
 JCC_OBJS = jcc.obj jc.obj jc_lex.obj jc_par.obj mem.obj
-HEADERS = code.h common.h dosjun.h files.h jc.h
+HEADERS = array.h campaign.h code.h combat.h common.h dosjun.h files.h fp.h gfx.h input.h io.h items.h jc.h main.h monsters.h party.h save.h zone.h
 
 all: dosjun editor jcc
 
-dosjun: $(MAIN_OBJS)
+dosjun: $(MAIN_OBJS) $(HEADERS)
 	TCC $(CFLAGS) DOSJUN.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
-editor: $(EDITOR_OBJS)
+editor: $(EDITOR_OBJS) $(HEADERS)
 	TCC $(CFLAGS) EDITOR.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
-demo: $(DEMO_OBJS)
+demo: $(DEMO_OBJS) $(HEADERS)
 	TCC $(CFLAGS) MKDEMO.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
 	MKDEMO
 
-jcc: $(JCC_OBJS)
+jcc: $(JCC_OBJS) $(HEADERS)
 	TCC $(CFLAGS) $(JCC_OBJS) DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
 campaign.obj: campaign.c $(HEADERS)
@@ -27,6 +27,10 @@ campaign.obj: campaign.c $(HEADERS)
 code.obj: code.c $(HEADERS)
 	TCC $(CFLAGS) -c code.c
 	TLIB DOSJUN.LIB +-code.obj, DOSJUN.TXT
+
+combat.obj: combat.c $(HEADERS)
+	TCC $(CFLAGS) -c combat.c
+	TLIB DOSJUN.LIB +-combat.obj, DOSJUN.TXT
 
 chars.obj: chars.c $(HEADERS)
 	TCC $(CFLAGS) -c chars.c

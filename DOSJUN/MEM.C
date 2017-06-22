@@ -48,7 +48,7 @@ noexport void Add_Entry(void *mem, size_t size, char *tag)
 
 noexport void Mark_Entry_Freed(void *mem)
 {
-	int i;
+	unsigned int i;
 	for (i = 0; i < entry_count; i++) {
 		if (entries[i].address == mem && entries[i].freed == false) {
 			entries[i].freed = true;
@@ -61,7 +61,7 @@ noexport void Mark_Entry_Freed(void *mem)
 
 noexport void Update_Entry_Size(void *mem, size_t size)
 {
-	int i;
+	unsigned int i;
 	for (i = 0; i < entry_count; i++) {
 		if (entries[i].address == mem && entries[i].freed == false) {
 			entries[i].size = size;

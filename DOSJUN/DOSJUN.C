@@ -1,10 +1,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <conio.h>
-#include <stdio.h>
-#include <string.h>
-#include "gamelib.h"
 #include "dosjun.h"
+#include "gamelib.h"
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 

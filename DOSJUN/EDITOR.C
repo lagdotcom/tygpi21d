@@ -31,19 +31,6 @@ bool redraw_details, redraw_zone, clear_screen;
 int sel_x, sel_y;
 editorstate state;
 
-/* P R O T O T Y P E S /////////////////////////////////////////////////// */
-
-bool Input_Multiline_String(int x, int y, char *string, int max);
-bool Input_Number(int x, int y, int *number, int min, int max);
-void Draw_Bounded_String(int x, int y, int w, int h, colour col, char *string, bool trans_flag);
-void Draw_Line_DB(int xo, int yo, int x1, int y1, colour col);
-void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled);
-void Free_Zone(zone *z);
-void Initialise_Zone(zone *z);
-void Load_Zone(char *filename, zone *z);
-monster *Lookup_Monster(monsters *lib, monster_id id);
-void Save_Zone(char *filename, zone *z);
-
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 #define TX (8 + x*7)
@@ -235,10 +222,10 @@ string_id Add_Description(void)
 #define MENU_CANCEL		-1
 #define MENU_DELETE		-2
 #define MENU_ADD		-3
-int Input_Scroller_Menu(char **options, int count)
+unsigned int Input_Scroller_Menu(char **options, unsigned int count)
 {
 	char buffer[50];
-	int offset = 0,
+	unsigned int offset = 0,
 		i;
 
 	/* We're drawing over everything, so... */
@@ -283,7 +270,7 @@ int Input_Scroller_Menu(char **options, int count)
 
 			case SCAN_INS:	return MENU_ADD;
 
-			case SCAN_0: return offset;
+			case SCAN_0:	return offset;
 			_num_scan(1, SCAN_1)
 			_num_scan(2, SCAN_2)
 			_num_scan(3, SCAN_3)
@@ -326,7 +313,7 @@ void Change_Description(void)
 
 void Import_Code_Strings(void)
 {
-	int i;
+	unsigned int i;
 
 	/* In case we're re-importing, free old string entries */
 	for (i = 0; i < gZone.header.num_code_strings; i++) {
@@ -343,7 +330,7 @@ void Import_Code_Strings(void)
 
 void Import_Code_Scripts(void)
 {
-	int i;
+	unsigned int i;
 	bytecode *code;
 
 	/* Free old scripts */
@@ -391,7 +378,7 @@ void Load_Code(void)
 void Change_Script(script_id *script)
 {
 	char **menu;
-	int result,
+	unsigned int result,
 		i;
 
 	if (parser.script_count == 0) return;
@@ -676,7 +663,7 @@ char *Describe_EncounterTable(etable_id id)
 void Change_EncounterTable(void)
 {
 	char **menu;
-	int result,
+	unsigned int result,
 		i;
 	tile *under = TILE(gZone, sel_x, sel_y);
 

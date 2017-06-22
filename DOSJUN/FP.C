@@ -1,8 +1,9 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include <alloc.h>
-#include "gamelib.h"
 #include "dosjun.h"
+#include "gamelib.h"
+#include "gfx.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 

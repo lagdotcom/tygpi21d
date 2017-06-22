@@ -45,3 +45,39 @@ void Draw_Party_Status(void)
 
 	redraw_party = false;
 }
+
+bool Equip_Item(unsigned char pc, item_id iid)
+{
+	int i;
+	item *it = Lookup_Item(&gItems, iid);
+	if (it == null) return false;
+
+	/* TODO: check char can equip item */
+
+	for (i = 0; i < INVENTORY_SIZE; i++) {
+		if (gSave.characters[pc].items[i].item == iid) {
+			gSave.characters[pc].items[i].flags |= vfEquipped;
+			/* TODO: remove other items at same time */
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool Add_To_Inventory(unsigned char pc, item_id iid, unsigned char qty)
+{
+	int i;
+	item *it = Lookup_Item(&gItems, iid);
+	if (it == null) return false;
+
+	for (i = 0; i < INVENTORY_SIZE; i++) {
+		if (gSave.characters[pc].items[i].item == 0) {
+			gSave.characters[pc].items[i].item = iid;
+			gSave.characters[pc].items[i].quantity = qty;
+			return true;
+		}
+	}
+
+	return false;
+}

@@ -84,27 +84,27 @@ gamestate Start_New_Game()
 	gSave.header.num_characters = 6;
 
 	Blit_String_DB(0, 40, 15, "Who are you?", 0);
-	Input_String(104, 40, &gSave.characters[0].name, NAME_SIZE);
+	Input_String(104, 40, gSave.characters[0].name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[0], jBard,     8, 13, 13, 10, 0);
 
 	Blit_String_DB(0, 56, 15, "Who's the strong one?", 0);
-	Input_String(176, 56, &gSave.characters[1].name, NAME_SIZE);
+	Input_String(176, 56, gSave.characters[1].name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[1], jFighter, 14,  9, 11, 20, 0);
 
 	Blit_String_DB(0, 72, 15, "Who's the nerd?", 0);
-	Input_String(128, 72, &gSave.characters[2].name, NAME_SIZE);
+	Input_String(128, 72, gSave.characters[2].name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[2], jMage,     9, 14, 11,  8, 8);
 
 	Blit_String_DB(0, 88, 15, "Who's kinda shifty?", 0);
-	Input_String(160, 88, &gSave.characters[3].name, NAME_SIZE);
+	Input_String(160, 88, gSave.characters[3].name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[3], jRogue,    9, 11, 14, 12, 0);
 
 	Blit_String_DB(0, 104, 15, "Who cares a lot?", 0);
-	Input_String(136, 104, &gSave.characters[4].name, NAME_SIZE);
+	Input_String(136, 104, gSave.characters[4].name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[4], jCleric,  13, 13,  8, 14, 6);
 
 	Blit_String_DB(0, 120, 15, "Who likes guns?", 0);
-	Input_String(128, 120, &gSave.characters[5].name, NAME_SIZE);
+	Input_String(128, 120, gSave.characters[5].name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[5], jRanger,  13,  8, 13, 13, 0);
 
 	Start_Campaign("ETR");
