@@ -6,18 +6,22 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Load_Monsters(char *filename, monsters *m)
+bool Load_Monsters(char *filename, monsters *m)
 {
 	FILE *fp = fopen(filename, "rb");
-	if (!fp) IO_Error("Could not open monsters");
+	if (!fp) {
+		printf("Could not open for reading: %s\n", filename);
+		return false;
+	}
 
 	fread(&m->header, sizeof(monsters_header), 1, fp);
-	/* TODO: Check magic/version */
+	Check_Version_Header(m->header);
 
 	m->monsters = SzAlloc(m->header.num_monsters, monster, "Load_Monsters");
 	fread(m->monsters, sizeof(monster), m->header.num_monsters, fp);
 
 	fclose(fp);
+	return true;
 }
 
 void Free_Monsters(monsters *m)
@@ -30,15 +34,19 @@ void Initialise_Monsters(monsters *m)
 	m->monsters = null;
 }
 
-void Save_Monsters(char *filename, monsters *m)
+bool Save_Monsters(char *filename, monsters *m)
 {
 	FILE *fp = fopen(filename, "wb");
-	if (!fp) IO_Error("Could not open monsters for writing");
+	if (!fp) {
+		printf("Could not open for writing: %s\n", filename);
+		return false;
+	}
 
 	Set_Version_Header(m->header);
 	fwrite(&m->header, sizeof(monsters_header), 1, fp);
 	fwrite(m->monsters, sizeof(monster), m->header.num_monsters, fp);
 	fclose(fp);
+	return true;
 }
 
 monster *Lookup_Monster(monsters *lib, monster_id id)

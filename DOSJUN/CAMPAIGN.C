@@ -11,14 +11,18 @@ void Initialise_Campaign(campaign *c)
 	c->zones = null;
 }
 
-void Load_Campaign(char *filename, campaign *c)
+bool Load_Campaign(char *filename, campaign *c)
 {
 	int i;
 
 	FILE *fp = fopen(filename, "rb");
-	if (!fp) IO_Error("Could not open campaign");
+	if (!fp) {
+		printf("Could not open for reading: %s\n", filename);
+		return false;
+	}
+
 	fread(&c->header, sizeof(campaign_header), 1, fp);
-	/* TODO: Check magic/version */
+	Check_Version_Header(c->header);
 
 	c->zones = SzAlloc(c->header.num_zones, char *, "Load_Campaign");
 	for (i = 0; i < c->header.num_zones; i++) {
@@ -26,6 +30,7 @@ void Load_Campaign(char *filename, campaign *c)
 	}
 
 	fclose(fp);
+	return true;
 }
 
 void Free_Campaign(campaign *c)
@@ -40,10 +45,14 @@ void Free_Campaign(campaign *c)
 	}
 }
 
-void Save_Campaign(char *filename, campaign *c)
+bool Save_Campaign(char *filename, campaign *c)
 {
 	int i;
 	FILE *fp = fopen(filename, "wb");
+	if (!fp) {
+		printf("Could not open for writing: %s\n", filename);
+		return false;
+	}
 
 	Set_Version_Header(c->header);
 	fwrite(&c->header, sizeof(campaign_header), 1, fp);
@@ -53,4 +62,5 @@ void Save_Campaign(char *filename, campaign *c)
 	}
 
 	fclose(fp);
+	return true;
 }

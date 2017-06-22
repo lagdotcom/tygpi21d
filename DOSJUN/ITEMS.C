@@ -6,17 +6,22 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Load_Items(char *filename, items *i)
+bool Load_Items(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "rb");
-	if (!fp) IO_Error("Could not open items");
+	if (!fp) {
+		printf("Could not open for reading: %s\n", filename);
+		return false;
+	}
+
 	fread(&i->header, sizeof(items_header), 1, fp);
-	/* TODO: Check magic/version */
+	Check_Version_Header(i->header);
 
 	i->items = SzAlloc(i->header.num_items, item, "Load_Items");
 	fread(i->items, sizeof(item), i->header.num_items, fp);
 
 	fclose(fp);
+	return true;
 }
 
 void Free_Items(items *i)
@@ -29,15 +34,19 @@ void Initialise_Items(items *i)
 	i->items = null;
 }
 
-void Save_Items(char *filename, items *i)
+bool Save_Items(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "wb");
-	if (!fp) IO_Error("Could not open items for writing");
+	if (!fp) {
+		printf("Could not open for writing: %s\n", filename);
+		return false;
+	}
 
 	Set_Version_Header(i->header);
 	fwrite(&i->header, sizeof(items_header), 1, fp);
 	fwrite(i->items, sizeof(item), i->header.num_items, fp);
 	fclose(fp);
+	return true;
 }
 
 item *Lookup_Item(items *lib, item_id id)

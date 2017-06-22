@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "common.h"
+#include "files.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -30,12 +31,6 @@ void Write_LengthString(char *string, FILE *fp)
 	len = strlen(string);
 	fwrite(&len, sizeof(length), 1, fp);
 	fwrite(string, 1, len + 1, fp);
-}
-
-void IO_Error(char *message)
-{
-	printf("IO ERROR: %s", message);
-	exit(1);
 }
 
 char **Get_Directory_Listing(char *pattern, int *count)
@@ -75,4 +70,15 @@ unsigned char Get_Next_Scan_Code(void)
 
 	while (scan == 0) scan = Get_Scan_Code();
 	return scan;
+}
+
+bool Check_Version(char *magic, unsigned char version)
+{
+	if (strncmp(magic, FILE_MAGIC, 3) || version > VERSION_NOW)
+	{
+		puts("File does not belong to DOSJUN.\n");
+		return false;
+	}
+
+	return true;
 }

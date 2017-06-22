@@ -97,7 +97,10 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 
 	printf("%s:\n", filename);
 	fp = fopen(filename, "r");
-	if (!fp) IO_Error("Could not open JC");
+	if (!fp) {
+		printf("Could not open for reading: %s\n", filename);
+		return -1;
+	}
 
 	while (fgets(line, JC_LINE_LENGTH, fp)) {
 		line_no++;
@@ -129,14 +132,17 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 	return err;
 }
 
-void Dump_Compiled_JC(jc_parser *p, char *filename)
+bool Dump_Compiled_JC(jc_parser *p, char *filename)
 {
 	FILE *fp;
 	int i, j, opbytes = 0;
 
 	printf("jcc: dumping progress to %s\n", filename);
 	fp = fopen(filename, "w");
-	if (!fp) IO_Error("Could not open jcc for writing");
+	if (!fp) {
+		printf("Could not open for writing: %s\n", filename);
+		return false;
+	}
 
 	for (i = 0; i < p->script_count; i++) {
 		fprintf(fp, "\n[%s]\n", p->scripts[i].name);
@@ -172,4 +178,5 @@ void Dump_Compiled_JC(jc_parser *p, char *filename)
 	}
 
 	fclose(fp);
+	return true;
 }

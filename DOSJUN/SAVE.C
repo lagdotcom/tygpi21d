@@ -12,14 +12,17 @@ void Initialise_Savefile(save *s)
 	s->script_locals = null;
 }
 
-void Load_Savefile(char *filename, save *s)
+bool Load_Savefile(char *filename, save *s)
 {
 	int i;
 	FILE *fp = fopen(filename, "rb");
-	if (!fp) IO_Error("Could not open savefile");
+	if (!fp) {
+		printf("Could not open for reading: %s\n", filename);
+		return false;
+	}
 
 	fread(&s->header, sizeof(save_header), 1, fp);
-	/* TODO: Check magic/version */
+	Check_Version_Header(s->header);
 
 	s->script_globals = SzAlloc(MAX_GLOBALS, int, "Load_Savefile.globals");
 	fread(s->script_globals, sizeof(int), MAX_GLOBALS, fp);
@@ -31,6 +34,7 @@ void Load_Savefile(char *filename, save *s)
 	}
 
 	fclose(fp);
+	return true;
 }
 
 void Free_Savefile(save *s)
@@ -44,11 +48,14 @@ void Free_Savefile(save *s)
 	s->header.num_zones = 0;
 }
 
-void Save_Savefile(char *filename, save *s)
+bool Save_Savefile(char *filename, save *s)
 {
 	int i;
 	FILE *fp = fopen(filename, "wb");
-	if (!fp) IO_Error("Could not open savefile for writing");
+	if (!fp) {
+		printf("Could not open for reading: %s\n", filename);
+		return false;
+	}
 
 	Set_Version_Header(s->header);
 	fwrite(&s->header, sizeof(save_header), 1, fp);
@@ -60,4 +67,5 @@ void Save_Savefile(char *filename, save *s)
 	}
 
 	fclose(fp);
+	return true;
 }

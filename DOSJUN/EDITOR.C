@@ -373,7 +373,11 @@ void Load_Code(void)
 
 	strcpy(buffer, zone_filename);
 	dot = strchr(buffer, '.');
-	strcpy(dot, ".JC");
+	if (dot) {
+		strcpy(dot, ".JC");
+	} else {
+		strcat(buffer, ".JC");
+	}
 
 	if (Compile_JC(&parser, buffer, true) == 0) {
 		Import_Code_Strings();

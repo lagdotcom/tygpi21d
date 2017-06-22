@@ -171,9 +171,10 @@ void Trigger_Enter_Script(void)
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-void Show_Dungeon_Screen(void)
+gamestate Show_Dungeon_Screen(void)
 {
 	int done = 0;
+	gamestate new;
 
 	/* Get background image and palette */
 	PCX_Init(&explore_bg);
@@ -195,7 +196,7 @@ void Show_Dungeon_Screen(void)
 
 		switch (Get_Next_Scan_Code()) {
 			case SCAN_Q:
-				gState = gsQuit;
+				new = gsQuit;
 				done = 1;
 				break;
 
@@ -221,6 +222,7 @@ void Show_Dungeon_Screen(void)
 
 	/* Cleanup */
 	PCX_Delete(&explore_bg);
+	return new;
 }
 
 void main(void)
@@ -246,11 +248,11 @@ void main(void)
 	while (gState != gsQuit) {
 		switch (gState) {
 			case gsMainMenu:
-				Show_Main_Menu();
+				gState = Show_Main_Menu();
 				break;
 
 			case gsDungeon:
-				Show_Dungeon_Screen();
+				gState = Show_Dungeon_Screen();
 				break;
 		}
 	}

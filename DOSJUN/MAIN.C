@@ -73,7 +73,7 @@ void Start_Campaign(char *name)
 	Load_Campaign_Data();
 }
 
-void Start_New_Game()
+gamestate Start_New_Game()
 {
 	Fill_Double_Buffer(0);
 
@@ -108,10 +108,10 @@ void Start_New_Game()
 	Initialise_Character(&gSave.characters[5], jRanger,  13,  8, 13, 13, 0);
 
 	Start_Campaign("ETR");
-	gState = gsDungeon;
 	trigger_on_enter = true;
 
 	Save_Savefile("ETR.SAV", &gSave);
+	return gsDungeon;
 }
 
 bool Load_Game()
@@ -145,11 +145,12 @@ bool Load_Game()
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-void Show_Main_Menu(void)
+gamestate Show_Main_Menu(void)
 {
 	int option;
 	bool done = false;
 	char *menu[3];
+	gamestate next;
 	menu[0] = "NEW GAME";
 	menu[1] = "LOAD GAME";
 	menu[2] = "QUIT";
@@ -163,20 +164,24 @@ void Show_Main_Menu(void)
 
 		switch (option) {
 			case 0:
-				Start_New_Game();
+				next = Start_New_Game();
 				done = true;
 				break;
 
 			case 1:
-				if (Load_Game()) done = true;
+				if (Load_Game()) {
+					done = true;
+					next = gsDungeon;
+				}
 				break;
 
 			case 2:
-				gState = gsQuit;
+				next = gsQuit;
 				done = true;
 				break;
 		}
 	}
 
 	PCX_Delete(&menu_bg);
+	return next;
 }

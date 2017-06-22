@@ -11,6 +11,7 @@
 
 #define FILE_MAGIC		"JUN"
 #define VERSION_1		1
+#define VERSION_NOW		VERSION_1
 
 #define NAME_SIZE		24
 #define PARTY_SIZE		6
@@ -88,6 +89,7 @@ typedef enum {
 } walltypes;
 
 #define Set_Version_Header(h) strncpy(h.magic, FILE_MAGIC, 3); h.version = VERSION_1
+#define Check_Version_Header(h) if (!Check_Version(h.magic, h.version)) { fclose(fp); return false; }
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 

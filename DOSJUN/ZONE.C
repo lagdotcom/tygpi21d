@@ -23,15 +23,18 @@ void Initialise_Zone(zone *z)
 	z->code_strings = null;
 }
 
-void Load_Zone(char *filename, zone *z)
+bool Load_Zone(char *filename, zone *z)
 {
 	int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "rb");
-	if (!fp) IO_Error("Could not open zone");
+	if (!fp) {
+		printf("Could not open for reading: %s\n", filename);
+		return false;
+	}
 
 	fread(h, sizeof(zone_header), 1, fp);
-	/* TODO: Check magic/version */
+	Check_Version_Header(z->header);
 
 	z->tiles = SzAlloc(h->width * h->height, tile, "Load_Zone.tiles");
 	fread(z->tiles, sizeof(tile), h->width * h->height, fp);
@@ -80,6 +83,7 @@ void Load_Zone(char *filename, zone *z)
 	}
 
 	fclose(fp);
+	return true;
 }
 
 void Free_Zone(zone *z)
@@ -115,12 +119,15 @@ void Free_Zone(zone *z)
 	Free(z->etables);
 }
 
-void Save_Zone(char *filename, zone *z)
+bool Save_Zone(char *filename, zone *z)
 {
 	int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "wb");
-	if (!fp) IO_Error("Could not open zone for writing");
+	if (!fp) {
+		printf("Could not open for writing: %s\n", filename);
+		return false;
+	}
 
 	Set_Version_Header(z->header);
 	fwrite(h, sizeof(zone_header), 1, fp);
@@ -144,4 +151,5 @@ void Save_Zone(char *filename, zone *z)
 	fwrite(z->etables, sizeof(etable), h->num_etables, fp);
 
 	fclose(fp);
+	return true;
 }
