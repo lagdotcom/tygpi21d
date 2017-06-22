@@ -107,8 +107,44 @@ void Delete_Picture(void)
 {
 	if (picture_loaded) {
 		picture_loaded = false;
-		PCX_Delete(&current_pic);
+		Free(current_pic.buffer);
 	}
+}
+
+noexport Load_Picture(char *filename, pcx_picture_ptr image)
+{
+	FILE *fp;
+	int num_bytes, index, size;
+	long count;
+	unsigned char data;
+	char far *header;
+
+	fp = fopen(filename, "rb");
+
+	header = (char far*)image;
+	for (index = 0; index < 128; index++) {
+		header[index] = (char)getc(fp);
+	}
+
+	size = (image->header.width + 1) * (image->header.height + 1);
+	image->buffer = Allocate(size, 1, "Load_Picture");
+
+	count = 0;
+	while (count < size) {
+		data = (unsigned char)getc(fp);
+
+		if (data >= 192 && data <= 255) {
+			num_bytes = data - 192;
+			data = (unsigned char)getc(fp);
+			while (num_bytes-- > 0) {
+				image->buffer[count++] = data;
+			}
+		} else {
+			image->buffer[count++] = data;
+		}
+	}
+
+	fclose(fp);
 }
 
 void Show_Picture(char *name)
@@ -119,11 +155,10 @@ void Show_Picture(char *name)
 	sprintf(filename, "PICS\\%s.PCX", name);
 
 	Delete_Picture();
-	current_pic.buffer = farmalloc(128 * 128);
-	PCX_Load(filename, &current_pic, 0);
+	Load_Picture(filename, &current_pic);
 
 	/* draw that thing */
-	output = &video_buffer[8 * SCREEN_WIDTH + 8];
+	output = &double_buffer[8 * SCREEN_WIDTH + 8];
 	input = current_pic.buffer;
 	for (y = 0; y < 128; y++) {
 		memcpy(output, input, 128);

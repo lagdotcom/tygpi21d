@@ -230,6 +230,7 @@ void main(void)
 	Initialise_Monsters(&gMonsters);
 	Initialise_Savefile(&gSave);
 	Initialise_Zone(&gZone);
+	Initialise_Combat();
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
 		printf("\nNot enough memory to create double buffer.");
@@ -250,10 +251,6 @@ void main(void)
 
 			case gsDungeon:
 				gState = Show_Dungeon_Screen();
-				break;
-
-			case gsCombat:
-				gState = Continue_Combat();
 				break;
 		}
 	}

@@ -27,10 +27,9 @@ noexport void Clear_Encounter(void)
 	Free_Array(i, gCombat.monsters);
 }
 
-void Add_Monster(monster_id id)
+void Add_Monster(monster* template)
 {
 	monster *m = SzAlloc(1, monster, "Add_Monster");
-	monster *template = Lookup_Monster(&gMonsters, id);
 	memcpy(m, template, sizeof(monster));
 	m->stats[sHP] = m->stats[sMaxHP];
 	m->stats[sMP] = m->stats[sMaxMP];
@@ -38,29 +37,51 @@ void Add_Monster(monster_id id)
 	Add_to_Array(gCombat.monsters, m);
 }
 
+void Initialise_Combat(void)
+{
+	Null_Array(gCombat.monsters);
+}
+
+void Enter_Combat_Loop(void)
+{
+	/* TODO */
+
+	Clear_Encounter();
+
+	redraw_description = true;
+	redraw_fp = true;
+	redraw_party = true;
+	Draw_FP();
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 void Start_Combat(encounter_id id)
 {
+	char description[1000],
+		*write,
+		*first = null;
 	int i, count;
 	encounter *en = &gZone.encounters[id];
+	monster *m;
 
 	Clear_Encounter();
+	description[0] = 0;
+	write = description;
+	write += sprintf(write, "You face:");
 
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
 		if (!en->monsters[i]) continue;
+		m = Lookup_Monster(&gMonsters, en->monsters[i]);
+		if (first == null) first = m->image;
 
 		count = randint(en->minimum[i], en->maximum[i]);
-		while (count > 0) Add_Monster(en->monsters[i]);
+		write += sprintf(write, " %dx %s", count, m->name);
+		while (count-- > 0) Add_Monster(m);
 	}
 
-	gState = gsCombat;
-}
+	Show_Picture(first);
+	Show_Game_String(description, true);
 
-gamestate Continue_Combat(void)
-{
-	Clear_Encounter();
-
-	/* TODO */
-	return gsDungeon;
+	Enter_Combat_Loop();
 }

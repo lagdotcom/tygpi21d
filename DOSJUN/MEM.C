@@ -31,7 +31,8 @@ noexport void Add_Entry(void *mem, size_t size, char *tag)
 		allocated_entries += 20;
 		entries = realloc(old_entries, sizeof(entry) * allocated_entries);
 		if (!entries) {
-			printf("MEM: Could not allocate another entry.");
+			printf("MEM: Could not allocate another entry (already have %d).\n", allocated_entries - 20);
+			entries = old_entries;
 			Stop_Memory_Tracking();
 			abort();
 			return;
@@ -87,8 +88,8 @@ void *Reallocate(void *mem, size_t count, size_t size, char *tag)
 	if (nu == mem) {
 		Update_Entry_Size(mem, count * size);
 	} else {
-		Mark_Entry_Freed(mem);
-		Add_Entry(mem, count * size, tag);
+		if (mem != null) Mark_Entry_Freed(mem);
+		Add_Entry(nu, count * size, tag);
 	}
 
 	return nu;

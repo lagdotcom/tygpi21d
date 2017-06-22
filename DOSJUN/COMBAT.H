@@ -8,6 +8,7 @@
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 gamestate Continue_Combat(void);
+void Initialise_Combat(void);
 void Start_Combat(encounter_id id);
 
 #endif

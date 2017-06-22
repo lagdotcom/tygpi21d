@@ -33,8 +33,7 @@ typedef enum {
 typedef enum {
 	gsMainMenu,
 	gsDungeon,
-	gsQuit,
-	gsCombat
+	gsQuit
 } gamestate;
 
 typedef unsigned char bytecode;
