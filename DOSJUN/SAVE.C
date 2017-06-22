@@ -24,6 +24,8 @@ bool Load_Savefile(char *filename, save *s)
 	fread(&s->header, sizeof(save_header), 1, fp);
 	Check_Version_Header(s->header);
 
+	fread(s->characters, sizeof(character), PARTY_SIZE, fp);
+
 	s->script_globals = SzAlloc(MAX_GLOBALS, int, "Load_Savefile.globals");
 	fread(s->script_globals, sizeof(int), MAX_GLOBALS, fp);
 
@@ -59,6 +61,8 @@ bool Save_Savefile(char *filename, save *s)
 
 	Set_Version_Header(s->header);
 	fwrite(&s->header, sizeof(save_header), 1, fp);
+
+	fwrite(s->characters, sizeof(character), PARTY_SIZE, fp);
 
 	fwrite(s->script_globals, sizeof(int), MAX_GLOBALS, fp);
 
