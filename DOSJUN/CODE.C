@@ -365,6 +365,20 @@ noexport void EquipItem(host *h)
 	Push_Stack(h, result);
 }
 
+noexport void SetTileDescription(host *h)
+{
+	bool result;
+	coord x = Pop_Stack(h);
+	coord y = Pop_Stack(h);
+	string_id string = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "settiledescription %d, %d, #%d", x, y, string);
+#endif
+
+	TILE(gZone, x, y)->description = string;
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(host *h, bytecode op)
@@ -405,6 +419,7 @@ noexport void Run_Code_Instruction(host *h, bytecode op)
 		case coUnlock:		Unlock(h); return;
 		case coGiveItem:	GiveItem(h); return;
 		case coEquipItem:	EquipItem(h); return;
+		case coSetTileDescription: SetTileDescription(h); return;
 	}
 
 	h->running = false;

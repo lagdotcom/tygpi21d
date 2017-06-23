@@ -555,6 +555,24 @@ noexport bool Call_EquipItem_State(jc_parser *p)
 	return true;
 }
 
+noexport bool Call_SetTileDescription_State(jc_parser *p)
+{
+	/* TODO: expressions */
+	jc_token *x, *y, *string;
+
+	CONSUME();
+	x = CONSUME();
+	y = CONSUME();
+	string = CONSUME();
+
+	if (!Emit_Argument(p, string)) return false;
+	if (!Emit_Argument(p, y)) return false;
+	if (!Emit_Argument(p, x)) return false;
+
+	EMIT(coSetTileDescription);
+	return true;
+}
+
 noexport bool Keyword_State(jc_parser *p)
 {
 	if (!p->in_script) {
@@ -570,6 +588,7 @@ noexport bool Keyword_State(jc_parser *p)
 		if (MATCH("Unlock")) return Call_Unlock_State(p);
 		if (MATCH("GiveItem")) return Call_GiveItem_State(p);
 		if (MATCH("EquipItem")) return Call_EquipItem_State(p);
+		if (MATCH("SetTileDescription")) return Call_SetTileDescription_State(p);
 
 		if (MATCH("If")) return Start_If_State(p);
 		if (MATCH("ElseIf")) return Start_ElseIf_State(p);
