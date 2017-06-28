@@ -7,11 +7,29 @@
 #include <string.h>
 #include "common.h"
 
+/* D E F I N E S ///////////////////////////////////////////////////////// */
+
+#ifdef FAR_MEMORY
+
+#include <alloc.h>
+
+#define _calloc  farcalloc
+#define _free    farfree
+#define _realloc farrealloc
+
+#else
+
+#define _calloc  calloc
+#define _free    free
+#define _realloc realloc
+
+#endif
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
 	char *tag;
-	void *address;
+	void PtrDist *address;
 	size_t size;
 	bool freed;
 } entry;
@@ -20,7 +38,7 @@ typedef struct {
 
 unsigned int entry_count = 0;
 unsigned int allocated_entries = 0;
-entry *entries = null;
+entry PtrDist *entries = null;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -29,7 +47,7 @@ noexport void Add_Entry(void *mem, size_t size, char *tag)
 	entry *old_entries = entries;
 	if (entry_count == allocated_entries) {
 		allocated_entries += 20;
-		entries = realloc(old_entries, sizeof(entry) * allocated_entries);
+		entries = _realloc(old_entries, sizeof(entry) * allocated_entries);
 		if (!entries) {
 			printf("MEM: Could not allocate another entry (already have %u).\n", allocated_entries - 20);
 			entries = old_entries;
@@ -75,16 +93,16 @@ noexport void Update_Entry_Size(void *mem, size_t size)
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-void *Allocate(size_t count, size_t size, char *tag)
+void PtrDist *Allocate(size_t count, size_t size, char *tag)
 {
-	void *mem = calloc(count, size);
+	void PtrDist *mem = _calloc(count, size);
 	Add_Entry(mem, count * size, tag);
 	return mem;
 }
 
-void *Reallocate(void *mem, size_t count, size_t size, char *tag)
+void PtrDist *Reallocate(void PtrDist *mem, size_t count, size_t size, char *tag)
 {
-	void *nu = realloc(mem, count * size);
+	void PtrDist *nu = _realloc(mem, count * size);
 	if (nu == mem) {
 		Update_Entry_Size(mem, count * size);
 	} else {
@@ -95,9 +113,9 @@ void *Reallocate(void *mem, size_t count, size_t size, char *tag)
 	return nu;
 }
 
-char *Duplicate_String(const char *src, char *tag)
+char PtrDist *Duplicate_String(const char *src, char *tag)
 {
-	void *mem = Allocate(strlen(src) + 1, sizeof(char), tag);
+	void PtrDist *mem = Allocate(strlen(src) + 1, sizeof(char), tag);
 	if (!mem) {
 		printf("MEM: Duplicate_String[%s] failed on: %s", tag, src);
 		Stop_Memory_Tracking();
@@ -112,7 +130,7 @@ void Free(void *mem)
 {
 	if (mem != null) {
 		Mark_Entry_Freed(mem);
-		free(mem);
+		_free(mem);
 
 		mem = null;
 	}
@@ -124,13 +142,13 @@ void Stop_Memory_Tracking(void)
 	for (i = 0; i < entry_count; i++) {
 		if (entries[i].freed == false) {
 			printf("#%u [%s]: @%p, %u bytes not freed\n", i, entries[i].tag, entries[i].address, entries[i].size);
-			free(entries[i].address);
+			_free(entries[i].address);
 		}
 	}
 
 	printf("Tracked %u memory entries overall.\n", entry_count);
 
-	free(entries);
+	_free(entries);
 }
 
 #endif

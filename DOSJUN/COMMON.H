@@ -60,22 +60,43 @@ typedef unsigned char zone_id;
 
 #ifdef MEMORY_DEBUG
 
-char *Duplicate_String(const char *src, char *tag);
-void *Allocate(size_t count, size_t size, char *tag);
-void Free(void *mem);
-void *Reallocate(void *mem, size_t count, size_t size, char *tag);
-void Stop_Memory_Tracking(void);
+	#ifdef FAR_MEMORY
+		
+		#define PtrDist far
 
-#else
+	#else
 
-#define Duplicate_String(src, tag) strdup(src)
-#define Allocate(count, size, tag) calloc(count, size)
-#define Free(mem) { free(mem); mem = null; }
-#define Reallocate(mem, count, size, tag) realloc(mem, (count) * (size))
-#define Stop_Memory_Tracking()
+		#define PtrDist
+
+	#endif
+
+	char PtrDist *Duplicate_String(const char *src, char *tag);
+	void PtrDist *Allocate(size_t count, size_t size, char *tag);
+	void Free(void *mem);
+	void PtrDist *Reallocate(void PtrDist *mem, size_t count, size_t size, char *tag);
+	void Stop_Memory_Tracking(void);
+
+#else /* no MEMORY_DEBUG */
+
+	#define Duplicate_String(src, tag) strdup(src)
+	#define Stop_Memory_Tracking()
+
+	#ifdef FAR_MEMORY
+
+		#define Allocate(count, size, tag) farcalloc(count, size)
+		#define Free(mem) { farfree(mem); mem = null; }
+		#define Reallocate(mem, count, size, tag) farrealloc(mem, (count) * (size))
+
+	#else /* no FAR_MEMORY */
+
+		#define Allocate(count, size, tag) calloc(count, size)
+		#define Free(mem) { free(mem); mem = null; }
+		#define Reallocate(mem, count, size, tag) realloc(mem, (count) * (size))
+
+	#endif
 
 #endif
 
 #define SzAlloc(count, obj, tag) Allocate(count, sizeof(obj), tag)
 
-#endif
+#endif /* DOSJUN_COMMON_H */
