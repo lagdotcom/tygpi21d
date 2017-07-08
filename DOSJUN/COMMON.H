@@ -37,6 +37,7 @@ typedef enum {
 } gamestate;
 
 typedef unsigned char bytecode;
+typedef unsigned char char_flag;
 typedef unsigned char colour;
 typedef unsigned char coord;
 typedef unsigned char direction;
