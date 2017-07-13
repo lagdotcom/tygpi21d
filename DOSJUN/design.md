@@ -10,6 +10,9 @@ The party consists of 6 characters.
 ## Character
 A character has these stats:
 - Name
+- Strength
+- Dexterity
+- Intelligence
 - HP / MaxHP
 - MP / MaxMP
 
