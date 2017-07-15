@@ -367,7 +367,6 @@ noexport void EquipItem(host *h)
 
 noexport void SetTileDescription(host *h)
 {
-	bool result;
 	coord x = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	string_id string = Pop_Stack(h);
