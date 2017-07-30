@@ -81,3 +81,24 @@ bool Add_To_Inventory(unsigned char pc, item_id iid, unsigned char qty)
 
 	return false;
 }
+
+bool In_Front_Row(unsigned char pc)
+{
+	return !(gSave.characters[pc].flags & cfBackRow);
+}
+
+item *Get_Equipped_Weapon(unsigned char pc)
+{
+	int i;
+	item *it;
+	inventory *iv;
+
+	for (i = 0; i < INVENTORY_SIZE; i++) {
+		iv = &gSave.characters[pc].items[i];
+		if (iv->item != 0 && iv->flags & vfEquipped) {
+			return Lookup_Item(&gItems, iv->item);
+		}
+	}
+
+	return null;
+}

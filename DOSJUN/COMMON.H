@@ -37,6 +37,7 @@ typedef enum {
 } gamestate;
 
 typedef unsigned char bytecode;
+typedef unsigned char char_flag;
 typedef unsigned char colour;
 typedef unsigned char coord;
 typedef unsigned char direction;
@@ -50,6 +51,7 @@ typedef unsigned char item_type;
 typedef unsigned char job_id;
 typedef unsigned int length;
 typedef unsigned int monster_id;
+typedef unsigned char monster_row;
 typedef unsigned int script_id;
 typedef unsigned char special_id;
 typedef unsigned int string_id;

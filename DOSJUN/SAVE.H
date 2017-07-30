@@ -9,6 +9,10 @@
 
 #define SAVE_HEADER_PADDING			14
 
+typedef enum {
+	cfBackRow = 1
+} charflags;
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
@@ -23,6 +27,7 @@ typedef struct {
 	unsigned char level;
 	unsigned int stats[NUM_STATS];
 	inventory items[INVENTORY_SIZE];
+	char_flag flags;
 } character;
 
 typedef struct {

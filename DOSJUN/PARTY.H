@@ -10,5 +10,7 @@
 bool Add_To_Inventory(unsigned char pc, item_id iid, unsigned char qty);
 void Draw_Party_Status(void);
 bool Equip_Item(unsigned char pc, item_id iid);
+item *Get_Equipped_Weapon(unsigned char pc);
+bool In_Front_Row(unsigned char pc);
 
 #endif

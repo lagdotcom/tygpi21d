@@ -13,67 +13,86 @@ typedef enum {
 	tfSelf = 8
 } targetflags;
 
+#define TARGET_PC(i)	(-i - 1)
+#define TARGET_ENEMY(i)	(i)
+#define IS_PC(i)		(i < 0)
+
+typedef unsigned int act;
+typedef int targ;
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
-	bool (*check)(char pc);
-	void (*act)(char pc, int target);
+	bool (*check)(targ source);
+	void (*act)(targ source, targ target);
 	char *name;
 	targetflags targeting;
 } action;
 
-typedef struct {
-	action* actions;
-	Declare_Array(monster, monsters);
-	int monsters_alive;
-} combat;
-
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-noexport combat gCombat;
+noexport action *combat_actions;
+noexport monster **combat_monsters;
+noexport int SZ(combat_monsters);
+noexport int monsters_alive;
 
 /* C O M B A T  A C T I O N S //////////////////////////////////////////// */
 
-bool Check_Attack(char pc)
+noexport bool Check_Attack(targ source)
 {
-	bool front = In_Front_Row(pc);
-	item *weapon = Get_Equipped_Weapon(pc);
+	bool front;
+	item *weapon;
+
+	if (IS_PC(source)) {
+		front = In_Front_Row(TARGET_PC(source));
+		weapon = Get_Equipped_Weapon(TARGET_PC(source));
+	} else {
+		front = combat_monsters[source]->row == rowFront;
+		weapon = null; /* TODO */
+	}
+
 	if (weapon == null) return front;
 
 	if (weapon->flags & (ifMediumRange | ifLongRange)) return true;
 	return front;
 }
 
-void Attack(char pc, int target)
+noexport void Attack(targ source, targ target)
 {
-
+	/* TODO */
 }
 
-bool Check_Block(char pc)
+noexport bool Check_Block(targ source)
 {
 	return true;
 }
 
-void Block(char pc, int target)
+noexport void Block(targ source, targ target)
 {
-
+	/* TODO */
 }
 
-bool Check_Defend(char pc)
+noexport bool Check_Defend(targ source)
 {
+	/* TODO: fix for enemy */
 	char i;
+
 	/* There must be an alive ally to Defend */
-	for (i = 0; i < PARTY_SIZE; i++) {
-		if (i == pc) continue;
-		if (gSave.characters[i].stats[sHP] > 0) return true;
+	if (IS_PC(source)) {
+		for (i = 0; i < PARTY_SIZE; i++) {
+			if (i == TARGET_PC(source)) continue;
+			if (gSave.characters[i].stats[sHP] > 0) return true;
+		}
+	} else {
+		/* TODO */
 	}
 
 	return false;
 }
 
-void Defend(char pc, int target)
+noexport void Defend(targ source, targ target)
 {
-
+	/* TODO */
 }
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
@@ -86,7 +105,7 @@ int randint(int minimum, int maximum)
 noexport void Clear_Encounter(void)
 {
 	int i;
-	Free_Array(i, gCombat.monsters);
+	Free_Array(i, combat_monsters);
 }
 
 void Add_Monster(monster* template)
@@ -96,22 +115,22 @@ void Add_Monster(monster* template)
 	m->stats[sHP] = m->stats[sMaxHP];
 	m->stats[sMP] = m->stats[sMaxMP];
 
-	Add_to_Array(gCombat.monsters, m);
-	gCombat.monsters_alive++;
+	Add_to_Array(combat_monsters, m);
+	monsters_alive++;
 }
 
 #define Add_Combat_Action(_index, _name, _check, _act, _targeting) { \
-	gCombat.actions[_index].check = _check; \
-	gCombat.actions[_index].act = _act; \
-	gCombat.actions[_index].name = _name; \
-	gCombat.actions[_index].targeting = _targeting; \
+	combat_actions[_index].check = _check; \
+	combat_actions[_index].act = _act; \
+	combat_actions[_index].name = _name; \
+	combat_actions[_index].targeting = _targeting; \
 }
 
 void Initialise_Combat(void)
 {
-	Null_Array(gCombat.monsters);
+	Null_Array(combat_monsters);
 
-	gCombat.actions = SzAlloc(NUM_ACTIONS, action, "Initialise_Combat");
+	combat_actions = SzAlloc(NUM_ACTIONS, action, "Initialise_Combat");
 	Add_Combat_Action(0, "Attack", Check_Attack, Attack, tfEnemy);
 	Add_Combat_Action(1, "Block", Check_Block, Block, tfSelf);
 	Add_Combat_Action(2, "Defend", Check_Defend, Defend, tfAlly);
@@ -119,17 +138,118 @@ void Initialise_Combat(void)
 
 void Free_Combat(void)
 {
-	Free(gCombat.actions);
+	Free(combat_actions);
+}
+
+noexport act Get_Pc_Action(unsigned char pc)
+{
+	int i, count = 0;
+	act ai;
+	int *action_ids = SzAlloc(NUM_ACTIONS, int, "Get_Pc_Action.ids");
+	char **action_names = SzAlloc(NUM_ACTIONS, char *, "Get_Pc_Action.names");
+
+	for (i = 0; i < NUM_ACTIONS; i++) {
+		if (combat_actions[i].check(pc)) {
+			action_names[count] = combat_actions[i].name;
+			action_ids[count++] = i;
+		}
+	}
+
+	/* TODO */
+	i = Input_Menu(action_names, count, 10, 10);
+	ai = action_ids[i];
+
+	Free(action_ids);
+	Free(action_names);
+
+	return ai;
+}
+
+noexport targ Get_Pc_Target(unsigned char pc, act action_id)
+{
+	char **menu, temp[100];
+	int *target_ids;
+	int items = 0, max, i;
+	targ choice;
+	action *a = &combat_actions[action_id];
+
+	/* get the easiest case out of the way */
+	if (a->targeting == tfSelf) return TARGET_PC(pc);
+
+	/* OK, gather all possible targets */
+	max = PARTY_SIZE + SZ(combat_monsters);
+	menu = SzAlloc(max, char *, "Get_Pc_Target.menu");
+	target_ids = SzAlloc(max, int, "Get_Pc_Target.targs");
+
+	if (a->targeting & tfSelf) {
+		menu[items] = Duplicate_String(gSave.characters[pc].name, "Get_Pc_Target.self");
+		target_ids[items++] = TARGET_PC(pc);
+	}
+
+	if (a->targeting & tfAlly) {
+		for (i = 0; i < PARTY_SIZE; i++) {
+			if (i == pc) continue;
+			if (gSave.characters[i].stats[sHP] > 0 || a->targeting & tfDead) {
+				menu[items] = Duplicate_String(gSave.characters[i].name, "Get_Pc_Target.ally");
+				target_ids[items++] = TARGET_PC(i);
+			}
+		}
+	}
+
+	if (a->targeting & tfEnemy) {
+		for (i = 0; i < SZ(combat_monsters); i++) {
+			if (combat_monsters[i]->stats[sHP] > 0 || a->targeting & tfDead) {
+				/* TODO: ignore if already in menu, use group number */
+
+				if (combat_monsters[i]->stats[sHP] > 0) {
+					menu[items] = Duplicate_String(combat_monsters[i]->name, "Get_Pc_Target.monster");
+				} else {
+					sprintf(temp, "%s (dead)", combat_monsters[i]->name);
+					menu[items] = Duplicate_String(temp, "Get_Pc_Target.dead");
+				}
+
+				target_ids[items++] = i;
+			}
+		}
+	}
+
+	/* TODO */
+	choice = target_ids[Input_Menu(menu, items, 10, 10)];
+
+	for (i = 0; i < items; i++) {
+		Free(menu[i]);
+	}
+
+	Free(menu);
+	Free(target_ids);
+
+	return choice;
+}
+
+noexport void Apply_Pc_Action(unsigned char pc, act action_id, targ target_id)
+{
+	combat_actions[action_id].act(TARGET_PC(pc), target_id);
 }
 
 noexport void Enter_Combat_Loop(void)
 {
 	int i;
+	int pc_actions[PARTY_SIZE];
+	int pc_targets[PARTY_SIZE];
 
-	while (gCombat.monsters_alive > 0) {
+	while (monsters_alive > 0) {
 		for (i = 0; i < PARTY_SIZE; i++) {
-			/* TODO */
+			pc_actions[i] = Get_Pc_Action(i);
+			pc_targets[i] = Get_Pc_Target(i, pc_actions[i]);
 		}
+
+		/* TODO: get monster actions */
+
+		for (i = 0; i < PARTY_SIZE; i++) {
+			Apply_Pc_Action(i, pc_actions[i], pc_targets[i]);
+		}
+
+		/* TODO: apply monster actions */
 	}
 
 	Clear_Encounter();
