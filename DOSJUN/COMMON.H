@@ -50,6 +50,7 @@ typedef unsigned int item_flag;
 typedef unsigned char item_type;
 typedef unsigned char job_id;
 typedef unsigned int length;
+typedef unsigned char monster_ai;
 typedef unsigned int monster_id;
 typedef unsigned char monster_row;
 typedef unsigned int script_id;

@@ -8,12 +8,16 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define MONSTERS_HEADER_PADDING		27
-#define MONSTER_PADDING				9
+#define MONSTER_PADDING				8
 
 typedef enum {
 	rowFront,
 	rowBack
 } row;
+
+typedef enum {
+	aiMindless
+} ai;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -23,6 +27,7 @@ typedef struct {
 	monster_id id;
 	unsigned int stats[NUM_STATS];
 	monster_row row;
+	monster_ai ai;
 
 	unsigned char unused[MONSTER_PADDING];
 } monster;

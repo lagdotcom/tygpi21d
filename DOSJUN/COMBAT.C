@@ -17,7 +17,8 @@ typedef enum {
 #define TARGET_ENEMY(i)	(i)
 #define IS_PC(i)		(i < 0)
 
-typedef unsigned int act;
+#define NO_ACTION		-1
+typedef int act;
 typedef int targ;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
@@ -231,11 +232,36 @@ noexport void Apply_Pc_Action(unsigned char pc, act action_id, targ target_id)
 	combat_actions[action_id].act(TARGET_PC(pc), target_id);
 }
 
+noexport void Apply_Monster_Action(unsigned char monster, act action_id, targ target_id)
+{
+	if (action_id >= 0) {
+		combat_actions[action_id].act(monster, target_id);
+	}
+}
+
+/* A I  R O U T I N E S ////////////////////////////////////////////////// */
+
+noexport void AI_Mindless(int monster, int *action, int *target)
+{
+	int t = randint(0, PARTY_SIZE - 1);
+	while (gSave.characters[t].stats[sHP] <= 0) {
+		t = randint(0, PARTY_SIZE - 1);
+	}
+
+	*action = 0;	/* Attack */
+	*target = TARGET_PC(t);
+}
+
 noexport void Enter_Combat_Loop(void)
 {
 	int i;
-	int pc_actions[PARTY_SIZE];
-	int pc_targets[PARTY_SIZE];
+	act pc_actions[PARTY_SIZE];
+	targ pc_targets[PARTY_SIZE];
+	act *monster_actions;
+	targ *monster_targets;
+
+	monster_actions = SzAlloc(SZ(combat_monsters), act, "Enter_Combat_Loop.actions");
+	monster_targets = SzAlloc(SZ(combat_monsters), targ, "Enter_Combat_Loop.targets");
 
 	while (monsters_alive > 0) {
 		for (i = 0; i < PARTY_SIZE; i++) {
@@ -243,16 +269,33 @@ noexport void Enter_Combat_Loop(void)
 			pc_targets[i] = Get_Pc_Target(i, pc_actions[i]);
 		}
 
-		/* TODO: get monster actions */
+		for (i = 0; i < SZ(combat_monsters); i++) {
+			/* TODO: could have self-res enemies? */
+			if (combat_monsters[i]->stats[sHP] > 0) {
+				/* TODO: change to array lookup? */
+				switch (combat_monsters[i]->ai) {
+					case aiMindless:
+						AI_Mindless(i, &monster_actions[i], &monster_targets[i]);
+						break;
+				}
+			}
+			else {
+				monster_actions[i] = NO_ACTION;
+			}
+		}
 
 		for (i = 0; i < PARTY_SIZE; i++) {
 			Apply_Pc_Action(i, pc_actions[i], pc_targets[i]);
 		}
 
-		/* TODO: apply monster actions */
+		for (i = 0; i < SZ(combat_monsters); i++) {
+			Apply_Monster_Action(i, monster_actions[i], monster_targets[i]);
+		}
 	}
 
 	Clear_Encounter();
+	Free(monster_actions);
+	Free(monster_targets);
 
 	redraw_description = true;
 	redraw_fp = true;
