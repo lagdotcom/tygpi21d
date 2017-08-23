@@ -166,7 +166,7 @@ bool Get_Colour(colour *value)
 	return false;
 }
 
-void Change_Ceiling()
+void Change_Ceiling(void)
 {
 	if (Get_Colour(&TILE(gZone, sel_x, sel_y)->ceil)) {
 		Draw_Tile(sel_x, sel_y);
@@ -174,7 +174,7 @@ void Change_Ceiling()
 	}
 }
 
-void Change_Floor()
+void Change_Floor(void)
 {
 	if (Get_Colour(&TILE(gZone, sel_x, sel_y)->floor)) {
 		Draw_Tile(sel_x, sel_y);

@@ -154,8 +154,9 @@ noexport bool Load_Picture(char *filename, pcx_picture_ptr image)
 
 void Show_Picture(char *name)
 {
-	int x, y;
-	unsigned char *output, *input;
+	int y;
+	unsigned char *output;
+	char *input;
 	char filename[20];
 	sprintf(filename, "PICS\\%s.PCX", name);
 

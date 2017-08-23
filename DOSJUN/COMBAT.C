@@ -39,18 +39,50 @@ noexport int monsters_alive;
 
 /* C O M B A T  A C T I O N S //////////////////////////////////////////// */
 
+noexport item *Get_Weapon(targ source)
+{
+	if (IS_PC(source)) {
+		return Get_Equipped_Weapon(TARGET_PC(source));
+	}
+
+	return null; /* TODO */
+}
+
+noexport bool Get_Row(targ source)
+{
+	if (IS_PC(source)) {
+		return In_Front_Row(TARGET_PC(source));
+	}
+
+	return combat_monsters[source]->row == rowFront;
+}
+
+noexport unsigned int Get_Stat(targ source, stat_id stat)
+{
+	if (IS_PC(source)) {
+		return gSave.characters[TARGET_PC(source)].stats[stat];
+	}
+
+	return combat_monsters[source]->stats[stat];
+}
+
+noexport stat_id Get_Weapon_Stat(item *weapon)
+{
+	if (weapon == null) return sStrength;
+	return (weapon->flags & ifDexterityWeapon) ? sDexterity : sStrength;
+}
+
+noexport void Damage(targ victim, int amount)
+{
+	/* TODO */
+}
+
+/* C O M B A T  A C T I O N S //////////////////////////////////////////// */
+
 noexport bool Check_Attack(targ source)
 {
-	bool front;
-	item *weapon;
-
-	if (IS_PC(source)) {
-		front = In_Front_Row(TARGET_PC(source));
-		weapon = Get_Equipped_Weapon(TARGET_PC(source));
-	} else {
-		front = combat_monsters[source]->row == rowFront;
-		weapon = null; /* TODO */
-	}
+	bool front = Get_Row(source);
+	item *weapon = Get_Weapon(source);
 
 	if (weapon == null) return front;
 
@@ -60,7 +92,25 @@ noexport bool Check_Attack(targ source)
 
 noexport void Attack(targ source, targ target)
 {
-	/* TODO */
+	item *weapon = Get_Weapon(source);
+	int base = Get_Stat(source, Get_Weapon_Stat(weapon));
+	int min, max, roll;
+
+	if (randint(1, 20) <= base) {
+		/* HIT */
+		min = Get_Stat(source, sMinDamage);
+		max = Get_Stat(source, sMaxDamage);
+
+		if (weapon) {
+			min += weapon->stats[sMinDamage];
+			max += weapon->stats[sMaxDamage];
+		}
+
+		roll = randint(min, max) - Get_Stat(target, sArmour);
+		if (roll > 0) Damage(target, roll);
+	} else {
+		/* MISS */
+	}
 }
 
 noexport bool Check_Block(targ source)

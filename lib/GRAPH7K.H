@@ -113,6 +113,7 @@ would just call it the SCAN_1 key. */
 #define SCAN_PGDWN			81
 #define SCAN_INS			82
 #define SCAN_DEL			83
+
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 unsigned char Get_Ascii_Key(void);

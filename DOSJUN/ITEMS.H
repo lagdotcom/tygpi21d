@@ -17,7 +17,7 @@ typedef enum {
 	itFootwear,
 	itJewellery,
 	itPotion,
-	itScroll
+	itScroll,
 } item_types;
 
 typedef enum {
@@ -26,12 +26,13 @@ typedef enum {
 	ifHeavy = 2,
 	ifStacked = 4,
 	ifMediumRange = 8,
-	ifLongRange = 16
+	ifLongRange = 16,
+	ifDexterityWeapon = 32,
 } itemflags;
 
 typedef enum {
 	spNone,
-	spHeal
+	spHeal,
 } itemspecials;
 
 #define ITEMS_HEADER_PADDING		27

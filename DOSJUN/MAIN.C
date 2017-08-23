@@ -83,8 +83,9 @@ gamestate Start_New_Game()
 	Blit_String_DB(0, 24, 15, "to a local one.", 0);
 	gSave.header.num_characters = 6;
 
-	Blit_String_DB(0, 40, 15, "Who are you?", 0);
-	Input_String(104, 40, gSave.characters[0].name, NAME_SIZE);
+	Blit_String_DB(0, 40, 15, "Who's the bossy one?", 0);
+	Input_String(168, 40, gSave.characters[0].name, NAME_SIZE);
+	/*                                                  Str Int Dex  HP MP*/
 	Initialise_Character(&gSave.characters[0], jBard,     8, 13, 13, 10, 0);
 
 	Blit_String_DB(0, 56, 15, "Who's the strong one?", 0);
