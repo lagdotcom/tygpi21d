@@ -140,6 +140,12 @@ noexport void Attack(targ source, targ target)
 	stat min, max;
 	int roll;
 
+	/* already dead */
+	if (Get_Stat(target, sHP) <= 0) {
+		/* TODO: reassign target? */
+		return;
+	}
+
 	if (randint(1, 20) <= base) {
 		Combat_Message("%s hits %s!", NAME(source), NAME(target));
 
