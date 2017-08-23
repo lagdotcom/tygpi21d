@@ -23,6 +23,8 @@ typedef unsigned char bool;
 #define East	1
 #define South	2
 #define West	3
+#define Up		4
+#define Down	5
 
 typedef enum {
 	rAhead,

@@ -573,6 +573,26 @@ noexport bool Call_SetTileDescription_State(jc_parser *p)
 	return true;
 }
 
+noexport bool Call_SetTileColour_State(jc_parser *p)
+{
+	/* TODO: expressions */
+	jc_token *x, *y, *surface, *colour;
+
+	CONSUME();
+	x = CONSUME();
+	y = CONSUME();
+	surface = CONSUME();
+	colour = CONSUME();
+
+	if (!Emit_Argument(p, colour)) return false;
+	if (!Emit_Argument(p, surface)) return false;
+	if (!Emit_Argument(p, y)) return false;
+	if (!Emit_Argument(p, x)) return false;
+
+	EMIT(coSetTileColour);
+	return true;
+}
+
 noexport bool Keyword_State(jc_parser *p)
 {
 	if (!p->in_script) {
@@ -589,6 +609,7 @@ noexport bool Keyword_State(jc_parser *p)
 		if (MATCH("GiveItem")) return Call_GiveItem_State(p);
 		if (MATCH("EquipItem")) return Call_EquipItem_State(p);
 		if (MATCH("SetTileDescription")) return Call_SetTileDescription_State(p);
+		if (MATCH("SetTileColour")) return Call_SetTileColour_State(p);
 
 		if (MATCH("If")) return Start_If_State(p);
 		if (MATCH("ElseIf")) return Start_ElseIf_State(p);

@@ -47,7 +47,8 @@ typedef enum {
 	coUnlock = 0xA3,
 	coGiveItem = 0xA4,
 	coEquipItem = 0xA5,
-	coSetTileDescription = 0xA6
+	coSetTileDescription = 0xA6,
+	coSetTileColour = 0xA7,
 } code_op;
 
 typedef enum {

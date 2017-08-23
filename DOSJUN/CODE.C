@@ -378,6 +378,34 @@ noexport void SetTileDescription(host *h)
 	TILE(gZone, x, y)->description = string;
 }
 
+noexport void SetTileColour(host *h)
+{
+	coord x = Pop_Stack(h);
+	coord y = Pop_Stack(h);
+	int f = Pop_Stack(h);
+	colour c = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "settilecolour %d, %d, %d, %d", x, y, facing, colour);
+#endif
+
+	switch (f) {
+		case Up:
+			TILE(gZone, x, y)->ceil = c;
+			break;
+
+		case Down:
+			TILE(gZone, x, y)->floor = c;
+			break;
+
+		default:
+			TILE(gZone, x, y)->walls[f].texture = c;
+			break;
+	}
+
+	redraw_fp = true;
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(host *h, bytecode op)
@@ -419,6 +447,7 @@ noexport void Run_Code_Instruction(host *h, bytecode op)
 		case coGiveItem:	GiveItem(h); return;
 		case coEquipItem:	EquipItem(h); return;
 		case coSetTileDescription: SetTileDescription(h); return;
+		case coSetTileColour: SetTileColour(h); return;
 	}
 
 	h->running = false;
