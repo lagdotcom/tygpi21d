@@ -23,6 +23,7 @@
 #define YB EY - ps
 #define YC SY + pe
 #define YD EY - pe
+#define DOORSIZE 8
 
 #define FILLED true
 
@@ -61,6 +62,13 @@ bool Draw_FP_Tile(coord x, coord y, char ps, char pe, char cmod)
 	centre = Get_Wall(x, y, gSave.header.facing, rAhead);
 	if (centre->texture) {
 		Draw_Square_DB(centre->texture + cmod, XC, YC, XD, YD, FILLED);
+
+		switch (centre->type) {
+			case wtDoor:
+			case wtLockedDoor:
+				Draw_Square_DB(0, XC + DOORSIZE, YC + DOORSIZE, XD - DOORSIZE, YD, false);
+				break;
+		}
 
 		return false;
 	}
