@@ -5,6 +5,8 @@ Const North = 0
 Const East = 1
 Const South = 2
 Const West = 3
+Const Ceiling = 4
+Const Floor = 5
 
 # NPC IDs
 Const leader = 0

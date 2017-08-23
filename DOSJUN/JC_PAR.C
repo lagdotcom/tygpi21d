@@ -593,6 +593,28 @@ noexport bool Call_SetTileColour_State(jc_parser *p)
 	return true;
 }
 
+noexport bool Call_Teleport_State(jc_parser *p)
+{
+	/* TODO: expressions */
+	jc_token *zone, *x, *y, *facing, *transition;
+
+	CONSUME();
+	zone = CONSUME();
+	x = CONSUME();
+	y = CONSUME();
+	facing = CONSUME();
+	transition = CONSUME();
+
+	if (!Emit_Argument(p, transition)) return false;
+	if (!Emit_Argument(p, facing)) return false;
+	if (!Emit_Argument(p, y)) return false;
+	if (!Emit_Argument(p, x)) return false;
+	if (!Emit_Argument(p, zone)) return false;
+
+	EMIT(coTeleport);
+	return true;
+}
+
 noexport bool Keyword_State(jc_parser *p)
 {
 	if (!p->in_script) {

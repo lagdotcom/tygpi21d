@@ -22,7 +22,7 @@ Zone tiles can have scripts attached them. Scripts are written in a fairly simpl
 ### Commands
 - `SetTileDescription x, y, string_id`
 - `SetTileColour x, y, surface, colour_id`: surface can be N/E/S/W/C/F
-- `Teleport zone, x, y, transition`: transition types - silent, stairs, teleport
+- `Teleport zone, x, y, facing, transition`: transition types - silent, stairs, teleport
 
 ### Variables
 There are three variable scopes.

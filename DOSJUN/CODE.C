@@ -406,6 +406,32 @@ noexport void SetTileColour(host *h)
 	redraw_fp = true;
 }
 
+noexport void Teleport(host *h)
+{
+	zone_id zone = Pop_Stack(h);
+	coord x = Pop_Stack(h);
+	coord y = Pop_Stack(h);
+	int facing = Pop_Stack(h);
+	int transition = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "teleport %d, %d, %d, %d, %d", zone, x, y, facing, transition);
+#endif
+
+	switch (transition) {
+		/* TODO */
+	}
+
+	gSave.header.zone = zone;
+	gSave.header.x = x;
+	gSave.header.y = y;
+	gSave.header.facing = facing;
+
+	redraw_description = true;
+	redraw_fp = true;
+	trigger_on_enter = true;
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(host *h, bytecode op)
@@ -448,6 +474,7 @@ noexport void Run_Code_Instruction(host *h, bytecode op)
 		case coEquipItem:	EquipItem(h); return;
 		case coSetTileDescription: SetTileDescription(h); return;
 		case coSetTileColour: SetTileColour(h); return;
+		case coTeleport:	Teleport(h); return;
 	}
 
 	h->running = false;
