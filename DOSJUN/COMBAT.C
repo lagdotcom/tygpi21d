@@ -115,7 +115,7 @@ noexport void Damage(targ victim, int amount)
 
 	Combat_Message("%s takes %d damage.", NAME(victim), amount);
 	Set_Stat(victim, sHP, hp);
-	if (hp < 0) {
+	if (hp <= 0) {
 		Kill(victim);
 	}
 }
