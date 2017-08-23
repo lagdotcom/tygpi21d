@@ -12,5 +12,6 @@ void Draw_Party_Status(void);
 bool Equip_Item(unsigned char pc, item_id iid);
 item *Get_Equipped_Weapon(unsigned char pc);
 bool In_Front_Row(unsigned char pc);
+void Pc_Select(int num);
 
 #endif

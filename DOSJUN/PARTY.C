@@ -16,6 +16,21 @@ bool redraw_party;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
+noexport void Pc_Select_Box(bool sel, int x, int y)
+{
+	Draw_Square_DB(sel ? 14 : 0, x - 2, y - 2, x + 70, y + 30, false);
+}
+
+void Pc_Select(int num)
+{
+	Pc_Select_Box(num == 0, SX, SY);
+	Pc_Select_Box(num == 1, SX, SY + 34);
+	Pc_Select_Box(num == 2, SX, SY + 68);
+	Pc_Select_Box(num == 3, SX + 80, SY);
+	Pc_Select_Box(num == 4, SX + 80, SY + 34);
+	Pc_Select_Box(num == 5, SX + 80, SY + 68);
+}
+
 void Draw_Character_Status(int index, int x, int y)
 {
 	character* ch = &gSave.characters[index];
@@ -90,7 +105,6 @@ bool In_Front_Row(unsigned char pc)
 item *Get_Equipped_Weapon(unsigned char pc)
 {
 	int i;
-	item *it;
 	inventory *iv;
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {

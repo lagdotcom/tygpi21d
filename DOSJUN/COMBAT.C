@@ -252,12 +252,14 @@ noexport act Get_Pc_Action(unsigned char pc)
 	}
 
 	/* TODO */
+	Pc_Select(pc);
 	i = Input_Menu(action_names, count, 10, 10);
 	ai = action_ids[i];
 
 	Free(action_ids);
 	Free(action_names);
 
+	Pc_Select(-1);
 	return ai;
 }
 
@@ -310,6 +312,7 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 	}
 
 	/* TODO */
+	Pc_Select(pc);
 	choice = target_ids[Input_Menu(menu, items, 10, 10)];
 
 	for (i = 0; i < items; i++) {
@@ -319,6 +322,7 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 	Free(menu);
 	Free(target_ids);
 
+	Pc_Select(-1);
 	return choice;
 }
 
