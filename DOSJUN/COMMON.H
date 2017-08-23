@@ -55,6 +55,7 @@ typedef unsigned int monster_id;
 typedef unsigned char monster_row;
 typedef unsigned int script_id;
 typedef unsigned char special_id;
+typedef int stat;
 typedef unsigned int string_id;
 typedef unsigned char wall_type;
 typedef unsigned char zone_id;

@@ -25,7 +25,7 @@ typedef struct {
 	char name[NAME_SIZE];
 	char image[8];
 	monster_id id;
-	unsigned int stats[NUM_STATS];
+	stat stats[NUM_STATS];
 	monster_row row;
 	monster_ai ai;
 

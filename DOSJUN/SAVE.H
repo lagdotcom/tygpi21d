@@ -25,7 +25,7 @@ typedef struct {
 	char name[NAME_SIZE];
 	job_id job;
 	unsigned char level;
-	unsigned int stats[NUM_STATS];
+	stat stats[NUM_STATS];
 	inventory items[INVENTORY_SIZE];
 	char_flag flags;
 } character;

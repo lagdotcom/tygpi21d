@@ -16,6 +16,7 @@ typedef enum {
 #define TARGET_PC(i)	(-i - 1)
 #define TARGET_ENEMY(i)	(i)
 #define IS_PC(i)		(i < 0)
+#define NAME(i)			(IS_PC(i) ? gSave.characters[TARGET_PC(i)].name : combat_monsters[i]->name)
 
 #define NO_ACTION		-1
 typedef int act;
@@ -37,7 +38,22 @@ noexport monster **combat_monsters;
 noexport int SZ(combat_monsters);
 noexport int monsters_alive;
 
+int randint(int minimum, int maximum);
+
 /* C O M B A T  A C T I O N S //////////////////////////////////////////// */
+
+noexport void Combat_Message(char *format, ...)
+{
+	va_list vargs;
+	char message[500];
+
+	va_start(vargs, format);
+	vsprintf(message, format, vargs);
+	va_end(vargs);
+
+	/* TODO */
+	Show_Game_String(message, true);
+}
 
 noexport item *Get_Weapon(targ source)
 {
@@ -57,13 +73,22 @@ noexport bool Get_Row(targ source)
 	return combat_monsters[source]->row == rowFront;
 }
 
-noexport unsigned int Get_Stat(targ source, stat_id stat)
+noexport stat Get_Stat(targ source, stat_id st)
 {
 	if (IS_PC(source)) {
-		return gSave.characters[TARGET_PC(source)].stats[stat];
+		return gSave.characters[TARGET_PC(source)].stats[st];
 	}
 
-	return combat_monsters[source]->stats[stat];
+	return combat_monsters[source]->stats[st];
+}
+
+noexport void Set_Stat(targ source, stat_id st, stat num)
+{
+	if (IS_PC(source)) {
+		gSave.characters[TARGET_PC(source)].stats[st] = num;
+	} else {
+		combat_monsters[source]->stats[st] = num;
+	}
 }
 
 noexport stat_id Get_Weapon_Stat(item *weapon)
@@ -72,9 +97,27 @@ noexport stat_id Get_Weapon_Stat(item *weapon)
 	return (weapon->flags & ifDexterityWeapon) ? sDexterity : sStrength;
 }
 
+noexport void Kill(targ victim)
+{
+	Combat_Message("%s dies!", NAME(victim));
+
+	if (IS_PC(victim)) {
+		/* TODO */
+	} else {
+		monsters_alive--;
+	}
+}
+
 noexport void Damage(targ victim, int amount)
 {
-	/* TODO */
+	stat hp = Get_Stat(victim, sHP);
+	hp -= amount;
+
+	Combat_Message("%s takes %d damage.", NAME(victim), amount);
+	Set_Stat(victim, sHP, hp);
+	if (hp < 0) {
+		Kill(victim);
+	}
 }
 
 /* C O M B A T  A C T I O N S //////////////////////////////////////////// */
@@ -93,11 +136,13 @@ noexport bool Check_Attack(targ source)
 noexport void Attack(targ source, targ target)
 {
 	item *weapon = Get_Weapon(source);
-	int base = Get_Stat(source, Get_Weapon_Stat(weapon));
-	int min, max, roll;
+	stat base = Get_Stat(source, Get_Weapon_Stat(weapon));
+	stat min, max;
+	int roll;
 
 	if (randint(1, 20) <= base) {
-		/* HIT */
+		Combat_Message("%s hits %s!", NAME(source), NAME(target));
+
 		min = Get_Stat(source, sMinDamage);
 		max = Get_Stat(source, sMaxDamage);
 
@@ -109,7 +154,7 @@ noexport void Attack(targ source, targ target)
 		roll = randint(min, max) - Get_Stat(target, sArmour);
 		if (roll > 0) Damage(target, roll);
 	} else {
-		/* MISS */
+		Combat_Message("%s attacks %s and misses.", NAME(source), NAME(target));
 	}
 }
 

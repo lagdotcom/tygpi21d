@@ -50,7 +50,7 @@ typedef struct {
 	int special_argument1;
 	int special_argument2;
 	unsigned char unused[ITEM_PADDING];
-	unsigned int stats[NUM_STATS];
+	stat stats[NUM_STATS];
 } item;
 
 typedef struct {
