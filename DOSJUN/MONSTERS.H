@@ -7,7 +7,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define MONSTERS_HEADER_PADDING		27
+#define MONSTERS_HEADER_PADDING		26
 #define MONSTER_PADDING				8
 
 typedef enum {
@@ -35,7 +35,7 @@ typedef struct {
 typedef struct {
 	VERSION_HEADER;
 
-	unsigned char num_monsters;
+	unsigned int num_monsters;
 
 	unsigned char unused[MONSTERS_HEADER_PADDING];
 } monsters_header;

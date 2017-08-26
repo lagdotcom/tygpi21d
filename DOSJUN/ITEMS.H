@@ -35,7 +35,7 @@ typedef enum {
 	spHeal,
 } itemspecials;
 
-#define ITEMS_HEADER_PADDING		27
+#define ITEMS_HEADER_PADDING		26
 #define ITEM_PADDING				6
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
@@ -56,7 +56,7 @@ typedef struct {
 typedef struct {
 	VERSION_HEADER;
 
-	unsigned char num_items;
+	unsigned int num_items;
 
 	unsigned char unused[ITEMS_HEADER_PADDING];
 } items_header;
