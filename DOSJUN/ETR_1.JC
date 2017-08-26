@@ -7,7 +7,8 @@ Const q_init = 1
 Const q_door_locked = 2
 Const q_key_found = 3
 Const q_door_unlocked = 4
-Const q_fought_rat = 5
+Const q_gone_outside = 5
+Const q_fought_rat = 6
 Local q_status
 
 Script wake_up
@@ -33,7 +34,7 @@ Script wake_up
 EndScript
 
 Script facing_door
-	If @Facing != East
+	If @Facing != South
 		Return
 	EndIf
 
@@ -50,7 +51,7 @@ Script facing_door
 		PcSpeak shifty, "Let me try the key."
 		Text "The lock rattles around a bit, then\ngives."
 		PcSpeak liberal, "Great... can we leave now?"
-		Unlock @X, @Y, East
+		Unlock @X, @Y, South
 		q_status = q_door_unlocked
 	EndIf
 EndScript
@@ -74,6 +75,14 @@ Script just_outside
 	Text "The contrast between the room you\njust left and this corridor is sharp. Everything around you is made of dry stone."
 	Text "Everyone seems confused. You look at\neach other for a while before someone speaks."
 	PcSpeak nerd, "Aren't we supposed to be in a\nwarehouse?"
+	q_status = q_gone_outside
+EndScript
+
+Script rat_fight
+	If q_status != q_gone_outside
+		Return
+	EndIf
+
 	PcSpeak liberal, "I heard something! Ugh, something\nunpleasant."
 	Text "You hear it too; a quiet skittering\nsound. It doesn't take long before\nthe culprit is revealed."
 	# Show the rat somehow?
