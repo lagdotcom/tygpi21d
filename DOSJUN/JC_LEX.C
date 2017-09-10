@@ -81,7 +81,7 @@ noexport void Lexer_Error(char *line, int offset, char *message)
 }
 
 #define Lex_Error(message) { \
-	Lexer_Error(source, ptr - source, message); \
+	Lexer_Error(source, (int)(ptr - source), message); \
 	return false; \
 }
 #define Lex_Push(c) buffer[buffer_offset++] = c
@@ -114,7 +114,7 @@ bool Tokenize_Code_String(char *source, jc_token *tokens, int *count)
 	lex_state state = lsNone,
 		guess = lsNone;
 	jc_token_type token_type;
-	unsigned char *ptr = source,
+	char *ptr = source,
 		ch;
 	char buffer[LEXER_TOKEN_SIZE];
 	int buffer_offset = 0;

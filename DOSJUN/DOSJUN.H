@@ -4,8 +4,8 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "common.h"
+#include "types.h"
 
-#include "array.h"
 #include "campaign.h"
 #include "code.h"
 #include "combat.h"
@@ -14,6 +14,7 @@
 #include "items.h"
 #include "input.h"
 #include "io.h"
+#include "list.h"
 #include "main.h"
 #include "monsters.h"
 #include "party.h"

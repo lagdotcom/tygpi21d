@@ -7,9 +7,9 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define SX 8
+#define SX 96
 #define SY 8
-#define EX 135
+#define EX 223
 #define EY 135
 #define P1 22
 #define P2 36

@@ -14,9 +14,8 @@ pcx_picture menu_bg;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Initialise_Character(character *c, job_id job, unsigned short str,
-	unsigned short intelligence, unsigned short dex, unsigned short hp,
-	unsigned short mp)
+void Initialise_Character(character *c, job_id job, int str,
+	int intelligence, int dex, int hp, int mp)
 {
 	c->job = job;
 	c->level = 1;
@@ -119,9 +118,7 @@ bool Load_Game()
 {
 	char **filenames;
 	char buffer[13];
-	int done,
-		i,
-		choice,
+	int choice,
 		count;
 
 	Fill_Double_Buffer(0);

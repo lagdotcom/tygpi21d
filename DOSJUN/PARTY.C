@@ -7,8 +7,9 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define SX 148
-#define SY 12
+#define SX1 8
+#define SX2 232
+#define SY 8
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
@@ -23,40 +24,40 @@ noexport void Pc_Select_Box(bool sel, int x, int y)
 
 void Pc_Select(int num)
 {
-	Pc_Select_Box(num == 0, SX, SY);
-	Pc_Select_Box(num == 1, SX, SY + 34);
-	Pc_Select_Box(num == 2, SX, SY + 68);
-	Pc_Select_Box(num == 3, SX + 80, SY);
-	Pc_Select_Box(num == 4, SX + 80, SY + 34);
-	Pc_Select_Box(num == 5, SX + 80, SY + 68);
+	Pc_Select_Box(num == 0, SX1, SY);
+	Pc_Select_Box(num == 1, SX1, SY + 34);
+	Pc_Select_Box(num == 2, SX1, SY + 68);
+	Pc_Select_Box(num == 3, SX2, SY);
+	Pc_Select_Box(num == 4, SX2, SY + 34);
+	Pc_Select_Box(num == 5, SX2, SY + 68);
 }
 
 void Draw_Character_Status(int index, int x, int y)
 {
 	character* ch = &gSave.characters[index];
-	char buffer[11];
+	char buffer[9];
 
-	strncpy(buffer, ch->name, 10);
-	buffer[10] = 0;
-	Blit_String_DB(x, y, 15, buffer, 0);
+	strncpy(buffer, ch->name, 8);
+	buffer[8] = 0;
+	Blit_String_DB(x + 16, y, 15, buffer, 0);
 
-	sprintf(buffer, "%4u/%u", ch->stats[sHP], ch->stats[sMaxHP]);
-	Blit_String_DB(x, y + 8, 15, buffer, 0);
+	sprintf(buffer, "H%3u/%-3u", ch->stats[sHP], ch->stats[sMaxHP]);
+	Blit_String_DB(x + 16, y + 8, 15, buffer, 0);
 
 	if (ch->stats[sMaxMP] > 0) {
-		sprintf(buffer, "%4u/%u", ch->stats[sMP], ch->stats[sMaxMP]);
-		Blit_String_DB(x, y + 16, 15, buffer, 0);
+		sprintf(buffer, "M%3u/%-3u", ch->stats[sMP], ch->stats[sMaxMP]);
+		Blit_String_DB(x + 16, y + 16, 15, buffer, 0);
 	}
 }
 
 void Draw_Party_Status(void)
 {
-	Draw_Character_Status(0, SX, SY);
-	Draw_Character_Status(1, SX, SY + 34);
-	Draw_Character_Status(2, SX, SY + 68);
-	Draw_Character_Status(3, SX + 80, SY);
-	Draw_Character_Status(4, SX + 80, SY + 34);
-	Draw_Character_Status(5, SX + 80, SY + 68);
+	Draw_Character_Status(0, SX1, SY);
+	Draw_Character_Status(1, SX1, SY + 32);
+	Draw_Character_Status(2, SX1, SY + 64);
+	Draw_Character_Status(3, SX2, SY);
+	Draw_Character_Status(4, SX2, SY + 32);
+	Draw_Character_Status(5, SX2, SY + 64);
 
 	redraw_party = false;
 }

@@ -106,7 +106,7 @@ noexport bool Token_Matches(jc_parser *p, char *check)
 
 noexport bool Parse_Error(jc_parser *p, char *message)
 {
-	printf("-- PARSE ERROR --\n");
+	printf("-- PARSE ERROR @%d/%dtk --\n", p->position, p->token_count);
 	printf("%s\n", message);
 
 	return false;
@@ -376,8 +376,6 @@ noexport bool Begin_Script_State(jc_parser *p)
 noexport bool Call_PcSpeak_State(jc_parser *p)
 {
 	jc_token *pc, *val;
-	jc_var *pc_var;
-	int sindex;
 
 	CONSUME();
 	pc = CONSUME();
@@ -425,7 +423,6 @@ noexport bool Start_If_State(jc_parser *p)
 {
 	/* TODO: expressions */
 	jc_token *left, *right, *cmp;
-	jc_var *left_v, *right_v;
 
 	CONSUME();
 	left = CONSUME();
@@ -445,8 +442,6 @@ noexport bool Start_ElseIf_State(jc_parser *p)
 {
 	/* TODO: expressions */
 	jc_token *left, *right, *cmp;
-	jc_var *left_v, *right_v;
-	int *preserved;
 
 	if (p->stack_size == 0) return Parse_Error(p, "ElseIf without If");
 	/* TODO: check stack top is an If */
@@ -470,8 +465,6 @@ noexport bool Start_ElseIf_State(jc_parser *p)
 
 noexport bool End_If_State(jc_parser *p)
 {
-	int i;
-
 	if (p->stack_size == 0) return Parse_Error(p, "EndIf without If");
 	/* TODO: check stack top is an If */
 
@@ -492,7 +485,6 @@ noexport bool Call_Combat_State(jc_parser *p)
 {
 	/* TODO: expressions */
 	jc_token *val;
-	jc_var *val_v;
 
 	CONSUME();
 	val = CONSUME();
@@ -632,6 +624,7 @@ noexport bool Keyword_State(jc_parser *p)
 		if (MATCH("EquipItem")) return Call_EquipItem_State(p);
 		if (MATCH("SetTileDescription")) return Call_SetTileDescription_State(p);
 		if (MATCH("SetTileColour")) return Call_SetTileColour_State(p);
+		if (MATCH("Teleport")) return Call_Teleport_State(p);
 
 		if (MATCH("If")) return Start_If_State(p);
 		if (MATCH("ElseIf")) return Start_ElseIf_State(p);

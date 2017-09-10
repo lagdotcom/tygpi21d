@@ -1,9 +1,9 @@
 CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc -d -w -DMEMORY_DEBUG -DFAR_MEMORY
 DEMO_OBJS = mkdemo.obj campaign.obj io.obj items.obj monsters.obj save.obj zone.obj
-MAIN_OBJS = dosjun.obj campaign.obj code.obj combat.obj fp.obj gfx.obj input.obj io.obj items.obj main.obj mem.obj monsters.obj party.obj save.obj zone.obj
+MAIN_OBJS = dosjun.obj campaign.obj code.obj combat.obj fp.obj gfx.obj input.obj io.obj items.obj list.obj main.obj mem.obj monsters.obj party.obj save.obj zone.obj
 EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj items.obj jc.obj jc_lex.obj jc_par.obj mem.obj monsters.obj save.obj zone.obj
 JCC_OBJS = jcc.obj jc.obj jc_lex.obj jc_par.obj mem.obj
-HEADERS = array.h campaign.h code.h combat.h common.h dosjun.h files.h fp.h gfx.h input.h io.h items.h jc.h main.h monsters.h party.h save.h zone.h
+HEADERS = campaign.h code.h combat.h common.h dosjun.h files.h fp.h gfx.h input.h io.h items.h jc.h list.h main.h monsters.h party.h save.h types.h zone.h
 
 all: dosjun editor jcc
 
@@ -83,6 +83,10 @@ jc_par.obj: jc_par.c $(HEADERS)
 
 jcc.obj: jcc.c $(HEADERS)
 	TCC $(CFLAGS) -c jcc.c
+
+list.obj: list.c $(HEADERS)
+	TCC $(CFLAGS) -c list.c
+	TLIB DOSJUN.LIB +-list.obj, DOSJUN.TXT
 
 main.obj: main.c $(HEADERS)
 	TCC $(CFLAGS) -c main.c
