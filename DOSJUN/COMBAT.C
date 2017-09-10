@@ -73,6 +73,19 @@ noexport void Combat_Message(char *format, ...)
 	Show_Combat_String(message, true);
 }
 
+noexport void Combat_Highlight_Pc(int pc)
+{
+	char buffer[9];
+	int i;
+
+	for (i = 0; i < PARTY_SIZE; i++) {
+		strncpy(buffer, gSave.characters[i].name, 8);
+		buffer[8] = 0;
+
+		Blit_String_DB(248, 8 + i * 32, (i == pc) ? 14 : 15, buffer, 0);
+	}
+}
+
 noexport item *Get_Weapon(targ source)
 {
 	if (IS_PC(source)) {
@@ -282,14 +295,14 @@ noexport act Get_Pc_Action(unsigned char pc)
 	}
 
 	/* TODO */
-	Pc_Select(pc);
+	Combat_Highlight_Pc(pc);
 	i = Input_Menu(action_names, count, 10, 10);
 	ai = action_ids[i];
 
 	Free(action_ids);
 	Free(action_names);
 
-	Pc_Select(-1);
+	Combat_Highlight_Pc(-1);
 	return ai;
 }
 
@@ -344,7 +357,7 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 	}
 
 	/* TODO */
-	Pc_Select(pc);
+	Combat_Highlight_Pc(pc);
 	choice = target_ids[Input_Menu(menu, items, 10, 10)];
 
 	for (i = 0; i < items; i++) {
@@ -354,7 +367,7 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 	Free(menu);
 	Free(target_ids);
 
-	Pc_Select(-1);
+	Combat_Highlight_Pc(-1);
 	return choice;
 }
 

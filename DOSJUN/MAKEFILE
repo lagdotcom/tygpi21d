@@ -5,7 +5,7 @@ EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj items.obj jc.obj jc_lex.obj jc
 JCC_OBJS = jcc.obj jc.obj jc_lex.obj jc_par.obj mem.obj
 HEADERS = campaign.h code.h combat.h common.h dosjun.h files.h fp.h gfx.h input.h io.h items.h jc.h list.h main.h monsters.h party.h save.h types.h zone.h
 
-all: dosjun editor jcc
+all: dosjun
 
 demo: mkdemo.exe demo.zon
 dosjun: dosjun.exe
