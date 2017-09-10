@@ -1,6 +1,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "dosjun.h"
+#include "gamelib.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -35,6 +36,8 @@ typedef struct {
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
+noexport pcx_picture combat_bg;
+
 noexport action *combat_actions;
 noexport list *combat_monsters;
 noexport int monsters_alive;
@@ -42,6 +45,21 @@ noexport int monsters_alive;
 int randint(int minimum, int maximum);
 
 /* C O M B A T  A C T I O N S //////////////////////////////////////////// */
+
+noexport void Show_Combat_String(char *string, bool wait_for_key)
+{
+	Draw_Square_DB(0, 96, 144, 223, 191, 1);
+	/* TODO: split onto lines a bit more nicely */
+	Draw_Bounded_String(100, 148, 15, 5, 15, string, 0);
+
+	if (wait_for_key) {
+		Show_Double_Buffer();
+		Delay(5);
+		Get_Next_Scan_Code();
+	} else {
+		Show_Double_Buffer();
+	}
+}
 
 noexport void Combat_Message(char *format, ...)
 {
@@ -52,8 +70,7 @@ noexport void Combat_Message(char *format, ...)
 	vsprintf(message, format, vargs);
 	va_end(vargs);
 
-	/* TODO */
-	Show_Game_String(message, true);
+	Show_Combat_String(message, true);
 }
 
 noexport item *Get_Weapon(targ source)
@@ -238,12 +255,16 @@ void Initialise_Combat(void)
 	Add_Combat_Action(0, "Attack", Check_Attack, Attack, tfEnemy);
 	Add_Combat_Action(1, "Block", Check_Block, Block, tfSelf);
 	Add_Combat_Action(2, "Defend", Check_Defend, Defend, tfAlly);
+
+	PCX_Init(&combat_bg);
+	PCX_Load("COMBAT.PCX", &combat_bg, 0);
 }
 
 void Free_Combat(void)
 {
 	Free_List(combat_monsters);
 	Free(combat_actions);
+	PCX_Delete(&combat_bg);
 }
 
 noexport act Get_Pc_Action(unsigned char pc)
@@ -372,6 +393,15 @@ noexport void AI_Mindless(int monster, int *action, int *target)
 	*target = TARGET_PC(t);
 }
 
+noexport void Show_Combat_Pc_Stats(void)
+{
+	int i;
+
+	for (i = 0; i < PARTY_SIZE; i++) {
+		Draw_Character_Status(i, 232, 8 + i * 32);
+	}
+}
+
 noexport void Enter_Combat_Loop(void)
 {
 	int i;
@@ -384,6 +414,8 @@ noexport void Enter_Combat_Loop(void)
 	monster_targets = SzAlloc(combat_monsters->size, targ, "Enter_Combat_Loop.targets");
 
 	while (monsters_alive > 0) {
+		Show_Combat_Pc_Stats();
+
 		for (i = 0; i < PARTY_SIZE; i++) {
 			pc_actions[i] = Get_Pc_Action(i);
 			pc_targets[i] = Get_Pc_Target(i, pc_actions[i]);
@@ -449,8 +481,18 @@ void Start_Combat(encounter_id id)
 		while (count-- > 0) Add_Monster(m);
 	}
 
+	/* Briefly show encounter on Dungeon screen */
 	Show_Picture(first);
 	Show_Game_String(description, true);
 
+	/* Set up Combat screen */
+	redraw_everything = true;
+	memcpy(double_buffer, combat_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
+	Show_Picture(first);
+
+	/* DO IT */
 	Enter_Combat_Loop();
+	
+	/* TODO: if you lose... shouldn't do this */
+	Redraw_Dungeon_Screen(false);
 }

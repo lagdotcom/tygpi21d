@@ -26,7 +26,7 @@ void Initialise_Character(character *c, job_id job, int str,
 	c->stats[sMP] = c->stats[sMaxMP] = mp;
 }
 
-void Load_Campaign_Data()
+void Load_Campaign_Data(void)
 {
 	char buffer[13];
 
@@ -72,7 +72,7 @@ void Start_Campaign(char *name)
 	Load_Campaign_Data();
 }
 
-gamestate Start_New_Game()
+gamestate Start_New_Game(void)
 {
 	Fill_Double_Buffer(0);
 
@@ -114,7 +114,7 @@ gamestate Start_New_Game()
 	return gsDungeon;
 }
 
-bool Load_Game()
+bool Load_Game(void)
 {
 	char **filenames;
 	char buffer[13];

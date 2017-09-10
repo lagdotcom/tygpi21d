@@ -36,15 +36,17 @@ extern zone gZone;
 
 extern bool
 	trigger_on_enter,
+	redraw_everything,
 	redraw_description,
 	redraw_fp,
 	redraw_party;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+wall *Get_Wall(coord x, coord y, direction dir, relative rel);
 char Get_X_Offset(direction dir);
 char Get_Y_Offset(direction dir);
-wall *Get_Wall(coord x, coord y, direction dir, relative rel);
+void Redraw_Dungeon_Screen(bool script);
 void Show_Game_String(char *string, bool wait_for_key);
 
 #endif

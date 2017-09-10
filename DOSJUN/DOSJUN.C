@@ -14,7 +14,8 @@ monsters gMonsters;
 save gSave;
 zone gZone;
 
-bool redraw_description;
+bool redraw_everything,
+	redraw_description;
 bool trigger_on_enter;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
@@ -166,6 +167,19 @@ void Trigger_Enter_Script(void)
 	trigger_on_enter = false;
 }
 
+void Redraw_Dungeon_Screen(bool script)
+{
+	if (redraw_everything) memcpy(double_buffer, explore_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
+	if (redraw_fp || redraw_everything) Draw_FP();
+	if (redraw_party || redraw_everything) Draw_Party_Status();
+	if (script && trigger_on_enter) Trigger_Enter_Script();
+
+	if (redraw_description || redraw_everything) Draw_Description();
+	redraw_everything = false;
+
+	Show_Double_Buffer();
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 gamestate Show_Dungeon_Screen(void)
@@ -176,19 +190,14 @@ gamestate Show_Dungeon_Screen(void)
 	/* Get background image and palette */
 	PCX_Init(&explore_bg);
 	PCX_Load("BACK.PCX", &explore_bg, 1);
-	memcpy(double_buffer, explore_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
 
+	redraw_everything = true;
 	redraw_description = true;
 	redraw_fp = true;
 	redraw_party = true;
 
 	while (!done) {
-		if (redraw_fp) Draw_FP();
-		if (redraw_party) Draw_Party_Status();
-		if (trigger_on_enter) Trigger_Enter_Script();
-
-		if (redraw_description) Draw_Description();
-		Show_Double_Buffer();
+		Redraw_Dungeon_Screen(true);
 		Delay(1);
 
 		switch (Get_Next_Scan_Code()) {

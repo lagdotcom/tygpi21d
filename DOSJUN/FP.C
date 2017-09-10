@@ -172,7 +172,7 @@ void Show_Picture(char *name)
 	
 	if (Load_Picture(filename, &current_pic)) {
 		/* draw that thing */
-		output = &double_buffer[8 * SCREEN_WIDTH + 8];
+		output = &double_buffer[8 * SCREEN_WIDTH + 96];
 		input = current_pic.buffer;
 		for (y = 0; y < 128; y++) {
 			memcpy(output, input, 128);
