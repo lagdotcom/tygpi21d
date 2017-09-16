@@ -31,6 +31,9 @@ noexport bool Item_Matches(list_type type, void *a, void *b)
 				return true;
 			break;
 
+		case ltInteger:
+			return (int)a == (int)b;
+
 		case ltObject:
 			/* TODO: ? */
 			return a == b;
@@ -46,12 +49,15 @@ noexport void Free_Item(list_type type, void *item)
 		case ltObject:
 			Free(item);
 			break;
+
+		case ltInteger:
+			return;
 	}
 }
 
-list *New_List(list_type type)
+list *New_List(list_type type, char *tag)
 {
-	list *l = SzAlloc(1, list, "New_List");
+	list *l = SzAlloc(1, list, tag);
 
 	l->type = type;
 	l->capacity = 0;
