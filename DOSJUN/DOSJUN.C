@@ -124,6 +124,7 @@ void Draw_Description(void)
 bool Try_Move_Forward(void)
 {
 	wall *centre;
+	tile *ahead;
 	coord ax, ay;
 
 	centre = Get_Wall(gSave.header.x, gSave.header.y, gSave.header.facing, rAhead);
@@ -142,6 +143,16 @@ bool Try_Move_Forward(void)
 				Show_Game_String("The door is locked.", true);
 				return false;
 		}
+	}
+
+	ahead = Get_Adjacent_Tile(gSave.header.x, gSave.header.y, gSave.header.facing, 1);
+	if (ahead == null) {
+		Show_Game_String("There's nothing to walk onto.", true);
+		return false;
+	}
+	if (ahead->flags & tiImpassable) {
+		Show_Game_String("That way is blocked.", true);
+		return false;
 	}
 
 	ax = gSave.header.x + Get_X_Offset(gSave.header.facing);

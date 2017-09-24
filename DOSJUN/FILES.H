@@ -23,7 +23,7 @@ typedef enum {
 	slHead,
 	slBody,
 	slFeet,
-	slAccessory
+	slAccessory,
 } slot_id;
 #define NUM_SLOTS		6
 #define INVENTORY_SIZE	10
@@ -38,7 +38,7 @@ typedef enum {
 	sDexterity,
 	sIntelligence,
 	sHP,
-	sMP
+	sMP,
 } stat_id;
 #define NUM_STATS		10
 
@@ -50,8 +50,13 @@ typedef enum {
 typedef enum {
 	wtNormal,
 	wtDoor,
-	wtLockedDoor
+	wtLockedDoor,
 } walltypes;
+
+typedef enum {
+	tiNone = 0,
+	tiImpassable = 1,
+} tileflags;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 

@@ -69,6 +69,8 @@ typedef unsigned int script_id;
 typedef unsigned char special_id;
 typedef int stat;
 typedef unsigned int string_id;
+typedef unsigned char thing_id;
+typedef unsigned int tile_flag;
 typedef unsigned char wall_type;
 typedef unsigned char zone_id;
 

@@ -9,9 +9,15 @@
 
 #define ZONE_HEADER_PADDING			8
 #define WALL_PADDING				2
-#define TILE_PADDING				8
+#define TILE_PADDING				5
 #define ENCOUNTER_SIZE	6
 #define ETABLE_SIZE		6
+
+typedef enum {
+	thNone = 0,
+
+	thTest,
+} thing;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -28,6 +34,8 @@ typedef struct {
 	string_id description;
 	script_id on_enter;
 	etable_id etable;
+	tile_flag flags;
+	thing_id thing;
 
 	unsigned char unused[TILE_PADDING];
 } tile;
