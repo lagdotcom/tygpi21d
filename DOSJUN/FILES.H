@@ -43,15 +43,6 @@ typedef enum {
 #define NUM_STATS		10
 
 typedef enum {
-	jFighter,	/* Str */
-	jCleric,	/* Str, Int */
-	jMage,		/* Int */
-	jRogue,		/* Dex */
-	jRanger,	/* Str, Dex */
-	jBard		/* Int, Dex */
-} jobs;
-
-typedef enum {
 	vfNone = 0,
 	vfEquipped = 1
 } inventoryflags;

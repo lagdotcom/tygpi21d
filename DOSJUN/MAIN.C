@@ -17,13 +17,21 @@ pcx_picture menu_bg;
 void Initialise_Character(character *c, job_id job, int str,
 	int intelligence, int dex, int hp, int mp)
 {
-	c->job = job;
-	c->level = 1;
+	int i;
+
+	c->experience = 0;
+	c->total_level = 0;
+	for (i = 0; i < NUM_JOBS; i++) {
+		c->job_level[i] = 0;
+	}
+
 	c->stats[sStrength] = str;
 	c->stats[sDexterity] = dex;
 	c->stats[sIntelligence] = intelligence;
 	c->stats[sHP] = c->stats[sMaxHP] = hp;
 	c->stats[sMP] = c->stats[sMaxMP] = mp;
+
+	Set_Job(c, job);
 }
 
 void Load_Campaign_Data(void)

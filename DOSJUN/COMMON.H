@@ -38,6 +38,16 @@ typedef enum {
 	gsQuit
 } gamestate;
 
+typedef enum {
+	jFighter,	/* Str */
+	jCleric,	/* Str, Int */
+	jMage,		/* Int */
+	jRogue,		/* Dex */
+	jRanger,	/* Str, Dex */
+	jBard		/* Int, Dex */
+} job_id;
+#define NUM_JOBS		6
+
 typedef unsigned char bytecode;
 typedef unsigned char char_flag;
 typedef unsigned char colour;
@@ -50,7 +60,7 @@ typedef unsigned char internal_id;
 typedef unsigned int item_id;
 typedef unsigned int item_flag;
 typedef unsigned char item_type;
-typedef unsigned char job_id;
+typedef unsigned char job_storage;
 typedef unsigned int length;
 typedef unsigned char monster_ai;
 typedef unsigned int monster_id;

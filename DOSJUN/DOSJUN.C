@@ -240,6 +240,7 @@ void main(void)
 	Initialise_Savefile(&gSave);
 	Initialise_Zone(&gZone);
 	Initialise_Combat();
+	Initialise_Jobs();
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
 		printf("\nNot enough memory to create double buffer.");
@@ -274,6 +275,7 @@ void main(void)
 	Free_Savefile(&gSave);
 	Free_Zone(&gZone);
 	Free_Combat();
+	Free_Jobs();
 	Delete_Picture();
 
 	Delete_Double_Buffer();

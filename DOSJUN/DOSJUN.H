@@ -14,6 +14,7 @@
 #include "items.h"
 #include "input.h"
 #include "io.h"
+#include "jobs.h"
 #include "list.h"
 #include "main.h"
 #include "monsters.h"

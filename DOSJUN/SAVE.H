@@ -23,11 +23,13 @@ typedef struct {
 
 typedef struct {
 	char name[NAME_SIZE];
-	job_id job;
-	unsigned char level;
+	job_storage job;
+	unsigned int total_level;
+	unsigned char job_level[NUM_JOBS];
 	stat stats[NUM_STATS];
 	inventory items[INVENTORY_SIZE];
 	char_flag flags;
+	unsigned long experience;
 } character;
 
 typedef struct {
