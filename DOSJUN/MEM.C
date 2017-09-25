@@ -36,11 +36,19 @@ typedef struct {
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
+unsigned long peak_use = 0;
+unsigned long current_use = 0;
 unsigned int entry_count = 0;
 unsigned int allocated_entries = 0;
 entry PtrDist *entries = null;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
+
+noexport void Update_Peak(long change)
+{
+	current_use += change;
+	if (current_use > peak_use) peak_use = current_use;
+}
 
 noexport void Add_Entry(void *mem, MemSz size, char *tag)
 {
@@ -62,6 +70,7 @@ noexport void Add_Entry(void *mem, MemSz size, char *tag)
 	entries[entry_count].size = size;
 	entries[entry_count].freed = false;
 
+	Update_Peak(size);
 	entry_count++;
 }
 
@@ -70,6 +79,7 @@ noexport void Mark_Entry_Freed(void *mem)
 	unsigned int i;
 	for (i = 0; i < entry_count; i++) {
 		if (entries[i].address == mem && entries[i].freed == false) {
+			Update_Peak(-entries[i].size);
 			entries[i].freed = true;
 			return;
 		}
@@ -83,6 +93,7 @@ noexport void Update_Entry_Size(void *mem, MemSz size)
 	unsigned int i;
 	for (i = 0; i < entry_count; i++) {
 		if (entries[i].address == mem && entries[i].freed == false) {
+			Update_Peak(size - entries[i].size);
 			entries[i].size = size;
 			return;
 		}
@@ -138,7 +149,9 @@ void Free(void *mem)
 
 void Stop_Memory_Tracking(void)
 {
+	FILE *fp;
 	unsigned int i;
+
 	for (i = 0; i < entry_count; i++) {
 		if (entries[i].freed == false) {
 			printf("#%u [%s]: @%p, %lu bytes not freed\n", i, entries[i].tag, entries[i].address, entries[i].size);
@@ -147,6 +160,13 @@ void Stop_Memory_Tracking(void)
 	}
 
 	printf("Tracked %u memory entries overall.\n", entry_count);
+
+	fp = fopen("memory.txt", "w");
+	fprintf(fp, "Peak use: %lu bytes\n\n", peak_use);
+	for (i = 0; i < entry_count; i++) {
+		fprintf(fp, "#%u [%s]: @%p, %lu bytes%s\n", i, entries[i].tag, entries[i].address, entries[i].size, entries[i].freed ? "" : " NOT FREED");
+	}
+	fclose(fp);
 
 	_free(entries);
 }
