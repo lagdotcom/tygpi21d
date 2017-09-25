@@ -1,31 +1,19 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <alloc.h>
 #include "dosjun.h"
 #include "gamelib.h"
 #include "gfx.h"
 
-/* D E F I N E S ///////////////////////////////////////////////////////// */
+/* D E F I N E S ///////////////////////////////////////////////////////// */ 
 
 #define SX 96
 #define SY 8
-#define EX 223
-#define EY 135
-#define P1 22
-#define P2 36
-#define P3 42
 
-#define XA SX + ps
-#define XB EX - ps
-#define XC SX + pe
-#define XD EX - pe
-#define YA SY + ps
-#define YB EY - ps
-#define YC SY + pe
-#define YD EY - pe
-#define DOORSIZE 8
-
-#define FILLED true
+#define TEXTURE_PIECES 4
+#define TXIN	0
+#define TXSI	1
+#define TXNR	2
+#define TXFR	3
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
@@ -33,79 +21,223 @@ bool redraw_fp;
 pcx_picture current_pic;
 bool picture_loaded = false;
 
+pcx_picture *textures = null;
+int num_textures = 0;
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-bool Draw_FP_Tile(coord x, coord y, char ps, char pe, char cmod)
+noexport UINT32 Image_Size(pcx_picture_ptr image)
 {
-	tile *under;
-	wall *left, *right, *centre;
+	UINT32 width = image->header.width;
+	UINT32 height = image->header.height;
+	width++;
+	height++;
 
-	under = TILE(gZone, x, y);
-	if (under->floor) {
-		Draw_HorzTrapezium_DB(under->floor + cmod, XA, XB, XC - 1, XD + 1, YB, YD + 1, FILLED);
-	}
+	return width * height;
+}
 
-	if (under->ceil) {
-		Draw_HorzTrapezium_DB(under->ceil + cmod, XA, XB, XC - 1, XD + 1, YA, YC - 1, FILLED);
-	}
+noexport bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
+{
+	FILE *fp;
+	int num_bytes, index;
+	UINT32 count, size;
+	unsigned char data;
+	char far *header, *write;
 
-	left = Get_Wall(x, y, gSave.header.facing, rLeft);
-	if (left->texture) {
-		Draw_VertTrapezium_DB(left->texture + cmod, XA, XC - 1, YA + 1, YB - 1, YC + 1, YD - 1, FILLED);
-	}
-
-	right = Get_Wall(x, y, gSave.header.facing, rRight);
-	if (right->texture) {
-		Draw_VertTrapezium_DB(right->texture + cmod, XB, XD + 1, YA + 1, YB - 1, YC + 1, YD - 1, FILLED);
-	}
-
-	centre = Get_Wall(x, y, gSave.header.facing, rAhead);
-	if (centre->texture) {
-		Draw_Square_DB(centre->texture + cmod, XC, YC, XD, YD, FILLED);
-
-		switch (centre->type) {
-			case wtDoor:
-			case wtLockedDoor:
-				Draw_Square_DB(0, XC + DOORSIZE, YC + DOORSIZE, XD - DOORSIZE, YD, false);
-				break;
-		}
-
+	fp = fopen(filename, "rb");
+	if (!fp) {
+		printf("Could not open for reading: %s\n", filename);
 		return false;
 	}
 
+	header = (char far*)image;
+	for (index = 0; index < 128; index++) {
+		header[index] = (char)getc(fp);
+	}
+
+	size = Image_Size(image);
+	image->buffer = Allocate(size, 1, tag);
+	if (image->buffer == null) {
+		fclose(fp);
+		printf("Could not allocate picture buffer.\n");
+		return false;
+	}
+
+	count = 0;
+	write = image->buffer;
+	while (count < size) {
+		data = (unsigned char)getc(fp);
+
+		if (data >= 192) {
+			num_bytes = data - 192;
+			data = (unsigned char)getc(fp);
+			while (num_bytes-- > 0) {
+				*write = data;
+				count++;
+				write++;
+			}
+		} else {
+			*write = data;
+			count++;
+			write++;
+		}
+	}
+
+	fclose(fp);
 	return true;
+}
+
+noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, char piece, UINT32 sx, UINT32 sy)
+{
+	pcx_picture_ptr texture;
+	unsigned char *output;
+	char PtrDist *input;
+	int x, y, tex_width;
+
+	/* TODO: use tex properly */
+	if (textureId == 0) return;
+	texture = &textures[/* textureId * TEXTURE_PIECES + */ piece];
+
+	output = &double_buffer[(dy + SY) * SCREEN_WIDTH + (dx + SX)];
+	tex_width = texture->header.width + 1;
+	input = texture->buffer + sy * tex_width + sx;
+
+	for (y = 0; y < h; y++) {
+		for (x = 0; x < w; x++) {
+			if (*input != 0)
+				*output = *input;
+
+			output++;
+			input++;
+		}
+
+		output += SCREEN_WIDTH - w;
+		input += tex_width - w;
+	}
+}
+
+noexport tile *Get_Offset_Tile(int forward, int left)
+{
+	coord ax, ay;
+
+	char fx = Get_X_Offset(gSave.header.facing);
+	char fy = Get_Y_Offset(gSave.header.facing);
+	char lx = fy;
+	char ly = -fx;
+
+	ax = gSave.header.x + fx * forward + lx * left;
+	ay = gSave.header.y + fy * forward + ly * left;
+
+	if (Is_Coord_Valid(ax, ay)) return TILE(gZone, ax, ay);
+	return null;
 }
 
 void Clear_FP(void)
 {
-	int x, y;
+	int y;
+	unsigned char *output = &double_buffer[8 * SCREEN_WIDTH + 96];
 
-	for (x = SX; x <= EX; x++) {
-		for (y = SY; y <= EY; y++) {
-			Plot_Pixel_Fast_DB(x, y, 0);
-		}
+	for (y = 0; y < 128; y++) {
+		memset(output, 0, 128);
+		output += SCREEN_WIDTH;
 	}
 }
 
 void Draw_FP(void)
 {
-	int x, y, ox, oy;
+	tile *t;
+	direction bwall, lwall, rwall;
 
 	Clear_FP();
 
-	ox = Get_X_Offset(gSave.header.facing);
-	oy = Get_Y_Offset(gSave.header.facing);
+	bwall = gSave.header.facing;
+	lwall = Turn_Left(bwall);
+	rwall = Turn_Right(bwall);
 
-	if (Draw_FP_Tile(gSave.header.x, gSave.header.y, 0, P1, 0)) {
-		x = gSave.header.x + ox;
-		y = gSave.header.y + oy;
+	t = Get_Offset_Tile(2, 2);
+	if (t != null) {
+		Draw_Tile_Segment(t->walls[bwall].texture, 0, 48, 16, 32, TXFR, 0, 10);
+		Draw_Tile_Segment(t->ceil, 0, 43, 14, 5, TXFR, 0, 0);
+		Draw_Tile_Segment(t->floor, 0, 80, 14, 5, TXFR, 0, 47);
+	}
 
-		if (Draw_FP_Tile(x, y, P1, P2, 16)) {
-			x += ox;
-			y += oy;
+	t = Get_Offset_Tile(2, -2);
+	if (t != null) {
+		Draw_Tile_Segment(t->walls[bwall].texture, 112, 48, 16, 32, TXFR, 232, 10);
+		Draw_Tile_Segment(t->ceil, 114, 43, 14, 5, TXFR, 234, 0);
+		Draw_Tile_Segment(t->floor, 114, 80, 14, 5, TXFR, 234, 47);
+	}
 
-			Draw_FP_Tile(x, y, P2, P3, 32);
-		}
+	t = Get_Offset_Tile(2, 1);
+	if (t != null) {
+		Draw_Tile_Segment(t->walls[bwall].texture, 16, 48, 32, 32, TXFR, 56, 10);
+		Draw_Tile_Segment(t->walls[lwall].texture, 0, 43, 16, 42, TXFR, 24, 5);
+		Draw_Tile_Segment(t->ceil, 2, 43, 46, 5, TXFR, 42, 0);
+		Draw_Tile_Segment(t->floor, 2, 80, 46, 5, TXFR, 42, 47);
+	}
+
+	t = Get_Offset_Tile(2, -1);
+	if (t != null) {
+		Draw_Tile_Segment(t->walls[bwall].texture, 80, 48, 32, 32, TXFR, 160, 10);
+		Draw_Tile_Segment(t->ceil, 80, 43, 46, 5, TXFR, 160, 0);
+		Draw_Tile_Segment(t->floor, 80, 80, 46, 5, TXFR, 160, 147);
+		Draw_Tile_Segment(t->walls[rwall].texture, 112, 43, 16, 42, TXFR, 208, 5);
+	}
+
+	t = Get_Offset_Tile(2, 0);
+	if (t != null) {
+		Draw_Tile_Segment(t->walls[bwall].texture, 48, 48, 32, 32, TXFR, 106, 10);
+		Draw_Tile_Segment(t->ceil, 44, 43, 40, 5, TXFR, 102, 0);
+		Draw_Tile_Segment(t->walls[lwall].texture, 43, 43, 5, 42, TXFR, 96, 5);
+		Draw_Tile_Segment(t->floor, 44, 80, 40, 5, TXFR, 102, 47);
+		Draw_Tile_Segment(t->walls[rwall].texture, 80, 43, 5, 42, TXFR, 143, 5);
+	}
+
+	t = Get_Offset_Tile(1, 1);
+	if (t != null) {
+		Draw_Tile_Segment(t->walls[bwall].texture, 0, 43, 42, 42, TXNR, 0, 22);
+		Draw_Tile_Segment(t->ceil, 0, 32, 43, 11, TXNR, 0, 0);
+		Draw_Tile_Segment(t->floor, 0, 85, 43, 11, TXNR, 0, 75);
+	}
+
+	t = Get_Offset_Tile(1, -1);
+	if (t != null) {
+		Draw_Tile_Segment(t->walls[bwall].texture, 86, 43, 42, 42, TXNR, 120, 22);
+		Draw_Tile_Segment(t->ceil, 85, 32, 43, 11, TXNR, 119, 0);
+		Draw_Tile_Segment(t->floor, 85, 95, 43, 11, TXNR, 119, 75);
+	}
+
+	t = Get_Offset_Tile(1, 0);
+	if (t != null) {
+		Draw_Tile_Segment(t->walls[bwall].texture, 43, 43, 42, 42, TXNR, 59, 22);
+		Draw_Tile_Segment(t->ceil, 33, 32, 62, 11, TXNR, 49, 0);
+		Draw_Tile_Segment(t->walls[lwall].texture, 32, 32, 11, 64, TXNR, 48, 11);
+		Draw_Tile_Segment(t->floor, 33, 85, 62, 11, TXNR, 49, 75);
+		Draw_Tile_Segment(t->walls[rwall].texture, 85, 32, 11, 64, TXNR, 101, 11);
+	}
+
+	t = Get_Offset_Tile(0, 1);
+	if (t != null) {
+		Draw_Tile_Segment(t->walls[bwall].texture, 0, 32, 32, 64, TXSI, 0, 32);
+		Draw_Tile_Segment(t->ceil, 0, 0, 32, 32, TXSI, 0, 0);
+		Draw_Tile_Segment(t->floor, 0, 96, 32, 32, TXSI, 0, 96);
+	}
+
+	t = Get_Offset_Tile(0, -1);
+	if (t != null) {
+		Draw_Tile_Segment(t->walls[bwall].texture, 96, 32, 32, 64, TXSI, 32, 32);
+		Draw_Tile_Segment(t->ceil, 96, 0, 32, 32, TXSI, 32, 0);
+		Draw_Tile_Segment(t->floor, 96, 96, 32, 32, TXSI, 32, 96);
+	}
+
+	t = Get_Offset_Tile(0, 0);
+	if (t != null) {
+		/* if this is null, something is really wrong. */
+		Draw_Tile_Segment(t->walls[bwall].texture, 32, 32, 64, 64, TXIN, 32, 64);
+		Draw_Tile_Segment(t->ceil, 1, 0, 126, 32, TXIN, 1, 0);
+		Draw_Tile_Segment(t->walls[lwall].texture, 0, 0, 32, 128, TXIN, 0, 32);
+		Draw_Tile_Segment(t->floor, 1, 96, 126, 32, TXIN, 1, 160);
+		Draw_Tile_Segment(t->walls[rwall].texture, 96, 0, 32, 128, TXIN, 96, 32);
 	}
 
 	redraw_fp = false;
@@ -119,47 +251,6 @@ void Delete_Picture(void)
 	}
 }
 
-noexport bool Load_Picture(char *filename, pcx_picture_ptr image)
-{
-	FILE *fp;
-	int num_bytes, index, size;
-	long count;
-	unsigned char data;
-	char far *header;
-
-	fp = fopen(filename, "rb");
-	if (!fp) {
-		printf("Could not open for reading: %s\n", filename);
-		return false;
-	}
-
-	header = (char far*)image;
-	for (index = 0; index < 128; index++) {
-		header[index] = (char)getc(fp);
-	}
-
-	size = (image->header.width + 1) * (image->header.height + 1);
-	image->buffer = Allocate(size, 1, "Load_Picture");
-
-	count = 0;
-	while (count < size) {
-		data = (unsigned char)getc(fp);
-
-		if (data >= 192) {
-			num_bytes = data - 192;
-			data = (unsigned char)getc(fp);
-			while (num_bytes-- > 0) {
-				image->buffer[count++] = data;
-			}
-		} else {
-			image->buffer[count++] = data;
-		}
-	}
-
-	fclose(fp);
-	return true;
-}
-
 void Show_Picture(char *name)
 {
 	int y;
@@ -170,7 +261,7 @@ void Show_Picture(char *name)
 
 	Delete_Picture();
 	
-	if (Load_Picture(filename, &current_pic)) {
+	if (Load_Picture(filename, &current_pic, "Show_Picture")) {
 		/* draw that thing */
 		output = &double_buffer[8 * SCREEN_WIDTH + 96];
 		input = current_pic.buffer;
@@ -182,4 +273,41 @@ void Show_Picture(char *name)
 
 		picture_loaded = true;
 	}
+}
+
+void Free_Textures(void)
+{
+	int i;
+
+	if (num_textures > 0) {
+		for (i = 0; i < num_textures * TEXTURE_PIECES; i++)
+			Free(textures[i].buffer);
+		Free(textures);
+
+		num_textures = 0;
+	}
+}
+
+noexport void Load_Texture_Pieces(char *name, int index)
+{
+	int i;
+	char filename[20];
+
+	for (i = 0; i < TEXTURE_PIECES; i++) {
+		sprintf(filename, "WALL\\%s%d.PCX", name, i + 1);
+		if (!Load_Picture(filename, &textures[index * TEXTURE_PIECES + i], name)) {
+			printf("Could not load: %s\n", filename);
+			exit(1);
+		}
+	}
+}
+
+void Load_Textures(zone *z)
+{
+	Free_Textures();
+
+	/* TODO: use z->textures */
+	num_textures = 1;
+	textures = SzAlloc(1, pcx_picture, "Load_Textures");
+	Load_Texture_Pieces("TEST", 0);
 }

@@ -30,7 +30,7 @@
 typedef struct {
 	char *tag;
 	void PtrDist *address;
-	size_t size;
+	MemSz size;
 	bool freed;
 } entry;
 
@@ -42,7 +42,7 @@ entry PtrDist *entries = null;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-noexport void Add_Entry(void *mem, size_t size, char *tag)
+noexport void Add_Entry(void *mem, MemSz size, char *tag)
 {
 	entry *old_entries = entries;
 	if (entry_count == allocated_entries) {
@@ -78,7 +78,7 @@ noexport void Mark_Entry_Freed(void *mem)
 	fprintf(stderr, "WARNING: Cannot free %p - not found.\n", mem);
 }
 
-noexport void Update_Entry_Size(void *mem, size_t size)
+noexport void Update_Entry_Size(void *mem, MemSz size)
 {
 	unsigned int i;
 	for (i = 0; i < entry_count; i++) {
@@ -93,14 +93,14 @@ noexport void Update_Entry_Size(void *mem, size_t size)
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-void PtrDist *Allocate(size_t count, size_t size, char *tag)
+void PtrDist *Allocate(MemSz count, MemSz size, char *tag)
 {
 	void PtrDist *mem = _calloc(count, size);
 	Add_Entry(mem, count * size, tag);
 	return mem;
 }
 
-void PtrDist *Reallocate(void PtrDist *mem, size_t count, size_t size, char *tag)
+void PtrDist *Reallocate(void PtrDist *mem, MemSz count, MemSz size, char *tag)
 {
 	void PtrDist *nu = _realloc(mem, count * size);
 	if (nu == mem) {
@@ -141,7 +141,7 @@ void Stop_Memory_Tracking(void)
 	unsigned int i;
 	for (i = 0; i < entry_count; i++) {
 		if (entries[i].freed == false) {
-			printf("#%u [%s]: @%p, %u bytes not freed\n", i, entries[i].tag, entries[i].address, entries[i].size);
+			printf("#%u [%s]: @%p, %lu bytes not freed\n", i, entries[i].tag, entries[i].address, entries[i].size);
 			_free(entries[i].address);
 		}
 	}

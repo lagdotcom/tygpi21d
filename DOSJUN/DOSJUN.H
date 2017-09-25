@@ -47,7 +47,10 @@ extern bool
 wall *Get_Wall(coord x, coord y, direction dir, relative rel);
 char Get_X_Offset(direction dir);
 char Get_Y_Offset(direction dir);
+bool Is_Coord_Valid(coord x, coord y);
 void Redraw_Dungeon_Screen(bool script);
 void Show_Game_String(char *string, bool wait_for_key);
+direction Turn_Left(direction dir);
+direction Turn_Right(direction dir);
 
 #endif

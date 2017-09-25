@@ -76,22 +76,24 @@ typedef unsigned char zone_id;
 
 /* Memory Debugging */
 
+#ifdef FAR_MEMORY
+
+    #define PtrDist far
+    #define MemSz unsigned long
+
+#else
+
+    #define PtrDist
+    #define MemSz size_t
+
+#endif
+
 #ifdef MEMORY_DEBUG
 
-	#ifdef FAR_MEMORY
-		
-		#define PtrDist far
-
-	#else
-
-		#define PtrDist
-
-	#endif
-
 	char PtrDist *Duplicate_String(const char *src, char *tag);
-	void PtrDist *Allocate(size_t count, size_t size, char *tag);
+	void PtrDist *Allocate(MemSz count, MemSz size, char *tag);
 	void Free(void *mem);
-	void PtrDist *Reallocate(void PtrDist *mem, size_t count, size_t size, char *tag);
+	void PtrDist *Reallocate(void PtrDist *mem, MemSz count, MemSz size, char *tag);
 	void Stop_Memory_Tracking(void);
 
 #else /* no MEMORY_DEBUG */

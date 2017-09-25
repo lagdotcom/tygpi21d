@@ -52,6 +52,8 @@ void Load_Campaign_Data(void)
 	strcat(buffer, ".ZON");
 	Free_Zone(&gZone);
 	Load_Zone(buffer, &gZone);
+
+	Load_Textures(&gZone);
 }
 
 void Start_Campaign(char *name)

@@ -38,6 +38,18 @@ char Get_Y_Offset(direction dir)
 	}
 }
 
+direction Turn_Left(direction dir)
+{
+	if (dir == North) return West;
+	return dir - 1;
+}
+
+direction Turn_Right(direction dir)
+{
+	if (dir == West) return North;
+	return dir + 1;
+}
+
 bool Is_Coord_Valid(coord x, coord y)
 {
 	if (x >= gZone.header.width) return false;
@@ -218,15 +230,13 @@ gamestate Show_Dungeon_Screen(void)
 				break;
 
 			case SCAN_LEFT:
-				if (gSave.header.facing == North) gSave.header.facing = West;
-				else gSave.header.facing--;
+				gSave.header.facing = Turn_Left(gSave.header.facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
 				break;
 
 			case SCAN_RIGHT:
-				if (gSave.header.facing == West) gSave.header.facing = North;
-				else gSave.header.facing++;
+				gSave.header.facing = Turn_Right(gSave.header.facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
 				break;
@@ -285,6 +295,7 @@ void main(void)
 	Free_Monsters(&gMonsters);
 	Free_Savefile(&gSave);
 	Free_Zone(&gZone);
+	Free_Textures();
 	Free_Combat();
 	Free_Jobs();
 	Delete_Picture();
