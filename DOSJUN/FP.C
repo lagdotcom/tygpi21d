@@ -163,34 +163,34 @@ void Draw_FP(void)
 
 	t = Get_Offset_Tile(2, -2);
 	if (t != null) {
-		Draw_Tile_Segment(t->walls[bwall].texture, 112, 48, 16, 32, TXFR, 232, 10);
-		Draw_Tile_Segment(t->ceil, 114, 43, 14, 5, TXFR, 234, 0);
-		Draw_Tile_Segment(t->floor, 114, 80, 14, 5, TXFR, 234, 47);
+		Draw_Tile_Segment(t->walls[bwall].texture, 112, 48, 16, 32, TXFR, 154, 10);
+		Draw_Tile_Segment(t->ceil, 114, 43, 14, 5, TXFR, 156, 0);
+		Draw_Tile_Segment(t->floor, 114, 80, 14, 5, TXFR, 156, 47);
 	}
 
 	t = Get_Offset_Tile(2, 1);
 	if (t != null) {
-		Draw_Tile_Segment(t->walls[bwall].texture, 16, 48, 32, 32, TXFR, 56, 10);
-		Draw_Tile_Segment(t->walls[lwall].texture, 0, 43, 16, 42, TXFR, 24, 5);
-		Draw_Tile_Segment(t->ceil, 2, 43, 46, 5, TXFR, 42, 0);
-		Draw_Tile_Segment(t->floor, 2, 80, 46, 5, TXFR, 42, 47);
+		Draw_Tile_Segment(t->walls[bwall].texture, 16, 48, 32, 32, TXFR, 32, 10);
+		Draw_Tile_Segment(t->walls[lwall].texture, 0, 43, 16, 42, TXFR, 16, 5);
+		Draw_Tile_Segment(t->ceil, 2, 43, 46, 5, TXFR, 18, 0);
+		Draw_Tile_Segment(t->floor, 2, 80, 46, 5, TXFR, 18, 47);
 	}
 
 	t = Get_Offset_Tile(2, -1);
 	if (t != null) {
-		Draw_Tile_Segment(t->walls[bwall].texture, 80, 48, 32, 32, TXFR, 160, 10);
-		Draw_Tile_Segment(t->ceil, 80, 43, 46, 5, TXFR, 160, 0);
-		Draw_Tile_Segment(t->floor, 80, 80, 46, 5, TXFR, 160, 147);
-		Draw_Tile_Segment(t->walls[rwall].texture, 112, 43, 16, 42, TXFR, 208, 5);
+		Draw_Tile_Segment(t->walls[bwall].texture, 80, 48, 32, 32, TXFR, 106, 10);
+		Draw_Tile_Segment(t->ceil, 80, 43, 46, 5, TXFR, 106, 0);
+		Draw_Tile_Segment(t->floor, 80, 80, 46, 5, TXFR, 106, 147);
+		Draw_Tile_Segment(t->walls[rwall].texture, 112, 43, 16, 42, TXFR, 138, 5);
 	}
 
 	t = Get_Offset_Tile(2, 0);
 	if (t != null) {
-		Draw_Tile_Segment(t->walls[bwall].texture, 48, 48, 32, 32, TXFR, 106, 10);
-		Draw_Tile_Segment(t->ceil, 44, 43, 40, 5, TXFR, 102, 0);
-		Draw_Tile_Segment(t->walls[lwall].texture, 43, 43, 5, 42, TXFR, 96, 5);
-		Draw_Tile_Segment(t->floor, 44, 80, 40, 5, TXFR, 102, 47);
-		Draw_Tile_Segment(t->walls[rwall].texture, 80, 43, 5, 42, TXFR, 143, 5);
+		Draw_Tile_Segment(t->walls[bwall].texture, 48, 48, 32, 32, TXFR, 69, 10);
+		Draw_Tile_Segment(t->ceil, 44, 43, 40, 5, TXFR, 65, 0);
+		Draw_Tile_Segment(t->walls[lwall].texture, 43, 43, 5, 42, TXFR, 64, 5);
+		Draw_Tile_Segment(t->floor, 44, 80, 40, 5, TXFR, 65, 47);
+		Draw_Tile_Segment(t->walls[rwall].texture, 80, 43, 5, 42, TXFR, 101, 5);
 	}
 
 	t = Get_Offset_Tile(1, 1);
@@ -202,18 +202,18 @@ void Draw_FP(void)
 
 	t = Get_Offset_Tile(1, -1);
 	if (t != null) {
-		Draw_Tile_Segment(t->walls[bwall].texture, 86, 43, 42, 42, TXNR, 120, 22);
-		Draw_Tile_Segment(t->ceil, 85, 32, 43, 11, TXNR, 119, 0);
-		Draw_Tile_Segment(t->floor, 85, 95, 43, 11, TXNR, 119, 75);
+		Draw_Tile_Segment(t->walls[bwall].texture, 86, 43, 42, 42, TXNR, 108, 22);
+		Draw_Tile_Segment(t->ceil, 85, 32, 43, 11, TXNR, 107, 0);
+		Draw_Tile_Segment(t->floor, 85, 95, 43, 11, TXNR, 107, 75);
 	}
 
 	t = Get_Offset_Tile(1, 0);
 	if (t != null) {
-		Draw_Tile_Segment(t->walls[bwall].texture, 43, 43, 42, 42, TXNR, 59, 22);
-		Draw_Tile_Segment(t->ceil, 33, 32, 62, 11, TXNR, 49, 0);
-		Draw_Tile_Segment(t->walls[lwall].texture, 32, 32, 11, 64, TXNR, 48, 11);
-		Draw_Tile_Segment(t->floor, 33, 85, 62, 11, TXNR, 49, 75);
-		Draw_Tile_Segment(t->walls[rwall].texture, 85, 32, 11, 64, TXNR, 101, 11);
+		Draw_Tile_Segment(t->walls[bwall].texture, 43, 43, 42, 42, TXNR, 54, 22);
+		Draw_Tile_Segment(t->ceil, 33, 32, 62, 11, TXNR, 44, 0);
+		Draw_Tile_Segment(t->walls[lwall].texture, 32, 32, 11, 64, TXNR, 43, 11);
+		Draw_Tile_Segment(t->floor, 33, 85, 62, 11, TXNR, 44, 75);
+		Draw_Tile_Segment(t->walls[rwall].texture, 85, 32, 11, 64, TXNR, 96, 11);
 	}
 
 	t = Get_Offset_Tile(0, 1);
@@ -308,6 +308,6 @@ void Load_Textures(zone *z)
 
 	/* TODO: use z->textures */
 	num_textures = 1;
-	textures = SzAlloc(1, pcx_picture, "Load_Textures");
+	textures = SzAlloc(1 * TEXTURE_PIECES, pcx_picture, "Load_Textures");
 	Load_Texture_Pieces("TEST", 0);
 }
