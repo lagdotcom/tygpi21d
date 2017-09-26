@@ -87,7 +87,7 @@ noexport bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
 	return true;
 }
 
-noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, char piece, UINT32 sx, UINT32 sy)
+noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, char piece, int sx, int sy)
 {
 	pcx_picture_ptr texture;
 	unsigned char *output;
@@ -97,10 +97,10 @@ noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, 
 	/* TODO: use tex properly */
 	if (textureId == 0) return;
 	texture = &textures[/* textureId * TEXTURE_PIECES + */ piece];
+	tex_width = texture->header.width + 1;
 
 	output = &double_buffer[(dy + SY) * SCREEN_WIDTH + (dx + SX)];
-	tex_width = texture->header.width + 1;
-	input = texture->buffer + sy * tex_width + sx;
+	input = &texture->buffer[sy * tex_width + sx];
 
 	for (y = 0; y < h; y++) {
 		for (x = 0; x < w; x++) {
