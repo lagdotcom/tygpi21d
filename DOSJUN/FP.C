@@ -180,7 +180,7 @@ void Draw_FP(void)
 	if (t != null) {
 		Draw_Tile_Segment(t->walls[bwall].texture, 80, 48, 32, 32, TXFR, 106, 10);
 		Draw_Tile_Segment(t->ceil, 80, 43, 46, 5, TXFR, 106, 0);
-		Draw_Tile_Segment(t->floor, 80, 80, 46, 5, TXFR, 106, 147);
+		Draw_Tile_Segment(t->floor, 80, 80, 46, 5, TXFR, 106, 47);
 		Draw_Tile_Segment(t->walls[rwall].texture, 112, 43, 16, 42, TXFR, 138, 5);
 	}
 
@@ -204,7 +204,7 @@ void Draw_FP(void)
 	if (t != null) {
 		Draw_Tile_Segment(t->walls[bwall].texture, 86, 43, 42, 42, TXNR, 108, 22);
 		Draw_Tile_Segment(t->ceil, 85, 32, 43, 11, TXNR, 107, 0);
-		Draw_Tile_Segment(t->floor, 85, 95, 43, 11, TXNR, 107, 75);
+		Draw_Tile_Segment(t->floor, 85, 85, 43, 11, TXNR, 107, 75);
 	}
 
 	t = Get_Offset_Tile(1, 0);

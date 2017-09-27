@@ -165,7 +165,7 @@ void Level_Up(character *c)
 
 		/* TODO: add skills */
 
-		*level++;
+		(*level)++;
 	}
 
 	c->experience = 0;
