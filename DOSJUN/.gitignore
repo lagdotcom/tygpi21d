@@ -2,3 +2,4 @@
 *.vcxproj*
 Debug/
 MSFIX/
+*.o

@@ -29,15 +29,15 @@ typedef struct {
 	monster_row row;
 	monster_ai ai;
 
-	unsigned char unused[MONSTER_PADDING];
+	char unused[MONSTER_PADDING];
 } monster;
 
 typedef struct {
 	VERSION_HEADER;
 
-	unsigned int num_monsters;
+	UINT16 num_monsters;
 
-	unsigned char unused[MONSTERS_HEADER_PADDING];
+	char unused[MONSTERS_HEADER_PADDING];
 } monsters_header;
 
 typedef struct {

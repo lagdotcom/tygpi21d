@@ -252,7 +252,7 @@ gamestate Show_Dungeon_Screen(void)
 	return new;
 }
 
-void main(void)
+int main(void)
 {
 	printf("Initialising DOSJUN...");
 	Initialise_Campaign(&gCampaign);
@@ -265,7 +265,7 @@ void main(void)
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
 		printf("\nNot enough memory to create double buffer.");
-		return;
+		return 1;
 	}
 
 	printf("OK\n");
@@ -282,6 +282,9 @@ void main(void)
 
 			case gsDungeon:
 				gState = Show_Dungeon_Screen();
+				break;
+
+			case gsQuit:
 				break;
 		}
 	}
@@ -304,4 +307,5 @@ void main(void)
 
 	printf("OK!\n");
 	Stop_Memory_Tracking();
+	return 0;
 }

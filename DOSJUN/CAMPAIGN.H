@@ -19,7 +19,7 @@ typedef struct {
 	direction start_facing;
 	zone_id num_zones;
 
-	unsigned char unused[CAMPAIGN_HEADER_PADDING];
+	char unused[CAMPAIGN_HEADER_PADDING];
 } campaign_header;
 
 typedef struct {

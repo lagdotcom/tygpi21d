@@ -3,6 +3,8 @@
 #include "dosjun.h"
 #include "gamelib.h"
 
+#include <stdarg.h>
+
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define NUM_ACTIONS	3
@@ -302,7 +304,7 @@ noexport void Block(targ source, targ target)
 noexport bool Check_Defend(targ source)
 {
 	/* TODO: fix for enemy */
-	char i;
+	int i;
 
 	/* There must be an alive ally to Defend */
 	if (IS_PC(source)) {
@@ -326,7 +328,7 @@ noexport void Defend(targ source, targ target)
 
 int randint(int minimum, int maximum)
 {
-	return minimum + random(maximum - minimum + 1);
+	return minimum + random() % (maximum - minimum + 1);
 }
 
 noexport void Clear_Encounter(void)

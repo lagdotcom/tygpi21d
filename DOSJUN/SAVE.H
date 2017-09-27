@@ -18,18 +18,18 @@ typedef enum {
 typedef struct {
 	item_id item;
 	inventory_flag flags;
-	unsigned char quantity;
+	UINT8 quantity;
 } inventory;
 
 typedef struct {
 	char name[NAME_SIZE];
 	job_storage job;
-	unsigned int total_level;
-	unsigned char job_level[NUM_JOBS];
+	UINT16 total_level;
+	UINT8 job_level[NUM_JOBS];
 	stat stats[NUM_STATS];
 	inventory items[INVENTORY_SIZE];
 	char_flag flags;
-	unsigned long experience;
+	UINT32 experience;
 } character;
 
 typedef struct {
@@ -39,10 +39,10 @@ typedef struct {
 	zone_id zone;
 	direction facing;
 	coord x, y;
-	unsigned char num_characters;
+	UINT8 num_characters;
 	zone_id num_zones;
 
-	unsigned char unused[SAVE_HEADER_PADDING];
+	char unused[SAVE_HEADER_PADDING];
 } save_header;
 
 typedef struct {
@@ -52,7 +52,6 @@ typedef struct {
 	int *script_globals;
 	int **script_locals;
 } save;
-
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 

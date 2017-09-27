@@ -1,12 +1,17 @@
 #ifndef DOSJUN_TYPES_H
 #define DOSJUN_TYPES_H
 
+#include <stdint.h>
+
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-typedef unsigned char UINT8;
-typedef unsigned int UINT16;
-typedef unsigned long UINT32;
+typedef uint8_t UINT8;
+typedef uint8_t BYTE;
+typedef int8_t INT8;
 
-typedef unsigned char BYTE;
+typedef uint16_t UINT16;
+typedef int16_t INT16;
+
+typedef uint32_t UINT32;
 
 #endif

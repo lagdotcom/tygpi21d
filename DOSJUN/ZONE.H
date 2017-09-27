@@ -25,7 +25,7 @@ typedef struct {
 	colour texture;
 	wall_type type;
 
-	unsigned char unused[WALL_PADDING];
+	char unused[WALL_PADDING];
 } wall;
 
 typedef struct {
@@ -37,19 +37,19 @@ typedef struct {
 	tile_flag flags;
 	thing_id thing;
 
-	unsigned char unused[TILE_PADDING];
+	char unused[TILE_PADDING];
 } tile;
 
 typedef struct {
 	monster_id monsters[ENCOUNTER_SIZE];
-	unsigned char minimum[ENCOUNTER_SIZE];
-	unsigned char maximum[ENCOUNTER_SIZE];
+	UINT8 minimum[ENCOUNTER_SIZE];
+	UINT8 maximum[ENCOUNTER_SIZE];
 } encounter;
 
 typedef struct {
-	unsigned char possibilities;
+	UINT8 possibilities;
 	encounter_id encounters[ETABLE_SIZE];
-	unsigned char percentages[ETABLE_SIZE];
+	UINT8 percentages[ETABLE_SIZE];
 } etable;
 
 typedef struct {
@@ -63,7 +63,7 @@ typedef struct {
 	string_id num_code_strings;
 	etable_id num_etables;
 
-	unsigned char unused[ZONE_HEADER_PADDING];
+	char unused[ZONE_HEADER_PADDING];
 } zone_header;
 
 typedef struct {

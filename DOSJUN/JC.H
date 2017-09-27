@@ -46,43 +46,43 @@ typedef struct {
 typedef struct {
 	jc_scope scope;
 	char *name;
-	int index;
-	int value;
+	INT16 index;
+	INT16 value;
 } jc_var;
 
 typedef struct {
 	char *name;
 	bytecode *code;
-	unsigned int size;
+	UINT16 size;
 } jc_script;
 
 typedef struct {
 	char name[6];
-	int start;
-	int *offsets;
-	int offset_count;
+	INT16 start;
+	INT16 *offsets;
+	INT16 offset_count;
 } jc_stack;
 
 typedef struct {
 	jc_token *tokens;
-	unsigned int token_count;
-	unsigned int position;
+	UINT16 token_count;
+	UINT16 position;
 
 	jc_var *vars;
-	unsigned int global_count;
-	unsigned int local_count;
-	unsigned int temp_count;
-	unsigned int var_count;
+	UINT16 global_count;
+	UINT16 local_count;
+	UINT16 temp_count;
+	UINT16 var_count;
 
 	jc_script *scripts;
-	unsigned int script_count;
+	UINT16 script_count;
 	bool in_script;
 
 	char **strings;
-	unsigned int string_count;
+	UINT16 string_count;
 
 	jc_stack *stack;
-	unsigned int stack_size;
+	UINT16 stack_size;
 } jc_parser;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */

@@ -5,7 +5,7 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 typedef enum {
-
+	skNone
 } skill_id;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
@@ -157,7 +157,7 @@ void Level_Up(character *c)
 	c->stats[sMP] += j->mp_per_level;
 	c->stats[sMaxMP] += j->mp_per_level;
 
-	if (c->job_level[c->job] < JOB_LEVELS) {
+	if (*level < JOB_LEVELS) {
 		l = &j->levels[*level];
 		if (l->stat != -1) {
 			c->stats[l->stat]++;
@@ -165,7 +165,7 @@ void Level_Up(character *c)
 
 		/* TODO: add skills */
 
-		*level++;
+		(*level)++;
 	}
 
 	c->experience = 0;

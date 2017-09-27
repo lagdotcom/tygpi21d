@@ -4,7 +4,6 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "common.h"
-#include "types.h"
 
 #include "campaign.h"
 #include "code.h"

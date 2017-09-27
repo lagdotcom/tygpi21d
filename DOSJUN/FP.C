@@ -42,7 +42,7 @@ noexport bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
 	int num_bytes, index;
 	UINT32 count, size;
 	unsigned char data;
-	char far *header, *write;
+	char *header, *write;
 
 	fp = fopen(filename, "rb");
 	if (!fp) {
@@ -50,7 +50,7 @@ noexport bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
 		return false;
 	}
 
-	header = (char far*)image;
+	header = (char *)image;
 	for (index = 0; index < 128; index++) {
 		header[index] = (char)getc(fp);
 	}
@@ -87,11 +87,11 @@ noexport bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
 	return true;
 }
 
-noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, char piece, int sx, int sy)
+noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, int piece, int sx, int sy)
 {
 	pcx_picture_ptr texture;
 	unsigned char *output;
-	char PtrDist *input;
+	char *input;
 	int x, y, tex_width;
 
 	/* TODO: use tex properly */
@@ -180,7 +180,7 @@ void Draw_FP(void)
 	if (t != null) {
 		Draw_Tile_Segment(t->walls[bwall].texture, 80, 48, 32, 32, TXFR, 106, 10);
 		Draw_Tile_Segment(t->ceil, 80, 43, 46, 5, TXFR, 106, 0);
-		Draw_Tile_Segment(t->floor, 80, 80, 46, 5, TXFR, 106, 147);
+		Draw_Tile_Segment(t->floor, 80, 80, 46, 5, TXFR, 106, 47);
 		Draw_Tile_Segment(t->walls[rwall].texture, 112, 43, 16, 42, TXFR, 138, 5);
 	}
 
@@ -204,7 +204,7 @@ void Draw_FP(void)
 	if (t != null) {
 		Draw_Tile_Segment(t->walls[bwall].texture, 86, 43, 42, 42, TXNR, 108, 22);
 		Draw_Tile_Segment(t->ceil, 85, 32, 43, 11, TXNR, 107, 0);
-		Draw_Tile_Segment(t->floor, 85, 95, 43, 11, TXNR, 107, 75);
+		Draw_Tile_Segment(t->floor, 85, 85, 43, 11, TXNR, 107, 75);
 	}
 
 	t = Get_Offset_Tile(1, 0);

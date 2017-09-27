@@ -1,0 +1,106 @@
+CFLAGS = -g -O0 -fpack-struct -Wall -Werror
+DEMO_OBJS = mkdemo.o campaign.o io.o items.o monsters.o save.o zone.o
+MAIN_OBJS = dosjun.o campaign.o code.o combat.o djgpp.o fp.o gfx.o gamelib.o input.o io.o items.o jobs.o list.o main.o mem.o monsters.o party.o save.o zone.o
+EDITOR_OBJS = editor.o djgpp.o gamelib.o gfx.o input.o io.o items.o jc.o jc_lex.o jc_par.o mem.o monsters.o save.o zone.o
+JCC_OBJS = jcc.o jc.o jc_lex.o jc_par.o mem.o
+HEADERS = campaign.h code.h combat.h common.h dosjun.h files.h fp.h gfx.h input.h io.h items.h jc.h jobs.h list.h main.h monsters.h party.h save.h types.h zone.h
+
+all: dosjun
+
+demo: mkdemo.exe demo.zon
+dosjun: dosjun.exe
+editor: editor.exe
+jcc: jcc.exe
+
+dosjun.exe: $(MAIN_OBJS) $(HEADERS)
+	gcc $(CFLAGS) $(MAIN_OBJS) -o dosjun.exe
+
+editor.exe: $(EDITOR_OBJS) $(HEADERS)
+	gcc $(CFLAGS) $(EDITOR_OBJS) -o editor.exe
+
+mkdemo.exe: $(DEMO_OBJS) $(HEADERS)
+	gcc $(CFLAGS) $(DEMO_OBJS) -o mkdemo.exe
+
+demo.zon: mkdemo.exe
+	MKDEMO
+
+gamelib.o:
+	gcc $(CFLAGS) -c gamelib.c
+
+djgpp.o:
+	gcc $(CFLAGS) -c djgpp.c
+
+jcc.exe: $(JCC_OBJS) $(HEADERS)
+	gcc $(CFLAGS) $(JCC_OBJS) -o jcc.exe
+
+campaign.o: campaign.c $(HEADERS)
+	gcc $(CFLAGS) -c campaign.c
+
+code.o: code.c $(HEADERS)
+	gcc $(CFLAGS) -c code.c
+
+combat.o: combat.c $(HEADERS)
+	gcc $(CFLAGS) -c combat.c
+
+chars.o: chars.c $(HEADERS)
+	gcc $(CFLAGS) -c chars.c
+
+dosjun.o: dosjun.c $(HEADERS)
+	gcc $(CFLAGS) -c dosjun.c
+
+editor.o: editor.c $(HEADERS)
+	gcc $(CFLAGS) -c editor.c
+
+fp.o: fp.c $(HEADERS)
+	gcc $(CFLAGS) -c fp.c
+
+gfx.o: gfx.c $(HEADERS)
+	gcc $(CFLAGS) -c gfx.c
+
+input.o: input.c $(HEADERS)
+	gcc $(CFLAGS) -c input.c
+
+io.o: io.c $(HEADERS)
+	gcc $(CFLAGS) -c io.c
+
+items.o: items.c $(HEADERS)
+	gcc $(CFLAGS) -c items.c
+
+jc.o: jc.c $(HEADERS)
+	gcc $(CFLAGS) -c jc.c
+
+jc_lex.o: jc_lex.c $(HEADERS)
+	gcc $(CFLAGS) -c jc_lex.c
+
+jc_par.o: jc_par.c $(HEADERS)
+	gcc $(CFLAGS) -c jc_par.c
+
+jcc.o: jcc.c $(HEADERS)
+	gcc $(CFLAGS) -c jcc.c
+
+jobs.o: jobs.c $(HEADERS)
+	gcc $(CFLAGS) -c jobs.c
+
+list.o: list.c $(HEADERS)
+	gcc $(CFLAGS) -c list.c
+
+main.o: main.c $(HEADERS)
+	gcc $(CFLAGS) -c main.c
+
+mem.o: mem.c $(HEADERS)
+	gcc $(CFLAGS) -c mem.c
+
+mkdemo.o: mkdemo.c $(HEADERS)
+	gcc $(CFLAGS) -c mkdemo.c
+
+monsters.o: monsters.c $(HEADERS)
+	gcc $(CFLAGS) -c monsters.c
+
+party.o: party.c $(HEADERS)
+	gcc $(CFLAGS) -c party.c
+
+save.o: save.c $(HEADERS)
+	gcc $(CFLAGS) -c save.c
+
+zone.o: zone.c $(HEADERS)
+	gcc $(CFLAGS) -c zone.c

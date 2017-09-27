@@ -45,10 +45,10 @@ typedef struct {
 	item_id id;
 	item_type type;
 	item_flag flags;
-	unsigned long value;
+	UINT32 value;
 	special_id special;
-	int special_argument1;
-	int special_argument2;
+	INT16 special_argument1;
+	INT16 special_argument2;
 	unsigned char unused[ITEM_PADDING];
 	stat stats[NUM_STATS];
 } item;
@@ -56,9 +56,9 @@ typedef struct {
 typedef struct {
 	VERSION_HEADER;
 
-	unsigned int num_items;
+	UINT16 num_items;
 
-	unsigned char unused[ITEMS_HEADER_PADDING];
+	char unused[ITEMS_HEADER_PADDING];
 } items_header;
 
 typedef struct {

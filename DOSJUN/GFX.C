@@ -18,7 +18,7 @@ void Draw_Line_DB(int xo, int yo, int x1, int y1, colour col)
 		index;
 
 	/* Access the video buffer directly for speed. */
-	unsigned char far *vb_start = double_buffer;
+	unsigned char *vb_start = double_buffer;
 
 	/* Precompute the first pixel address in the video buffer. Use shifts for
 	multiplication. */
