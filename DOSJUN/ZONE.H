@@ -7,7 +7,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define ZONE_HEADER_PADDING			8
+#define ZONE_HEADER_PADDING			6
 #define WALL_PADDING				2
 #define TILE_PADDING				5
 #define ENCOUNTER_SIZE	6
@@ -62,6 +62,7 @@ typedef struct {
 	encounter_id num_encounters;
 	string_id num_code_strings;
 	etable_id num_etables;
+	unsigned short num_textures;
 
 	unsigned char unused[ZONE_HEADER_PADDING];
 } zone_header;
@@ -76,6 +77,7 @@ typedef struct {
 	encounter *encounters;
 	char **code_strings;
 	etable *etables;
+	char **textures;
 } zone;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */

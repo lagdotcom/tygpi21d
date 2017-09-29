@@ -13,6 +13,7 @@ void Initialise_Zone(zone *z)
 	z->header.num_encounters = 0;
 	z->header.num_code_strings = 0;
 	z->header.num_etables = 0;
+	z->header.num_textures = 0;
 
 	z->tiles = null;
 	z->strings = null;
@@ -21,6 +22,7 @@ void Initialise_Zone(zone *z)
 	z->encounters = null;
 	z->etables = null;
 	z->code_strings = null;
+	z->textures = null;
 }
 
 bool Load_Zone(char *filename, zone *z)
@@ -82,6 +84,14 @@ bool Load_Zone(char *filename, zone *z)
 		z->etables = null;
 	}
 
+	if (h->num_textures > 0) {
+		z->textures = SzAlloc(h->num_textures, char *, "Load_Zone.textures");
+		for (i = 0; i < h->num_textures; i++)
+			z->textures[i] = Read_LengthString(fp);
+	} else {
+		z->textures = null;
+	}
+
 	fclose(fp);
 	return true;
 }
@@ -117,6 +127,13 @@ void Free_Zone(zone *z)
 	}
 
 	Free(z->etables);
+
+	if (z->textures != null) {
+		for (i = 0; i < z->header.num_textures; i++) {
+			Free(z->textures[i]);
+		}
+		Free(z->textures);
+	}
 }
 
 bool Save_Zone(char *filename, zone *z)
@@ -149,6 +166,10 @@ bool Save_Zone(char *filename, zone *z)
 	}
 
 	fwrite(z->etables, sizeof(etable), h->num_etables, fp);
+
+	for (i = 0; i < h->num_textures; i++) {
+		Write_LengthString(z->textures[i], fp);
+	}
 
 	fclose(fp);
 	return true;

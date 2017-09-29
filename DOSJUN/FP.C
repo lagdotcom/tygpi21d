@@ -94,9 +94,8 @@ noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, 
 	char PtrDist *input;
 	int x, y, tex_width;
 
-	/* TODO: use tex properly */
 	if (textureId == 0) return;
-	texture = &textures[/* textureId * TEXTURE_PIECES + */ piece];
+	texture = &textures[textureId * TEXTURE_PIECES + piece];
 	tex_width = texture->header.width + 1;
 
 	output = &double_buffer[(dy + SY) * SCREEN_WIDTH + (dx + SX)];
@@ -304,10 +303,12 @@ noexport void Load_Texture_Pieces(char *name, int index)
 
 void Load_Textures(zone *z)
 {
+	int i;
 	Free_Textures();
 
 	/* TODO: use z->textures */
-	num_textures = 1;
-	textures = SzAlloc(1 * TEXTURE_PIECES, pcx_picture, "Load_Textures");
-	Load_Texture_Pieces("TEST", 0);
+	num_textures = z->header.num_textures;
+	textures = SzAlloc(num_textures * TEXTURE_PIECES, pcx_picture, "Load_Textures");
+	for (i = 0; i < num_textures; i++)
+		Load_Texture_Pieces(z->textures[i], i);
 }
