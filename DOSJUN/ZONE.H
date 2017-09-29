@@ -16,7 +16,9 @@
 typedef enum {
 	thNone = 0,
 
-	thTest,
+	thShiny,
+
+	thINVALID
 } thing;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */

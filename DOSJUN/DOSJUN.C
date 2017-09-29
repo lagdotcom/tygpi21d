@@ -197,6 +197,10 @@ void Redraw_Dungeon_Screen(bool script)
 	if (redraw_party || redraw_everything) Draw_Party_Status();
 	if (script && trigger_on_enter) Trigger_Enter_Script();
 
+	/* script might have set these */
+	if (redraw_fp || redraw_everything) Draw_FP();
+	if (redraw_party || redraw_everything) Draw_Party_Status();
+
 	if (redraw_description || redraw_everything) Draw_Description();
 	redraw_everything = false;
 

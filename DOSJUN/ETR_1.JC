@@ -62,6 +62,7 @@ Script at_key
 		PcSpeak leader, "I think I saw something."
 		PcSpeak nra, "It's a key. At least we're getting\nsomewhere."
 		Text "You pocket the key."
+		SetTileThing @X, @Y, 0
 		PcSpeak liberal, "Not much of a puzzle, was it?"
 		q_status = q_key_found
 	EndIf
