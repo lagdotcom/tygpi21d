@@ -406,6 +406,20 @@ noexport void SetTileColour(host *h)
 	redraw_fp = true;
 }
 
+noexport void SetTileThing(host *h)
+{
+	coord x = Pop_Stack(h);
+	coord y = Pop_Stack(h);
+	thing_id th = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "settilething %d, %d, %d", x, y, th);
+#endif
+
+	TILE(gZone, x, y)->thing = th;
+	redraw_fp = true;
+}
+
 noexport void Teleport(host *h)
 {
 	zone_id zone = Pop_Stack(h);
@@ -475,6 +489,7 @@ noexport void Run_Code_Instruction(host *h, bytecode op)
 		case coSetTileDescription: SetTileDescription(h); return;
 		case coSetTileColour: SetTileColour(h); return;
 		case coTeleport:	Teleport(h); return;
+		case coSetTileThing: SetTileThing(h); return;
 	}
 
 	h->running = false;

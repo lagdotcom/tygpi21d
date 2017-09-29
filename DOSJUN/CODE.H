@@ -50,6 +50,7 @@ typedef enum {
 	coSetTileDescription = 0xA6,
 	coSetTileColour = 0xA7,
 	coTeleport = 0xA8,
+	coSetTileThing = 0xA9,
 } code_op;
 
 typedef enum {

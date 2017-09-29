@@ -49,6 +49,7 @@ bool Is_Code_Keyword(char *string)
 	if (!strcmp(string, "Script")) return true;
 	if (!strcmp(string, "SetTileColour")) return true;
 	if (!strcmp(string, "SetTileDescription")) return true;
+	if (!strcmp(string, "SetTileThing")) return true;
 	if (!strcmp(string, "Teleport")) return true;
 	if (!strcmp(string, "Text")) return true;
 	if (!strcmp(string, "Unlock")) return true;

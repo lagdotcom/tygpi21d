@@ -585,6 +585,24 @@ noexport bool Call_SetTileColour_State(jc_parser *p)
 	return true;
 }
 
+noexport bool Call_SetTileThing_State(jc_parser *p)
+{
+	/* TODO: expressions */
+	jc_token *x, *y, *thing;
+
+	CONSUME();
+	x = CONSUME();
+	y = CONSUME();
+	thing = CONSUME();
+
+	if (!Emit_Argument(p, thing)) return false;
+	if (!Emit_Argument(p, y)) return false;
+	if (!Emit_Argument(p, x)) return false;
+
+	EMIT(coSetTileThing);
+	return true;
+}
+
 noexport bool Call_Teleport_State(jc_parser *p)
 {
 	/* TODO: expressions */
@@ -625,6 +643,7 @@ noexport bool Keyword_State(jc_parser *p)
 		if (MATCH("SetTileDescription")) return Call_SetTileDescription_State(p);
 		if (MATCH("SetTileColour")) return Call_SetTileColour_State(p);
 		if (MATCH("Teleport")) return Call_Teleport_State(p);
+		if (MATCH("SetTileThing")) return Call_SetTileThing_State(p);
 
 		if (MATCH("If")) return Start_If_State(p);
 		if (MATCH("ElseIf")) return Start_ElseIf_State(p);
