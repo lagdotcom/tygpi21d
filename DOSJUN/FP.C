@@ -116,9 +116,11 @@ noexport void Paste_DB(int dx, int dy, pcx_picture *texture, int w, int h, int s
 
 noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, char piece, int sx, int sy)
 {
+	int pieceStart;
 	if (textureId == 0) return;
 
-	Paste_DB(dx, dy, &textures[textureId * TEXTURE_PIECES + piece], w, h, sx, sy);
+	pieceStart = (textureId - 1) * TEXTURE_PIECES;
+	Paste_DB(dx, dy, &textures[pieceStart + piece], w, h, sx, sy);
 }
 
 noexport void Draw_Thing(thing_id th, int dx, int dy, int w, int h, int sx, int sy)
