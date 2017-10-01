@@ -3,39 +3,22 @@
 #include "dosjun.h"
 #include "gamelib.h"
 
-/* D E F I N E S ///////////////////////////////////////////////////////// */
+#include <time.h>
 
-#define NUM_ACTIONS	3
+/* D E F I N E S ///////////////////////////////////////////////////////// */
 
 /* highlight colours */
 #define COLOUR_ACTIVE	14
 #define COLOUR_SELECT	11
 
-typedef enum {
-	tfAlly = 1,
-	tfEnemy = 2,
-	tfDead = 4,
-	tfSelf = 8
-} targetflags;
-
-#define MONSTER(i)		((monster *)List_At(combat_monsters, i))
-
-#define TARGET_PC(i)	(-(i) - 1)
-#define TARGET_ENEMY(i)	(i)
-#define IS_PC(i)		(i < 0)
-#define NAME(i)			(IS_PC(i) ? gSave.characters[TARGET_PC(i)].name : MONSTER(i)->name)
-
-#define NO_ACTION		-1
-typedef int act;
-typedef int targ;
-
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
-	bool (*check)(targ source);
-	void (*act)(targ source, targ target);
+	action_check_fn check;
+	action_do_fn act;
 	char *name;
 	targetflags targeting;
+	UINT8 priority;
 } action;
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
@@ -48,8 +31,6 @@ noexport list *combat_groups[ENCOUNTER_SIZE];
 noexport int group_y[ENCOUNTER_SIZE];
 noexport int monsters_alive;
 noexport int groups_alive;
-
-int randint(int minimum, int maximum);
 
 /* C O M B A T  A C T I O N S //////////////////////////////////////////// */
 
@@ -96,7 +77,7 @@ noexport void Highlight_Ally(int pc_active, int pc_select)
 	}
 }
 
-noexport void Format_Enemy_Group(int group, char *buffer)
+noexport void Format_Enemy_Group(groupnum group, char *buffer)
 {
 	int enemy = (int)List_At(combat_groups[group], 0);
 	sprintf(buffer, "%s x%u", MONSTER(enemy)->name, combat_groups[group]->size);
@@ -109,7 +90,7 @@ noexport void Format_Enemy_Group(int group, char *buffer)
 
 noexport void Show_Enemies(void)
 {
-	int i;
+	groupnum i;
 	int y = EPANEL_Y;
 	char buffer[100];
 
@@ -126,9 +107,9 @@ noexport void Show_Enemies(void)
 	}
 }
 
-noexport void Highlight_Enemy_Group(int group, int colour)
+noexport void Highlight_Enemy_Group(groupnum group, int colour)
 {
-	int i;
+	groupnum i;
 	char buffer[100];
 
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
@@ -181,7 +162,7 @@ noexport stat_id Get_Weapon_Stat(item *weapon)
 	return (weapon->flags & ifDexterityWeapon) ? sDexterity : sStrength;
 }
 
-noexport int Get_Enemy_Group(targ victim)
+noexport groupnum Get_Enemy_Group(targ victim)
 {
 	int i;
 
@@ -198,7 +179,7 @@ noexport int Get_Enemy_Group(targ victim)
 	return -1;
 }
 
-noexport targ Get_Random_Target(int group)
+noexport targ Get_Random_Target(groupnum group)
 {
 	int i;
 
@@ -213,7 +194,7 @@ noexport bool Is_Dead(targ victim)
 
 noexport void Kill(targ victim)
 {
-	int group;
+	groupnum group;
 	Combat_Message("%s dies!", NAME(victim));
 
 	if (IS_PC(victim)) {
@@ -345,16 +326,18 @@ void Add_Monster(monster* template)
 	monsters_alive++;
 }
 
-#define Add_Combat_Action(_index, _name, _check, _act, _targeting) { \
-	combat_actions[_index].check = _check; \
-	combat_actions[_index].act = _act; \
-	combat_actions[_index].name = _name; \
-	combat_actions[_index].targeting = _targeting; \
+void Add_Combat_Action(act id, char *name, action_check_fn check_fn, action_do_fn act_fn, targetflags target, UINT8 priority)
+{
+	combat_actions[id].check = check_fn;
+	combat_actions[id].act = act_fn;
+	combat_actions[id].name = name;
+	combat_actions[id].targeting = target;
+	combat_actions[id].priority = priority;
 }
 
 void Initialise_Combat(void)
 {
-	int i;
+	groupnum i;
 
 	combat_monsters = New_List(ltObject, "Initialise_Combat.monsters");
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
@@ -362,17 +345,19 @@ void Initialise_Combat(void)
 	}
 
 	combat_actions = SzAlloc(NUM_ACTIONS, action, "Initialise_Combat.actions");
-	Add_Combat_Action(0, "Attack", Check_Attack, Attack, tfEnemy);
-	Add_Combat_Action(1, "Block", Check_Block, Block, tfSelf);
-	Add_Combat_Action(2, "Defend", Check_Defend, Defend, tfAlly);
+	Add_Combat_Action(aAttack, "Attack", Check_Attack, Attack, tfEnemy, 100);
+	Add_Combat_Action(aBlock, "Block", Check_Block, Block, tfSelf, 120);
+	Add_Combat_Action(aDefend, "Defend", Check_Defend, Defend, tfAlly, 120);
 
 	PCX_Init(&combat_bg);
 	PCX_Load("COMBAT.PCX", &combat_bg, 0);
+
+	randomize();
 }
 
 void Free_Combat(void)
 {
-	int i;
+	groupnum i;
 
 	Free_List(combat_monsters);
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
@@ -615,7 +600,8 @@ void Start_Combat(encounter_id id)
 	char description[1000],
 		*write,
 		*first = null;
-	int i, count;
+	groupnum i;
+	int count;
 	encounter *en = &gZone.encounters[id];
 	monster *m;
 

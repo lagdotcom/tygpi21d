@@ -25,7 +25,7 @@ bool Load_Campaign(char *filename, campaign *c)
 
 	c->zones = SzAlloc(c->header.num_zones, char *, "Load_Campaign");
 	for (i = 0; i < c->header.num_zones; i++) {
-		c->zones[i] = Read_LengthString(fp);
+		c->zones[i] = Read_LengthString(fp, "Load_Campaign.n");
 	}
 
 	fclose(fp);

@@ -11,7 +11,7 @@ bool Check_Version(char *magic, unsigned char version);
 void Free_Directory_Listing(char **listing, int count);
 char **Get_Directory_Listing(char *pattern, int *count);
 unsigned char Get_Next_Scan_Code(void);
-char *Read_LengthString(FILE *fp);
+char *Read_LengthString(FILE *fp, char *tag);
 void Write_LengthString(char *string, FILE *fp);
 
 #endif

@@ -44,7 +44,7 @@ bool Load_Zone(char *filename, zone *z)
 	if (h->num_strings > 0) {
 		z->strings = SzAlloc(h->num_strings, char *, "Load_Zone.strings");
 		for (i = 0; i < h->num_strings; i++)
-			z->strings[i] = Read_LengthString(fp);
+			z->strings[i] = Read_LengthString(fp, "Load_Zone.strings.n");
 	} else {
 		z->strings = null;
 	}
@@ -54,7 +54,7 @@ bool Load_Zone(char *filename, zone *z)
 		z->script_lengths = SzAlloc(h->num_scripts, length, "Load_Zone.script_lengths");
 		for (i = 0; i < h->num_scripts; i++) {
 			fread(&z->script_lengths[i], sizeof(length), 1, fp);
-			z->scripts[i] = SzAlloc(z->script_lengths[i], bytecode, "Load_Zone.scripts[i]");
+			z->scripts[i] = SzAlloc(z->script_lengths[i], bytecode, "Load_Zone.scripts.i");
 			fread(z->scripts[i], sizeof(bytecode), z->script_lengths[i], fp);
 		}
 	} else {
@@ -72,7 +72,7 @@ bool Load_Zone(char *filename, zone *z)
 	if (h->num_code_strings > 0) {
 		z->code_strings = SzAlloc(h->num_code_strings, char *, "Load_Zone.code_strings");
 		for (i = 0; i < h->num_code_strings; i++)
-			z->code_strings[i] = Read_LengthString(fp);
+			z->code_strings[i] = Read_LengthString(fp, "Load_Zone.code_strings.n");
 	} else {
 		z->code_strings = null;
 	}
@@ -87,7 +87,7 @@ bool Load_Zone(char *filename, zone *z)
 	if (h->num_textures > 0) {
 		z->textures = SzAlloc(h->num_textures, char *, "Load_Zone.textures");
 		for (i = 0; i < h->num_textures; i++)
-			z->textures[i] = Read_LengthString(fp);
+			z->textures[i] = Read_LengthString(fp, "Load_Zone.textures.n");
 	} else {
 		z->textures = null;
 	}

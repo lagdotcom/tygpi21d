@@ -153,7 +153,7 @@ noexport void Load_Texture_Pieces(char *name, int index)
 
 	for (i = 0; i < TEXTURE_PIECES; i++) {
 		sprintf(filename, "WALL\\%s%d.PCX", name, i + 1);
-		if (!Load_Picture(filename, &textures[index * TEXTURE_PIECES + i], name)) {
+		if (!Load_Picture(filename, &textures[index * TEXTURE_PIECES + i], "Load_Texture_Pieces.n")) {
 			printf("Could not load: %s\n", filename);
 			exit(1);
 		}

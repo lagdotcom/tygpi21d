@@ -14,13 +14,13 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-char *Read_LengthString(FILE *fp)
+char *Read_LengthString(FILE *fp, char *tag)
 {
 	char *string;
 	length len;
 
 	fread(&len, sizeof(length), 1, fp);
-	string = SzAlloc(len + 1, char, "Read_LengthString");
+	string = SzAlloc(len + 1, char, tag);
 	fread(string, 1, len + 1, fp);
 	return string;
 }

@@ -76,7 +76,7 @@ void Start_Campaign(char *name)
 	gSave.script_globals = SzAlloc(MAX_GLOBALS, int, "Start_Campaign.globals");
 	gSave.script_locals = SzAlloc(gSave.header.num_zones, int *, "Start_Campaign.locals");
 	for (i = 0; i < gSave.header.num_zones; i++) {
-		gSave.script_locals[i] = SzAlloc(MAX_LOCALS, int, "Start_Campaign.locals[i]");
+		gSave.script_locals[i] = SzAlloc(MAX_LOCALS, int, "Start_Campaign.locals.i");
 	}
 
 	Load_Campaign_Data();
