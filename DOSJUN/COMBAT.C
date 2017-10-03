@@ -31,6 +31,7 @@ noexport list *combat_groups[ENCOUNTER_SIZE];
 noexport int group_y[ENCOUNTER_SIZE];
 noexport int monsters_alive;
 noexport int groups_alive;
+noexport UINT32 earned_experience;
 
 /* C O M B A T  A C T I O N S //////////////////////////////////////////// */
 
@@ -194,13 +195,16 @@ noexport bool Is_Dead(targ victim)
 
 noexport void Kill(targ victim)
 {
+	monster *m;
 	groupnum group;
 	Combat_Message("%s dies!", NAME(victim));
 
 	if (IS_PC(victim)) {
 		/* TODO */
 	} else {
+		m = List_At(combat_monsters, victim);
 		monsters_alive--;
+		earned_experience += m->experience;
 
 		group = Get_Enemy_Group(victim);
 		if (group >= 0) {
@@ -640,8 +644,15 @@ void Start_Combat(encounter_id id)
 	Show_Picture(first);
 
 	/* DO IT */
+	earned_experience = 0;
 	Enter_Combat_Loop();
 	
 	/* TODO: if you lose... shouldn't do this */
+	for (count = 0; count < PARTY_SIZE; count++) {
+		if (!Is_Dead(TARGET_PC(count))) {
+			Add_Experience(&gSave.characters[count], earned_experience);
+		}
+	}
+
 	Redraw_Dungeon_Screen(false);
 }

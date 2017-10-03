@@ -8,7 +8,7 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define MONSTERS_HEADER_PADDING		26
-#define MONSTER_PADDING				8
+#define MONSTER_PADDING				4
 
 typedef enum {
 	rowFront,
@@ -28,6 +28,7 @@ typedef struct {
 	stat stats[NUM_STATS];
 	monster_row row;
 	monster_ai ai;
+	UINT32 experience;
 
 	unsigned char unused[MONSTER_PADDING];
 } monster;

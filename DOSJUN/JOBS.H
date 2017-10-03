@@ -14,6 +14,7 @@
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+void Add_Experience(character *c, UINT32 xp);
 void Free_Jobs(void);
 void Initialise_Jobs(void);
 void Level_Up(character *c);

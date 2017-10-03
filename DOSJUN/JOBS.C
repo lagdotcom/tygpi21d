@@ -170,3 +170,9 @@ void Level_Up(character *c)
 
 	c->experience = 0;
 }
+
+void Add_Experience(character *c, UINT32 xp)
+{
+	/* TODO: xp penalties, level up trigger */
+	c->experience += xp;
+}
