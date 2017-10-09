@@ -11,11 +11,11 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-noexport void Resize_List(list *l, int new_capacity)
+noexport void Resize_List(list *l, unsigned int new_capacity)
 {
 	void *new_storage = Reallocate(l->items, new_capacity, sizeof(void *), "Resize_List");
 	if (new_storage == null) {
-		printf("Resize_List failed: going from %d to %d\n", l->capacity, new_capacity);
+		printf("Resize_List failed: going from %u to %u\n", l->capacity, new_capacity);
 		exit(1);
 	}
 
@@ -58,6 +58,8 @@ noexport void Free_Item(list_type type, void *item)
 list *New_List(list_type type, char *tag)
 {
 	list *l = SzAlloc(1, list, tag);
+	if (l == null)
+		die("New_List: Out of memory");
 
 	l->type = type;
 	l->capacity = 0;
@@ -146,7 +148,7 @@ bool Remove_from_List(list *l, void *match)
 void *List_At(list *l, unsigned int index)
 {
 	if (index >= l->size) {
-		printf("List_At failed: size %d, asked for %d\n", l->size, index);
+		printf("List_At failed: size %u, asked for %u\n", l->size, index);
 		return null;
 	}
 

@@ -24,7 +24,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define TILE(z, x, y) (&z.tiles[y * z.header.width + x])
+#define TILE(z, x, y) (&z.tiles[(y) * z.header.width + (x)])
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 

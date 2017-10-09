@@ -266,7 +266,11 @@ noexport void Attack(targ source, targ target)
 		}
 
 		roll = randint(min, max) - Get_Stat(target, sArmour);
-		if (roll > 0) Damage(target, roll);
+		if (roll > 0) {
+			Damage(target, roll);
+		} else {
+			Combat_Message("The blow glances off.");
+		}
 	} else {
 		Combat_Message("%s attacks %s and misses.", NAME(source), NAME(target));
 	}
@@ -320,6 +324,9 @@ noexport void Clear_Encounter(void)
 void Add_Monster(monster* template)
 {
 	monster *m = SzAlloc(1, monster, "Add_Monster");
+	if (m == null)
+		die("Add_Monster: out of memory");
+
 	memcpy(m, template, sizeof(monster));
 	m->stats[sHP] = m->stats[sMaxHP];
 	m->stats[sMP] = m->stats[sMaxMP];
@@ -376,6 +383,9 @@ noexport act Get_Pc_Action(unsigned char pc)
 	act ai;
 	int *action_ids = SzAlloc(NUM_ACTIONS, int, "Get_Pc_Action.ids");
 	char **action_names = SzAlloc(NUM_ACTIONS, char *, "Get_Pc_Action.names");
+
+	if (action_ids == null || action_names == null)
+		die("Get_Pc_Action: out of memory");
 
 	for (i = 0; i < NUM_ACTIONS; i++) {
 		if (combat_actions[i].check(TARGET_PC(pc))) {
@@ -551,6 +561,8 @@ noexport void Enter_Combat_Loop(void)
 
 	monster_actions = SzAlloc(combat_monsters->size, act, "Enter_Combat_Loop.actions");
 	monster_targets = SzAlloc(combat_monsters->size, targ, "Enter_Combat_Loop.targets");
+	if (monster_actions == null || monster_targets == null)
+		die("Enter_Combat_Loop: out of memory");
 
 	while (monsters_alive > 0) {
 		Show_Combat_Pc_Stats();

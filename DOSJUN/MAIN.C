@@ -75,11 +75,18 @@ void Start_Campaign(char *name)
 
 	gSave.script_globals = SzAlloc(MAX_GLOBALS, int, "Start_Campaign.globals");
 	gSave.script_locals = SzAlloc(gSave.header.num_zones, int *, "Start_Campaign.locals");
+	if (gSave.script_globals == null || gSave.script_locals == null) goto _dead;
+
 	for (i = 0; i < gSave.header.num_zones; i++) {
 		gSave.script_locals[i] = SzAlloc(MAX_LOCALS, int, "Start_Campaign.locals.i");
+		if (gSave.script_locals[i] == null) goto _dead;
 	}
 
 	Load_Campaign_Data();
+	return;
+
+_dead:
+	die("Start_Campaign: out of memory");
 }
 
 gamestate Start_New_Game(void)

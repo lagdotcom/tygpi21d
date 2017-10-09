@@ -102,9 +102,9 @@ wall* Get_Wall(coord x, coord y, dir dir, relative rel)
 				case rRight: return &under->walls[dNorth];
 				default: return null;
 			}
-	}
 
-	return null;
+		default: return null;
+	}
 }
 
 void Show_Game_String(char *string, bool wait_for_key)

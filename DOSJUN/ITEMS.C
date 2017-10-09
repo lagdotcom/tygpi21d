@@ -19,6 +19,9 @@ bool Load_Items(char *filename, items *i)
 	Check_Version_Header(i->header);
 
 	i->items = SzAlloc(i->header.num_items, item, "Load_Items");
+	if (i->items == null)
+		die("Load_Items: out of memory");
+
 	fread(i->items, sizeof(item), i->header.num_items, fp);
 
 	fclose(fp);

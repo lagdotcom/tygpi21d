@@ -24,6 +24,7 @@ bool Load_Campaign(char *filename, campaign *c)
 	Check_Version_Header(c->header);
 
 	c->zones = SzAlloc(c->header.num_zones, char *, "Load_Campaign");
+	if (c->zones == null) die("Load_Campaign: out of memory");
 	for (i = 0; i < c->header.num_zones; i++) {
 		c->zones[i] = Read_LengthString(fp, "Load_Campaign.n");
 	}

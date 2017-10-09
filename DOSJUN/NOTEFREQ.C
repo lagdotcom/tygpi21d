@@ -1,6 +1,6 @@
 #include "types.h"
 
-#define _BLOCK(n) (n << 10)
+#define _BLOCK(n) ((n) << 10)
 
 UINT16 note_frequencies[] = {
 	/*  C0 */ _BLOCK(0) | 344,

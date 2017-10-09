@@ -39,10 +39,12 @@ bool Load_Zone(char *filename, zone *z)
 	Check_Version_Header(z->header);
 
 	z->tiles = SzAlloc(h->width * h->height, tile, "Load_Zone.tiles");
+	if (z->tiles == null) goto _dead;
 	fread(z->tiles, sizeof(tile), h->width * h->height, fp);
 
 	if (h->num_strings > 0) {
 		z->strings = SzAlloc(h->num_strings, char *, "Load_Zone.strings");
+		if (z->strings == null) goto _dead;
 		for (i = 0; i < h->num_strings; i++)
 			z->strings[i] = Read_LengthString(fp, "Load_Zone.strings.n");
 	} else {
@@ -52,9 +54,12 @@ bool Load_Zone(char *filename, zone *z)
 	if (h->num_scripts > 0) {
 		z->scripts = SzAlloc(h->num_scripts, bytecode *, "Load_Zone.scripts");
 		z->script_lengths = SzAlloc(h->num_scripts, length, "Load_Zone.script_lengths");
+		if (z->scripts == null || z->script_lengths == null) goto _dead;
+
 		for (i = 0; i < h->num_scripts; i++) {
 			fread(&z->script_lengths[i], sizeof(length), 1, fp);
 			z->scripts[i] = SzAlloc(z->script_lengths[i], bytecode, "Load_Zone.scripts.i");
+			if (z->scripts[i] == null) goto _dead;
 			fread(z->scripts[i], sizeof(bytecode), z->script_lengths[i], fp);
 		}
 	} else {
@@ -64,6 +69,7 @@ bool Load_Zone(char *filename, zone *z)
 
 	if (h->num_encounters > 0) {
 		z->encounters = SzAlloc(h->num_encounters, encounter, "Load_Zone.encounters");
+		if (z->encounters == null) goto _dead;
 		fread(z->encounters, sizeof(encounter), h->num_encounters, fp);
 	} else {
 		z->encounters = null;
@@ -71,6 +77,7 @@ bool Load_Zone(char *filename, zone *z)
 
 	if (h->num_code_strings > 0) {
 		z->code_strings = SzAlloc(h->num_code_strings, char *, "Load_Zone.code_strings");
+		if (z->code_strings == null) goto _dead;
 		for (i = 0; i < h->num_code_strings; i++)
 			z->code_strings[i] = Read_LengthString(fp, "Load_Zone.code_strings.n");
 	} else {
@@ -79,6 +86,7 @@ bool Load_Zone(char *filename, zone *z)
 
 	if (h->num_etables > 0) {
 		z->etables = SzAlloc(h->num_etables, etable, "Load_Zone.etables");
+		if (z->etables == null) goto _dead;
 		fread(z->etables, sizeof(etable), h->num_etables, fp);
 	} else {
 		z->etables = null;
@@ -86,6 +94,7 @@ bool Load_Zone(char *filename, zone *z)
 
 	if (h->num_textures > 0) {
 		z->textures = SzAlloc(h->num_textures, char *, "Load_Zone.textures");
+		if (z->textures == null) goto _dead;
 		for (i = 0; i < h->num_textures; i++)
 			z->textures[i] = Read_LengthString(fp, "Load_Zone.textures.n");
 	} else {
@@ -94,6 +103,9 @@ bool Load_Zone(char *filename, zone *z)
 
 	fclose(fp);
 	return true;
+
+_dead:
+	die("Load_Zone: out of memory");
 }
 
 void Free_Zone(zone *z)

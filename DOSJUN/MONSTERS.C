@@ -18,6 +18,7 @@ bool Load_Monsters(char *filename, monsters *m)
 	Check_Version_Header(m->header);
 
 	m->monsters = SzAlloc(m->header.num_monsters, monster, "Load_Monsters");
+	if (m->monsters == null) die("Load_Monsters: out of memory");
 	fread(m->monsters, sizeof(monster), m->header.num_monsters, fp);
 
 	fclose(fp);

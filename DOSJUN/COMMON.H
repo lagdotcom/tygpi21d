@@ -78,6 +78,8 @@ typedef UINT16 tileflag_id;
 typedef UINT8 walltype_id;
 typedef UINT8 zone_id;
 
+#define die(msg) { Stop_Memory_Tracking(); printf(msg); exit(1); }
+
 /* Memory Debugging */
 
 #ifdef FAR_MEMORY

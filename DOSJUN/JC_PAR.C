@@ -106,7 +106,7 @@ noexport bool Token_Matches(jc_parser *p, char *check)
 
 noexport bool Parse_Error(jc_parser *p, char *message)
 {
-	printf("-- PARSE ERROR @%d/%dtk --\n", p->position, p->token_count);
+	printf("-- PARSE ERROR @%u/%utk --\n", p->position, p->token_count);
 	printf("%s\n", message);
 
 	return false;

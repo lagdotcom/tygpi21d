@@ -92,7 +92,7 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 {
 	bool success;
 	char line[JC_LINE_LENGTH];
-	jc_token *tokens = SzAlloc(MAX_TOKENS_PER_LINE, jc_token, "Compile_JC");
+	jc_token *tokens;
 	int count,
 		i,
 		err = 0,
@@ -105,6 +105,9 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 		printf("Could not open for reading: %s\n", filename);
 		return -1;
 	}
+
+	tokens = SzAlloc(MAX_TOKENS_PER_LINE, jc_token, "Compile_JC");
+	if (tokens == null) die("Compile_JC: out of memory");
 
 	while (fgets(line, JC_LINE_LENGTH, fp)) {
 		line_no++;

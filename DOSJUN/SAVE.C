@@ -27,16 +27,22 @@ bool Load_Savefile(char *filename, save *s)
 	fread(s->characters, sizeof(character), PARTY_SIZE, fp);
 
 	s->script_globals = SzAlloc(MAX_GLOBALS, int, "Load_Savefile.globals");
+	if (s->script_globals == null) goto _dead;
 	fread(s->script_globals, sizeof(int), MAX_GLOBALS, fp);
 
 	s->script_locals = SzAlloc(s->header.num_zones, int *, "Load_Savefile.locals");
+	if (s->script_locals == null) goto _dead;
 	for (i = 0; i < s->header.num_zones; i++) {
 		s->script_locals[i] = SzAlloc(MAX_LOCALS, int, "Load_Savefile.locals[i]");
+		if (s->script_locals[i] == null) goto _dead;
 		fread(s->script_locals[i], sizeof(int), MAX_LOCALS, fp);
 	}
 
 	fclose(fp);
 	return true;
+
+_dead:
+	die("Load_Savefile: out of memory");
 }
 
 void Free_Savefile(save *s)

@@ -108,6 +108,8 @@ void Draw_Bounded_String(int x, int y, int w, int h, colour col, char *string, b
 		i = 0;
 	char ch;
 
+	if (string == null) return;
+
 	while (string[i]) {
 		if (row >= h) return;
 
@@ -213,6 +215,9 @@ char *Word_Wrap(char *string, int width, int height)
 	int i = 0,
 		last_space = 0,
 		x = 0;
+
+	if (wrapped == null)
+		die("Word_Wrap: out of memory");
 
 	while (string[i]) {
 		if (string[i] == ' ') {

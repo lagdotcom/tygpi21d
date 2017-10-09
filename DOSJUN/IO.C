@@ -21,6 +21,9 @@ char *Read_LengthString(FILE *fp, char *tag)
 
 	fread(&len, sizeof(length), 1, fp);
 	string = SzAlloc(len + 1, char, tag);
+	if (string == null)
+		die("Read_LengthString: out of memory");
+
 	fread(string, 1, len + 1, fp);
 	return string;
 }
@@ -41,6 +44,8 @@ char **Get_Directory_Listing(char *pattern, int *count)
 	int i, done;
 
 	filenames = SzAlloc(MAX_FILES, char *, "Get_Directory_Listing");
+	if (filenames == null)
+		die("Get_Directory_Listing: out of memory");
 
 	i = 0;
 	done = findfirst(pattern, &ff, 0);
@@ -75,7 +80,7 @@ unsigned char Get_Next_Scan_Code(void)
 
 bool Check_Version(char *magic, unsigned char version)
 {
-	if (strncmp(magic, FILE_MAGIC, 3) || version > VERSION_NOW)
+	if (strncmp(magic, FILE_MAGIC, 3) != 0 || version > VERSION_NOW)
 	{
 		puts("File does not belong to DOSJUN.\n");
 		return false;
