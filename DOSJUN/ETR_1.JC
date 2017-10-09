@@ -23,11 +23,11 @@ Script wake_up
 	EquipItem shifty, itPenknife
 	GiveItem liberal, itPlaster, 4
 
-	Text "You slowly come to your senses, and\nfind yourself in unfamiliar\nsurroundings. You rouse your friends."
+	Text "You slowly come to your senses, and find yourself in unfamiliar surroundings. You rouse your friends."
 	PcSpeak strong, "Ugh... where are we?"
-	PcSpeak nerd, "I don't think it matters. We're\nsupposed to escape, right?"
+	PcSpeak nerd, "I don't think it matters. We're supposed to escape, right?"
 	PcSpeak leader, "Let's look around."
-	Text "The walls are newly whitewashed, and\nthe room seems nearly featureless\nsave for a door a few paces away."
+	Text "The walls are newly whitewashed, and the room seems nearly featureless save for a door a few paces away."
 	PcSpeak strong, "Whose idea was this, again?"
 
 	q_status = q_init
@@ -39,7 +39,7 @@ Script facing_door
 	EndIf
 
 	If q_status == q_init
-		Text "You find a door. It looks quite\nstrong, and there's an imposing lock hanging off it."
+		Text "You find a door. It looks quite strong, and there's an imposing lock hanging off it."
 		PcSpeak liberal, "This looks like the way out!"
 		PcSpeak shifty, "Hmm... it's locked. Good lock, too."
 		PcSpeak leader, "There has to be something in here."
@@ -49,7 +49,7 @@ Script facing_door
 		PcSpeak nerd, "With what?"
 	ElseIf q_status == q_key_found
 		PcSpeak shifty, "Let me try the key."
-		Text "The lock rattles around a bit, then\ngives."
+		Text "The lock rattles around a bit, then gives."
 		PcSpeak liberal, "Great... can we leave now?"
 		Unlock @X, @Y, South
 		q_status = q_door_unlocked
@@ -58,9 +58,9 @@ EndScript
 
 Script at_key
 	If q_status < q_key_found
-		Text "At first, this corner of the room\nseems as empty of the others, but a\nglint catches your eye."
+		Text "At first, this corner of the room seems as empty of the others, but a glint catches your eye."
 		PcSpeak leader, "I think I saw something."
-		PcSpeak nra, "It's a key. At least we're getting\nsomewhere."
+		PcSpeak nra, "It's a key. At least we're getting somewhere."
 		Text "You pocket the key."
 		SetTileThing @X, @Y, 0
 		PcSpeak liberal, "Not much of a puzzle, was it?"
@@ -73,9 +73,9 @@ Script just_outside
 		Return
 	EndIf
 
-	Text "The contrast between the room you\njust left and this corridor is sharp. Everything around you is made of dry stone."
-	Text "Everyone seems confused. You look at\neach other for a while before someone speaks."
-	PcSpeak nerd, "Aren't we supposed to be in a\nwarehouse?"
+	Text "The contrast between the room you just left and this corridor is sharp. Everything around you is made of dry stone."
+	Text "Everyone seems confused. You look at each other for a while before someone speaks."
+	PcSpeak nerd, "Aren't we supposed to be in a warehouse?"
 	q_status = q_gone_outside
 EndScript
 
@@ -84,23 +84,23 @@ Script rat_fight
 		Return
 	EndIf
 
-	PcSpeak liberal, "I heard something! Ugh, something\nunpleasant."
-	Text "You hear it too; a quiet skittering\nsound. It doesn't take long before\nthe culprit is revealed."
+	PcSpeak liberal, "I heard something! Ugh, something unpleasant."
+	Text "You hear it too; a quiet skittering sound. It doesn't take long before the culprit is revealed."
 	# Show the rat somehow?
-	Text "A very large rat slowly approaches\nyour group. It lifts its nose and\nsniffs the air, then makes a strange hissing noise."
-	PcSpeak nra, "That's the second largest rat I've\never seen."
-	Text "You don't have time to rebuke your\nfriend; the rat suddenly charges at\nyou!"
+	Text "A very large rat slowly approaches your group. It lifts its nose and sniffs the air, then makes a strange hissing noise."
+	PcSpeak nra, "That's the second largest rat I've ever seen."
+	Text "You don't have time to rebuke your friend; the rat suddenly charges at you!"
 	Combat 0
 	q_status = q_fought_rat
 
 	PcSpeak strong, "Was that thing rabid?"
-	PcSpeak shifty, "I don't want to know. I want to know\nif this place is licensed."
-	Text "You check your watch. It's only been\nhalf an hour since you arrived at the leisure centre, but you feel somewhat ill."
-	Text "Your head is foggy, but you blame it\non the anaesthetic they injected you\nwith shortly after your names were\ncalled."
-	Text "You're not sure that's standard\nprocedure for these games..."
+	PcSpeak shifty, "I don't want to know. I want to know if this place is licensed."
+	Text "You check your watch. It's only been half an hour since you arrived at the leisure centre, but you feel somewhat ill."
+	Text "Your head is foggy, but you blame it on the anaesthetic they injected you with shortly after your names were called."
+	Text "You're not sure that's standard procedure for these games..."
 	PcSpeak leader, "Something is wrong."
 	Text "You take out your phone, but it isn't turned on. It won't even turn on."
-	PcSpeak nerd, "Mine's out too. I charged it this\nmorning... should last a day, at\nleast."
+	PcSpeak nerd, "Mine's out too. I charged it this morning... should last a day, at least."
 	Text "Everyone is silent."
 	PcSpeak liberal, "What are we going to do?"
 	PcSpeak nra, "Let's just keep looking. There has to be an exit."

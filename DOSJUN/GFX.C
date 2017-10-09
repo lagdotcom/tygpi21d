@@ -204,3 +204,56 @@ void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled)
 		Draw_Line_DB(x1, y0, x1, y1, col);
 	}
 }
+
+
+/* Wrap a string to fit in a given box size. You must Free() the returned string. */
+char *Word_Wrap(char *string, int width, int height)
+{
+	char *wrapped = Duplicate_String(string, "Word_Wrap");
+	int i = 0,
+		last_space = 0,
+		x = 0;
+
+	while (string[i]) {
+		if (string[i] == ' ') {
+			last_space = i;
+		}
+
+		x++;
+		if (x >= width && last_space > 0) {
+			wrapped[last_space] = '\n';
+
+			x = i - last_space;
+			last_space = 0;
+		}
+
+		i++;
+	}
+
+	return wrapped;
+}
+
+/* Clears an area, then prints a string into it, with wrapping. */
+void Draw_Wrapped_String(int x, int y, int w, int h, colour col, char *string, bool margin)
+{
+	int columns = w / 8;
+	int rows = h / 8;
+	char *wrapped;
+
+	if (margin) {
+		columns--;
+		rows--;
+
+		x += 4;
+		y += 4;
+		w -= 8;
+		h -= 8;
+	}
+
+	wrapped = Word_Wrap(string, columns, rows);
+
+	Draw_Square_DB(0, x, y, x + w - 1, y + h - 1, true);
+	Draw_Bounded_String(x, y, w, h, col, wrapped, false);
+
+	Free(wrapped);
+}

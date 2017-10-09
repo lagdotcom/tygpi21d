@@ -109,8 +109,7 @@ wall* Get_Wall(coord x, coord y, direction dir, relative rel)
 
 void Show_Game_String(char *string, bool wait_for_key)
 {
-	Draw_Square_DB(0, 12, 148, 12 + 37*8, 148 + 5*8, 1);
-	Draw_Bounded_String(12, 148, 37, 5, 15, string, 0);
+	Draw_Wrapped_String(8, 144, 304, 48, 15, string, true);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();

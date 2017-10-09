@@ -37,9 +37,7 @@ noexport UINT32 earned_experience;
 
 noexport void Show_Combat_String(char *string, bool wait_for_key)
 {
-	Draw_Square_DB(0, 96, 144, 223, 191, 1);
-	/* TODO: split onto lines a bit more nicely */
-	Draw_Bounded_String(100, 148, 15, 5, 15, string, 0);
+	Draw_Wrapped_String(96, 144, 128, 48, 15, string, true);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();
