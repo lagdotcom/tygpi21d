@@ -11,10 +11,10 @@
 #define Set_Tile(ix, c, f, wn, we, ws, ww, d) { \
 	z.tiles[ix].ceil = c; \
 	z.tiles[ix].floor = f; \
-	z.tiles[ix].walls[North].texture = wn; \
-	z.tiles[ix].walls[East].texture = we; \
-	z.tiles[ix].walls[South].texture = ws; \
-	z.tiles[ix].walls[West].texture = ww; \
+	z.tiles[ix].walls[dNorth].texture = wn; \
+	z.tiles[ix].walls[dEast].texture = we; \
+	z.tiles[ix].walls[dSouth].texture = ws; \
+	z.tiles[ix].walls[dWest].texture = ww; \
 	z.tiles[ix].description = d + 1; \
 }
 
@@ -61,7 +61,7 @@ void Demo_Campaign(char *filename)
 	c.header.start_zone = 0;
 	c.header.start_x = 0;
 	c.header.start_y = 0;
-	c.header.start_facing = East;
+	c.header.start_facing = dEast;
 	c.header.num_zones = 1;
 	Zero(c.header.unused, CAMPAIGN_HEADER_PADDING);
 
@@ -195,7 +195,7 @@ void Etr_Campaign(char *filename)
 	c.header.start_zone = 0;
 	c.header.start_x = 0;
 	c.header.start_y = 4;
-	c.header.start_facing = East;
+	c.header.start_facing = dEast;
 	c.header.num_zones = 1;
 	Zero(c.header.unused, CAMPAIGN_HEADER_PADDING);
 

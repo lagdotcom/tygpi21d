@@ -11,18 +11,18 @@
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct {
+typedef struct campaign_header {
 	VERSION_HEADER;
 
 	zone_id start_zone;
 	coord start_x, start_y;
-	direction start_facing;
+	dir_id start_facing;
 	zone_id num_zones;
 
 	unsigned char unused[CAMPAIGN_HEADER_PADDING];
 } campaign_header;
 
-typedef struct {
+typedef struct campaign {
 	campaign_header header;
 
 	char **zones;

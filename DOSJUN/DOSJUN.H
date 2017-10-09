@@ -44,13 +44,13 @@ extern bool
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-wall *Get_Wall(coord x, coord y, direction dir, relative rel);
-char Get_X_Offset(direction dir);
-char Get_Y_Offset(direction dir);
+wall *Get_Wall(coord x, coord y, dir dir, relative rel);
+char Get_X_Offset(dir dir);
+char Get_Y_Offset(dir dir);
 bool Is_Coord_Valid(coord x, coord y);
 void Redraw_Dungeon_Screen(bool script);
 void Show_Game_String(char *string, bool wait_for_key);
-direction Turn_Left(direction dir);
-direction Turn_Right(direction dir);
+dir Turn_Left(dir dir);
+dir Turn_Right(dir dir);
 
 #endif

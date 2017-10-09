@@ -47,10 +47,10 @@ void Draw_Tile(coord x, coord y)
 	}
 
 	Draw_Square_DB(t->floor, TX + 1, TY + 1, TX + 5, TY + 5, 1);
-	Draw_Line_DB(TX + 2, TY + 0, TX + 4, TY + 0, t->walls[North].texture);
-	Draw_Line_DB(TX + 2, TY + 6, TX + 4, TY + 6, t->walls[South].texture);
-	Draw_Line_DB(TX + 0, TY + 2, TX + 0, TY + 4, t->walls[West].texture);
-	Draw_Line_DB(TX + 6, TY + 2, TX + 6, TY + 4, t->walls[East].texture);
+	Draw_Line_DB(TX + 2, TY + 0, TX + 4, TY + 0, t->walls[dNorth].texture);
+	Draw_Line_DB(TX + 2, TY + 6, TX + 4, TY + 6, t->walls[dSouth].texture);
+	Draw_Line_DB(TX + 0, TY + 2, TX + 0, TY + 4, t->walls[dWest].texture);
+	Draw_Line_DB(TX + 6, TY + 2, TX + 6, TY + 4, t->walls[dEast].texture);
 }
 
 void Draw_Zone(void)
@@ -71,7 +71,7 @@ void Draw_Zone(void)
 
 #define DX 250
 
-char Get_Walltype_Char(wall_type type)
+char Get_Walltype_Char(walltype type)
 {
 	switch (type) {
 		case wtNormal: return 'W';
@@ -81,18 +81,18 @@ char Get_Walltype_Char(wall_type type)
 	}
 }
 
-char Get_Direction_Char(direction dir)
+char Get_Direction_Char(dir dir)
 {
 	switch (dir) {
-		case North: return 'N';
-		case East: return 'E';
-		case South: return 'S';
-		case West: return 'W';
+		case dNorth: return 'N';
+		case dEast: return 'E';
+		case dSouth: return 'S';
+		case dWest: return 'W';
 		default: return '?';
 	}
 }
 
-void Draw_Wall(tile *t, direction dir, int y)
+void Draw_Wall(tile *t, dir dir, int y)
 {
 	char buf[100];
 
@@ -119,10 +119,10 @@ void Draw_Details(void)
 	sprintf(buf, "F: %5d", t->floor);
 	Blit_String_DB(DX, 32, t->floor, buf, 0);
 
-	Draw_Wall(t, North, 48);
-	Draw_Wall(t, East,  56);
-	Draw_Wall(t, South, 64);
-	Draw_Wall(t, West,  72);
+	Draw_Wall(t, dNorth, 48);
+	Draw_Wall(t, dEast,  56);
+	Draw_Wall(t, dSouth, 64);
+	Draw_Wall(t, dWest,  72);
 
 	sprintf(buf, "D: %5u", t->description);
 	Blit_String_DB(DX, 88, 15, buf, 0);
@@ -182,7 +182,7 @@ void Change_Floor(void)
 	}
 }
 
-void Change_Wall(direction dir)
+void Change_Wall(dir dir)
 {
 	if (Get_Colour(&TILE(gZone, sel_x, sel_y)->walls[dir].texture)) {
 		Draw_Tile(sel_x, sel_y);
@@ -190,7 +190,7 @@ void Change_Wall(direction dir)
 	}
 }
 
-void Change_Door(direction dir)
+void Change_Door(dir dir)
 {
 	wall *w = &(TILE(gZone, sel_x, sel_y)->walls[dir]);
 
@@ -787,21 +787,21 @@ void Main_Editor_Loop(void)
 				break;
 
 			case SCAN_N:
-				if (state == esDoor) Change_Door(North);
-				else if (state == esWall) Change_Wall(North);
+				if (state == esDoor) Change_Door(dNorth);
+				else if (state == esWall) Change_Wall(dNorth);
 				break;
 			case SCAN_E:
-				if (state == esDoor) Change_Door(East);
-				else if (state == esWall) Change_Wall(East);
+				if (state == esDoor) Change_Door(dEast);
+				else if (state == esWall) Change_Wall(dEast);
 				else if (state == esEncounter) Change_EncounterTable();
 				break;
 			case SCAN_S:
-				if (state == esDoor) Change_Door(South);
-				else if (state == esWall) Change_Wall(South);
+				if (state == esDoor) Change_Door(dSouth);
+				else if (state == esWall) Change_Wall(dSouth);
 				break;
 			case SCAN_W:
-				if (state == esDoor) Change_Door(West);
-				else if (state == esWall) Change_Wall(West);
+				if (state == esDoor) Change_Door(dWest);
+				else if (state == esWall) Change_Wall(dWest);
 				break;
 			case SCAN_C:
 				Change_Ceiling();

@@ -137,7 +137,7 @@ noexport bool Get_Row(targ source)
 	return MONSTER(source)->row == rowFront;
 }
 
-noexport stat Get_Stat(targ source, stat_id st)
+noexport stat_value Get_Stat(targ source, statistic st)
 {
 	if (IS_PC(source)) {
 		return gSave.characters[TARGET_PC(source)].stats[st];
@@ -146,7 +146,7 @@ noexport stat Get_Stat(targ source, stat_id st)
 	return MONSTER(source)->stats[st];
 }
 
-noexport void Set_Stat(targ source, stat_id st, stat num)
+noexport void Set_Stat(targ source, statistic st, stat_value num)
 {
 	if (IS_PC(source)) {
 		gSave.characters[TARGET_PC(source)].stats[st] = num;
@@ -155,7 +155,7 @@ noexport void Set_Stat(targ source, stat_id st, stat num)
 	}
 }
 
-noexport stat_id Get_Weapon_Stat(item *weapon)
+noexport statistic Get_Weapon_Stat(item *weapon)
 {
 	if (weapon == null) return sStrength;
 	return (weapon->flags & ifDexterityWeapon) ? sDexterity : sStrength;
@@ -216,7 +216,7 @@ noexport void Kill(targ victim)
 
 noexport void Damage(targ victim, int amount)
 {
-	stat hp = Get_Stat(victim, sHP);
+	stat_value hp = Get_Stat(victim, sHP);
 	hp -= amount;
 
 	Combat_Message("%s takes %d damage.", NAME(victim), amount);
@@ -245,8 +245,8 @@ noexport bool Check_Attack(targ source)
 noexport void Attack(targ source, targ target)
 {
 	item *weapon = Get_Weapon(source);
-	stat base = Get_Stat(source, Get_Weapon_Stat(weapon));
-	stat min, max;
+	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
+	stat_value min, max;
 	int roll;
 
 	if (Is_Dead(target)) {

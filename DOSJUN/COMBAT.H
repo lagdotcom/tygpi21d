@@ -14,14 +14,14 @@ typedef int groupnum;
 typedef bool(*action_check_fn)(targ source);
 typedef void(*action_do_fn)(targ source, targ target);
 
-typedef enum {
+typedef enum targetflags {
 	tfAlly = 1,
 	tfEnemy = 2,
 	tfDead = 4,
 	tfSelf = 8
 } targetflags;
 
-typedef enum {
+typedef enum action_ids {
 	aAttack = 0,
 	aBlock,
 	aDefend,

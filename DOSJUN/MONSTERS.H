@@ -11,38 +11,38 @@
 #define MONSTERS_HEADER_PADDING		26
 #define MONSTER_PADDING				4
 
-typedef enum {
+typedef enum row {
 	rowFront,
 	rowBack
 } row;
 
-typedef enum {
+typedef enum ai {
 	aiMindless
 } ai;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct {
+typedef struct monster {
 	char name[NAME_SIZE];
 	char image[8];
 	monster_id id;
-	stat stats[NUM_STATS];
-	monster_row row;
-	monster_ai ai;
+	stat_value stats[NUM_STATS];
+	row_id row;
+	ai_id ai;
 	UINT32 experience;
 
 	unsigned char unused[MONSTER_PADDING];
 } monster;
 
-typedef struct {
+typedef struct monsters_header {
 	VERSION_HEADER;
 
-	unsigned int num_monsters;
+	UINT16 num_monsters;
 
 	unsigned char unused[MONSTERS_HEADER_PADDING];
 } monsters_header;
 
-typedef struct {
+typedef struct monsters {
 	monsters_header header;
 
 	monster *monsters;

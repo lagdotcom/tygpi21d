@@ -7,7 +7,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-typedef enum {
+typedef enum itemtype {
 	itPrimaryWeapon,
 	itSmallWeapon,
 	itTwoHandedWeapon,
@@ -18,9 +18,9 @@ typedef enum {
 	itJewellery,
 	itPotion,
 	itScroll,
-} item_types;
+} itemtype;
 
-typedef enum {
+typedef enum itemflag {
 	ifNone = 0,
 	ifLight = 1,
 	ifHeavy = 2,
@@ -28,40 +28,40 @@ typedef enum {
 	ifMediumRange = 8,
 	ifLongRange = 16,
 	ifDexterityWeapon = 32,
-} itemflags;
+} itemflag;
 
-typedef enum {
+typedef enum itemspecial {
 	spNone,
 	spHeal,
-} itemspecials;
+} itemspecial;
 
 #define ITEMS_HEADER_PADDING		26
 #define ITEM_PADDING				6
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct {
+typedef struct item {
 	char name[NAME_SIZE];
 	item_id id;
 	item_type type;
-	item_flag flags;
-	unsigned long value;
-	special_id special;
-	int special_argument1;
-	int special_argument2;
+	itemflag_id flags;
+	UINT32 value;
+	itemspecial_id special;
+	INT16 special_argument1;
+	INT16 special_argument2;
 	unsigned char unused[ITEM_PADDING];
-	stat stats[NUM_STATS];
+	stat_value stats[NUM_STATS];
 } item;
 
-typedef struct {
+typedef struct items_header {
 	VERSION_HEADER;
 
-	unsigned int num_items;
+	UINT16 num_items;
 
 	unsigned char unused[ITEMS_HEADER_PADDING];
 } items_header;
 
-typedef struct {
+typedef struct items {
 	items_header header;
 
 	item *items;

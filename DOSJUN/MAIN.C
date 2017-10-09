@@ -14,7 +14,7 @@ pcx_picture menu_bg;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Initialise_Character(character *c, job_id job, int str,
+void Initialise_Character(character *c, job job, int str,
 	int intelligence, int dex, int hp, int mp)
 {
 	int i;

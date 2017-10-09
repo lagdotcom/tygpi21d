@@ -13,7 +13,7 @@
 #define ENCOUNTER_SIZE	6
 #define ETABLE_SIZE		6
 
-typedef enum {
+typedef enum thing {
 	thNone = 0,
 
 	thShiny,
@@ -23,38 +23,38 @@ typedef enum {
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct {
+typedef struct wall {
 	colour texture;
-	wall_type type;
+	walltype_id type;
 
 	unsigned char unused[WALL_PADDING];
 } wall;
 
-typedef struct {
+typedef struct tile {
 	wall walls[4];
 	colour floor, ceil;
 	string_id description;
 	script_id on_enter;
 	etable_id etable;
-	tile_flag flags;
+	tileflag_id flags;
 	thing_id thing;
 
 	unsigned char unused[TILE_PADDING];
 } tile;
 
-typedef struct {
+typedef struct encounter {
 	monster_id monsters[ENCOUNTER_SIZE];
 	unsigned char minimum[ENCOUNTER_SIZE];
 	unsigned char maximum[ENCOUNTER_SIZE];
 } encounter;
 
-typedef struct {
+typedef struct etable {
 	unsigned char possibilities;
 	encounter_id encounters[ETABLE_SIZE];
 	unsigned char percentages[ETABLE_SIZE];
 } etable;
 
-typedef struct {
+typedef struct zone_header {
 	VERSION_HEADER;
 
 	char campaign_name[8];
@@ -69,7 +69,7 @@ typedef struct {
 	unsigned char unused[ZONE_HEADER_PADDING];
 } zone_header;
 
-typedef struct {
+typedef struct zone {
 	zone_header header;
 
 	tile *tiles;

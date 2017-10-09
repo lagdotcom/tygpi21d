@@ -13,7 +13,7 @@
 #define MAX_CONSTS		200
 #define MAX_STACK		20
 
-typedef enum {
+typedef enum code_op {
 	coNOP,
 	/* Stack */
 	coPushGlobal = 0x10,
@@ -53,17 +53,17 @@ typedef enum {
 	coSetTileThing = 0xA9,
 } code_op;
 
-typedef enum {
+typedef enum code_internal {
 	internalX,
 	internalY,
 	internalFacing,
 
 	internalInvalid = 0xFF
-} internal;
+} code_internal;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct {
+typedef struct code_host {
 	bytecode* code;
 	int* globals;
 	int* locals;
@@ -74,7 +74,7 @@ typedef struct {
 	int sp;
 	bool running;
 	int result;
-} host;
+} code_host;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 

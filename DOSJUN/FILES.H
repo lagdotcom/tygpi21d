@@ -17,18 +17,19 @@
 #define NAME_SIZE		24
 #define PARTY_SIZE		6
 
-typedef enum {
+typedef enum itemslot {
 	slWeapon,
 	slOffHand,
 	slHead,
 	slBody,
 	slFeet,
 	slAccessory,
-} slot_id;
-#define NUM_SLOTS		6
+
+	NUM_SLOTS
+} itemslot;
 #define INVENTORY_SIZE	10
 
-typedef enum {
+typedef enum statistic {
 	sMaxHP,
 	sMaxMP,
 	sMinDamage,
@@ -39,24 +40,25 @@ typedef enum {
 	sIntelligence,
 	sHP,
 	sMP,
-} stat_id;
-#define NUM_STATS		10
 
-typedef enum {
+	NUM_STATS
+} statistic;
+
+typedef enum inventoryflag {
 	vfNone = 0,
 	vfEquipped = 1
-} inventoryflags;
+} inventoryflag;
 
-typedef enum {
+typedef enum walltype {
 	wtNormal,
 	wtDoor,
 	wtLockedDoor,
-} walltypes;
+} walltype;
 
-typedef enum {
+typedef enum tileflag {
 	tiNone = 0,
 	tiImpassable = 1,
-} tileflags;
+} tileflag;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 

@@ -20,33 +20,33 @@ bool trigger_on_enter;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-char Get_X_Offset(direction dir)
+char Get_X_Offset(dir dir)
 {
 	switch (dir) {
-		case East: return 1;
-		case West: return -1;
+		case dEast: return 1;
+		case dWest: return -1;
 		default: return 0;
 	}
 }
 
-char Get_Y_Offset(direction dir)
+char Get_Y_Offset(dir dir)
 {
 	switch (dir) {
-		case South: return 1;
-		case North: return -1;
+		case dSouth: return 1;
+		case dNorth: return -1;
 		default: return 0;
 	}
 }
 
-direction Turn_Left(direction dir)
+dir Turn_Left(dir dir)
 {
-	if (dir == North) return West;
+	if (dir == dNorth) return dWest;
 	return dir - 1;
 }
 
-direction Turn_Right(direction dir)
+dir Turn_Right(dir dir)
 {
-	if (dir == West) return North;
+	if (dir == dWest) return dNorth;
 	return dir + 1;
 }
 
@@ -57,7 +57,7 @@ bool Is_Coord_Valid(coord x, coord y)
 	return true;
 }
 
-tile* Get_Adjacent_Tile(coord x, coord y, direction dir, char multiple)
+tile* Get_Adjacent_Tile(coord x, coord y, dir dir, char multiple)
 {
 	coord ax = x + Get_X_Offset(dir) * multiple;
 	coord ay = y + Get_Y_Offset(dir) * multiple;
@@ -66,40 +66,40 @@ tile* Get_Adjacent_Tile(coord x, coord y, direction dir, char multiple)
 	return (tile*)null;
 }
 
-wall* Get_Wall(coord x, coord y, direction dir, relative rel)
+wall* Get_Wall(coord x, coord y, dir dir, relative rel)
 {
 	tile* under = TILE(gZone, x, y);
 
 	switch (dir) {
-		case North:
+		case dNorth:
 			switch (rel) {
-				case rLeft:  return &under->walls[West];
-				case rAhead: return &under->walls[North];
-				case rRight: return &under->walls[East];
+				case rLeft:  return &under->walls[dWest];
+				case rAhead: return &under->walls[dNorth];
+				case rRight: return &under->walls[dEast];
 				default: return null;
 			}
 
-		case East:
+		case dEast:
 			switch (rel) {
-				case rLeft:  return &under->walls[North];
-				case rAhead: return &under->walls[East];
-				case rRight: return &under->walls[South];
+				case rLeft:  return &under->walls[dNorth];
+				case rAhead: return &under->walls[dEast];
+				case rRight: return &under->walls[dSouth];
 				default: return null;
 			}
 
-		case South:
+		case dSouth:
 			switch (rel) {
-				case rLeft:  return &under->walls[East];
-				case rAhead: return &under->walls[South];
-				case rRight: return &under->walls[West];
+				case rLeft:  return &under->walls[dEast];
+				case rAhead: return &under->walls[dSouth];
+				case rRight: return &under->walls[dWest];
 				default: return null;
 			}
 
-		case West:
+		case dWest:
 			switch (rel) {
-				case rLeft:  return &under->walls[South];
-				case rAhead: return &under->walls[West];
-				case rRight: return &under->walls[North];
+				case rLeft:  return &under->walls[dSouth];
+				case rAhead: return &under->walls[dWest];
+				case rRight: return &under->walls[dNorth];
 				default: return null;
 			}
 	}

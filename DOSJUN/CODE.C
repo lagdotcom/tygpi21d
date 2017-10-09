@@ -32,21 +32,21 @@ noexport void Code_Error(const char *format, ...)
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-noexport bytecode Next_Op(host *h)
+noexport bytecode Next_Op(code_host *h)
 {
 	h->pc = h->next_pc;
 	h->next_pc++;
 	return h->code[h->pc];
 }
 
-noexport int Next_Literal(host *h)
+noexport int Next_Literal(code_host *h)
 {
 	bytecode little = Next_Op(h);
 	bytecode big = Next_Op(h);
 	return little | (big << 8);
 }
 
-noexport void Push_Stack(host *h, int value)
+noexport void Push_Stack(code_host *h, int value)
 {
 	h->stack[h->sp++] = value;
 #ifdef TRACE_CODE
@@ -54,7 +54,7 @@ noexport void Push_Stack(host *h, int value)
 #endif
 }
 
-noexport int Pop_Stack(host *h)
+noexport int Pop_Stack(code_host *h)
 {
 	int value = h->stack[--h->sp];
 #ifdef TRACE_CODE
@@ -70,7 +70,7 @@ noexport int Bool(int result)
 
 /* O P C O D E  F U N C T I O N S //////////////////////////////////////// */
 
-noexport void Push_Global(host *h)
+noexport void Push_Global(code_host *h)
 {
 	bytecode index = Next_Op(h);
 #ifdef TRACE_CODE
@@ -79,7 +79,7 @@ noexport void Push_Global(host *h)
 	Push_Stack(h, h->globals[index]);
 }
 
-noexport void Push_Local(host *h)
+noexport void Push_Local(code_host *h)
 {
 	bytecode index = Next_Op(h);
 #ifdef TRACE_CODE
@@ -88,7 +88,7 @@ noexport void Push_Local(host *h)
 	Push_Stack(h, h->locals[index]);
 }
 
-noexport void Push_Temp(host *h)
+noexport void Push_Temp(code_host *h)
 {
 	bytecode index = Next_Op(h);
 #ifdef TRACE_CODE
@@ -97,7 +97,7 @@ noexport void Push_Temp(host *h)
 	Push_Stack(h, h->temps[index]);
 }
 
-noexport void Push_Internal(host *h)
+noexport void Push_Internal(code_host *h)
 {
 	internal_id index = Next_Op(h);
 #ifdef TRACE_CODE
@@ -121,7 +121,7 @@ noexport void Push_Internal(host *h)
 	Code_Error("Unknown internal #%d", index);
 }
 
-noexport void Push_Literal(host *h)
+noexport void Push_Literal(code_host *h)
 {
 	int value = Next_Literal(h);
 #ifdef TRACE_CODE
@@ -130,7 +130,7 @@ noexport void Push_Literal(host *h)
 	Push_Stack(h, value);
 }
 
-noexport void Pop_Global(host *h)
+noexport void Pop_Global(code_host *h)
 {
 	bytecode index = Next_Op(h);
 #ifdef TRACE_CODE
@@ -139,7 +139,7 @@ noexport void Pop_Global(host *h)
 	h->globals[index] = Pop_Stack(h);
 }
 
-noexport void Pop_Local(host *h)
+noexport void Pop_Local(code_host *h)
 {
 	bytecode index = Next_Op(h);
 #ifdef TRACE_CODE
@@ -148,7 +148,7 @@ noexport void Pop_Local(host *h)
 	h->locals[index] = Pop_Stack(h);
 }
 
-noexport void Pop_Temp(host *h)
+noexport void Pop_Temp(code_host *h)
 {
 	bytecode index = Next_Op(h);
 #ifdef TRACE_CODE
@@ -157,7 +157,7 @@ noexport void Pop_Temp(host *h)
 	h->temps[index] = Pop_Stack(h);
 }
 
-noexport void Add(host *h)
+noexport void Add(code_host *h)
 {
 	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
@@ -167,7 +167,7 @@ noexport void Add(host *h)
 	Push_Stack(h, left + right);
 }
 
-noexport void Sub(host *h)
+noexport void Sub(code_host *h)
 {
 	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
@@ -177,7 +177,7 @@ noexport void Sub(host *h)
 	Push_Stack(h, left - right);
 }
 
-noexport void Mul(host *h)
+noexport void Mul(code_host *h)
 {
 	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
@@ -187,7 +187,7 @@ noexport void Mul(host *h)
 	Push_Stack(h, left * right);
 }
 
-noexport void Div(host *h)
+noexport void Div(code_host *h)
 {
 	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
@@ -197,7 +197,7 @@ noexport void Div(host *h)
 	Push_Stack(h, left / right);
 }
 
-noexport void Eq(host *h)
+noexport void Eq(code_host *h)
 {
 	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
@@ -207,7 +207,7 @@ noexport void Eq(host *h)
 	Push_Stack(h, Bool(left == right));
 }
 
-noexport void Neq(host *h)
+noexport void Neq(code_host *h)
 {
 	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
@@ -217,7 +217,7 @@ noexport void Neq(host *h)
 	Push_Stack(h, Bool(left != right));
 }
 
-noexport void Lt(host *h)
+noexport void Lt(code_host *h)
 {
 	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
@@ -227,7 +227,7 @@ noexport void Lt(host *h)
 	Push_Stack(h, Bool(left < right));
 }
 
-noexport void Lte(host *h)
+noexport void Lte(code_host *h)
 {
 	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
@@ -237,7 +237,7 @@ noexport void Lte(host *h)
 	Push_Stack(h, Bool(left <= right));
 }
 
-noexport void Gt(host *h)
+noexport void Gt(code_host *h)
 {
 	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
@@ -247,7 +247,7 @@ noexport void Gt(host *h)
 	Push_Stack(h, Bool(left > right));
 }
 
-noexport void Gte(host *h)
+noexport void Gte(code_host *h)
 {
 	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
@@ -257,7 +257,7 @@ noexport void Gte(host *h)
 	Push_Stack(h, Bool(left >= right));
 }
 
-noexport void Jump(host *h)
+noexport void Jump(code_host *h)
 {
 	h->next_pc = Next_Literal(h);
 #ifdef TRACE_CODE
@@ -265,7 +265,7 @@ noexport void Jump(host *h)
 #endif
 }
 
-noexport void JumpFalse(host *h)
+noexport void JumpFalse(code_host *h)
 {
 	int offset = Next_Literal(h);
 #ifdef TRACE_CODE
@@ -274,7 +274,7 @@ noexport void JumpFalse(host *h)
 	if (!Pop_Stack(h)) h->next_pc = offset;
 }
 
-noexport void Return(host *h)
+noexport void Return(code_host *h)
 {
 	h->running = false;
 	h->result = 0;
@@ -283,7 +283,7 @@ noexport void Return(host *h)
 #endif
 }
 
-noexport void Combat(host *h)
+noexport void Combat(code_host *h)
 {
 	encounter_id combat = Pop_Stack(h);
 
@@ -294,7 +294,7 @@ noexport void Combat(host *h)
 	Start_Combat(combat);
 }
 
-noexport void PcSpeak(host *h)
+noexport void PcSpeak(code_host *h)
 {
 	char buffer[300];
 	int pc = Pop_Stack(h);
@@ -308,7 +308,7 @@ noexport void PcSpeak(host *h)
 	Show_Game_String(buffer, true);
 }
 
-noexport void Text(host *h)
+noexport void Text(code_host *h)
 {
 	string_id string = Pop_Stack(h);
 
@@ -319,12 +319,12 @@ noexport void Text(host *h)
 	Show_Game_String(gZone.code_strings[string], true);
 }
 
-noexport void Unlock(host *h)
+noexport void Unlock(code_host *h)
 {
 	tile *tile;
 	coord x = Pop_Stack(h);
 	coord y = Pop_Stack(h);
-	direction dir = Pop_Stack(h);
+	dir dir = Pop_Stack(h);
 
 #ifdef TRACE_CODE
 	fprintf(trace, "unlock %d, %d, %d", x, y, dir);
@@ -336,7 +336,7 @@ noexport void Unlock(host *h)
 	/* TODO: unlock wall on other side too? */
 }
 
-noexport void GiveItem(host *h)
+noexport void GiveItem(code_host *h)
 {
 	bool result;
 	int pc = Pop_Stack(h);
@@ -351,7 +351,7 @@ noexport void GiveItem(host *h)
 	Push_Stack(h, result);
 }
 
-noexport void EquipItem(host *h)
+noexport void EquipItem(code_host *h)
 {
 	bool result;
 	int pc = Pop_Stack(h);
@@ -365,7 +365,7 @@ noexport void EquipItem(host *h)
 	Push_Stack(h, result);
 }
 
-noexport void SetTileDescription(host *h)
+noexport void SetTileDescription(code_host *h)
 {
 	coord x = Pop_Stack(h);
 	coord y = Pop_Stack(h);
@@ -378,7 +378,7 @@ noexport void SetTileDescription(host *h)
 	TILE(gZone, x, y)->description = string;
 }
 
-noexport void SetTileColour(host *h)
+noexport void SetTileColour(code_host *h)
 {
 	coord x = Pop_Stack(h);
 	coord y = Pop_Stack(h);
@@ -390,11 +390,11 @@ noexport void SetTileColour(host *h)
 #endif
 
 	switch (f) {
-		case Up:
+		case dUp:
 			TILE(gZone, x, y)->ceil = c;
 			break;
 
-		case Down:
+		case dDown:
 			TILE(gZone, x, y)->floor = c;
 			break;
 
@@ -406,7 +406,7 @@ noexport void SetTileColour(host *h)
 	redraw_fp = true;
 }
 
-noexport void SetTileThing(host *h)
+noexport void SetTileThing(code_host *h)
 {
 	coord x = Pop_Stack(h);
 	coord y = Pop_Stack(h);
@@ -420,12 +420,12 @@ noexport void SetTileThing(host *h)
 	redraw_fp = true;
 }
 
-noexport void Teleport(host *h)
+noexport void Teleport(code_host *h)
 {
 	zone_id zone = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 	coord y = Pop_Stack(h);
-	int facing = Pop_Stack(h);
+	dir facing = Pop_Stack(h);
 	int transition = Pop_Stack(h);
 
 #ifdef TRACE_CODE
@@ -448,7 +448,7 @@ noexport void Teleport(host *h)
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
-noexport void Run_Code_Instruction(host *h, bytecode op)
+noexport void Run_Code_Instruction(code_host *h, bytecode op)
 {
 #ifdef TRACE_CODE
 	fprintf(trace, "%04x: [%02x] ", h->pc, op);
@@ -501,7 +501,7 @@ noexport void Run_Code_Instruction(host *h, bytecode op)
 #endif
 }
 
-noexport bool Run_Code_Host(host *h)
+noexport bool Run_Code_Host(code_host *h)
 {
 	h->running = true;
 
@@ -521,7 +521,7 @@ noexport bool Run_Code_Host(host *h)
 bool Run_Code(script_id id)
 {
 	bool result;
-	host h;
+	code_host h;
 
 #ifdef TRACE_CODE
 	trace = fopen("JUNTRACE.TXT", "w");

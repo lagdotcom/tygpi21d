@@ -207,7 +207,7 @@ noexport void Clear_FP(void)
 void Draw_FP(void)
 {
 	tile *t;
-	direction bwall, lwall, rwall;
+	dir bwall, lwall, rwall;
 
 	Clear_FP();
 

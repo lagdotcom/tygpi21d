@@ -12,7 +12,7 @@
 #define MAX_BYTES_PER_SCRIPT	1000
 #define MAX_STRINGS				200
 
-typedef enum {
+typedef enum jc_token_type {
 	ttUnknown,
 	ttComment,
 	ttKeyword,
@@ -29,7 +29,7 @@ typedef enum {
 	ttGTE
 } jc_token_type;
 
-typedef enum {
+typedef enum jc_scope {
 	scConst,
 	scGlobal,
 	scLocal,
@@ -38,32 +38,32 @@ typedef enum {
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct {
+typedef struct jc_token {
 	jc_token_type type;
 	char *value;
 } jc_token;
 
-typedef struct {
+typedef struct jc_var {
 	jc_scope scope;
 	char *name;
 	int index;
 	int value;
 } jc_var;
 
-typedef struct {
+typedef struct jc_script {
 	char *name;
 	bytecode *code;
 	unsigned int size;
 } jc_script;
 
-typedef struct {
+typedef struct jc_stack {
 	char name[6];
 	int start;
 	int *offsets;
 	int offset_count;
 } jc_stack;
 
-typedef struct {
+typedef struct jc_parser {
 	jc_token *tokens;
 	unsigned int token_count;
 	unsigned int position;

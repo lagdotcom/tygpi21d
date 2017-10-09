@@ -4,6 +4,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include <stdlib.h>
+#include "types.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -19,60 +20,63 @@ typedef unsigned char bool;
 #define null 0
 #endif
 
-#define North	0
-#define East	1
-#define South	2
-#define West	3
-#define Up		4
-#define Down	5
+typedef enum dir {
+	dNorth,
+	dEast,
+	dSouth,
+	dWest,
+	dUp,
+	dDown
+} dir;
 
-typedef enum {
+typedef enum relative {
 	rAhead,
 	rLeft,
 	rRight
 } relative;
 
-typedef enum {
+typedef enum gamestate {
 	gsMainMenu,
 	gsDungeon,
 	gsQuit
 } gamestate;
 
-typedef enum {
+typedef enum job {
 	jFighter,	/* Str */
 	jCleric,	/* Str, Int */
 	jMage,		/* Int */
 	jRogue,		/* Dex */
 	jRanger,	/* Str, Dex */
-	jBard		/* Int, Dex */
-} job_id;
-#define NUM_JOBS		6
+	jBard,		/* Int, Dex */
 
-typedef unsigned char bytecode;
-typedef unsigned char char_flag;
-typedef unsigned char colour;
-typedef unsigned char coord;
-typedef unsigned char direction;
-typedef unsigned int encounter_id;
-typedef unsigned int etable_id;
-typedef unsigned char inventory_flag;
-typedef unsigned char internal_id;
-typedef unsigned int item_id;
-typedef unsigned int item_flag;
-typedef unsigned char item_type;
-typedef unsigned char job_storage;
-typedef unsigned int length;
-typedef unsigned char monster_ai;
-typedef unsigned int monster_id;
-typedef unsigned char monster_row;
-typedef unsigned int script_id;
-typedef unsigned char special_id;
-typedef int stat;
-typedef unsigned int string_id;
-typedef unsigned char thing_id;
-typedef unsigned int tile_flag;
-typedef unsigned char wall_type;
-typedef unsigned char zone_id;
+	NUM_JOBS
+} job;
+
+typedef UINT8 ai_id;
+typedef UINT8 bytecode;
+typedef UINT8 charflag_id;
+typedef UINT8 colour;
+typedef UINT8 coord;
+typedef UINT8 dir_id;
+typedef UINT16 encounter_id;
+typedef UINT16 etable_id;
+typedef UINT8 inventoryflag_id;
+typedef UINT8 internal_id;
+typedef UINT16 item_id;
+typedef UINT16 itemflag_id;
+typedef UINT8 item_type;
+typedef UINT8 job_id;
+typedef UINT16 length;
+typedef UINT16 monster_id;
+typedef UINT8 row_id;
+typedef UINT16 script_id;
+typedef UINT8 itemspecial_id;
+typedef INT16 stat_value;
+typedef UINT16 string_id;
+typedef UINT8 thing_id;
+typedef UINT16 tileflag_id;
+typedef UINT8 walltype_id;
+typedef UINT8 zone_id;
 
 /* Memory Debugging */
 

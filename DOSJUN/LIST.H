@@ -1,13 +1,13 @@
 #ifndef DOSJUN_LIST_H
 #define DOSJUN_LIST_H
 
-typedef enum {
+typedef enum list_type {
 	ltString,
 	ltInteger,
 	ltObject
 } list_type;
 
-typedef struct {
+typedef struct list {
 	list_type type;
 	unsigned int size;
 	unsigned int capacity;

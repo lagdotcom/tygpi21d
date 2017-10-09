@@ -18,6 +18,6 @@ void Add_Experience(character *c, UINT32 xp);
 void Free_Jobs(void);
 void Initialise_Jobs(void);
 void Level_Up(character *c);
-void Set_Job(character *c, job_id job);
+void Set_Job(character *c, job job);
 
 #endif

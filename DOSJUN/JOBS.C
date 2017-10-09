@@ -11,7 +11,7 @@ typedef enum {
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
-	stat_id stat;
+	statistic stat;
 	skill_id a;
 	skill_id b;
 } level_spec;
@@ -29,14 +29,14 @@ noexport job_spec jobspecs[NUM_JOBS];
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-noexport void Setup_Job(job_id job, char *name, int hp, int mp)
+noexport void Setup_Job(job job, char *name, int hp, int mp)
 {
 	jobspecs[job].name = name;
 	jobspecs[job].hp_per_level = hp;
 	jobspecs[job].mp_per_level = mp;
 }
 
-noexport void Setup_Job_Level(job_id job, int level, stat_id stat, skill_id sa, skill_id sb)
+noexport void Setup_Job_Level(job job, int level, statistic stat, skill_id sa, skill_id sb)
 {
 	jobspecs[job].levels[level - 1].stat = stat;
 	jobspecs[job].levels[level - 1].a = sa;
@@ -133,7 +133,7 @@ void Free_Jobs(void)
 {
 }
 
-void Set_Job(character *c, job_id job)
+void Set_Job(character *c, job job)
 {
 	c->job = job;
 
