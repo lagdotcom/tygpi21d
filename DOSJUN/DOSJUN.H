@@ -20,6 +20,7 @@
 #include "monsters.h"
 #include "party.h"
 #include "save.h"
+#include "sound.h"
 #include "zone.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */

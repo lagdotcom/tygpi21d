@@ -257,7 +257,7 @@ gamestate Show_Dungeon_Screen(void)
 
 void main(void)
 {
-	printf("Initialising DOSJUN...");
+	printf("Initialising DOSJUN...\n");
 	Initialise_Campaign(&gCampaign);
 	Initialise_Items(&gItems);
 	Initialise_Monsters(&gMonsters);
@@ -265,6 +265,7 @@ void main(void)
 	Initialise_Zone(&gZone);
 	Initialise_Combat();
 	Initialise_Jobs();
+	Initialise_Sound();
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
 		printf("\nNot enough memory to create double buffer.");
@@ -301,6 +302,7 @@ void main(void)
 	Free_Textures();
 	Free_Combat();
 	Free_Jobs();
+	Free_Sound();
 	Delete_Picture();
 
 	Delete_Double_Buffer();

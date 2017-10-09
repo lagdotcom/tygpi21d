@@ -1,9 +1,9 @@
 CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc -d -w -DMEMORY_DEBUG -DFAR_MEMORY
 DEMO_OBJS = mkdemo.obj campaign.obj io.obj items.obj monsters.obj save.obj zone.obj
-MAIN_OBJS = dosjun.obj campaign.obj code.obj combat.obj fp.obj gfx.obj input.obj io.obj items.obj jobs.obj list.obj main.obj mem.obj monsters.obj party.obj save.obj zone.obj
+MAIN_OBJS = dosjun.obj campaign.obj code.obj combat.obj fp.obj gfx.obj input.obj io.obj items.obj jobs.obj list.obj main.obj mem.obj monsters.obj party.obj save.obj sound.obj zone.obj
 EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj items.obj jc.obj jc_lex.obj jc_par.obj mem.obj monsters.obj save.obj zone.obj
 JCC_OBJS = jcc.obj jc.obj jc_lex.obj jc_par.obj mem.obj
-HEADERS = campaign.h code.h combat.h common.h dosjun.h files.h fp.h gfx.h input.h io.h items.h jc.h jobs.h list.h main.h monsters.h party.h save.h types.h zone.h
+HEADERS = campaign.h code.h combat.h common.h dosjun.h files.h fp.h gfx.h input.h io.h items.h jc.h jobs.h list.h main.h monsters.h party.h save.h sound.h types.h zone.h
 
 all: dosjun
 
@@ -114,6 +114,10 @@ party.obj: party.c $(HEADERS)
 save.obj: save.c $(HEADERS)
 	TCC $(CFLAGS) -c save.c
 	TLIB DOSJUN.LIB +-save.obj, DOSJUN.TXT
+
+sound.obj: sound.c $(HEADERS)
+	TCC $(CFLAGS) -c sound.c
+	TLIB DOSJUN.LIB +-sound.obj, DOSJUN.TXT
 
 zone.obj: zone.c $(HEADERS)
 	TCC $(CFLAGS) -c zone.c
