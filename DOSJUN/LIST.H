@@ -21,6 +21,8 @@ void Free_List(list *l);
 bool In_List(list *l, void *match);
 void *List_At(list *l, unsigned int index);
 list *New_List(list_type type, char *tag);
+list *Read_List(FILE *fp, char *tag);
 bool Remove_from_List(list *l, void *match);
+void Write_List(list *l, FILE *fp);
 
 #endif

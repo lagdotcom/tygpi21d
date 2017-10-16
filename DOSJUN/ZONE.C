@@ -106,6 +106,7 @@ bool Load_Zone(char *filename, zone *z)
 
 _dead:
 	die("Load_Zone: out of memory");
+	return false;
 }
 
 void Free_Zone(zone *z)

@@ -26,6 +26,8 @@ typedef enum action_ids {
 	aBlock,
 	aDefend,
 
+	aSing,
+
 	NUM_ACTIONS,
 	NO_ACTION = -1
 } action_ids;
@@ -35,7 +37,7 @@ typedef enum action_ids {
 #define TARGET_PC(i)	(-(i) - 1)
 #define TARGET_ENEMY(i)	(i)
 #define IS_PC(i)		((i) < 0)
-#define NAME(i)			(IS_PC(i) ? gSave.characters[TARGET_PC(i)].name : MONSTER(i)->name)
+#define NAME(i)			(IS_PC(i) ? Get_Pc(TARGET_PC(i))->header.name : MONSTER(i)->name)
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 

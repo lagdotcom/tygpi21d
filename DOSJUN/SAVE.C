@@ -1,20 +1,27 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include <stdio.h>
-#include "save.h"
-#include "code.h"
+#include "dosjun.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 void Initialise_Savefile(save *s)
 {
+	int i;
+
 	s->script_globals = null;
 	s->script_locals = null;
+
+	for (i = 0; i < PARTY_SIZE; i++) {
+		Get_Pc(i)->skills = null;
+	}
 }
 
 bool Load_Savefile(char *filename, save *s)
 {
+	character *c;
 	int i;
+
 	FILE *fp = fopen(filename, "rb");
 	if (!fp) {
 		printf("Could not open for reading: %s\n", filename);
@@ -24,7 +31,11 @@ bool Load_Savefile(char *filename, save *s)
 	fread(&s->header, sizeof(save_header), 1, fp);
 	Check_Version_Header(s->header);
 
-	fread(s->characters, sizeof(character), PARTY_SIZE, fp);
+	for (i = 0; i < PARTY_SIZE; i++) {
+		c = &s->characters[i];
+		fread(&c->header, sizeof(character_header), 1, fp);
+		c->skills = Read_List(fp, "Load_Savefile.chars[i].skills");
+	}
 
 	s->script_globals = SzAlloc(MAX_GLOBALS, int, "Load_Savefile.globals");
 	if (s->script_globals == null) goto _dead;
@@ -43,6 +54,7 @@ bool Load_Savefile(char *filename, save *s)
 
 _dead:
 	die("Load_Savefile: out of memory");
+	return false;
 }
 
 void Free_Savefile(save *s)
@@ -54,11 +66,17 @@ void Free_Savefile(save *s)
 		Free(s->script_locals[i]);
 	Free(s->script_locals);
 	s->header.num_zones = 0;
+
+	for (i = 0; i < PARTY_SIZE; i++) {
+		Free_List(Get_Pc(i)->skills);
+	}
 }
 
 bool Save_Savefile(char *filename, save *s)
 {
+	character *c;
 	int i;
+
 	FILE *fp = fopen(filename, "wb");
 	if (!fp) {
 		printf("Could not open for reading: %s\n", filename);
@@ -68,7 +86,11 @@ bool Save_Savefile(char *filename, save *s)
 	Set_Version_Header(s->header);
 	fwrite(&s->header, sizeof(save_header), 1, fp);
 
-	fwrite(s->characters, sizeof(character), PARTY_SIZE, fp);
+	for (i = 0; i < PARTY_SIZE; i++) {
+		c = &s->characters[i];
+		fwrite(&c->header, sizeof(character_header), 1, fp);
+		Write_List(c->skills, fp);
+	}
 
 	fwrite(s->script_globals, sizeof(int), MAX_GLOBALS, fp);
 

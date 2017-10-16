@@ -23,6 +23,8 @@
 #include "sound.h"
 #include "zone.h"
 
+#include "bard.h"
+
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define TILE(z, x, y) (&z.tiles[(y) * z.header.width + (x)])

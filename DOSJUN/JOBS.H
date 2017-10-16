@@ -10,12 +10,17 @@
 
 #define JOB_LEVELS	10
 
+typedef enum skill_id {
+	skSing
+} skill_id;
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Add_Experience(character *c, UINT32 xp);
 void Free_Jobs(void);
+bool Has_Skill(character *c, skill_id sk);
 void Initialise_Jobs(void);
 void Level_Up(character *c);
 void Set_Job(character *c, job job);

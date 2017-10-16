@@ -2,21 +2,15 @@
 
 #include "dosjun.h"
 
-/* D E F I N E S ///////////////////////////////////////////////////////// */
-
-typedef enum {
-
-} skill_id;
-
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct {
+typedef struct level_spec {
 	statistic stat;
 	skill_id a;
 	skill_id b;
 } level_spec;
 
-typedef struct {
+typedef struct job_spec {
 	char *name;
 	int hp_per_level;
 	int mp_per_level;
@@ -47,7 +41,12 @@ noexport void Add_Skill(character *c, skill_id sk)
 {
 	if (sk == -1) return;
 
-	/* TODO */
+	Add_to_List(c->skills, sk);
+}
+
+bool Has_Skill(character *c, skill_id sk)
+{
+	return In_List(c->skills, sk);
 }
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
@@ -93,7 +92,7 @@ void Initialise_Jobs(void)
 	Setup_Job_Level(jMage, 10, sIntelligence, -1, -1);
 
 	Setup_Job(jBard, "Bard", 5, 0);
-	Setup_Job_Level(jBard, 1, -1, -1, -1);
+	Setup_Job_Level(jBard, 1, -1, skSing, -1);
 	Setup_Job_Level(jBard, 2, -1, -1, -1);
 	Setup_Job_Level(jBard, 3, -1, -1, -1);
 	Setup_Job_Level(jBard, 4, sDexterity, -1, -1);
@@ -135,32 +134,34 @@ void Free_Jobs(void)
 
 void Set_Job(character *c, job job)
 {
-	c->job = job;
+	character_header *ch = &c->header;
+	ch->job = job;
 
-	if (c->job_level[job] == 0) {
+	if (ch->job_level[job] == 0) {
 		Add_Skill(c, jobspecs[job].levels[0].a);
 		Add_Skill(c, jobspecs[job].levels[0].b);
 
-		c->job_level[job] = 1;
-		c->total_level++;
+		ch->job_level[job] = 1;
+		ch->total_level++;
 	}
 }
 
 void Level_Up(character *c)
 {
-	unsigned char *level = &c->job_level[c->job];
-	job_spec *j = &jobspecs[c->job];
+	character_header *ch = &c->header;
+	unsigned char *level = &ch->job_level[ch->job];
+	job_spec *j = &jobspecs[ch->job];
 	level_spec *l;
 
-	c->stats[sHP] += j->hp_per_level;
-	c->stats[sMaxHP] += j->hp_per_level;
-	c->stats[sMP] += j->mp_per_level;
-	c->stats[sMaxMP] += j->mp_per_level;
+	ch->stats[sHP] += j->hp_per_level;
+	ch->stats[sMaxHP] += j->hp_per_level;
+	ch->stats[sMP] += j->mp_per_level;
+	ch->stats[sMaxMP] += j->mp_per_level;
 
-	if (c->job_level[c->job] < JOB_LEVELS) {
+	if (ch->job_level[ch->job] < JOB_LEVELS) {
 		l = &j->levels[*level];
 		if (l->stat != -1) {
-			c->stats[l->stat]++;
+			ch->stats[l->stat]++;
 		}
 
 		/* TODO: add skills */
@@ -168,11 +169,13 @@ void Level_Up(character *c)
 		(*level)++;
 	}
 
-	c->experience = 0;
+	ch->experience = 0;
 }
 
 void Add_Experience(character *c, UINT32 xp)
 {
+	character_header *ch = &c->header;
+
 	/* TODO: xp penalties, level up trigger */
-	c->experience += xp;
+	ch->experience += xp;
 }

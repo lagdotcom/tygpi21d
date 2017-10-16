@@ -21,7 +21,7 @@ typedef struct inventory {
 	unsigned char quantity;
 } inventory;
 
-typedef struct character {
+typedef struct character_header {
 	char name[NAME_SIZE];
 	job_id job;
 	UINT16 total_level;
@@ -30,6 +30,11 @@ typedef struct character {
 	inventory items[INVENTORY_SIZE];
 	charflag_id flags;
 	UINT32 experience;
+} character_header;
+
+typedef struct character {
+	character_header header;
+	list *skills;
 } character;
 
 typedef struct save_header {

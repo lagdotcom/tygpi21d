@@ -1,0 +1,31 @@
+/* I N C L U D E S /////////////////////////////////////////////////////// */
+
+#include "dosjun.h"
+
+/* D E F I N E S ///////////////////////////////////////////////////////// */
+
+/* S T R U C T U R E S /////////////////////////////////////////////////// */
+
+/* G L O B A L S ///////////////////////////////////////////////////////// */
+
+/* F U N C T I O N S ///////////////////////////////////////////////////// */
+
+bool Check_Sing(targ source)
+{
+	int pc;
+
+	if (!IS_PC(source)) {
+		/* TODO */
+		return false;
+	}
+
+	pc = TARGET_PC(source);
+	
+	/* TODO: check for silence? */
+	return Has_Skill(Get_Pc(pc), skSing);
+}
+
+void Sing(targ source, targ target)
+{
+
+}

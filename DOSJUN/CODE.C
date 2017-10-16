@@ -304,7 +304,7 @@ noexport void PcSpeak(code_host *h)
 	fprintf(trace, "pcspeak %d, #%d", pc, string);
 #endif
 	
-	sprintf(buffer, "%s:\n%s", gSave.characters[pc].name, gZone.code_strings[string]);
+	sprintf(buffer, "%s:\n%s", Get_Pc(pc)->header.name, gZone.code_strings[string]);
 	Show_Game_String(buffer, true);
 }
 
@@ -347,7 +347,7 @@ noexport void GiveItem(code_host *h)
 	fprintf(trace, "giveitem %d, %d, %d", pc, item, qty);
 #endif
 
-	result = Add_To_Inventory(pc, item, qty);
+	result = Add_to_Inventory(pc, item, qty);
 	Push_Stack(h, result);
 }
 

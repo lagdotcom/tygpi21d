@@ -18,7 +18,7 @@ typedef struct {
 	action_do_fn act;
 	char *name;
 	targetflags targeting;
-	UINT8 priority;
+	UINT8 priority; /* TODO */
 } action;
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
@@ -66,7 +66,7 @@ noexport void Highlight_Ally(int pc_active, int pc_select)
 	int i, colour;
 
 	for (i = 0; i < PARTY_SIZE; i++) {
-		strncpy(buffer, gSave.characters[i].name, 8);
+		strncpy(buffer, Get_Pc(i)->header.name, 8);
 		buffer[8] = 0;
 
 		colour = 15;
@@ -140,7 +140,7 @@ noexport bool Get_Row(targ source)
 noexport stat_value Get_Stat(targ source, statistic st)
 {
 	if (IS_PC(source)) {
-		return gSave.characters[TARGET_PC(source)].stats[st];
+		return Get_Pc(TARGET_PC(source))->header.stats[st];
 	}
 
 	return MONSTER(source)->stats[st];
@@ -149,7 +149,7 @@ noexport stat_value Get_Stat(targ source, statistic st)
 noexport void Set_Stat(targ source, statistic st, stat_value num)
 {
 	if (IS_PC(source)) {
-		gSave.characters[TARGET_PC(source)].stats[st] = num;
+		Get_Pc(TARGET_PC(source))->header.stats[st] = num;
 	} else {
 		MONSTER(source)->stats[st] = num;
 	}
@@ -295,7 +295,7 @@ noexport bool Check_Defend(targ source)
 	if (IS_PC(source)) {
 		for (i = 0; i < PARTY_SIZE; i++) {
 			if (i == TARGET_PC(source)) continue;
-			if (gSave.characters[i].stats[sHP] > 0) return true;
+			if (Get_Pc(i)->header.stats[sHP] > 0) return true;
 		}
 	} else {
 		/* TODO */
@@ -357,6 +357,7 @@ void Initialise_Combat(void)
 	Add_Combat_Action(aAttack, "Attack", Check_Attack, Attack, tfEnemy, 100);
 	Add_Combat_Action(aBlock, "Block", Check_Block, Block, tfSelf, 120);
 	Add_Combat_Action(aDefend, "Defend", Check_Defend, Defend, tfAlly, 120);
+	Add_Combat_Action(aSing, "Sing", Check_Sing, Sing, tfSelf, 200);
 
 	PCX_Init(&combat_bg);
 	PCX_Load("COMBAT.PCX", &combat_bg, 0);
@@ -534,7 +535,7 @@ noexport void Apply_Monster_Action(unsigned char monster, act action_id, targ ta
 noexport void AI_Mindless(int monster, int *action, int *target)
 {
 	int t = randint(0, PARTY_SIZE - 1);
-	while (gSave.characters[t].stats[sHP] <= 0) {
+	while (Get_Pc(t)->header.stats[sHP] <= 0) {
 		t = randint(0, PARTY_SIZE - 1);
 	}
 
@@ -660,7 +661,7 @@ void Start_Combat(encounter_id id)
 	/* TODO: if you lose... shouldn't do this */
 	for (count = 0; count < PARTY_SIZE; count++) {
 		if (!Is_Dead(TARGET_PC(count))) {
-			Add_Experience(&gSave.characters[count], earned_experience);
+			Add_Experience(Get_Pc(count), earned_experience);
 		}
 	}
 

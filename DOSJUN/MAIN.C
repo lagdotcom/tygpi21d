@@ -17,19 +17,22 @@ pcx_picture menu_bg;
 void Initialise_Character(character *c, job job, int str,
 	int intelligence, int dex, int hp, int mp)
 {
+	character_header *ch = &c->header;
 	int i;
 
-	c->experience = 0;
-	c->total_level = 0;
+	ch->experience = 0;
+	ch->total_level = 0;
 	for (i = 0; i < NUM_JOBS; i++) {
-		c->job_level[i] = 0;
+		ch->job_level[i] = 0;
 	}
 
-	c->stats[sStrength] = str;
-	c->stats[sDexterity] = dex;
-	c->stats[sIntelligence] = intelligence;
-	c->stats[sHP] = c->stats[sMaxHP] = hp;
-	c->stats[sMP] = c->stats[sMaxMP] = mp;
+	ch->stats[sStrength] = str;
+	ch->stats[sDexterity] = dex;
+	ch->stats[sIntelligence] = intelligence;
+	ch->stats[sHP] = ch->stats[sMaxHP] = hp;
+	ch->stats[sMP] = ch->stats[sMaxMP] = mp;
+
+	c->skills = New_List(ltInteger, "Initialise_Character.skills");
 
 	Set_Job(c, job);
 }
@@ -100,28 +103,28 @@ gamestate Start_New_Game(void)
 	gSave.header.num_characters = 6;
 
 	Blit_String_DB(0, 40, 15, "Who's the bossy one?", 0);
-	Input_String(168, 40, gSave.characters[0].name, NAME_SIZE);
+	Input_String(168, 40, gSave.characters[0].header.name, NAME_SIZE);
 	/*                                                  Str Int Dex  HP MP*/
 	Initialise_Character(&gSave.characters[0], jBard,     8, 13, 13, 10, 0);
 
 	Blit_String_DB(0, 56, 15, "Who's the strong one?", 0);
-	Input_String(176, 56, gSave.characters[1].name, NAME_SIZE);
+	Input_String(176, 56, gSave.characters[1].header.name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[1], jFighter, 14,  9, 11, 20, 0);
 
 	Blit_String_DB(0, 72, 15, "Who's the nerd?", 0);
-	Input_String(128, 72, gSave.characters[2].name, NAME_SIZE);
+	Input_String(128, 72, gSave.characters[2].header.name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[2], jMage,     9, 14, 11,  8, 8);
 
 	Blit_String_DB(0, 88, 15, "Who's kinda shifty?", 0);
-	Input_String(160, 88, gSave.characters[3].name, NAME_SIZE);
+	Input_String(160, 88, gSave.characters[3].header.name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[3], jRogue,    9, 11, 14, 12, 0);
 
 	Blit_String_DB(0, 104, 15, "Who cares a lot?", 0);
-	Input_String(136, 104, gSave.characters[4].name, NAME_SIZE);
+	Input_String(136, 104, gSave.characters[4].header.name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[4], jCleric,  13, 13,  8, 14, 6);
 
 	Blit_String_DB(0, 120, 15, "Who likes guns?", 0);
-	Input_String(128, 120, gSave.characters[5].name, NAME_SIZE);
+	Input_String(128, 120, gSave.characters[5].header.name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[5], jRanger,  13,  8, 13, 13, 0);
 
 	Start_Campaign("ETR");

@@ -37,15 +37,15 @@ void Draw_Character_Status(int index, int x, int y)
 	character* ch = &gSave.characters[index];
 	char buffer[9];
 
-	strncpy(buffer, ch->name, 8);
+	strncpy(buffer, ch->header.name, 8);
 	buffer[8] = 0;
 	Blit_String_DB(x + 16, y, 15, buffer, 0);
 
-	sprintf(buffer, "H%3d/%-3d", ch->stats[sHP], ch->stats[sMaxHP]);
+	sprintf(buffer, "H%3d/%-3d", ch->header.stats[sHP], ch->header.stats[sMaxHP]);
 	Blit_String_DB(x + 16, y + 8, 15, buffer, 0);
 
-	if (ch->stats[sMaxMP] > 0) {
-		sprintf(buffer, "M%3d/%-3d", ch->stats[sMP], ch->stats[sMaxMP]);
+	if (ch->header.stats[sMaxMP] > 0) {
+		sprintf(buffer, "M%3d/%-3d", ch->header.stats[sMP], ch->header.stats[sMaxMP]);
 		Blit_String_DB(x + 16, y + 16, 15, buffer, 0);
 	}
 }
@@ -71,8 +71,8 @@ bool Equip_Item(unsigned char pc, item_id iid)
 	/* TODO: check char can equip item */
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		if (gSave.characters[pc].items[i].item == iid) {
-			gSave.characters[pc].items[i].flags |= vfEquipped;
+		if (gSave.characters[pc].header.items[i].item == iid) {
+			gSave.characters[pc].header.items[i].flags |= vfEquipped;
 			/* TODO: remove other items at same time */
 			return true;
 		}
@@ -81,18 +81,20 @@ bool Equip_Item(unsigned char pc, item_id iid)
 	return false;
 }
 
-bool Add_To_Inventory(unsigned char pc, item_id iid, unsigned char qty)
+bool Add_to_Inventory(unsigned char pc, item_id iid, unsigned char qty)
 {
 	int i;
 	item *it = Lookup_Item(&gItems, iid);
 	if (it == null) return false;
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		if (gSave.characters[pc].items[i].item == 0) {
-			gSave.characters[pc].items[i].item = iid;
-			gSave.characters[pc].items[i].quantity = qty;
+		if (gSave.characters[pc].header.items[i].item == 0) {
+			gSave.characters[pc].header.items[i].item = iid;
+			gSave.characters[pc].header.items[i].quantity = qty;
 			return true;
 		}
+
+		/* TODO: stack on existing items */
 	}
 
 	return false;
@@ -100,7 +102,7 @@ bool Add_To_Inventory(unsigned char pc, item_id iid, unsigned char qty)
 
 bool In_Front_Row(unsigned char pc)
 {
-	return !(gSave.characters[pc].flags & cfBackRow);
+	return !(gSave.characters[pc].header.flags & cfBackRow);
 }
 
 item *Get_Equipped_Weapon(unsigned char pc)
@@ -109,11 +111,16 @@ item *Get_Equipped_Weapon(unsigned char pc)
 	inventory *iv;
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		iv = &gSave.characters[pc].items[i];
+		iv = &gSave.characters[pc].header.items[i];
 		if (iv->item != 0 && iv->flags & vfEquipped) {
 			return Lookup_Item(&gItems, iv->item);
 		}
 	}
 
 	return null;
+}
+
+character *Get_Pc(int pc)
+{
+	return &gSave.characters[pc];
 }

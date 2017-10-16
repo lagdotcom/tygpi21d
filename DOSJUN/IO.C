@@ -82,7 +82,7 @@ bool Check_Version(char *magic, unsigned char version)
 {
 	if (strncmp(magic, FILE_MAGIC, 3) != 0 || version > VERSION_NOW)
 	{
-		puts("File does not belong to DOSJUN.\n");
+		printf("File does not belong to DOSJUN v%d.\n", VERSION_NOW);
 		return false;
 	}
 

@@ -2,8 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "common.h"
-#include "list.h"
+#include "dosjun.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -153,4 +152,59 @@ void *List_At(list *l, unsigned int index)
 	}
 
 	return l->items[index];
+}
+
+#define LIST_FILE_HEADER_SZ		sizeof(list_type) + sizeof(unsigned int)
+
+list *Read_List(FILE *fp, char *tag)
+{
+	int i;
+	list fake, *l;
+	
+	fread(&fake, LIST_FILE_HEADER_SZ, 1, fp);
+	l = New_List(fake.type, tag);
+
+	if (fake.size > l->capacity)
+		Resize_List(l, fake.size);
+	else
+		l->size = fake.size;
+
+	switch (l->type) {
+		case ltInteger:
+			fread(l->items, sizeof(int), l->size, fp);
+			break;
+
+		case ltString:
+			for (i = 0; i < l->size; i++)
+				l->items[i] = Read_LengthString(fp, tag);
+			break;
+
+		default:
+			printf("Cannot read a list of type %d from file.", l->type);
+			abort();
+	}
+
+	return l;
+}
+
+void Write_List(list *l, FILE *fp)
+{
+	int i;
+
+	fwrite(l, LIST_FILE_HEADER_SZ, 1, fp);
+
+	switch (l->type) {
+		case ltInteger:
+			fwrite(l->items, sizeof(int), l->size, fp);
+			break;
+
+		case ltString:
+			for (i = 0; i < l->size; i++)
+				Write_LengthString(l->items[i], fp);
+			break;
+
+		default:
+			printf("Cannot write a list of type %d to file.", l->type);
+			abort();
+	}
 }

@@ -7,6 +7,7 @@
 #include <string.h>
 #include "common.h"
 #include "io.h"
+#include "list.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
