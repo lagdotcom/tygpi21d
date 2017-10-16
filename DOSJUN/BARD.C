@@ -4,6 +4,8 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
+#define SING_HITBONUS		1
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
@@ -25,7 +27,42 @@ bool Check_Sing(targ source)
 	return Has_Skill(Get_Pc(pc), skSing);
 }
 
+noexport void Sing_Expires(targ target, int argument)
+{
+	character *c;
+	int pc;
+
+	if (!IS_PC(target)) {
+		/* TODO */
+		return;
+	}
+
+	for (pc = 0; pc < PARTY_SIZE; pc++) {
+		c = Get_Pc(pc);
+		c->header.stats[sHitBonus] -= argument;
+	}
+
+	if (gState == gsCombat) {
+		c = Get_Pc(TARGET_PC(target));
+		Combat_Message("%s stops singing.", c->header.name);
+	}
+}
+
 void Sing(targ source, targ target)
 {
+	character *c;
+	int pc;
 
+	if (!IS_PC(source)) {
+		/* TODO */
+		return;
+	}
+
+	for (pc = 0; pc < PARTY_SIZE; pc++) {
+		c = Get_Pc(pc);
+		c->header.stats[sHitBonus] += SING_HITBONUS;
+	}
+
+	Add_Buff(source, "Singing", exTurns, 1, Sing_Expires, SING_HITBONUS);
+	Combat_Message("%s sings, and the party is inspired!", Get_Pc(TARGET_PC(source))->header.name);
 }

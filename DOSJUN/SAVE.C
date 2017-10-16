@@ -13,7 +13,8 @@ void Initialise_Savefile(save *s)
 	s->script_locals = null;
 
 	for (i = 0; i < PARTY_SIZE; i++) {
-		Get_Pc(i)->skills = null;
+		s->characters[i].skills = null;
+		s->characters[i].buffs = null;
 	}
 }
 
@@ -34,7 +35,8 @@ bool Load_Savefile(char *filename, save *s)
 	for (i = 0; i < PARTY_SIZE; i++) {
 		c = &s->characters[i];
 		fread(&c->header, sizeof(character_header), 1, fp);
-		c->skills = Read_List(fp, "Load_Savefile.chars[i].skills");
+		c->skills = Read_List(fp, "Load_Savefile.chars.i.skills");
+		c->buffs = Read_List(fp, "Load_Savefile.chars.i.buffs");
 	}
 
 	s->script_globals = SzAlloc(MAX_GLOBALS, int, "Load_Savefile.globals");
@@ -44,7 +46,7 @@ bool Load_Savefile(char *filename, save *s)
 	s->script_locals = SzAlloc(s->header.num_zones, int *, "Load_Savefile.locals");
 	if (s->script_locals == null) goto _dead;
 	for (i = 0; i < s->header.num_zones; i++) {
-		s->script_locals[i] = SzAlloc(MAX_LOCALS, int, "Load_Savefile.locals[i]");
+		s->script_locals[i] = SzAlloc(MAX_LOCALS, int, "Load_Savefile.locals.i");
 		if (s->script_locals[i] == null) goto _dead;
 		fread(s->script_locals[i], sizeof(int), MAX_LOCALS, fp);
 	}
@@ -59,6 +61,7 @@ _dead:
 
 void Free_Savefile(save *s)
 {
+	character *c;
 	int i;
 	Free(s->script_globals);
 
@@ -68,7 +71,10 @@ void Free_Savefile(save *s)
 	s->header.num_zones = 0;
 
 	for (i = 0; i < PARTY_SIZE; i++) {
-		Free_List(Get_Pc(i)->skills);
+		c = &s->characters[i];
+		Free_List(c->skills);
+		Clear_List(c->buffs);
+		Free_List(c->buffs);
 	}
 }
 
@@ -90,6 +96,7 @@ bool Save_Savefile(char *filename, save *s)
 		c = &s->characters[i];
 		fwrite(&c->header, sizeof(character_header), 1, fp);
 		Write_List(c->skills, fp);
+		Write_List(c->buffs, fp);
 	}
 
 	fwrite(s->script_globals, sizeof(int), MAX_GLOBALS, fp);

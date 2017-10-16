@@ -61,11 +61,20 @@ list *New_List(list_type type, char *tag)
 		die("New_List: Out of memory");
 
 	l->type = type;
+	l->object_size = 0;
 	l->capacity = 0;
 	l->size = 0;
 	l->items = null;
 
 	Resize_List(l, LIST_START_CAPACITY);
+	return l;
+}
+
+list *New_Object_List(size_t size, char *tag)
+{
+	list *l = New_List(ltObject, tag);
+	l->object_size = size;
+
 	return l;
 }
 
@@ -154,34 +163,46 @@ void *List_At(list *l, unsigned int index)
 	return l->items[index];
 }
 
-#define LIST_FILE_HEADER_SZ		sizeof(list_type) + sizeof(unsigned int)
+/* The size of the list header when written to a file */
+#define LIST_FILE_HEADER_SZ		sizeof(list_type) + sizeof(unsigned int) + sizeof(unsigned int)
 
 list *Read_List(FILE *fp, char *tag)
 {
 	int i;
 	list fake, *l;
+	void **obj;
 	
 	fread(&fake, LIST_FILE_HEADER_SZ, 1, fp);
 	l = New_List(fake.type, tag);
+	l->object_size = fake.object_size;
 
 	if (fake.size > l->capacity)
 		Resize_List(l, fake.size);
 	else
 		l->size = fake.size;
 
-	switch (l->type) {
-		case ltInteger:
-			fread(l->items, sizeof(int), l->size, fp);
-			break;
+	if (l->size > 0) {
+		switch (l->type) {
+			case ltInteger:
+				fread(l->items, sizeof(int), l->size, fp);
+				break;
 
-		case ltString:
-			for (i = 0; i < l->size; i++)
-				l->items[i] = Read_LengthString(fp, tag);
-			break;
+			case ltString:
+				for (i = 0; i < l->size; i++)
+					l->items[i] = Read_LengthString(fp, tag);
+				break;
 
-		default:
-			printf("Cannot read a list of type %d from file.", l->type);
-			abort();
+			case ltObject:
+				obj = Allocate(l->size, l->object_size, tag);
+				fread(obj, l->object_size, l->size, fp);
+				for (i = 0; i < l->size; i++)
+					l->items[i] = &obj[i];
+				break;
+
+			default:
+				printf("Cannot read a list of type %d from file.", l->type);
+				abort();
+		}
 	}
 
 	return l;
@@ -193,18 +214,25 @@ void Write_List(list *l, FILE *fp)
 
 	fwrite(l, LIST_FILE_HEADER_SZ, 1, fp);
 
-	switch (l->type) {
-		case ltInteger:
-			fwrite(l->items, sizeof(int), l->size, fp);
-			break;
+	if (l->size > 0) {
+		switch (l->type) {
+			case ltInteger:
+				fwrite(l->items, sizeof(int), l->size, fp);
+				break;
 
-		case ltString:
-			for (i = 0; i < l->size; i++)
-				Write_LengthString(l->items[i], fp);
-			break;
+			case ltString:
+				for (i = 0; i < l->size; i++)
+					Write_LengthString(l->items[i], fp);
+				break;
 
-		default:
-			printf("Cannot write a list of type %d to file.", l->type);
-			abort();
+			case ltObject:
+				for (i = 0; i < l->size; i++)
+					fwrite(l->items[i], l->object_size, 1, fp);
+				break;
+
+			default:
+				printf("Cannot write a list of type %d to file.", l->type);
+				exit(1);
+		}
 	}
 }

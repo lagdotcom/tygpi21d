@@ -35,6 +35,7 @@ typedef struct character_header {
 typedef struct character {
 	character_header header;
 	list *skills;
+	list *buffs;
 } character;
 
 typedef struct save_header {

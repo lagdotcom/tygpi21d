@@ -33,6 +33,7 @@ void Initialise_Character(character *c, job job, int str,
 	ch->stats[sMP] = ch->stats[sMaxMP] = mp;
 
 	c->skills = New_List(ltInteger, "Initialise_Character.skills");
+	c->buffs = New_Object_List(sizeof(buff), "Initialise_Character.buffs");
 
 	Set_Job(c, job);
 }

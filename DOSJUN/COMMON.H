@@ -38,7 +38,8 @@ typedef enum relative {
 typedef enum gamestate {
 	gsMainMenu,
 	gsDungeon,
-	gsQuit
+	gsQuit,
+	gsCombat
 } gamestate;
 
 typedef enum job {

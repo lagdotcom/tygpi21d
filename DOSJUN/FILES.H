@@ -41,6 +41,12 @@ typedef enum statistic {
 	sIntelligence,
 	sHP,
 	sMP,
+	sHitBonus,
+	sDodgeBonus,
+	sUNUSED1,
+	sUNUSED2,
+	sUNUSED3,
+	sUNUSED4,
 
 	NUM_STATS
 } statistic;
@@ -67,7 +73,7 @@ typedef enum tileflag {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-#define Set_Version_Header(h) strncpy(h.magic, FILE_MAGIC, 3); h.version = VERSION_1
+#define Set_Version_Header(h) strncpy(h.magic, FILE_MAGIC, 3); h.version = VERSION_NOW
 #define Check_Version_Header(h) if (!Check_Version(h.magic, h.version)) { fclose(fp); return false; }
 
 #endif

@@ -185,7 +185,7 @@ noexport void Free_Things(void)
 
 	if (things == null) return;
 
-	for (i = 0; i < thINVALID; i++)
+	for (i = 0; i < thINVALID - 1; i++)
 		Free(things[i].buffer);
 
 	Free(things);

@@ -48,7 +48,7 @@ noexport void Show_Combat_String(char *string, bool wait_for_key)
 	}
 }
 
-noexport void Combat_Message(char *format, ...)
+void Combat_Message(char *format, ...)
 {
 	va_list vargs;
 	char message[500];
@@ -254,13 +254,16 @@ noexport void Attack(targ source, targ target)
 		return;
 	}
 
+	base += Get_Stat(source, sHitBonus);
+	base -= Get_Stat(target, sDodgeBonus);
+
 	if (randint(1, 20) <= base) {
 		Combat_Message("%s hits %s!", NAME(source), NAME(target));
 
 		min = Get_Stat(source, sMinDamage);
 		max = Get_Stat(source, sMaxDamage);
 
-		if (weapon) {
+		if (weapon != null) {
 			min += weapon->stats[sMinDamage];
 			max += weapon->stats[sMaxDamage];
 		}
@@ -530,16 +533,78 @@ noexport void Apply_Monster_Action(unsigned char monster, act action_id, targ ta
 	}
 }
 
+void Add_Buff(targ target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument)
+{
+	buff *b;
+
+	b = Allocate(1, sizeof(buff), name);
+	b->name = name;
+	b->type = exty;
+	b->duration = duration;
+	b->expiry = expiry;			/* is this dangerous to Read/Write? */
+	b->argument = argument;
+
+	if (IS_PC(target)) {
+		Add_to_List(Get_Pc(TARGET_PC(target))->buffs, b);
+	}
+}
+
+void Expire_Buffs(void)
+{
+	buff *b;
+	character *c;
+	int i, j;
+
+	for (i = 0; i < PARTY_SIZE; i++) {
+		c = Get_Pc(i);
+		for (j = c->buffs->size - 1; j >= 0; j--) {
+			b = List_At(c->buffs, j);
+			if (b->type == exTurns) {
+				b->duration--;
+
+				if (b->duration <= 0) {
+					b->expiry(TARGET_PC(i), b->argument);
+
+					Remove_from_List(c->buffs, b);
+				}
+			}
+		}
+	}
+
+	/* TODO: enemies */
+}
+
+void Expire_Combat_Buffs(void)
+{
+	buff *b;
+	character *c;
+	int i, j;
+
+	for (i = 0; i < PARTY_SIZE; i++) {
+		c = Get_Pc(i);
+		for (j = c->buffs->size - 1; j >= 0; j--) {
+			b = List_At(c->buffs, j);
+			if (b->type == exTurns) {
+				b->expiry(TARGET_PC(i), b->argument);
+
+				Remove_from_List(c->buffs, b);
+			}
+		}
+	}
+
+	/* TODO: enemies */
+}
+
 /* A I  R O U T I N E S ////////////////////////////////////////////////// */
 
-noexport void AI_Mindless(int monster, int *action, int *target)
+noexport void AI_Mindless(int monster, act *action, targ *target)
 {
 	int t = randint(0, PARTY_SIZE - 1);
 	while (Get_Pc(t)->header.stats[sHP] <= 0) {
 		t = randint(0, PARTY_SIZE - 1);
 	}
 
-	*action = 0;	/* Attack */
+	*action = aAttack;
 	*target = TARGET_PC(t);
 }
 
@@ -555,6 +620,7 @@ noexport void Show_Combat_Pc_Stats(void)
 noexport void Enter_Combat_Loop(void)
 {
 	int i;
+	bool first = true;
 	act pc_actions[PARTY_SIZE];
 	targ pc_targets[PARTY_SIZE];
 	act *monster_actions;
@@ -566,6 +632,8 @@ noexport void Enter_Combat_Loop(void)
 		die("Enter_Combat_Loop: out of memory");
 
 	while (monsters_alive > 0) {
+		if (!first) Expire_Buffs();
+
 		Show_Combat_Pc_Stats();
 		Show_Enemies();
 
@@ -596,6 +664,8 @@ noexport void Enter_Combat_Loop(void)
 		for (i = 0; i < combat_monsters->size; i++) {
 			Apply_Monster_Action(i, monster_actions[i], monster_targets[i]);
 		}
+
+		first = false;
 	}
 
 	Clear_Encounter();
@@ -656,6 +726,7 @@ void Start_Combat(encounter_id id)
 
 	/* DO IT */
 	earned_experience = 0;
+	gState = gsCombat;
 	Enter_Combat_Loop();
 	
 	/* TODO: if you lose... shouldn't do this */
@@ -665,5 +736,7 @@ void Start_Combat(encounter_id id)
 		}
 	}
 
+	gState = gsDungeon;
+	Expire_Combat_Buffs();
 	Redraw_Dungeon_Screen(false);
 }
