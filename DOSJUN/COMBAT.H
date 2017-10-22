@@ -4,6 +4,8 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "common.h"
+#include "monsters.h"
+#include "items.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -24,10 +26,12 @@ typedef enum targetflags {
 
 typedef enum action_ids {
 	aAttack = 0,
+	aSneakAttack,
 	aBlock,
 	aDefend,
 
 	aSing,
+	aHide,
 
 	NUM_ACTIONS,
 	NO_ACTION = -1
@@ -36,14 +40,12 @@ typedef enum action_ids {
 typedef enum expiry_type {
 	exTurns,
 	exSteps,
+	exTurnEndChance,
 } expiry_type;
-
-#define MONSTER(i)		((monster *)List_At(combat_monsters, i))
 
 #define TARGET_PC(i)	(-(i) - 1)
 #define TARGET_ENEMY(i)	(i)
 #define IS_PC(i)		((i) < 0)
-#define NAME(i)			(IS_PC(i) ? Get_Pc(TARGET_PC(i))->header.name : MONSTER(i)->name)
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -59,9 +61,18 @@ typedef struct {
 
 void Add_Buff(targ target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument);
 void Combat_Message(char *format, ...);
+void Damage(targ victim, int amount);
 void Free_Combat(void);
+monster *Get_Monster(targ target);
+stat_value Get_Stat(targ source, statistic st);
+char *Get_Target_Name(targ target);
+item *Get_Weapon(targ source);
+statistic Get_Weapon_Stat(item *weapon);
+bool Has_Buff(targ target, char *name);
+bool Is_Dead(targ victim);
 void Initialise_Combat(void);
 int randint(int minimum, int maximum);
+void Remove_Buff(targ target, char *name);
 void Start_Combat(encounter_id id);
 
 #endif

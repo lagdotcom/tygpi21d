@@ -11,6 +11,9 @@
 #define COLOUR_ACTIVE	14
 #define COLOUR_SELECT	11
 
+#define MONSTER(i)		((monster *)List_At(combat_monsters, i))
+#define NAME(i)			(IS_PC(i) ? Get_Pc(TARGET_PC(i))->header.name : MONSTER(i)->name)
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
@@ -33,7 +36,7 @@ noexport int monsters_alive;
 noexport int groups_alive;
 noexport UINT32 earned_experience;
 
-/* C O M B A T  A C T I O N S //////////////////////////////////////////// */
+/* H E L P E R  F U N C T I O N S //////////////////////////////////////// */
 
 noexport void Show_Combat_String(char *string, bool wait_for_key)
 {
@@ -119,7 +122,7 @@ noexport void Highlight_Enemy_Group(groupnum group, int colour)
 	}
 }
 
-noexport item *Get_Weapon(targ source)
+item *Get_Weapon(targ source)
 {
 	if (IS_PC(source)) {
 		return Get_Equipped_Weapon(TARGET_PC(source));
@@ -137,7 +140,7 @@ noexport bool Get_Row(targ source)
 	return MONSTER(source)->row == rowFront;
 }
 
-noexport stat_value Get_Stat(targ source, statistic st)
+stat_value Get_Stat(targ source, statistic st)
 {
 	if (IS_PC(source)) {
 		return Get_Pc(TARGET_PC(source))->header.stats[st];
@@ -155,7 +158,7 @@ noexport void Set_Stat(targ source, statistic st, stat_value num)
 	}
 }
 
-noexport statistic Get_Weapon_Stat(item *weapon)
+statistic Get_Weapon_Stat(item *weapon)
 {
 	if (weapon == null) return sStrength;
 	return (weapon->flags & ifDexterityWeapon) ? sDexterity : sStrength;
@@ -178,6 +181,16 @@ noexport groupnum Get_Enemy_Group(targ victim)
 	return -1;
 }
 
+monster *Get_Monster(targ target)
+{
+	return MONSTER(target);
+}
+
+char *Get_Target_Name(targ target)
+{
+	return NAME(target);
+}
+
 noexport targ Get_Random_Target(groupnum group)
 {
 	int i;
@@ -186,7 +199,7 @@ noexport targ Get_Random_Target(groupnum group)
 	return (targ)List_At(combat_groups[group], i);
 }
 
-noexport bool Is_Dead(targ victim)
+bool Is_Dead(targ victim)
 {
 	return Get_Stat(victim, sHP) <= 0;
 }
@@ -214,7 +227,7 @@ noexport void Kill(targ victim)
 	}
 }
 
-noexport void Damage(targ victim, int amount)
+void Damage(targ victim, int amount)
 {
 	stat_value hp = Get_Stat(victim, sHP);
 	hp -= amount;
@@ -232,6 +245,9 @@ noexport bool Check_Attack(targ source)
 {
 	bool front;
 	item *weapon;
+
+	/* Sneak Attack is handled separately */
+	if (Has_Buff(source, HIDE_BUFF_NAME)) return false;
 
 	front = Get_Row(source);
 	weapon = Get_Weapon(source);
@@ -358,9 +374,11 @@ void Initialise_Combat(void)
 
 	combat_actions = SzAlloc(NUM_ACTIONS, action, "Initialise_Combat.actions");
 	Add_Combat_Action(aAttack, "Attack", Check_Attack, Attack, tfEnemy, 100);
+	Add_Combat_Action(aSneakAttack, "Sneak Attack", Check_SneakAttack, SneakAttack, tfEnemy, 90);
 	Add_Combat_Action(aBlock, "Block", Check_Block, Block, tfSelf, 120);
 	Add_Combat_Action(aDefend, "Defend", Check_Defend, Defend, tfAlly, 120);
 	Add_Combat_Action(aSing, "Sing", Check_Sing, Sing, tfSelf, 200);
+	Add_Combat_Action(aHide, "Hide", Check_Hide, Hide, tfSelf, 50);
 
 	PCX_Init(&combat_bg);
 	PCX_Load("COMBAT.PCX", &combat_bg, 0);
@@ -546,6 +564,59 @@ void Add_Buff(targ target, char *name, expiry_type exty, int duration, buff_expi
 
 	if (IS_PC(target)) {
 		Add_to_List(Get_Pc(TARGET_PC(target))->buffs, b);
+	} else {
+		/* TODO */
+	}
+}
+
+bool Has_Buff(targ target, char *name)
+{
+	buff *b;
+	monster *m;
+	character *c;
+	int i;
+
+	if (IS_PC(target)) {
+		c = Get_Pc(TARGET_PC(target));
+		for (i = 0; i < c->buffs->size; i++) {
+			b = List_At(c->buffs, i);
+
+			if (strcmp(b->name, name) == 0) {
+				return true;
+			}
+		}
+	} else {
+		/* TODO */
+	}
+
+	return false;
+}
+
+noexport void Remove_Buff_from_List(targ owner, list *buffs, buff *b)
+{
+	b->expiry(owner, b->argument);
+	Remove_from_List(buffs, b);
+}
+
+void Remove_Buff(targ target, char *name)
+{
+	buff *b;
+	monster *m;
+	character *c;
+	int i;
+
+	if (IS_PC(target)) {
+		c = Get_Pc(TARGET_PC(target));
+		for (i = c->buffs->size - 1; i >= 0; i--) {
+			b = List_At(c->buffs, i);
+
+			if (strcmp(b->name, name) == 0) {
+				Remove_Buff_from_List(target, c->buffs, b);
+				return;
+			}
+		}
+	} else {
+		/* TODO */
 	}
 }
 
@@ -563,9 +634,13 @@ void Expire_Buffs(void)
 				b->duration--;
 
 				if (b->duration <= 0) {
-					b->expiry(TARGET_PC(i), b->argument);
+					Remove_Buff_from_List(TARGET_PC(i), c->buffs, b);
+				}
+			}
 
-					Remove_from_List(c->buffs, b);
+			if (b->type == exTurnEndChance) {
+				if (randint(0, 100) < b->duration) {
+					Remove_Buff_from_List(TARGET_PC(i), c->buffs, b);
 				}
 			}
 		}
@@ -584,10 +659,8 @@ void Expire_Combat_Buffs(void)
 		c = Get_Pc(i);
 		for (j = c->buffs->size - 1; j >= 0; j--) {
 			b = List_At(c->buffs, j);
-			if (b->type == exTurns) {
-				b->expiry(TARGET_PC(i), b->argument);
-
-				Remove_from_List(c->buffs, b);
+			if (b->type == exTurns || b->type == exTurnEndChance) {
+				Remove_Buff_from_List(TARGET_PC(i), c->buffs, b);
 			}
 		}
 	}

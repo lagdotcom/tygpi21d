@@ -104,7 +104,7 @@ void Initialise_Jobs(void)
 	Setup_Job_Level(jBard, 10, sDexterity, -1, -1);
 
 	Setup_Job(jRogue, "Rogue", 6, 0);
-	Setup_Job_Level(jRogue, 1, -1, -1, -1);
+	Setup_Job_Level(jRogue, 1, -1, skHide, -1);
 	Setup_Job_Level(jRogue, 2, -1, -1, -1);
 	Setup_Job_Level(jRogue, 3, -1, -1, -1);
 	Setup_Job_Level(jRogue, 4, sDexterity, -1, -1);

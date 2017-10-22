@@ -211,13 +211,12 @@ void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled)
 /* Wrap a string to fit in a given box size. You must Free() the returned string. */
 char *Word_Wrap(char *string, int width, int height)
 {
-	char *wrapped = Duplicate_String(string, "Word_Wrap");
+	char wrapped[200];
 	int i = 0,
 		last_space = 0,
 		x = 0;
 
-	if (wrapped == null)
-		die("Word_Wrap: out of memory");
+	strcpy(wrapped, string);
 
 	while (string[i]) {
 		if (string[i] == ' ') {
@@ -259,6 +258,4 @@ void Draw_Wrapped_String(int x, int y, int w, int h, colour col, char *string, b
 
 	Draw_Square_DB(0, x, y, x + w - 1, y + h - 1, true);
 	Draw_Bounded_String(x, y, w, h, col, wrapped, false);
-
-	Free(wrapped);
 }

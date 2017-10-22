@@ -24,6 +24,7 @@
 #include "zone.h"
 
 #include "bard.h"
+#include "rogue.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 

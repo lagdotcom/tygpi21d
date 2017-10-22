@@ -1,0 +1,113 @@
+/* I N C L U D E S /////////////////////////////////////////////////////// */
+
+#include "dosjun.h"
+
+/* D E F I N E S ///////////////////////////////////////////////////////// */
+
+#define HIDE_MULTIPLIER		1.5
+
+/* S T R U C T U R E S /////////////////////////////////////////////////// */
+
+/* G L O B A L S ///////////////////////////////////////////////////////// */
+
+/* F U N C T I O N S ///////////////////////////////////////////////////// */
+
+bool Check_Hide(targ source)
+{
+	monster *m;
+	character *c;
+
+	if (Has_Buff(source, HIDE_BUFF_NAME))
+		return false;
+
+	if (IS_PC(source)) {
+		c = Get_Pc(TARGET_PC(source));
+
+		return Has_Skill(c, skHide);
+	} else {
+		/* TODO */
+		return false;
+	}
+}
+
+noexport void Hidden_Expires(targ source, int argument)
+{
+	monster *m;
+	character *c;
+
+	if (gState == gsCombat) {
+		if (IS_PC(source)) {
+			c = Get_Pc(TARGET_PC(source));
+			Combat_Message("%s is revealed!", c->header.name);
+		} else {
+			m = Get_Monster(source);
+			Combat_Message("%s is revealed!", m->name);
+		}
+	}
+}
+
+void Hide(targ source, targ target)
+{
+	monster *m;
+	character *c;
+	int dexterity;
+
+	if (IS_PC(source)) {
+		c = Get_Pc(TARGET_PC(source));
+		Combat_Message("%s is hidden from view.", c->header.name);
+		dexterity = c->header.stats[sDexterity];
+	} else {
+		m = Get_Monster(source);
+		Combat_Message("%s is hidden from view.", m->name);
+		dexterity = m->stats[sDexterity];
+	}
+
+	if (dexterity > 20) dexterity = 20;
+	if (dexterity < 3) dexterity = 3;
+	Add_Buff(source, HIDE_BUFF_NAME, exTurnEndChance, 101 - (dexterity * 5), Hidden_Expires, 0);
+}
+
+bool Check_SneakAttack(targ source)
+{
+	return Has_Buff(source, HIDE_BUFF_NAME);
+}
+
+void SneakAttack(targ source, targ target)
+{
+	char *source_name = Get_Target_Name(source),
+		*target_name = Get_Target_Name(target);
+	item *weapon = Get_Weapon(source);
+	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
+	stat_value min, max;
+	int roll;
+
+	if (Is_Dead(target)) {
+		Combat_Message("%s missed their chance.", source_name);
+		return;
+	}
+
+	base += Get_Stat(source, sHitBonus);
+
+	if (randint(1, 20) <= base) {
+		Combat_Message("%s strikes %s from the shadows!", source_name, target_name);
+
+		min = Get_Stat(source, sMinDamage);
+		max = Get_Stat(source, sMaxDamage);
+
+		if (weapon != null) {
+			min += weapon->stats[sMinDamage];
+			max += weapon->stats[sMaxDamage];
+		}
+
+		roll = randint(min, max) * HIDE_MULTIPLIER - Get_Stat(target, sArmour);
+		if (roll > 0) {
+			Damage(target, roll);
+		} else {
+			Combat_Message("The blow glances off.");
+		}
+	} else {
+		Combat_Message("%s sneakily attacks %s, but misses.", source_name, target_name);
+	}
+
+	/* TODO: should lose hidden sometimes... */
+}

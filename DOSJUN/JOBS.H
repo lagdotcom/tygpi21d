@@ -11,7 +11,9 @@
 #define JOB_LEVELS	10
 
 typedef enum skill_id {
-	skSing
+	skSing,
+
+	skHide
 } skill_id;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
