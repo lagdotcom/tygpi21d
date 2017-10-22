@@ -620,7 +620,7 @@ noexport void Show_Combat_Pc_Stats(void)
 noexport void Enter_Combat_Loop(void)
 {
 	int i;
-	bool first = true;
+	bool first_turn = true;
 	act pc_actions[PARTY_SIZE];
 	targ pc_targets[PARTY_SIZE];
 	act *monster_actions;
@@ -632,7 +632,7 @@ noexport void Enter_Combat_Loop(void)
 		die("Enter_Combat_Loop: out of memory");
 
 	while (monsters_alive > 0) {
-		if (!first) Expire_Buffs();
+		if (!first_turn) Expire_Buffs();
 
 		Show_Combat_Pc_Stats();
 		Show_Enemies();
@@ -665,7 +665,7 @@ noexport void Enter_Combat_Loop(void)
 			Apply_Monster_Action(i, monster_actions[i], monster_targets[i]);
 		}
 
-		first = false;
+		first_turn = false;
 	}
 
 	Clear_Encounter();

@@ -16,7 +16,8 @@ zone gZone;
 
 bool redraw_everything,
 	redraw_description;
-bool trigger_on_enter;
+bool trigger_on_enter,
+	just_moved;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -174,6 +175,7 @@ bool Try_Move_Forward(void)
 	redraw_description = true;
 	redraw_fp = true;
 	trigger_on_enter = true;
+	just_moved = true;
 
 	return true;
 }
@@ -189,11 +191,34 @@ void Trigger_Enter_Script(void)
 	trigger_on_enter = false;
 }
 
+void Random_Encounter(void)
+{
+	int i;
+	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
+	etable* et;
+	if (under->etable == 0) return;
+
+	if (gSave.header.steps_without_encounter < 200)
+		gSave.header.steps_without_encounter++;
+
+	if (randint(0, 100) < gSave.header.steps_without_encounter) {
+		et = &gZone.etables[under->etable - 1];
+		for (i = 0; i < et->possibilities; i++) {
+			if (randint(0, 100) < et->percentages[i]) {
+				/* start random encounter! */
+				gSave.header.steps_without_encounter = 0;
+				Start_Combat(et->encounters[i]);
+			}
+		}
+	}
+}
+
 void Redraw_Dungeon_Screen(bool script)
 {
 	if (redraw_everything) memcpy(double_buffer, explore_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
 	if (redraw_fp || redraw_everything) Draw_FP();
 	if (redraw_party || redraw_everything) Draw_Party_Status();
+	if (script && just_moved) Random_Encounter();
 	if (script && trigger_on_enter) Trigger_Enter_Script();
 
 	/* script might have set these */
@@ -236,12 +261,14 @@ gamestate Show_Dungeon_Screen(void)
 				gSave.header.facing = Turn_Left(gSave.header.facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
+				just_moved = false;
 				break;
 
 			case SCAN_RIGHT:
 				gSave.header.facing = Turn_Right(gSave.header.facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
+				just_moved = false;
 				break;
 
 			case SCAN_UP:
