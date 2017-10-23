@@ -14,6 +14,8 @@ monsters gMonsters;
 save gSave;
 zone gZone;
 
+int global_danger = 1;
+
 bool redraw_everything,
 	redraw_description;
 bool trigger_on_enter,
@@ -199,7 +201,7 @@ void Random_Encounter(void)
 	if (under->etable == 0) return;
 
 	if (gSave.header.steps_without_encounter < 200)
-		gSave.header.steps_without_encounter++;
+		gSave.header.steps_without_encounter += under->danger + global_danger;
 
 	if (randint(0, 100) < gSave.header.steps_without_encounter) {
 		et = &gZone.etables[under->etable - 1];

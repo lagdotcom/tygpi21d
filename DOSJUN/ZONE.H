@@ -9,7 +9,7 @@
 
 #define ZONE_HEADER_PADDING			6
 #define WALL_PADDING				2
-#define TILE_PADDING				5
+#define TILE_PADDING				4
 #define ENCOUNTER_SIZE	6
 #define ETABLE_SIZE		6
 
@@ -38,6 +38,7 @@ typedef struct tile {
 	etable_id etable;
 	tileflag_id flags;
 	thing_id thing;
+	UINT8 danger;
 
 	unsigned char unused[TILE_PADDING];
 } tile;
