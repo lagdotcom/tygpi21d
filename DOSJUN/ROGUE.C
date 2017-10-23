@@ -48,23 +48,13 @@ noexport void Hidden_Expires(targ source, int argument)
 
 void Hide(targ source, targ target)
 {
-	monster *m;
-	character *c;
-	int dexterity;
-
-	if (IS_PC(source)) {
-		c = Get_Pc(TARGET_PC(source));
-		Combat_Message("%s is hidden from view.", c->header.name);
-		dexterity = c->header.stats[sDexterity];
-	} else {
-		m = Get_Monster(source);
-		Combat_Message("%s is hidden from view.", m->name);
-		dexterity = m->stats[sDexterity];
-	}
+	char *name = Get_Target_Name(source);
+	int dexterity = Get_Stat(source, sDexterity);
 
 	if (dexterity > 20) dexterity = 20;
 	if (dexterity < 3) dexterity = 3;
 	Add_Buff(source, HIDE_BUFF_NAME, exTurnEndChance, 101 - (dexterity * 5), Hidden_Expires, 0);
+	Combat_Message("%s is hidden from view.", name);
 }
 
 bool Check_SneakAttack(targ source)
@@ -87,6 +77,7 @@ void SneakAttack(targ source, targ target)
 	}
 
 	base += Get_Stat(source, sHitBonus);
+	/* note: dodge bonus is ignored on enemy! */
 
 	if (randint(1, 20) <= base) {
 		Combat_Message("%s strikes %s from the shadows!", source_name, target_name);
