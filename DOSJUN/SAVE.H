@@ -7,7 +7,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define SAVE_HEADER_PADDING			13
+#define SAVE_HEADER_PADDING			12
 
 typedef enum charflag {
 	cfBackRow = 1
@@ -47,7 +47,8 @@ typedef struct save_header {
 	coord x, y;
 	UINT8 num_characters;
 	zone_id num_zones;
-	UINT8 steps_without_encounter;
+	UINT8 encounter_chance;
+	UINT8 danger;
 
 	unsigned char unused[SAVE_HEADER_PADDING];
 } save_header;

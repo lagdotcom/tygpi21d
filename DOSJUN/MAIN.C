@@ -76,6 +76,8 @@ void Start_Campaign(char *name)
 	gSave.header.y = gCampaign.header.start_y;
 	gSave.header.facing = gCampaign.header.start_facing;
 	gSave.header.num_zones = gCampaign.header.num_zones;
+	gSave.header.encounter_chance = 0;
+	gSave.header.danger = 1;
 
 	gSave.script_globals = SzAlloc(MAX_GLOBALS, int, "Start_Campaign.globals");
 	gSave.script_locals = SzAlloc(gSave.header.num_zones, int *, "Start_Campaign.locals");

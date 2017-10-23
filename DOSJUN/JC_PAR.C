@@ -625,6 +625,20 @@ noexport bool Call_Teleport_State(jc_parser *p)
 	return true;
 }
 
+noexport bool Call_SetDanger_State(jc_parser *p)
+{
+	/* TODO: expression */
+	jc_token *danger;
+
+	CONSUME();
+	danger = CONSUME();
+
+	if (!Emit_Argument(p, danger)) return false;
+
+	EMIT(coSetDanger);
+	return true;
+}
+
 noexport bool Keyword_State(jc_parser *p)
 {
 	if (!p->in_script) {
@@ -644,6 +658,7 @@ noexport bool Keyword_State(jc_parser *p)
 		if (MATCH("SetTileColour")) return Call_SetTileColour_State(p);
 		if (MATCH("Teleport")) return Call_Teleport_State(p);
 		if (MATCH("SetTileThing")) return Call_SetTileThing_State(p);
+		if (MATCH("SetDanger")) return Call_SetDanger_State(p);
 
 		if (MATCH("If")) return Start_If_State(p);
 		if (MATCH("ElseIf")) return Start_ElseIf_State(p);

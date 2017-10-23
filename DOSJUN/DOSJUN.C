@@ -14,8 +14,6 @@ monsters gMonsters;
 save gSave;
 zone gZone;
 
-int global_danger = 1;
-
 bool redraw_everything,
 	redraw_description;
 bool trigger_on_enter,
@@ -200,15 +198,15 @@ void Random_Encounter(void)
 	etable* et;
 	if (under->etable == 0) return;
 
-	if (gSave.header.steps_without_encounter < 200)
-		gSave.header.steps_without_encounter += under->danger + global_danger;
+	if (gSave.header.encounter_chance < 200)
+		gSave.header.encounter_chance += under->danger + gSave.header.danger;
 
-	if (randint(0, 100) < gSave.header.steps_without_encounter) {
+	if (randint(0, 100) < gSave.header.encounter_chance) {
 		et = &gZone.etables[under->etable - 1];
 		for (i = 0; i < et->possibilities; i++) {
 			if (randint(0, 100) < et->percentages[i]) {
 				/* start random encounter! */
-				gSave.header.steps_without_encounter = 0;
+				gSave.header.encounter_chance = 0;
 				Start_Combat(et->encounters[i]);
 			}
 		}

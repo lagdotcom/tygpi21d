@@ -116,6 +116,10 @@ noexport void Push_Internal(code_host *h)
 		case internalFacing:
 			Push_Stack(h, gSave.header.facing);
 			return;
+
+		case internalDanger:
+			Push_Stack(h, gSave.header.danger);
+			return;
 	}
 
 	Code_Error("Unknown internal #%d", index);
@@ -446,6 +450,17 @@ noexport void Teleport(code_host *h)
 	trigger_on_enter = true;
 }
 
+noexport void SetDanger(code_host *h)
+{
+	int danger = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "setdanger %d", danger);
+#endif
+
+	gSave.header.danger = danger;
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -490,6 +505,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coSetTileColour: SetTileColour(h); return;
 		case coTeleport:	Teleport(h); return;
 		case coSetTileThing: SetTileThing(h); return;
+		case coSetDanger:	SetDanger(h); return;
 	}
 
 	h->running = false;

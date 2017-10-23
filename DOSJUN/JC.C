@@ -47,6 +47,7 @@ bool Is_Code_Keyword(char *string)
 	if (!strcmp(string, "PcSpeak")) return true;
 	if (!strcmp(string, "Return")) return true;
 	if (!strcmp(string, "Script")) return true;
+	if (!strcmp(string, "SetDanger")) return true;
 	if (!strcmp(string, "SetTileColour")) return true;
 	if (!strcmp(string, "SetTileDescription")) return true;
 	if (!strcmp(string, "SetTileThing")) return true;
@@ -59,6 +60,7 @@ bool Is_Code_Keyword(char *string)
 
 internal_id Get_Internal_Id(char *string)
 {
+	if (!strcmp(string, "Danger")) return internalDanger;
 	if (!strcmp(string, "Facing")) return internalFacing;
 	if (!strcmp(string, "X")) return internalX;
 	if (!strcmp(string, "Y")) return internalY;

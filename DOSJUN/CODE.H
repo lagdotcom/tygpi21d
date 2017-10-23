@@ -51,12 +51,14 @@ typedef enum code_op {
 	coSetTileColour = 0xA7,
 	coTeleport = 0xA8,
 	coSetTileThing = 0xA9,
+	coSetDanger = 0xAA,
 } code_op;
 
 typedef enum code_internal {
 	internalX,
 	internalY,
 	internalFacing,
+	internalDanger,
 
 	internalInvalid = 0xFF
 } code_internal;
