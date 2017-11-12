@@ -440,7 +440,12 @@ noexport void Teleport(code_host *h)
 		/* TODO */
 	}
 
-	gSave.header.zone = zone;
+	if (gSave.header.zone != zone) {
+		/* TODO */
+		gSave.header.zone = zone;
+		trigger_zone_enter = true;
+	}
+
 	gSave.header.x = x;
 	gSave.header.y = y;
 	gSave.header.facing = facing;

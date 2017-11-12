@@ -105,3 +105,9 @@ Script rat_fight
 	PcSpeak liberal, "What are we going to do?"
 	PcSpeak nra, "Let's just keep looking. There has to be an exit."
 EndScript
+
+Script Z_ENTER
+	If q_status >= q_key_found
+		SetTileThing 5, 4, 0
+	EndIf
+EndScript

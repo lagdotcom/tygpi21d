@@ -17,6 +17,7 @@ zone gZone;
 bool redraw_everything,
 	redraw_description;
 bool trigger_on_enter,
+	trigger_zone_enter,
 	just_moved;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
@@ -191,6 +192,22 @@ void Trigger_Enter_Script(void)
 	trigger_on_enter = false;
 }
 
+void Trigger_Zone_Enter_Script(void)
+{
+	if (gZone.header.on_enter) {
+		Run_Code(gZone.header.on_enter - 1);
+	}
+
+	trigger_zone_enter = false;
+}
+
+void Trigger_Zone_Move_Script(void)
+{
+	if (gZone.header.on_move) {
+		Run_Code(gZone.header.on_move - 1);
+	}
+}
+
 void Random_Encounter(encounter_id eid)
 {
 	gSave.header.encounter_chance = 0;
@@ -223,7 +240,11 @@ void Redraw_Dungeon_Screen(bool script)
 	if (redraw_everything) memcpy(double_buffer, explore_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
 	if (redraw_fp || redraw_everything) Draw_FP();
 	if (redraw_party || redraw_everything) Draw_Party_Status();
-	if (script && just_moved) Check_Random_Encounter();
+	if (script && just_moved) {
+		Check_Random_Encounter();
+		Trigger_Zone_Move_Script();
+	}
+	if (script && trigger_zone_enter) Trigger_Zone_Enter_Script();
 	if (script && trigger_on_enter) Trigger_Enter_Script();
 
 	/* script might have set these */
