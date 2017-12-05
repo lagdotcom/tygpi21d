@@ -8,6 +8,7 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define DEL 8
+#define ESC	27
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -29,10 +30,11 @@ bool Input_Number(int x, int y, int *number, int min, int max)
 	Show_Double_Buffer();
 
 	while (true) {
-		/* TODO: cancel by hitting escape */
 		ch = getch();
 
-		if (ch == '\r') {
+		if (ch == ESC) {
+			return false;
+		} else if (ch == '\r') {
 			if (i > 0) {
 				*number = atoi(buffer);
 
