@@ -124,11 +124,14 @@ noexport void Highlight_Enemy_Group(groupnum group, int colour)
 
 item *Get_Weapon(targ source)
 {
+	item_id iid;
+
 	if (IS_PC(source)) {
 		return Get_Equipped_Weapon(TARGET_PC(source));
 	}
 
-	return null; /* TODO */
+	iid = MONSTER(source)->weapon;
+	return iid ? Lookup_Item(iid) : null;
 }
 
 noexport bool Get_Row(targ source)

@@ -9,7 +9,7 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define MONSTERS_HEADER_PADDING		26
-#define MONSTER_PADDING				4
+#define MONSTER_PADDING				2
 
 typedef enum row {
 	rowFront,
@@ -30,6 +30,7 @@ typedef struct monster {
 	row_id row;
 	ai_id ai;
 	UINT32 experience;
+	item_id weapon;
 
 	unsigned char unused[MONSTER_PADDING];
 } monster;
