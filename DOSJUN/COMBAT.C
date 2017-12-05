@@ -406,9 +406,16 @@ noexport act Get_Pc_Action(unsigned char pc)
 {
 	int i, count = 0;
 	act ai;
-	int *action_ids = SzAlloc(NUM_ACTIONS, int, "Get_Pc_Action.ids");
-	char **action_names = SzAlloc(NUM_ACTIONS, char *, "Get_Pc_Action.names");
+	int *action_ids;
+	char **action_names;
 
+	if (Is_Dead(TARGET_PC(pc))) {
+		/* TODO: could be something doable when dead? */
+		return NO_ACTION;
+	}
+
+	action_ids = SzAlloc(NUM_ACTIONS, int, "Get_Pc_Action.ids");
+	action_names = SzAlloc(NUM_ACTIONS, char *, "Get_Pc_Action.names");
 	if (action_ids == null || action_names == null)
 		die("Get_Pc_Action: out of memory");
 
@@ -450,6 +457,9 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 	int diff;
 
 	me = TARGET_PC(pc);
+	if (Is_Dead(me)) {
+		return 0;
+	}
 
 	/* get the easiest case out of the way */
 	if (a->targeting == tfSelf) return TARGET_PC(pc);
@@ -534,7 +544,7 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 
 noexport void Apply_Pc_Action(unsigned char pc, act action_id, targ target_id)
 {
-	if (Get_Stat(TARGET_PC(pc), sHP) <= 0) {
+	if (Is_Dead(TARGET_PC(pc))) {
 		/* TODO: show message? */
 		return;
 	}
