@@ -7,7 +7,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define ZONE_HEADER_PADDING			6
+#define ZONE_HEADER_PADDING			2
 #define WALL_PADDING				2
 #define TILE_PADDING				4
 #define ENCOUNTER_SIZE	6
@@ -66,6 +66,8 @@ typedef struct zone_header {
 	string_id num_code_strings;
 	etable_id num_etables;
 	unsigned short num_textures;
+	script_id on_enter;
+	script_id on_move;
 
 	unsigned char unused[ZONE_HEADER_PADDING];
 } zone_header;

@@ -132,7 +132,9 @@ gamestate Start_New_Game(void)
 
 	Start_Campaign("ETR");
 	trigger_on_enter = true;
+	trigger_zone_enter = true;
 
+	/* TODO: remove at some point */
 	Save_Savefile("ETR.SAV", &gSave);
 	return gsDungeon;
 }
@@ -158,6 +160,7 @@ bool Load_Game(void)
 	Load_Campaign_Data();
 	gState = gsDungeon;
 	trigger_on_enter = false;
+	trigger_zone_enter = true;
 
 	Free_Directory_Listing(filenames, count);
 

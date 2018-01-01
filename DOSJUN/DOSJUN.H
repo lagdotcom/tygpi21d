@@ -41,6 +41,7 @@ extern zone gZone;
 
 extern bool
 	trigger_on_enter,
+	trigger_zone_enter,
 	redraw_everything,
 	redraw_description,
 	redraw_fp,
