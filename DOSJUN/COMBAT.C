@@ -131,7 +131,7 @@ item *Get_Weapon(targ source)
 	}
 
 	iid = MONSTER(source)->weapon;
-	return iid ? Lookup_Item(iid) : null;
+	return iid ? Lookup_Item(&gItems, iid) : null;
 }
 
 noexport bool Get_Row(targ source)
