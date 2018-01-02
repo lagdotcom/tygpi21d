@@ -1,132 +1,129 @@
-CFLAGS = -G -I\TC\INCLUDE -I..\LIB -L\TC\LIB -mc -d -w -DMEMORY_DEBUG -DFAR_MEMORY
-DEMO_OBJS = mkdemo.obj campaign.obj io.obj items.obj monsters.obj save.obj zone.obj
-MAIN_OBJS = dosjun.obj bard.obj campaign.obj code.obj combat.obj fp.obj gfx.obj input.obj io.obj items.obj jobs.obj list.obj main.obj mem.obj monsters.obj party.obj rogue.obj save.obj sound.obj zone.obj
-EDITOR_OBJS = editor.obj gfx.obj input.obj io.obj items.obj jc.obj jc_lex.obj jc_par.obj mem.obj monsters.obj save.obj zone.obj
-JCC_OBJS = jcc.obj jc.obj jc_lex.obj jc_par.obj mem.obj
-HEADERS = bard.h campaign.h code.h combat.h common.h dosjun.h files.h fp.h gfx.h input.h io.h items.h jc.h jobs.h list.h main.h monsters.h party.h rogue.h save.h sound.h types.h zone.h
+CFLAGS = -G -I\TC\INCLUDE -I..\LIB -mc -d -w -DMEMORY_DEBUG -DFAR_MEMORY
+CFLAGS_EXE = -G -L\TC\LIB -mc -d -w
+DEMO_OBJS = MKDEMO.OBJ CAMPAIGN.OBJ IO.OBJ ITEMS.OBJ MONSTERS.OBJ SAVE.OBJ ZONE.OBJ
+MAIN_OBJS = DOSJUN.OBJ BARD.OBJ CAMPAIGN.OBJ CODE.OBJ COMBAT.OBJ FP.OBJ GFX.OBJ INPUT.OBJ IO.OBJ ITEMS.OBJ JOBS.OBJ LIST.OBJ MAIN.OBJ MEM.OBJ MONSTERS.OBJ PARTY.OBJ ROGUE.OBJ SAVE.OBJ SOUND.OBJ ZONE.OBJ
+EDITOR_OBJS = EDITOR.OBJ GFX.OBJ INPUT.OBJ IO.OBJ ITEMS.OBJ JC.OBJ JC_LEX.OBJ JC_PAR.OBJ MEM.OBJ MONSTERS.OBJ SAVE.OBJ ZONE.OBJ
+JCC_OBJS = JCC.OBJ JC.OBJ JC_LEX.OBJ JC_PAR.OBJ MEM.OBJ
+HEADERS = BARD.H CAMPAIGN.H CODE.H COMBAT.H COMMON.H DOSJUN.H FILES.H FP.H GFX.H INPUT.H IO.H ITEMS.H JC.H JOBS.H LIST.H MAIN.H MONSTERS.H MUSIC.H PARTY.H ROGUE.H SAVE.H SOUND.H TYPES.H ZONE.H
 
 all: dosjun
 
-demo: mkdemo.exe demo.zon
-dosjun: dosjun.exe
-editor: editor.exe
-jcc: jcc.exe
+demo: MKDEMO.EXE DEMO.ZON
+dosjun: DOSJUN.EXE
+editor: EDITOR.EXE
+jcc: JCC.EXE
 
-dosjun.exe: $(MAIN_OBJS) $(HEADERS)
-	TCC $(CFLAGS) DOSJUN.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
-
-editor.exe: $(EDITOR_OBJS) $(HEADERS)
-	TCC $(CFLAGS) EDITOR.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
-
-mkdemo.exe: $(DEMO_OBJS) $(HEADERS)
-	TCC $(CFLAGS) MKDEMO.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
-
-demo.zon: mkdemo.exe
+DEMO.ZON: MKDEMO.EXE
 	MKDEMO
 
-jcc.exe: $(JCC_OBJS) $(HEADERS)
-	TCC $(CFLAGS) JCC.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
+DOSJUN.EXE: $(MAIN_OBJS) $(HEADERS)
+	TCC $(CFLAGS_EXE) DOSJUN.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
-bard.obj: bard.c $(HEADERS)
-	TCC $(CFLAGS) -c bard.c
-	TLIB DOSJUN.LIB +-bard.obj, DOSJUN.TXT
+EDITOR.EXE: $(EDITOR_OBJS) $(HEADERS)
+	TCC $(CFLAGS_EXE) EDITOR.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
-campaign.obj: campaign.c $(HEADERS)
-	TCC $(CFLAGS) -c campaign.c
-	TLIB DOSJUN.LIB +-campaign.obj, DOSJUN.TXT
+MKDEMO.EXE: $(MKDEMO_OBJS) $(HEADERS)
+	TCC $(CFLAGS_EXE) MKDEMO.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
-code.obj: code.c $(HEADERS)
-	TCC $(CFLAGS) -c code.c
-	TLIB DOSJUN.LIB +-code.obj, DOSJUN.TXT
+JCC.EXE: $(JCC_OBJS) $(HEADERS)
+	TCC $(CFLAGS_EXE) JCC.OBJ DOSJUN.LIB ..\LIB\GAMELIB.LIB
 
-combat.obj: combat.c $(HEADERS)
-	TCC $(CFLAGS) -c combat.c
-	TLIB DOSJUN.LIB +-combat.obj, DOSJUN.TXT
+BARD.OBJ: BARD.C $(HEADERS)
+	TCC $(CFLAGS) -c -oBARD.OBJ BARD.C
+	TLIB DOSJUN.LIB +-BARD.OBJ, DOSJUN.TXT
 
-chars.obj: chars.c $(HEADERS)
-	TCC $(CFLAGS) -c chars.c
-	TLIB DOSJUN.LIB +-chars.obj, DOSJUN.TXT
+CAMPAIGN.OBJ: CAMPAIGN.C $(HEADERS)
+	TCC $(CFLAGS) -c -oCAMPAIGN.OBJ CAMPAIGN.C
+	TLIB DOSJUN.LIB +-CAMPAIGN.OBJ, DOSJUN.TXT
 
-dosjun.obj: dosjun.c $(HEADERS)
-	TCC $(CFLAGS) -c dosjun.c
+CODE.OBJ: CODE.C $(HEADERS)
+	TCC $(CFLAGS) -c -oCODE.OBJ CODE.C
+	TLIB DOSJUN.LIB +-CODE.OBJ, DOSJUN.TXT
 
-editor.obj: editor.c $(HEADERS)
-	TCC $(CFLAGS) -c editor.c
+COMBAT.OBJ: COMBAT.C $(HEADERS)
+	TCC $(CFLAGS) -c -oCOMBAT.OBJ COMBAT.C
+	TLIB DOSJUN.LIB +-COMBAT.OBJ, DOSJUN.TXT
 
-fp.obj: fp.c $(HEADERS)
-	TCC $(CFLAGS) -c fp.c
-	TLIB DOSJUN.LIB +-fp.obj, DOSJUN.TXT
+DOSJUN.OBJ: DOSJUN.C $(HEADERS)
+	TCC $(CFLAGS) -c -oDOSJUN.OBJ DOSJUN.C
 
-gfx.obj: gfx.c $(HEADERS)
-	TCC $(CFLAGS) -c gfx.c
-	TLIB DOSJUN.LIB +-gfx.obj, DOSJUN.TXT
+EDITOR.OBJ: EDITOR.C $(HEADERS)
+	TCC $(CFLAGS) -c -oEDITOR.OBJ EDITOR.C
 
-input.obj: input.c $(HEADERS)
-	TCC $(CFLAGS) -c input.c
-	TLIB DOSJUN.LIB +-input.obj, DOSJUN.TXT
+FP.OBJ: FP.C $(HEADERS)
+	TCC $(CFLAGS) -c -oFP.OBJ FP.C
+	TLIB DOSJUN.LIB +-FP.OBJ, DOSJUN.TXT
 
-io.obj: io.c $(HEADERS)
-	TCC $(CFLAGS) -c io.c
-	TLIB DOSJUN.LIB +-io.obj, DOSJUN.TXT
+GFX.OBJ: GFX.C $(HEADERS)
+	TCC $(CFLAGS) -c -oGFX.OBJ GFX.C
+	TLIB DOSJUN.LIB +-GFX.OBJ, DOSJUN.TXT
 
-items.obj: items.c $(HEADERS)
-	TCC $(CFLAGS) -c items.c
-	TLIB DOSJUN.LIB +-items.obj, DOSJUN.TXT
+INPUT.OBJ: INPUT.C $(HEADERS)
+	TCC $(CFLAGS) -c -oINPUT.OBJ INPUT.C
+	TLIB DOSJUN.LIB +-INPUT.OBJ, DOSJUN.TXT
 
-jc.obj: jc.c $(HEADERS)
-	TCC $(CFLAGS) -c jc.c
-	TLIB DOSJUN.LIB +-jc.obj, DOSJUN.TXT
+IO.OBJ: IO.C $(HEADERS)
+	TCC $(CFLAGS) -c -oIO.OBJ IO.C
+	TLIB DOSJUN.LIB +-IO.OBJ, DOSJUN.TXT
 
-jc_lex.obj: jc_lex.c $(HEADERS)
-	TCC $(CFLAGS) -c jc_lex.c
-	TLIB DOSJUN.LIB +-jc_lex.obj, DOSJUN.TXT
+ITEMS.OBJ: ITEMS.C $(HEADERS)
+	TCC $(CFLAGS) -c -oITEMS.OBJ ITEMS.C
+	TLIB DOSJUN.LIB +-ITEMS.OBJ, DOSJUN.TXT
 
-jc_par.obj: jc_par.c $(HEADERS)
-	TCC $(CFLAGS) -c jc_par.c
-	TLIB DOSJUN.LIB +-jc_par.obj, DOSJUN.TXT
+JC.OBJ: JC.C $(HEADERS)
+	TCC $(CFLAGS) -c -oJC.OBJ JC.C
+	TLIB DOSJUN.LIB +-JC.OBJ, DOSJUN.TXT
 
-jcc.obj: jcc.c $(HEADERS)
-	TCC $(CFLAGS) -c jcc.c
+JCC.OBJ: JCC.C $(HEADERS)
+	TCC $(CFLAGS) -c -oJCC.OBJ JCC.C
 
-jobs.obj: jobs.c $(HEADERS)
-	TCC $(CFLAGS) -c jobs.c
-	TLIB DOSJUN.LIB +-jobs.obj, DOSJUN.TXT
+JC_LEX.OBJ: JC_LEX.C $(HEADERS)
+	TCC $(CFLAGS) -c -oJC_LEX.OBJ JC_LEX.C
+	TLIB DOSJUN.LIB +-JC_LEX.OBJ, DOSJUN.TXT
 
-list.obj: list.c $(HEADERS)
-	TCC $(CFLAGS) -c list.c
-	TLIB DOSJUN.LIB +-list.obj, DOSJUN.TXT
+JC_PAR.OBJ: JC_PAR.C $(HEADERS)
+	TCC $(CFLAGS) -c -oJC_PAR.OBJ JC_PAR.C
+	TLIB DOSJUN.LIB +-JC_PAR.OBJ, DOSJUN.TXT
 
-main.obj: main.c $(HEADERS)
-	TCC $(CFLAGS) -c main.c
-	TLIB DOSJUN.LIB +-main.obj, DOSJUN.TXT
+JOBS.OBJ: JOBS.C $(HEADERS)
+	TCC $(CFLAGS) -c -oJOBS.OBJ JOBS.C
+	TLIB DOSJUN.LIB +-JOBS.OBJ, DOSJUN.TXT
 
-mem.obj: mem.c $(HEADERS)
-	TCC $(CFLAGS) -c mem.c
-	TLIB DOSJUN.LIB +-mem.obj, DOSJUN.TXT
+LIST.OBJ: LIST.C $(HEADERS)
+	TCC $(CFLAGS) -c -oLIST.OBJ LIST.C
+	TLIB DOSJUN.LIB +-LIST.OBJ, DOSJUN.TXT
 
-mkdemo.obj: mkdemo.c $(HEADERS)
-	TCC $(CFLAGS) -c mkdemo.c
+MAIN.OBJ: MAIN.C $(HEADERS)
+	TCC $(CFLAGS) -c -oMAIN.OBJ MAIN.C
+	TLIB DOSJUN.LIB +-MAIN.OBJ, DOSJUN.TXT
 
-monsters.obj: monsters.c $(HEADERS)
-	TCC $(CFLAGS) -c monsters.c
-	TLIB DOSJUN.LIB +-monsters.obj, DOSJUN.TXT
+MEM.OBJ: MEM.C $(HEADERS)
+	TCC $(CFLAGS) -c -oMEM.OBJ MEM.C
+	TLIB DOSJUN.LIB +-MEM.OBJ, DOSJUN.TXT
 
-party.obj: party.c $(HEADERS)
-	TCC $(CFLAGS) -c party.c
+MKDEMO.OBJ: MKDEMO.C $(HEADERS)
+	TCC $(CFLAGS) -c -oMKDEMO.OBJ MKDEMO.C
+
+MONSTERS.OBJ: MONSTERS.C $(HEADERS)
+	TCC $(CFLAGS) -c -oMONSTERS.OBJ MONSTERS.C
+	TLIB DOSJUN.LIB +-MONSTERS.OBJ, DOSJUN.TXT
+
+PARTY.OBJ: PARTY.C $(HEADERS)
+	TCC $(CFLAGS) -c -oPARTY.OBJ PARTY.C
 	TLIB DOSJUN.LIB +-PARTY.OBJ, DOSJUN.TXT
 
-rogue.obj: rogue.c $(HEADERS)
-	TCC $(CFLAGS) -c rogue.c
-	TLIB DOSJUN.LIB +-rogue.obj, DOSJUN.TXT
+ROGUE.OBJ: ROGUE.C $(HEADERS)
+	TCC $(CFLAGS) -c -oROGUE.OBJ ROGUE.C
+	TLIB DOSJUN.LIB +-ROGUE.OBJ, DOSJUN.TXT
 
-save.obj: save.c $(HEADERS)
-	TCC $(CFLAGS) -c save.c
-	TLIB DOSJUN.LIB +-save.obj, DOSJUN.TXT
+SAVE.OBJ: SAVE.C $(HEADERS)
+	TCC $(CFLAGS) -c -oSAVE.OBJ SAVE.C
+	TLIB DOSJUN.LIB +-SAVE.OBJ, DOSJUN.TXT
 
-sound.obj: sound.c $(HEADERS)
-	TCC $(CFLAGS) -c sound.c
-	TLIB DOSJUN.LIB +-sound.obj, DOSJUN.TXT
+SOUND.OBJ: SOUND.C $(HEADERS)
+	TCC $(CFLAGS) -c -oSOUND.OBJ SOUND.C
+	TLIB DOSJUN.LIB +-SOUND.OBJ, DOSJUN.TXT
 
-zone.obj: zone.c $(HEADERS)
-	TCC $(CFLAGS) -c zone.c
-	TLIB DOSJUN.LIB +-zone.obj, DOSJUN.TXT
+ZONE.OBJ: ZONE.C $(HEADERS)
+	TCC $(CFLAGS) -c -oZONE.OBJ ZONE.C
+	TLIB DOSJUN.LIB +-ZONE.OBJ, DOSJUN.TXT
