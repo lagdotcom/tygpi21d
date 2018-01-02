@@ -41,12 +41,12 @@ noexport void Add_Skill(character *c, skill_id sk)
 {
 	if (sk == -1) return;
 
-	Add_to_List(c->skills, sk);
+	Add_to_List(c->skills, (void*)sk);
 }
 
 bool Has_Skill(character *c, skill_id sk)
 {
-	return In_List(c->skills, sk);
+	return In_List(c->skills, (void*)sk);
 }
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
