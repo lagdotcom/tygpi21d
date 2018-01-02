@@ -201,6 +201,26 @@ noexport void Div(code_host *h)
 	Push_Stack(h, left / right);
 }
 
+noexport void And(code_host *h)
+{
+	int left = Pop_Stack(h);
+	int right = Pop_Stack(h);
+#ifdef TRACE_CODE
+	fprintf(trace, "and");
+#endif
+	Push_Stack(h, left & right);
+}
+
+noexport void Or(code_host *h)
+{
+	int left = Pop_Stack(h);
+	int right = Pop_Stack(h);
+#ifdef TRACE_CODE
+	fprintf(trace, "or");
+#endif
+	Push_Stack(h, left | right);
+}
+
 noexport void Eq(code_host *h)
 {
 	int left = Pop_Stack(h);
@@ -488,6 +508,9 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coSub:			Sub(h); return;
 		case coMul:			Mul(h); return;
 		case coDiv:			Div(h); return;
+
+		case coAnd:			And(h); return;
+		case coOr:			Or(h); return;
 
 		case coEQ:			Eq(h); return;
 		case coNEQ:			Neq(h); return;

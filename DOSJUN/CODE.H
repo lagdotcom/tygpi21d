@@ -29,6 +29,9 @@ typedef enum code_op {
 	coSub = 0x31,
 	coMul = 0x32,
 	coDiv = 0x33,
+	/* Bitwise */
+	coAnd = 0x34,
+	coOr = 0x35,
 	/* Comparison */
 	coEQ = 0x40,
 	coNEQ = 0x41,
