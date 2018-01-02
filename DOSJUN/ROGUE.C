@@ -32,29 +32,22 @@ bool Check_Hide(targ source)
 
 noexport void Hidden_Expires(targ source, int argument)
 {
-	monster *m;
-	character *c;
+	combatant *c;
 
 	if (gState == gsCombat) {
-		if (IS_PC(source)) {
-			c = Get_Pc(TARGET_PC(source));
-			Combat_Message("%s is revealed!", c->header.name);
-		} else {
-			m = Get_Monster(source);
-			Combat_Message("%s is revealed!", m->name);
-		}
+		c = Get_Combatant(source);
+		Combat_Message("%s is revealed!", c->name);
 	}
 }
 
 void Hide(targ source, targ target)
 {
-	char *name = Get_Target_Name(source);
 	int dexterity = Get_Stat(source, sDexterity);
 
 	if (dexterity > 20) dexterity = 20;
 	if (dexterity < 3) dexterity = 3;
 	Add_Buff(source, HIDE_BUFF_NAME, exTurnEndChance, 101 - (dexterity * 5), Hidden_Expires, 0);
-	Combat_Message("%s is hidden from view.", name);
+	Combat_Message("%s is hidden from view.", NAME(source));
 }
 
 bool Check_SneakAttack(targ source)
@@ -64,8 +57,8 @@ bool Check_SneakAttack(targ source)
 
 void SneakAttack(targ source, targ target)
 {
-	char *source_name = Get_Target_Name(source),
-		*target_name = Get_Target_Name(target);
+	char *source_name = NAME(source),
+		*target_name = NAME(target);
 	item *weapon = Get_Weapon(source);
 	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
 	stat_value min, max;

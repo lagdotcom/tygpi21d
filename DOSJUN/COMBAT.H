@@ -6,6 +6,7 @@
 #include "common.h"
 #include "monsters.h"
 #include "items.h"
+#include "save.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -43,13 +44,13 @@ typedef enum expiry_type {
 	exTurnEndChance,
 } expiry_type;
 
-#define TARGET_PC(i)	(-(i) - 1)
-#define TARGET_ENEMY(i)	(i)
-#define IS_PC(i)		((i) < 0)
+#define IS_PC(n) (n < PARTY_SIZE)
+#define NAME(n) (Get_Combatant(n)->name)
+#define TARGET_PC(n) (targ)(n)
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct {
+typedef struct buff {
 	char *name;
 	buff_expiry_fn expiry;
 	expiry_type type;
@@ -57,15 +58,29 @@ typedef struct {
 	int argument;
 } buff;
 
+typedef struct combatant {
+	char *name;
+	stat_value *stats;
+	character *pc;
+	monster *monster;
+	list *buffs;
+	groupnum group;
+	item_id weapon;
+	row_id row;
+	bool is_pc;
+
+	act action;
+	targ target;
+} combatant;
+
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Add_Buff(targ target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument);
 void Combat_Message(char *format, ...);
 void Damage(targ victim, int amount);
 void Free_Combat(void);
-monster *Get_Monster(targ target);
+combatant *Get_Combatant(targ target);
 stat_value Get_Stat(targ source, statistic st);
-char *Get_Target_Name(targ target);
 item *Get_Weapon(targ source);
 statistic Get_Weapon_Stat(item *weapon);
 bool Has_Buff(targ target, char *name);

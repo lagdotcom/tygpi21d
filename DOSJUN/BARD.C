@@ -29,7 +29,7 @@ bool Check_Sing(targ source)
 
 noexport void Sing_Expires(targ target, int argument)
 {
-	character *c;
+	combatant *c;
 	int pc;
 
 	if (!IS_PC(target)) {
@@ -38,19 +38,19 @@ noexport void Sing_Expires(targ target, int argument)
 	}
 
 	for (pc = 0; pc < PARTY_SIZE; pc++) {
-		c = Get_Pc(pc);
-		c->header.stats[sHitBonus] -= argument;
+		c = Get_Combatant(TARGET_PC(pc));
+		c->stats[sHitBonus] -= argument;
 	}
 
 	if (gState == gsCombat) {
-		c = Get_Pc(TARGET_PC(target));
-		Combat_Message("%s stops singing.", c->header.name);
+		c = Get_Combatant(TARGET_PC(target));
+		Combat_Message("%s stops singing.", c->name);
 	}
 }
 
 void Sing(targ source, targ target)
 {
-	character *c;
+	combatant *c;
 	int pc;
 
 	if (!IS_PC(source)) {
@@ -59,10 +59,10 @@ void Sing(targ source, targ target)
 	}
 
 	for (pc = 0; pc < PARTY_SIZE; pc++) {
-		c = Get_Pc(pc);
-		c->header.stats[sHitBonus] += SING_HITBONUS;
+		c = Get_Combatant(TARGET_PC(pc));
+		c->stats[sHitBonus] += SING_HITBONUS;
 	}
 
 	Add_Buff(source, "Singing", exTurns, 1, Sing_Expires, SING_HITBONUS);
-	Combat_Message("%s sings, and the party is inspired!", Get_Pc(TARGET_PC(source))->header.name);
+	Combat_Message("%s sings, and the party is inspired!", Get_Combatant(TARGET_PC(source))->name);
 }

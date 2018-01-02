@@ -11,9 +11,6 @@
 #define COLOUR_ACTIVE	14
 #define COLOUR_SELECT	11
 
-#define MONSTER(i)		((monster *)List_At(combat_monsters, i))
-#define NAME(i)			(IS_PC(i) ? Get_Pc(TARGET_PC(i))->header.name : MONSTER(i)->name)
-
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
@@ -28,8 +25,8 @@ typedef struct {
 
 noexport pcx_picture combat_bg;
 
+noexport list *combatants;
 noexport action *combat_actions;
-noexport list *combat_monsters;
 noexport list *combat_groups[ENCOUNTER_SIZE];
 noexport int group_y[ENCOUNTER_SIZE];
 noexport int monsters_alive;
@@ -82,7 +79,7 @@ noexport void Highlight_Ally(int pc_active, int pc_select)
 noexport void Format_Enemy_Group(groupnum group, char *buffer)
 {
 	int enemy = (int)List_At(combat_groups[group], 0);
-	sprintf(buffer, "%s x%u", MONSTER(enemy)->name, combat_groups[group]->size);
+	sprintf(buffer, "%s x%u", Get_Combatant(enemy)->name, combat_groups[group]->size);
 }
 
 #define EPANEL_X	8
@@ -96,7 +93,7 @@ noexport void Show_Enemies(void)
 	int y = EPANEL_Y;
 	char buffer[100];
 
-	Draw_Square_DB(0, 8, 8, 87, 135, 1);
+	Draw_Square_DB(0, EPANEL_X, EPANEL_Y, 87, 135, 1);
 
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
 		if (combat_groups[i]->size > 0) {
@@ -124,41 +121,20 @@ noexport void Highlight_Enemy_Group(groupnum group, int colour)
 
 item *Get_Weapon(targ source)
 {
-	item_id iid;
-
-	if (IS_PC(source)) {
-		return Get_Equipped_Weapon(TARGET_PC(source));
-	}
-
-	iid = MONSTER(source)->weapon;
-	return iid ? Lookup_Item(&gItems, iid) : null;
-}
-
-noexport bool Get_Row(targ source)
-{
-	if (IS_PC(source)) {
-		return In_Front_Row(TARGET_PC(source));
-	}
-
-	return MONSTER(source)->row == rowFront;
+	combatant *c = Get_Combatant(source);
+	return c->weapon ? Lookup_Item(&gItems, c->weapon) : null;
 }
 
 stat_value Get_Stat(targ source, statistic st)
 {
-	if (IS_PC(source)) {
-		return Get_Pc(TARGET_PC(source))->header.stats[st];
-	}
-
-	return MONSTER(source)->stats[st];
+	combatant *c = Get_Combatant(source);
+	return c->stats[st];
 }
 
 noexport void Set_Stat(targ source, statistic st, stat_value num)
 {
-	if (IS_PC(source)) {
-		Get_Pc(TARGET_PC(source))->header.stats[st] = num;
-	} else {
-		MONSTER(source)->stats[st] = num;
-	}
+	combatant *c = Get_Combatant(source);
+	c->stats[st] = num;
 }
 
 statistic Get_Weapon_Stat(item *weapon)
@@ -167,31 +143,9 @@ statistic Get_Weapon_Stat(item *weapon)
 	return (weapon->flags & ifDexterityWeapon) ? sDexterity : sStrength;
 }
 
-noexport groupnum Get_Enemy_Group(targ victim)
+combatant *Get_Combatant(targ target)
 {
-	int i;
-
-	if (IS_PC(victim)) {
-		return -1;
-	}
-
-	for (i = 0; i < ENCOUNTER_SIZE; i++) {
-		if (In_List(combat_groups[i], (void*)victim)) {
-			return i;
-		}
-	}
-
-	return -1;
-}
-
-monster *Get_Monster(targ target)
-{
-	return MONSTER(target);
-}
-
-char *Get_Target_Name(targ target)
-{
-	return NAME(target);
+	return List_At(combatants, target);
 }
 
 noexport targ Get_Random_Target(groupnum group)
@@ -209,18 +163,18 @@ bool Is_Dead(targ victim)
 
 noexport void Kill(targ victim)
 {
-	monster *m;
 	groupnum group;
-	Combat_Message("%s dies!", NAME(victim));
+	combatant *c = Get_Combatant(victim);
 
-	if (IS_PC(victim)) {
+	Combat_Message("%s dies!", c->name);
+
+	if (c->is_pc) {
 		/* TODO */
 	} else {
-		m = List_At(combat_monsters, victim);
 		monsters_alive--;
-		earned_experience += m->experience;
+		earned_experience += c->monster->experience;
 
-		group = Get_Enemy_Group(victim);
+		group = c->group;
 		if (group >= 0) {
 			Remove_from_List(combat_groups[group], (void*)victim);
 			if (combat_groups[group]->size == 0) {
@@ -246,19 +200,20 @@ void Damage(targ victim, int amount)
 
 noexport bool Check_Attack(targ source)
 {
-	bool front;
+	bool in_front_row;
 	item *weapon;
+	combatant *c = Get_Combatant(source);
 
 	/* Sneak Attack is handled separately */
 	if (Has_Buff(source, HIDE_BUFF_NAME)) return false;
 
-	front = Get_Row(source);
+	in_front_row = c->row == rowFront;
 	weapon = Get_Weapon(source);
 
-	if (weapon == null) return front;
+	if (weapon == null) return in_front_row;
 
 	if (weapon->flags & (ifMediumRange | ifLongRange)) return true;
-	return front;
+	return in_front_row;
 }
 
 noexport void Attack(targ source, targ target)
@@ -311,13 +266,13 @@ noexport void Block(targ source, targ target)
 noexport bool Check_Defend(targ source)
 {
 	/* TODO: fix for enemy */
-	char i;
+	unsigned int i;
 
 	/* There must be an alive ally to Defend */
 	if (IS_PC(source)) {
 		for (i = 0; i < PARTY_SIZE; i++) {
-			if (i == TARGET_PC(source)) continue;
-			if (Get_Pc(i)->header.stats[sHP] > 0) return true;
+			if (TARGET_PC(i) == source) continue;
+			if (!Is_Dead(TARGET_PC(i))) return true;
 		}
 	} else {
 		/* TODO */
@@ -340,21 +295,69 @@ int randint(int minimum, int maximum)
 
 noexport void Clear_Encounter(void)
 {
-	Clear_List(combat_monsters);
+	combatant *c;
+	int i;
+
+	for (i = 0; i < combatants->size; i++) {
+		c = Get_Combatant(i);
+
+		if (!c->is_pc) {
+			Free(c->stats);
+			Free_List(c->buffs);
+		}
+	}
+
+	Clear_List(combatants);
 }
 
-void Add_Monster(monster* template)
+void Add_Monster(groupnum group, monster* template)
 {
-	monster *m = SzAlloc(1, monster, "Add_Monster");
-	if (m == null)
+	list *buffs;
+	combatant *c = SzAlloc(1, combatant, "Add_Monster.combatant");
+	stat_value *stats = SzAlloc(NUM_STATS, stat_value, "Add_Monster.stats");
+	if (c == null || stats == null)
 		die("Add_Monster: out of memory");
 
-	memcpy(m, template, sizeof(monster));
-	m->stats[sHP] = m->stats[sMaxHP];
-	m->stats[sMP] = m->stats[sMaxMP];
+	buffs = New_List(ltObject, "Add_Monster.buffs");
 
-	Add_to_List(combat_monsters, m);
+	memcpy(stats, template->stats, sizeof(stat_value) * NUM_STATS);
+	stats[sHP] = stats[sMaxHP];
+	stats[sMP] = stats[sMaxMP];
+
+	c->buffs = buffs;
+	c->group = group;
+	c->is_pc = false;
+	c->monster = template;
+	c->name = template->name;
+	c->pc = null;
+	c->row = template->row;
+	c->stats = stats;
+	c->weapon = template->weapon;
+
+	Add_to_List(combat_groups[group], (void*)combatants->size);
+	Add_to_List(combatants, c);
 	monsters_alive++;
+}
+
+noexport void Add_Pc(unsigned int pc)
+{
+	character *ch = Get_Pc(pc);
+
+	combatant *c = SzAlloc(1, combatant, "Add_PC.combatant");
+	if (c == null)
+		die("Add_PC: out of memory");
+
+	c->buffs = ch->buffs;
+	c->group = -1;
+	c->is_pc = true;
+	c->monster = null;
+	c->name = ch->header.name;
+	c->pc = ch;
+	c->row = In_Front_Row(pc) ? rowFront : rowBack;
+	c->stats = ch->header.stats;
+	c->weapon = Get_Equipped_Weapon(pc)->id;
+
+	Add_to_List(combatants, c);
 }
 
 void Add_Combat_Action(act id, char *name, action_check_fn check_fn, action_do_fn act_fn, targetflags target, UINT8 priority)
@@ -370,7 +373,7 @@ void Initialise_Combat(void)
 {
 	groupnum i;
 
-	combat_monsters = New_List(ltObject, "Initialise_Combat.monsters");
+	combatants = New_List(ltObject, "Initialise_Combat.combatants");
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
 		combat_groups[i] = New_List(ltInteger, "Initialise_Combat.group_x");
 	}
@@ -393,7 +396,8 @@ void Free_Combat(void)
 {
 	groupnum i;
 
-	Free_List(combat_monsters);
+	Clear_Encounter();
+	Free_List(combatants);
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
 		Free_List(combat_groups[i]);
 	}
@@ -408,11 +412,6 @@ noexport act Get_Pc_Action(unsigned char pc)
 	act ai;
 	int *action_ids;
 	char **action_names;
-
-	if (Is_Dead(TARGET_PC(pc))) {
-		/* TODO: could be something doable when dead? */
-		return NO_ACTION;
-	}
 
 	action_ids = SzAlloc(NUM_ACTIONS, int, "Get_Pc_Action.ids");
 	action_names = SzAlloc(NUM_ACTIONS, char *, "Get_Pc_Action.names");
@@ -453,19 +452,14 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 	bool done = false;
 	action *a = &combat_actions[action_id];
 	char ch;
-	targ me, choice, change;
+	int choice, change;
 	int diff;
 
-	me = TARGET_PC(pc);
-	if (Is_Dead(me)) {
-		return 0;
-	}
-
 	/* get the easiest case out of the way */
-	if (a->targeting == tfSelf) return TARGET_PC(pc);
+	if (a->targeting == tfSelf) return pc;
 
 	if (a->targeting & tfEnemy) {
-		choice = 0;
+		choice = PARTY_SIZE;
 	} else {
 		choice = TARGET_PC(0);
 	}
@@ -473,9 +467,9 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 	Highlight_Ally(pc, COLOUR_ACTIVE);
 	while (!done) {
 		if (IS_PC(choice)) {
-			Highlight_Ally(pc, TARGET_PC(choice));
+			Highlight_Ally(pc, choice);
 		} else {
-			Highlight_Enemy_Group(choice, COLOUR_SELECT);
+			Highlight_Enemy_Group(choice - PARTY_SIZE, COLOUR_SELECT);
 		}
 
 		Show_Double_Buffer();
@@ -489,7 +483,7 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 
 			case SCAN_LEFT:
 				if (IS_PC(choice) && a->targeting & tfEnemy) {
-					change = 0;
+					change = PARTY_SIZE;
 				}
 				break;
 
@@ -501,17 +495,18 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 
 			case SCAN_UP:
 				if (IS_PC(choice) && choice != TARGET_PC(0)) {
-					change = choice + 1;
-				} else if (!IS_PC(choice) && choice > 0) {
+					change = choice - 1;
+				}
+				else if (!IS_PC(choice) && choice > PARTY_SIZE) {
 					change = choice - 1;
 				}
 				break;
 
 			case SCAN_DOWN:
 				if (IS_PC(choice) && choice != TARGET_PC(PARTY_SIZE - 1)) {
-					change = choice - 1;
+					change = choice + 1;
 				}
-				else if (!IS_PC(choice) && choice < (groups_alive - 1)) {
+				else if (!IS_PC(choice) && choice < (groups_alive + PARTY_SIZE - 1)) {
 					change = choice + 1;
 				}
 				break;
@@ -520,10 +515,10 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 		if (change != choice || done) {
 			if (IS_PC(change)) {
 				diff = IS_PC(choice) ? change - choice : -1;
-				while (!Is_Valid_Target(me, change, a->targeting)) {
+				while (!Is_Valid_Target(pc, change, a->targeting)) {
 					change += diff;
-					if (change == TARGET_PC(PARTY_SIZE)) change = TARGET_PC(0);
-					if (change == TARGET_PC(-1)) change = TARGET_PC(PARTY_SIZE - 1);
+					if (change == PARTY_SIZE) change = TARGET_PC(0);
+					if (change == -1) change = TARGET_PC(PARTY_SIZE - 1);
 				}
 
 				Highlight_Ally(pc, -1);
@@ -536,32 +531,10 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 	}
 
 	if (!IS_PC(choice)) {
-		choice = Get_Random_Target(choice);
+		choice = Get_Random_Target(choice - PARTY_SIZE);
 	}
 
 	return choice;
-}
-
-noexport void Apply_Pc_Action(unsigned char pc, act action_id, targ target_id)
-{
-	if (Is_Dead(TARGET_PC(pc))) {
-		/* TODO: show message? */
-		return;
-	}
-
-	combat_actions[action_id].act(TARGET_PC(pc), target_id);
-}
-
-noexport void Apply_Monster_Action(unsigned char monster, act action_id, targ target_id)
-{
-	if (action_id >= 0) {
-		if (Get_Stat(monster, sHP) <= 0) {
-			/* TODO: show message? */
-			return;
-		}
-
-		combat_actions[action_id].act(monster, target_id);
-	}
 }
 
 void Add_Buff(targ target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument)
@@ -569,37 +542,29 @@ void Add_Buff(targ target, char *name, expiry_type exty, int duration, buff_expi
 	buff *b;
 
 	b = Allocate(1, sizeof(buff), name);
+	/* TODO: check nullptr */
+
 	b->name = name;
 	b->type = exty;
 	b->duration = duration;
 	b->expiry = expiry;			/* is this dangerous to Read/Write? */
 	b->argument = argument;
 
-	if (IS_PC(target)) {
-		Add_to_List(Get_Pc(TARGET_PC(target))->buffs, b);
-	} else {
-		/* TODO */
-	}
+	Add_to_List(Get_Combatant(target)->buffs, b);
 }
 
 bool Has_Buff(targ target, char *name)
 {
 	buff *b;
-	monster *m;
-	character *c;
 	int i;
+	combatant *c = Get_Combatant(target);
 
-	if (IS_PC(target)) {
-		c = Get_Pc(TARGET_PC(target));
-		for (i = 0; i < c->buffs->size; i++) {
-			b = List_At(c->buffs, i);
+	for (i = 0; i < c->buffs->size; i++) {
+		b = List_At(c->buffs, i);
 
-			if (strcmp(b->name, name) == 0) {
-				return true;
-			}
+		if (strcmp(b->name, name) == 0) {
+			return true;
 		}
-	} else {
-		/* TODO */
 	}
 
 	return false;
@@ -614,71 +579,62 @@ noexport void Remove_Buff_from_List(targ owner, list *buffs, buff *b)
 void Remove_Buff(targ target, char *name)
 {
 	buff *b;
-	monster *m;
-	character *c;
 	int i;
+	combatant *c = Get_Combatant(target);
 
-	if (IS_PC(target)) {
-		c = Get_Pc(TARGET_PC(target));
-		for (i = c->buffs->size - 1; i >= 0; i--) {
-			b = List_At(c->buffs, i);
+	for (i = c->buffs->size - 1; i >= 0; i--) {
+		b = List_At(c->buffs, i);
 
-			if (strcmp(b->name, name) == 0) {
-				Remove_Buff_from_List(target, c->buffs, b);
-				return;
-			}
+		if (strcmp(b->name, name) == 0) {
+			Remove_Buff_from_List(target, c->buffs, b);
+			return;
 		}
-	} else {
-		/* TODO */
 	}
 }
 
 void Expire_Buffs(void)
 {
 	buff *b;
-	character *c;
+	combatant *c;
 	int i, j;
 
-	for (i = 0; i < PARTY_SIZE; i++) {
-		c = Get_Pc(i);
+	for (i = 0; i < combatants->size; i++) {
+		c = Get_Combatant(i);
+
 		for (j = c->buffs->size - 1; j >= 0; j--) {
 			b = List_At(c->buffs, j);
 			if (b->type == exTurns) {
 				b->duration--;
 
 				if (b->duration <= 0) {
-					Remove_Buff_from_List(TARGET_PC(i), c->buffs, b);
+					Remove_Buff_from_List(i, c->buffs, b);
 				}
 			}
 
 			if (b->type == exTurnEndChance) {
 				if (randint(0, 100) < b->duration) {
-					Remove_Buff_from_List(TARGET_PC(i), c->buffs, b);
+					Remove_Buff_from_List(i, c->buffs, b);
 				}
 			}
 		}
 	}
-
-	/* TODO: enemies */
 }
 
 void Expire_Combat_Buffs(void)
 {
 	buff *b;
-	character *c;
+	combatant *c;
 	int i, j;
 
-	for (i = 0; i < PARTY_SIZE; i++) {
-		c = Get_Pc(i);
+	for (i = 0; i < combatants->size; i++) {
+		c = Get_Combatant(i);
 		for (j = c->buffs->size - 1; j >= 0; j--) {
 			b = List_At(c->buffs, j);
 			if (b->type == exTurns || b->type == exTurnEndChance) {
-				Remove_Buff_from_List(TARGET_PC(i), c->buffs, b);
+				Remove_Buff_from_List(i, c->buffs, b);
 			}
 		}
 	}
-
-	/* TODO: enemies */
 }
 
 /* A I  R O U T I N E S ////////////////////////////////////////////////// */
@@ -686,12 +642,12 @@ void Expire_Combat_Buffs(void)
 noexport void AI_Mindless(int monster, act *action, targ *target)
 {
 	int t = randint(0, PARTY_SIZE - 1);
-	while (Get_Pc(t)->header.stats[sHP] <= 0) {
+	while (Is_Dead(t)) {
 		t = randint(0, PARTY_SIZE - 1);
 	}
 
 	*action = aAttack;
-	*target = TARGET_PC(t);
+	*target = t;
 }
 
 noexport void Show_Combat_Pc_Stats(void)
@@ -706,16 +662,8 @@ noexport void Show_Combat_Pc_Stats(void)
 noexport void Enter_Combat_Loop(void)
 {
 	int i;
+	combatant *c;
 	bool first_turn = true;
-	act pc_actions[PARTY_SIZE];
-	targ pc_targets[PARTY_SIZE];
-	act *monster_actions;
-	targ *monster_targets;
-
-	monster_actions = SzAlloc(combat_monsters->size, act, "Enter_Combat_Loop.actions");
-	monster_targets = SzAlloc(combat_monsters->size, targ, "Enter_Combat_Loop.targets");
-	if (monster_actions == null || monster_targets == null)
-		die("Enter_Combat_Loop: out of memory");
 
 	while (monsters_alive > 0) {
 		if (!first_turn) Expire_Buffs();
@@ -723,40 +671,42 @@ noexport void Enter_Combat_Loop(void)
 		Show_Combat_Pc_Stats();
 		Show_Enemies();
 
-		for (i = 0; i < PARTY_SIZE; i++) {
-			pc_actions[i] = Get_Pc_Action(i);
-			pc_targets[i] = Get_Pc_Target(i, pc_actions[i]);
-		}
+		for (i = 0; i < combatants->size; i++) {
+			c = Get_Combatant(i);
 
-		for (i = 0; i < combat_monsters->size; i++) {
 			/* TODO: could have self-res enemies? */
-			if (MONSTER(i)->stats[sHP] > 0) {
-				/* TODO: change to array lookup? */
-				switch (MONSTER(i)->ai) {
+			if (Is_Dead(i)) {
+				c->action = NO_ACTION;
+				continue;
+			}
+
+			if (c->is_pc) {
+				c->action = Get_Pc_Action(i);
+				c->target = Get_Pc_Target(i, c->action);
+			} else {
+				switch (c->monster->ai) {
 					case aiMindless:
-						AI_Mindless(i, &monster_actions[i], &monster_targets[i]);
+						AI_Mindless(i, &c->action, &c->target);
 						break;
 				}
 			}
-			else {
-				monster_actions[i] = NO_ACTION;
+		}
+
+		/* TODO: move priorities, randomising order? */
+		for (i = 0; i < combatants->size; i++) {
+			c = Get_Combatant(i);
+
+			/* TODO: could have self-res enemies? */
+			if (c->action != NO_ACTION && !Is_Dead(i)) {
+				/* TODO: retarget dead enemies? */
+				combat_actions[c->action].act(i, c->target);
 			}
-		}
-
-		for (i = 0; i < PARTY_SIZE; i++) {
-			Apply_Pc_Action(i, pc_actions[i], pc_targets[i]);
-		}
-
-		for (i = 0; i < combat_monsters->size; i++) {
-			Apply_Monster_Action(i, monster_actions[i], monster_targets[i]);
 		}
 
 		first_turn = false;
 	}
 
 	Clear_Encounter();
-	Free(monster_actions);
-	Free(monster_targets);
 
 	redraw_description = true;
 	redraw_fp = true;
@@ -777,6 +727,11 @@ void Start_Combat(encounter_id id)
 	monster *m;
 
 	Clear_Encounter();
+
+	for (i = 0; i < PARTY_SIZE; i++) {
+		Add_Pc(i);
+	}
+
 	description[0] = 0;
 	write = description;
 	write += sprintf(write, "You face:");
@@ -792,8 +747,7 @@ void Start_Combat(encounter_id id)
 			write += sprintf(write, " %s x%d", m->name, count);
 
 			while (count > 0) {
-				Add_to_List(combat_groups[groups_alive], (void*)monsters_alive);
-				Add_Monster(m);
+				Add_Monster(groups_alive, m);
 				count--;
 			}
 
@@ -817,7 +771,7 @@ void Start_Combat(encounter_id id)
 	
 	/* TODO: if you lose... shouldn't do this */
 	for (count = 0; count < PARTY_SIZE; count++) {
-		if (!Is_Dead(TARGET_PC(count))) {
+		if (!Is_Dead(count)) {
 			Add_Experience(Get_Pc(count), earned_experience);
 		}
 	}
