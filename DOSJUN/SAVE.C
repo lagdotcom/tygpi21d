@@ -9,6 +9,8 @@ void Initialise_Savefile(save *s)
 {
 	int i;
 
+	s->header.num_zones = 0;
+
 	s->script_globals = null;
 	s->script_locals = null;
 

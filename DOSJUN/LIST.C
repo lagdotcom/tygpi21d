@@ -82,6 +82,9 @@ void Clear_List(list *l)
 {
 	unsigned int i;
 
+	if (l == null)
+		return;
+
 	for (i = 0; i < l->size; i++) {
 		Free_Item(l->type, l->items[i]);
 	}
@@ -91,6 +94,9 @@ void Clear_List(list *l)
 
 void Free_List(list *l)
 {
+	if (l == null)
+		return;
+
 	Free(l->items);
 	Free(l);
 }
