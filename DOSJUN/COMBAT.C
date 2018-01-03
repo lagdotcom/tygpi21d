@@ -258,9 +258,22 @@ noexport bool Check_Block(targ source)
 	return true;
 }
 
+noexport void Block_Expires(targ target, int argument)
+{
+	combatant *c = Get_Combatant(target);
+
+	c->stats[sArmour] -= argument;
+}
+
 noexport void Block(targ source, targ target)
 {
-	/* TODO */
+	combatant *c = Get_Combatant(target);
+	int bonus = c->stats[sStrength];
+
+	c->stats[sArmour] += bonus;
+	Add_Buff(target, "Blocking", exTurns, 1, Block_Expires, bonus);
+
+	Combat_Message("%s braces themselves.", c->name);
 }
 
 noexport bool Check_Defend(targ source)
