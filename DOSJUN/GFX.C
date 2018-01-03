@@ -208,7 +208,7 @@ void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled)
 }
 
 
-/* Wrap a string to fit in a given box size. You must Free() the returned string. */
+/* Wrap a string to fit in a given box size. You must NOT Free() the returned string. */
 char *Word_Wrap(char *string, int width, int height)
 {
 	char wrapped[200];

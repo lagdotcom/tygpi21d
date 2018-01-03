@@ -31,6 +31,8 @@ bool Load_Savefile(char *filename, save *s)
 		return false;
 	}
 
+	Log("Load_Savefile: %s", filename);
+
 	fread(&s->header, sizeof(save_header), 1, fp);
 	Check_Version_Header(s->header);
 
@@ -90,6 +92,8 @@ bool Save_Savefile(char *filename, save *s)
 		printf("Could not open for reading: %s\n", filename);
 		return false;
 	}
+
+	Log("Save_Savefile: %s", filename);
 
 	Set_Version_Header(s->header);
 	fwrite(&s->header, sizeof(save_header), 1, fp);

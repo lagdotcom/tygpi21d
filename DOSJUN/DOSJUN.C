@@ -274,6 +274,10 @@ gamestate Show_Dungeon_Screen(void)
 	redraw_party = true;
 
 	while (!done) {
+		if (just_moved) {
+			Log("Show_Dungeon_Screen: at %d,%d", gSave.header.x, gSave.header.y);
+		}
+
 		Redraw_Dungeon_Screen(true);
 		Delay(1);
 
@@ -310,6 +314,9 @@ gamestate Show_Dungeon_Screen(void)
 
 void main(void)
 {
+	Clear_Log();
+	Log("main: Init");
+
 	printf("Initialising DOSJUN...\n");
 	Initialise_Campaign(&gCampaign);
 	Initialise_Items(&gItems);
@@ -362,4 +369,6 @@ void main(void)
 
 	printf("OK!\n");
 	Stop_Memory_Tracking();
+
+	Log("main: Done");
 }

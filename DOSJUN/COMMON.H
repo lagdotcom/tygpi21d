@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include "types.h"
+#include "logging.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -79,7 +80,7 @@ typedef UINT16 tileflag_id;
 typedef UINT8 walltype_id;
 typedef UINT8 zone_id;
 
-#define die(msg) { Stop_Memory_Tracking(); printf("%s", msg); exit(1); }
+#define die(msg) { Stop_Memory_Tracking(); Log("die/%s", msg); printf("%s", msg); exit(1); }
 
 /* Memory Debugging */
 

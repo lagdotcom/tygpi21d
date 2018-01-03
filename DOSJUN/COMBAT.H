@@ -44,7 +44,7 @@ typedef enum expiry_type {
 	exTurnEndChance,
 } expiry_type;
 
-#define IS_PC(n) (n < PARTY_SIZE)
+#define IS_PC(n) ((n) < PARTY_SIZE)
 #define NAME(n) (Get_Combatant(n)->name)
 #define TARGET_PC(n) (targ)(n)
 

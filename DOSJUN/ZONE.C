@@ -35,6 +35,8 @@ bool Load_Zone(char *filename, zone *z)
 		return false;
 	}
 
+	Log("Load_Zone: %s", filename);
+
 	fread(h, sizeof(zone_header), 1, fp);
 	Check_Version_Header(z->header);
 

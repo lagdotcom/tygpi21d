@@ -20,6 +20,8 @@ bool Load_Campaign(char *filename, campaign *c)
 		return false;
 	}
 
+	Log("Load_Campaign: %s", filename);
+
 	fread(&c->header, sizeof(campaign_header), 1, fp);
 	Check_Version_Header(c->header);
 

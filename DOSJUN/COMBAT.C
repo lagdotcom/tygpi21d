@@ -343,9 +343,9 @@ noexport void Add_Pc(unsigned int pc)
 {
 	character *ch = Get_Pc(pc);
 
-	combatant *c = SzAlloc(1, combatant, "Add_PC.combatant");
+	combatant *c = SzAlloc(1, combatant, "Add_Pc");
 	if (c == null)
-		die("Add_PC: out of memory");
+		die("Add_Pc: out of memory");
 
 	c->buffs = ch->buffs;
 	c->group = -1;
@@ -542,7 +542,8 @@ void Add_Buff(targ target, char *name, expiry_type exty, int duration, buff_expi
 	buff *b;
 
 	b = Allocate(1, sizeof(buff), name);
-	/* TODO: check nullptr */
+	if (b == null)
+		die("Add_Buff: out of memory");
 
 	b->name = name;
 	b->type = exty;
@@ -726,6 +727,7 @@ void Start_Combat(encounter_id id)
 	encounter *en = &gZone.encounters[id];
 	monster *m;
 
+	Log("Start_Combat: #%d", id);
 	Clear_Encounter();
 
 	for (i = 0; i < PARTY_SIZE; i++) {

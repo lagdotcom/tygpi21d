@@ -200,6 +200,9 @@ list *Read_List(FILE *fp, char *tag)
 
 			case ltObject:
 				obj = Allocate(l->size, l->object_size, tag);
+				if (obj == null)
+					die("Read_List: out of memory");
+
 				fread(obj, l->object_size, l->size, fp);
 				for (i = 0; i < l->size; i++)
 					l->items[i] = &obj[i];

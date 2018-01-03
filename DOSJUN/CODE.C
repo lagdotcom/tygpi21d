@@ -567,6 +567,8 @@ bool Run_Code(script_id id)
 	bool result;
 	code_host h;
 
+	Log("Run_Code: #%d", id);
+
 #ifdef TRACE_CODE
 	trace = fopen("JUNTRACE.TXT", "w");
 #endif
