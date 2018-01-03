@@ -45,7 +45,8 @@ extern bool
 	redraw_everything,
 	redraw_description,
 	redraw_fp,
-	redraw_party;
+	redraw_party,
+	can_save;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 

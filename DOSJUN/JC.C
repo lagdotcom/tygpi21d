@@ -46,6 +46,7 @@ bool Is_Code_Keyword(char *string)
 	if (!strcmp(string, "Local")) return true;
 	if (!strcmp(string, "PcSpeak")) return true;
 	if (!strcmp(string, "Return")) return true;
+	if (!strcmp(string, "Safe")) return true;
 	if (!strcmp(string, "Script")) return true;
 	if (!strcmp(string, "SetDanger")) return true;
 	if (!strcmp(string, "SetTileColour")) return true;

@@ -639,6 +639,14 @@ noexport bool Call_SetDanger_State(jc_parser *p)
 	return true;
 }
 
+noexport bool Call_SetDanger_State(jc_parser *p)
+{
+	CONSUME();
+
+	EMIT(coSafe);
+	return true;
+}
+
 noexport bool Keyword_State(jc_parser *p)
 {
 	if (!p->in_script) {
@@ -659,6 +667,7 @@ noexport bool Keyword_State(jc_parser *p)
 		if (MATCH("Teleport")) return Call_Teleport_State(p);
 		if (MATCH("SetTileThing")) return Call_SetTileThing_State(p);
 		if (MATCH("SetDanger")) return Call_SetDanger_State(p);
+		if (MATCH("Safe")) return Call_Safe_State(p);
 
 		if (MATCH("If")) return Start_If_State(p);
 		if (MATCH("ElseIf")) return Start_ElseIf_State(p);

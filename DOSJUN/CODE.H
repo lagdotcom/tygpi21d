@@ -55,6 +55,7 @@ typedef enum code_op {
 	coTeleport = 0xA8,
 	coSetTileThing = 0xA9,
 	coSetDanger = 0xAA,
+	coSafe = 0xAB,
 } code_op;
 
 typedef enum code_internal {

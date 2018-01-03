@@ -486,6 +486,15 @@ noexport void SetDanger(code_host *h)
 	gSave.header.danger = danger;
 }
 
+noexport void Safe(code_host *h)
+{
+#ifdef TRACE_CODE
+	fprintf(trace, "safe");
+#endif
+
+	can_save = true;
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -534,6 +543,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coTeleport:	Teleport(h); return;
 		case coSetTileThing: SetTileThing(h); return;
 		case coSetDanger:	SetDanger(h); return;
+		case coSafe:		Safe(h); return;
 	}
 
 	h->running = false;

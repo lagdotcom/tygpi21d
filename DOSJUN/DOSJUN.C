@@ -18,7 +18,8 @@ bool redraw_everything,
 	redraw_description;
 bool trigger_on_enter,
 	trigger_zone_enter,
-	just_moved;
+	just_moved,
+	can_save;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -117,9 +118,9 @@ void Show_Game_String(char *string, bool wait_for_key)
 		Show_Double_Buffer();
 		Delay(5);
 		Get_Next_Scan_Code();
-	}
 
-	redraw_description = true;
+		redraw_description = true;
+	}
 }
 
 void Draw_Description(void)
@@ -177,6 +178,7 @@ bool Try_Move_Forward(void)
 	redraw_fp = true;
 	trigger_on_enter = true;
 	just_moved = true;
+	can_save = false;
 
 	return true;
 }
@@ -285,6 +287,18 @@ gamestate Show_Dungeon_Screen(void)
 			case SCAN_Q:
 				new = gsQuit;
 				done = 1;
+				break;
+
+			case SCAN_S:
+				if (can_save) {
+					if (Save_Savefile("ETR.SAV", &gSave)) {
+						Show_Game_String("Game saved.", true);
+					} else {
+						Show_Game_String("Error while saving.", true);
+					}
+				} else {
+					Show_Game_String("It's not safe here.", true);
+				}
 				break;
 
 			case SCAN_LEFT:
