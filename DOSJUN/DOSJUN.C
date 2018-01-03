@@ -257,6 +257,8 @@ void Redraw_Dungeon_Screen(bool script)
 	redraw_everything = false;
 
 	Show_Double_Buffer();
+
+	just_moved = false;
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -305,14 +307,12 @@ gamestate Show_Dungeon_Screen(void)
 				gSave.header.facing = Turn_Left(gSave.header.facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
-				just_moved = false;
 				break;
 
 			case SCAN_RIGHT:
 				gSave.header.facing = Turn_Right(gSave.header.facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
-				just_moved = false;
 				break;
 
 			case SCAN_UP:

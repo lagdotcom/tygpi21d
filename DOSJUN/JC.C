@@ -65,6 +65,7 @@ internal_id Get_Internal_Id(char *string)
 	if (!strcmp(string, "Facing")) return internalFacing;
 	if (!strcmp(string, "X")) return internalX;
 	if (!strcmp(string, "Y")) return internalY;
+	if (!strcmp(string, "JustMoved")) return internalJustMoved;
 
 	return internalInvalid;
 }

@@ -106,6 +106,13 @@ Script rat_fight
 	PcSpeak nra, "Let's just keep looking. There has to be an exit."
 EndScript
 
+Script safe_tile
+	Safe
+	If @JustMoved == 1
+		Text "You feel safe here."
+	EndIf
+EndScript
+
 Script Z_ENTER
 	If q_status >= q_key_found
 		SetTileThing 5, 4, 0

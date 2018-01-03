@@ -63,6 +63,7 @@ typedef enum code_internal {
 	internalY,
 	internalFacing,
 	internalDanger,
+	internalJustMoved,
 
 	internalInvalid = 0xFF
 } code_internal;

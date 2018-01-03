@@ -46,6 +46,7 @@ extern bool
 	redraw_description,
 	redraw_fp,
 	redraw_party,
+	just_moved,
 	can_save;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */

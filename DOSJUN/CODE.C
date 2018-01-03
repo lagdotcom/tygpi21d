@@ -120,6 +120,10 @@ noexport void Push_Internal(code_host *h)
 		case internalDanger:
 			Push_Stack(h, gSave.header.danger);
 			return;
+
+		case internalJustMoved:
+			Push_Stack(h, Bool(just_moved));
+			return;
 	}
 
 	Code_Error("Unknown internal #%d", index);
