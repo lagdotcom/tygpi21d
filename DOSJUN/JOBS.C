@@ -23,6 +23,14 @@ typedef struct job_spec {
 #define sNONE (-1)
 #define skNONE (-1)
 
+#define Y_LEVEL	8
+#define Y_HP	24
+#define Y_MP	32
+#define Y_STAT	40
+#define Y_LEARN 56
+#define Y_SKILL	64
+#define Y_DESC	72
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 noexport char buffer[100];
@@ -185,11 +193,38 @@ char *Stat_Name(statistic st)
 
 noexport skill_id Choose_Skill_Menu(skill_id a, skill_id b)
 {
-	/* TODO */
-	return a;
+	unsigned char ch;
+	bool first = true;
+
+	Blit_String_DB(8, Y_LEARN, 15, "Choose a skill to learn:", 0);
+
+	Draw_Wrapped_String(  8, Y_DESC, 144, 64, 31, skills[a].description, false);
+	Draw_Wrapped_String(168, Y_DESC, 144, 64, 31, skills[b].description, false);
+
+	while (true) {
+		Blit_String_DB(  8, Y_SKILL, first ? 11 : 15, skills[a].name, 0);
+		Blit_String_DB(168, Y_SKILL, first ? 15 : 11, skills[b].name, 0);
+		Show_Double_Buffer();
+
+		ch = Get_Next_Scan_Code();
+
+		switch (ch) {
+			case SCAN_ENTER:
+				return first ? a : b;
+
+			case SCAN_LEFT:
+				first = true;
+				break;
+
+			case SCAN_RIGHT:
+				first = false;
+				break;
+		}
+	}
 }
 
-noexport void Choose_Skill(character *c, skill_id a, skill_id b)
+/* Let the user choose which skill to learn on level up. Returns true if a screen redraw is needed. */
+noexport bool Choose_Skill(character *c, skill_id a, skill_id b)
 {
 	/* TODO: amnesia? */
 	bool immediate = true;
@@ -197,7 +232,7 @@ noexport void Choose_Skill(character *c, skill_id a, skill_id b)
 
 	if (a == skNONE) {
 		if (b == skNONE) {
-			return;
+			return true;
 		}
 
 		learnt = b;
@@ -212,12 +247,13 @@ noexport void Choose_Skill(character *c, skill_id a, skill_id b)
 
 	if (immediate) {
 		sprintf(buffer, "%s learns %s!", c->header.name, skills[learnt].name);
-		Blit_String_DB(8, 48, 15, buffer, 0);
+		Blit_String_DB(8, Y_SKILL, 15, buffer, 0);
 
-		Draw_Wrapped_String(8, 56, SCREEN_WIDTH - 16, 64, 31, skills[learnt].description, false);
+		Draw_Wrapped_String(8, Y_DESC, SCREEN_WIDTH - 16, 64, 31, skills[learnt].description, false);
 	}
 
 	Add_Skill(c, learnt);
+	return immediate;
 }
 
 void Level_Up(character *c)
@@ -236,13 +272,13 @@ void Level_Up(character *c)
 	ch->stats[sHP] += j->hp_per_level;
 	ch->stats[sMaxHP] += j->hp_per_level;
 	sprintf(buffer, "+%d HP", j->hp_per_level);
-	Blit_String_DB(8, 24, 15, buffer, 0);
+	Blit_String_DB(8, Y_HP, 15, buffer, 0);
 
 	if (j->mp_per_level > 0) {
 		ch->stats[sMP] += j->mp_per_level;
 		ch->stats[sMaxMP] += j->mp_per_level;
 		sprintf(buffer, "+%d MP", j->mp_per_level);
-		Blit_String_DB(8, 32, 15, buffer, 0);
+		Blit_String_DB(8, Y_MP, 15, buffer, 0);
 	}
 
 	if (ch->job_level[ch->job] < JOB_LEVELS) {
@@ -250,21 +286,21 @@ void Level_Up(character *c)
 		if (l->stat != sNONE) {
 			ch->stats[l->stat]++;
 			sprintf(buffer, "+1 %s", Stat_Name(l->stat));
-			Blit_String_DB(8, 40, 15, buffer, 0);
+			Blit_String_DB(8, Y_STAT, 15, buffer, 0);
 		}
 
 		sprintf(buffer, "%s becomes %s level %d!", ch->name, Job_Name(ch->job), *level + 1);
-		Blit_String_DB(8, 8, 15, buffer, 0);
+		Blit_String_DB(8, Y_LEVEL, 15, buffer, 0);
 
-		Choose_Skill(c, l->a, l->b);
-
-		Show_Double_Buffer();
-		Get_Next_Scan_Code();
+		if (Choose_Skill(c, l->a, l->b)) {
+			Show_Double_Buffer();
+			Get_Next_Scan_Code();
+		}
 
 		(*level)++;
 	} else {
 		sprintf(buffer, "%s gains a level!", ch->name);
-		Blit_String_DB(8, 8, 15, buffer, 0);
+		Blit_String_DB(8, Y_LEVEL, 15, buffer, 0);
 
 		Show_Double_Buffer();
 		Get_Next_Scan_Code();
