@@ -344,6 +344,7 @@ void Add_Monster(groupnum group, monster* template)
 	c->name = template->name;
 	c->pc = null;
 	c->row = template->row;
+	c->skills = null;	/* TODO */
 	c->stats = stats;
 	c->weapon = template->weapon;
 
@@ -367,6 +368,7 @@ noexport void Add_Pc(unsigned int pc)
 	c->name = ch->header.name;
 	c->pc = ch;
 	c->row = In_Front_Row(pc) ? rowFront : rowBack;
+	c->skills = ch->skills;
 	c->stats = ch->header.stats;
 	c->weapon = Get_Equipped_Weapon(pc)->id;
 

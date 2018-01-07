@@ -321,7 +321,7 @@ gamestate Show_Dungeon_Screen(void)
 
 			/* TESTING ONLY */
 			case SCAN_L:
-				Level_Up(&gSave.characters[0]);
+				Level_Up(&gSave.characters[3]);
 				break;
 		}
 	}

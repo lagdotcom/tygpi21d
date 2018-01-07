@@ -125,6 +125,10 @@ bool In_List(list *l, void *match)
 {
 	unsigned int i;
 
+	if (l == null) {
+		return false;
+	}
+
 	for (i = 0; i < l->size; i++) {
 		void *item = l->items[i];
 

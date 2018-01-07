@@ -14,20 +14,10 @@
 
 bool Check_Hide(targ source)
 {
-	monster *m;
-	character *c;
-
 	if (Has_Buff(source, HIDE_BUFF_NAME))
 		return false;
 
-	if (IS_PC(source)) {
-		c = Get_Pc(TARGET_PC(source));
-
-		return Has_Skill(c, skHide);
-	} else {
-		/* TODO */
-		return false;
-	}
+	return Has_Skill(Get_Combatant(source), skHide);
 }
 
 noexport void Hidden_Expires(targ source, int argument)
@@ -57,7 +47,8 @@ bool Check_SneakAttack(targ source)
 
 void SneakAttack(targ source, targ target)
 {
-	char *source_name = NAME(source),
+	combatant *attacker = Get_Combatant(source);
+	char *source_name = attacker->name,
 		*target_name = NAME(target);
 	item *weapon = Get_Weapon(source);
 	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
@@ -86,6 +77,14 @@ void SneakAttack(targ source, targ target)
 		roll = randint(min, max) * HIDE_MULTIPLIER - Get_Stat(target, sArmour);
 		if (roll > 0) {
 			Damage(target, roll);
+
+			if (Has_Skill(attacker, skBludgeon)) {
+				/* TODO: stun */
+			}
+
+			if (Has_Skill(attacker, skVenom)) {
+				/* TODO: poison */
+			}
 		} else {
 			Combat_Message("The blow glances off.");
 		}

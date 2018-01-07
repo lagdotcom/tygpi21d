@@ -14,17 +14,8 @@
 
 bool Check_Sing(targ source)
 {
-	int pc;
-
-	if (!IS_PC(source)) {
-		/* TODO */
-		return false;
-	}
-
-	pc = TARGET_PC(source);
-	
 	/* TODO: check for silence? */
-	return Has_Skill(Get_Pc(pc), skSing);
+	return Has_Skill(Get_Combatant(source), skSing);
 }
 
 noexport void Sing_Expires(targ target, int argument)

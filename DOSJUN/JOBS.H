@@ -12,7 +12,10 @@
 
 typedef enum skill_id {
 	skSing,
+
 	skHide,
+	skBludgeon,
+	skVenom,
 
 	NUM_SKILLS
 } skill_id;
@@ -24,13 +27,15 @@ typedef struct skill_spec {
 
 extern skill_spec skills[NUM_SKILLS];
 
+/* Check if a combatant/character has a skill learnt. */
+#define Has_Skill(c, sk) In_List(c->skills, (void*)sk)
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Add_Experience(character *c, UINT32 xp);
 void Free_Jobs(void);
-bool Has_Skill(character *c, skill_id sk);
 void Initialise_Jobs(void);
 void Level_Up(character *c);
 void Set_Job(character *c, job job);

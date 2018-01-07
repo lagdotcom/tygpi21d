@@ -219,8 +219,15 @@ char *Word_Wrap(char *string, int width, int height)
 	strcpy(wrapped, string);
 
 	while (string[i]) {
-		if (string[i] == ' ') {
-			last_space = i;
+		switch (string[i]) {
+			case ' ':
+				last_space = i;
+				break;
+
+			case '\n':
+				last_space = i;
+				x = -1;
+				break;
 		}
 
 		x++;

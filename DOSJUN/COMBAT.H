@@ -64,6 +64,7 @@ typedef struct combatant {
 	character *pc;
 	monster *monster;
 	list *buffs;
+	list *skills;
 	groupnum group;
 	item_id weapon;
 	row_id row;

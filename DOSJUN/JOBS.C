@@ -67,11 +67,6 @@ noexport void Add_Skill(character *c, skill_id sk)
 	Add_to_List(c->skills, (void*)sk);
 }
 
-bool Has_Skill(character *c, skill_id sk)
-{
-	return In_List(c->skills, (void*)sk);
-}
-
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -128,7 +123,7 @@ void Initialise_Jobs(void)
 
 	Setup_Job(jRogue, "Rogue", 6, 0);
 	Setup_Job_Level(jRogue, 1, sNONE, skHide, skNONE);
-	Setup_Job_Level(jRogue, 2, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRogue, 2, sNONE, skBludgeon, skVenom);
 	Setup_Job_Level(jRogue, 3, sNONE, skNONE, skNONE);
 	Setup_Job_Level(jRogue, 4, sDexterity, skNONE, skNONE);
 	Setup_Job_Level(jRogue, 5, sNONE, skNONE, skNONE);
@@ -150,8 +145,11 @@ void Initialise_Jobs(void)
 	Setup_Job_Level(jRanger, 9, sNONE, skNONE, skNONE);
 	Setup_Job_Level(jRanger, 10, sStrength, skNONE, skNONE);
 
-	Setup_Skill(skSing, "Sing", "Inspire the party to greater deeds. Attacks will hit more often.");
-	Setup_Skill(skHide, "Hide", "Retreat into the shadows. Next attack does bonus damage.");
+	Setup_Skill(skSing, "Sing", "Inspire the party to greater deeds.\nAttacks will hit more often.");
+
+	Setup_Skill(skHide, "Hide", "Retreat into the shadows.\nNext attack does bonus damage.");
+	Setup_Skill(skBludgeon, "Bludgeon", "Carry a large stick.\nYour hidden strikes stun your target.");
+	Setup_Skill(skVenom, "Venom", "Carry a small bag.\nYour hidden strikes poison your target.");
 }
 
 void Free_Jobs(void)
