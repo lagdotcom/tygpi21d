@@ -55,6 +55,7 @@ noexport void Add_Skill(character *c, skill_id sk)
 {
 	if (sk == skNONE) return;
 
+	Log("Add_Skill: %s +%s", c->header.name, skills[sk].name);
 	Add_to_List(c->skills, (void*)sk);
 }
 
@@ -226,6 +227,8 @@ void Level_Up(character *c)
 	job_spec *j = &jobspecs[ch->job];
 	level_spec *l;
 
+	Log("Level_Up: %s %d+1", ch->name, ch->total_level);
+
 	/* go to the level up screen */
 	redraw_everything = true;
 	Fill_Double_Buffer(0);	/* TODO: show LEVELUP.PCX or something? */
@@ -250,7 +253,7 @@ void Level_Up(character *c)
 			Blit_String_DB(8, 40, 15, buffer, 0);
 		}
 
-		sprintf(buffer, "%s becomes %s level %d!", c->header.name, Job_Name(c->header.job), *level + 1);
+		sprintf(buffer, "%s becomes %s level %d!", ch->name, Job_Name(ch->job), *level + 1);
 		Blit_String_DB(8, 8, 15, buffer, 0);
 
 		Choose_Skill(c, l->a, l->b);
@@ -260,7 +263,7 @@ void Level_Up(character *c)
 
 		(*level)++;
 	} else {
-		sprintf(buffer, "%s gains a level!", c->header.name);
+		sprintf(buffer, "%s gains a level!", ch->name);
 		Blit_String_DB(8, 8, 15, buffer, 0);
 
 		Show_Double_Buffer();
@@ -268,6 +271,7 @@ void Level_Up(character *c)
 	}
 
 	ch->experience = 0;
+	ch->total_level++;
 }
 
 void Add_Experience(character *c, UINT32 xp)
