@@ -318,6 +318,11 @@ gamestate Show_Dungeon_Screen(void)
 			case SCAN_UP:
 				Try_Move_Forward();
 				break;
+
+			/* TESTING ONLY */
+			case SCAN_L:
+				Level_Up(&gSave.characters[0]);
+				break;
 		}
 	}
 

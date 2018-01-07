@@ -1,5 +1,6 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
+#include "gamelib.h"
 #include "dosjun.h"
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
@@ -17,9 +18,16 @@ typedef struct job_spec {
 	level_spec levels[JOB_LEVELS];
 } job_spec;
 
+/* D E F I N E S ///////////////////////////////////////////////////////// */
+
+#define sNONE (-1)
+#define skNONE (-1)
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
+noexport char buffer[100];
 noexport job_spec jobspecs[NUM_JOBS];
+skill_spec skills[NUM_SKILLS];
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -37,9 +45,15 @@ noexport void Setup_Job_Level(job job, int level, statistic stat, skill_id sa, s
 	jobspecs[job].levels[level - 1].b = sb;
 }
 
+noexport void Setup_Skill(skill_id sk, char *name, char *description)
+{
+	skills[sk].name = name;
+	skills[sk].description = description;
+}
+
 noexport void Add_Skill(character *c, skill_id sk)
 {
-	if (sk == -1) return;
+	if (sk == skNONE) return;
 
 	Add_to_List(c->skills, (void*)sk);
 }
@@ -56,76 +70,79 @@ bool Has_Skill(character *c, skill_id sk)
 void Initialise_Jobs(void)
 {
 	Setup_Job(jFighter, "Fighter", 10, 0);
-	Setup_Job_Level(jFighter, 1, -1, -1, -1);
-	Setup_Job_Level(jFighter, 2, -1, -1, -1);
-	Setup_Job_Level(jFighter, 3, -1, -1, -1);
-	Setup_Job_Level(jFighter, 4, sStrength, -1, -1);
-	Setup_Job_Level(jFighter, 5, -1, -1, -1);
-	Setup_Job_Level(jFighter, 6, -1, -1, -1);
-	Setup_Job_Level(jFighter, 7, -1, -1, -1);
-	Setup_Job_Level(jFighter, 8, sStrength, -1, -1);
-	Setup_Job_Level(jFighter, 9, -1, -1, -1);
-	Setup_Job_Level(jFighter, 10, sStrength, -1, -1);
+	Setup_Job_Level(jFighter, 1, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jFighter, 2, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jFighter, 3, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jFighter, 4, sStrength, skNONE, skNONE);
+	Setup_Job_Level(jFighter, 5, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jFighter, 6, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jFighter, 7, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jFighter, 8, sStrength, skNONE, skNONE);
+	Setup_Job_Level(jFighter, 9, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jFighter, 10, sStrength, skNONE, skNONE);
 
 	Setup_Job(jCleric, "Cleric", 7, 3);
-	Setup_Job_Level(jCleric, 1, -1, -1, -1);
-	Setup_Job_Level(jCleric, 2, -1, -1, -1);
-	Setup_Job_Level(jCleric, 3, -1, -1, -1);
-	Setup_Job_Level(jCleric, 4, sIntelligence, -1, -1);
-	Setup_Job_Level(jCleric, 5, -1, -1, -1);
-	Setup_Job_Level(jCleric, 6, -1, -1, -1);
-	Setup_Job_Level(jCleric, 7, -1, -1, -1);
-	Setup_Job_Level(jCleric, 8, sStrength, -1, -1);
-	Setup_Job_Level(jCleric, 9, -1, -1, -1);
-	Setup_Job_Level(jCleric, 10, sIntelligence, -1, -1);
+	Setup_Job_Level(jCleric, 1, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jCleric, 2, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jCleric, 3, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jCleric, 4, sIntelligence, skNONE, skNONE);
+	Setup_Job_Level(jCleric, 5, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jCleric, 6, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jCleric, 7, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jCleric, 8, sStrength, skNONE, skNONE);
+	Setup_Job_Level(jCleric, 9, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jCleric, 10, sIntelligence, skNONE, skNONE);
 
 	Setup_Job(jMage, "Mage", 4, 4);
-	Setup_Job_Level(jMage, 1, -1, -1, -1);
-	Setup_Job_Level(jMage, 2, -1, -1, -1);
-	Setup_Job_Level(jMage, 3, -1, -1, -1);
-	Setup_Job_Level(jMage, 4, sIntelligence, -1, -1);
-	Setup_Job_Level(jMage, 5, -1, -1, -1);
-	Setup_Job_Level(jMage, 6, -1, -1, -1);
-	Setup_Job_Level(jMage, 7, -1, -1, -1);
-	Setup_Job_Level(jMage, 8, sIntelligence, -1, -1);
-	Setup_Job_Level(jMage, 9, -1, -1, -1);
-	Setup_Job_Level(jMage, 10, sIntelligence, -1, -1);
+	Setup_Job_Level(jMage, 1, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jMage, 2, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jMage, 3, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jMage, 4, sIntelligence, skNONE, skNONE);
+	Setup_Job_Level(jMage, 5, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jMage, 6, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jMage, 7, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jMage, 8, sIntelligence, skNONE, skNONE);
+	Setup_Job_Level(jMage, 9, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jMage, 10, sIntelligence, skNONE, skNONE);
 
 	Setup_Job(jBard, "Bard", 5, 0);
-	Setup_Job_Level(jBard, 1, -1, skSing, -1);
-	Setup_Job_Level(jBard, 2, -1, -1, -1);
-	Setup_Job_Level(jBard, 3, -1, -1, -1);
-	Setup_Job_Level(jBard, 4, sDexterity, -1, -1);
-	Setup_Job_Level(jBard, 5, -1, -1, -1);
-	Setup_Job_Level(jBard, 6, -1, -1, -1);
-	Setup_Job_Level(jBard, 7, -1, -1, -1);
-	Setup_Job_Level(jBard, 8, sIntelligence, -1, -1);
-	Setup_Job_Level(jBard, 9, -1, -1, -1);
-	Setup_Job_Level(jBard, 10, sDexterity, -1, -1);
+	Setup_Job_Level(jBard, 1, sNONE, skSing, skNONE);
+	Setup_Job_Level(jBard, 2, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jBard, 3, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jBard, 4, sDexterity, skNONE, skNONE);
+	Setup_Job_Level(jBard, 5, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jBard, 6, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jBard, 7, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jBard, 8, sIntelligence, skNONE, skNONE);
+	Setup_Job_Level(jBard, 9, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jBard, 10, sDexterity, skNONE, skNONE);
 
 	Setup_Job(jRogue, "Rogue", 6, 0);
-	Setup_Job_Level(jRogue, 1, -1, skHide, -1);
-	Setup_Job_Level(jRogue, 2, -1, -1, -1);
-	Setup_Job_Level(jRogue, 3, -1, -1, -1);
-	Setup_Job_Level(jRogue, 4, sDexterity, -1, -1);
-	Setup_Job_Level(jRogue, 5, -1, -1, -1);
-	Setup_Job_Level(jRogue, 6, -1, -1, -1);
-	Setup_Job_Level(jRogue, 7, -1, -1, -1);
-	Setup_Job_Level(jRogue, 8, sDexterity, -1, -1);
-	Setup_Job_Level(jRogue, 9, -1, -1, -1);
-	Setup_Job_Level(jRogue, 10, sDexterity, -1, -1);
+	Setup_Job_Level(jRogue, 1, sNONE, skHide, skNONE);
+	Setup_Job_Level(jRogue, 2, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRogue, 3, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRogue, 4, sDexterity, skNONE, skNONE);
+	Setup_Job_Level(jRogue, 5, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRogue, 6, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRogue, 7, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRogue, 8, sDexterity, skNONE, skNONE);
+	Setup_Job_Level(jRogue, 9, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRogue, 10, sDexterity, skNONE, skNONE);
 
 	Setup_Job(jRanger, "Ranger", 6, 0);
-	Setup_Job_Level(jRanger, 1, -1, -1, -1);
-	Setup_Job_Level(jRanger, 2, -1, -1, -1);
-	Setup_Job_Level(jRanger, 3, -1, -1, -1);
-	Setup_Job_Level(jRanger, 4, sStrength, -1, -1);
-	Setup_Job_Level(jRanger, 5, -1, -1, -1);
-	Setup_Job_Level(jRanger, 6, -1, -1, -1);
-	Setup_Job_Level(jRanger, 7, -1, -1, -1);
-	Setup_Job_Level(jRanger, 8, sDexterity, -1, -1);
-	Setup_Job_Level(jRanger, 9, -1, -1, -1);
-	Setup_Job_Level(jRanger, 10, sStrength, -1, -1);
+	Setup_Job_Level(jRanger, 1, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRanger, 2, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRanger, 3, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRanger, 4, sStrength, skNONE, skNONE);
+	Setup_Job_Level(jRanger, 5, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRanger, 6, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRanger, 7, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRanger, 8, sDexterity, skNONE, skNONE);
+	Setup_Job_Level(jRanger, 9, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jRanger, 10, sStrength, skNONE, skNONE);
+
+	Setup_Skill(skSing, "Sing", "Inspire the party to greater deeds. Attacks will hit more often.");
+	Setup_Skill(skHide, "Hide", "Retreat into the shadows. Next attack does bonus damage.");
 }
 
 void Free_Jobs(void)
@@ -146,6 +163,62 @@ void Set_Job(character *c, job job)
 	}
 }
 
+#define Job_Name(n) (jobspecs[n].name)
+
+char *Stat_Name(statistic st)
+{
+	switch (st) {
+		case sMaxHP: return "HP";
+		case sMaxMP: return "MP";
+		case sMinDamage: return "Minimum Damage";
+		case sMaxDamage: return "Maximum Damage";
+		case sArmour: return "Armour";
+		case sStrength: return "Strength";
+		case sDexterity: return "Dexterity";
+		case sIntelligence: return "Intelligence";
+		case sHitBonus: return "Hit Bonus";
+		case sDodgeBonus: return "Dodge Bonus";
+		default: return "???";
+	}
+}
+
+noexport skill_id Choose_Skill_Menu(skill_id a, skill_id b)
+{
+	/* TODO */
+	return a;
+}
+
+noexport void Choose_Skill(character *c, skill_id a, skill_id b)
+{
+	/* TODO: amnesia? */
+	bool immediate = true;
+	skill_id learnt = skNONE;
+
+	if (a == skNONE) {
+		if (b == skNONE) {
+			return;
+		}
+
+		learnt = b;
+	} else {
+		if (b != skNONE) {
+			immediate = false;
+			learnt = Choose_Skill_Menu(a, b);
+		} else {
+			learnt = a;
+		}
+	}
+
+	if (immediate) {
+		sprintf(buffer, "%s learns %s!", c->header.name, skills[learnt].name);
+		Blit_String_DB(8, 48, 15, buffer, 0);
+
+		Draw_Wrapped_String(8, 56, SCREEN_WIDTH - 16, 64, 31, skills[learnt].description, false);
+	}
+
+	Add_Skill(c, learnt);
+}
+
 void Level_Up(character *c)
 {
 	character_header *ch = &c->header;
@@ -153,20 +226,45 @@ void Level_Up(character *c)
 	job_spec *j = &jobspecs[ch->job];
 	level_spec *l;
 
+	/* go to the level up screen */
+	redraw_everything = true;
+	Fill_Double_Buffer(0);	/* TODO: show LEVELUP.PCX or something? */
+
 	ch->stats[sHP] += j->hp_per_level;
 	ch->stats[sMaxHP] += j->hp_per_level;
-	ch->stats[sMP] += j->mp_per_level;
-	ch->stats[sMaxMP] += j->mp_per_level;
+	sprintf(buffer, "+%d HP", j->hp_per_level);
+	Blit_String_DB(8, 24, 15, buffer, 0);
+
+	if (j->mp_per_level > 0) {
+		ch->stats[sMP] += j->mp_per_level;
+		ch->stats[sMaxMP] += j->mp_per_level;
+		sprintf(buffer, "+%d MP", j->mp_per_level);
+		Blit_String_DB(8, 32, 15, buffer, 0);
+	}
 
 	if (ch->job_level[ch->job] < JOB_LEVELS) {
 		l = &j->levels[*level];
-		if (l->stat != -1) {
+		if (l->stat != sNONE) {
 			ch->stats[l->stat]++;
+			sprintf(buffer, "+1 %s", Stat_Name(l->stat));
+			Blit_String_DB(8, 40, 15, buffer, 0);
 		}
 
-		/* TODO: add skills */
+		sprintf(buffer, "%s becomes %s level %d!", c->header.name, Job_Name(c->header.job), *level + 1);
+		Blit_String_DB(8, 8, 15, buffer, 0);
+
+		Choose_Skill(c, l->a, l->b);
+
+		Show_Double_Buffer();
+		Get_Next_Scan_Code();
 
 		(*level)++;
+	} else {
+		sprintf(buffer, "%s gains a level!", c->header.name);
+		Blit_String_DB(8, 8, 15, buffer, 0);
+
+		Show_Double_Buffer();
+		Get_Next_Scan_Code();
 	}
 
 	ch->experience = 0;

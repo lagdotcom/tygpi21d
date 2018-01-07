@@ -12,9 +12,17 @@
 
 typedef enum skill_id {
 	skSing,
+	skHide,
 
-	skHide
+	NUM_SKILLS
 } skill_id;
+
+typedef struct skill_spec {
+	char *name;
+	char *description;
+} skill_spec;
+
+extern skill_spec skills[NUM_SKILLS];
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
