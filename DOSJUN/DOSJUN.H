@@ -29,6 +29,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
+#define FNT (&font6x8)
 #define TILE(z, x, y) (&z.tiles[(y) * z.header.width + (x)])
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
@@ -49,6 +50,8 @@ extern bool
 	redraw_party,
 	just_moved,
 	can_save;
+
+extern font font6x8;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 

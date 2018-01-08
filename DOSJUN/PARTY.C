@@ -39,14 +39,14 @@ void Draw_Character_Status(int index, int x, int y)
 
 	strncpy(buffer, ch->header.name, 8);
 	buffer[8] = 0;
-	Blit_String_DB(x + 16, y, 15, buffer, 0);
+	Draw_Font(x + 16, y, 15, buffer, FNT, false);
 
 	sprintf(buffer, "H%3d/%-3d", ch->header.stats[sHP], ch->header.stats[sMaxHP]);
-	Blit_String_DB(x + 16, y + 8, 15, buffer, 0);
+	Draw_Font(x + 16, y + 8, 15, buffer, FNT, false);
 
 	if (ch->header.stats[sMaxMP] > 0) {
 		sprintf(buffer, "M%3d/%-3d", ch->header.stats[sMP], ch->header.stats[sMaxMP]);
-		Blit_String_DB(x + 16, y + 16, 15, buffer, 0);
+		Draw_Font(x + 16, y + 16, 15, buffer, FNT, false);
 	}
 }
 

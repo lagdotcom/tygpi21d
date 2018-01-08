@@ -14,6 +14,7 @@
 
 bool Input_Number(int x, int y, int *number, int min, int max)
 {
+	/* TODO: font */
 	int cx = 0,
 		cy = y,
 		i;
@@ -72,6 +73,7 @@ bool Input_Number(int x, int y, int *number, int min, int max)
 
 bool Input_String(int x, int y, char *string, int max)
 {
+	/* TODO: font */
 	int cx = x,
 		cy = y,
 		i = 0;
@@ -119,6 +121,7 @@ bool Input_String(int x, int y, char *string, int max)
 
 bool Input_Multiline_String(int x, int y, char *string, int max)
 {
+	/* TODO: font */
 	int cx = x,
 		cy = y,
 		i = 0;
@@ -165,15 +168,16 @@ bool Input_Multiline_String(int x, int y, char *string, int max)
 int Input_Menu(char **menu, int choices, int x, int y)
 {
 	int choice = 0,
+		height = FNT->header.height,
 		i;
 	unsigned char key;
 
 	for (i = 0; i < choices; i++) {
-		Blit_String_DB(x, y + i*8, 15, "  ", 0);
-		Blit_String_DB(x + 16, y + i*8, 15, menu[i], 0);
+		Draw_Font(x, y + i*height, 15, "  ", FNT, false);
+		Draw_Font(x + 16, y + i*height, 15, menu[i], FNT, false);
 	}
 
-	Blit_Char_DB(x, y + choice*8, '>', 15, 0);
+	Draw_Font_Char(x, y + choice*height, 15, '>', FNT, false);
 	Show_Double_Buffer();
 
 	while (true) {
@@ -181,18 +185,18 @@ int Input_Menu(char **menu, int choices, int x, int y)
 
 		switch (key) {
 			case SCAN_DOWN:
-				Blit_Char_DB(x, y + choice*8, ' ', 15, 0);
+				Draw_Font_Char(x, y + choice*height, 15, ' ', FNT, false);
 				choice++;
 				if (choice == choices) choice = 0;
-				Blit_Char_DB(x, y + choice*8, '>', 15, 0);
+				Draw_Font_Char(x, y + choice*height, 15, '>', FNT, false);
 				Show_Double_Buffer();
 				break;
 
 			case SCAN_UP:
-				Blit_Char_DB(x, y + choice*8, ' ', 15, 0);
+				Draw_Font_Char(x, y + choice*height, 15, ' ', FNT, false);
 				if (choice == 0) choice = choices - 1;
 				else choice--;
-				Blit_Char_DB(x, y + choice*8, '>', 15, 0);
+				Draw_Font_Char(x, y + choice*height, 15, '>', FNT, false);
 				Show_Double_Buffer();
 				break;
 

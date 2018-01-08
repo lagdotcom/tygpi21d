@@ -37,7 +37,7 @@ noexport UINT32 earned_experience;
 
 noexport void Show_Combat_String(char *string, bool wait_for_key)
 {
-	Draw_Wrapped_String(96, 144, 128, 48, 15, string, true);
+	Draw_Wrapped_Font(96, 144, 128, 48, 15, string, FNT, true);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();
@@ -72,7 +72,7 @@ noexport void Highlight_Ally(int pc_active, int pc_select)
 		colour = 15;
 		if (i == pc_active) colour = COLOUR_ACTIVE;
 		if (i == pc_select) colour = COLOUR_SELECT;
-		Blit_String_DB(248, 8 + i * 32, colour, buffer, 0);
+		Draw_Font(248, 8 + i * 32, colour, buffer, FNT, true);
 	}
 }
 

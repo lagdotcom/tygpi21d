@@ -99,34 +99,31 @@ gamestate Start_New_Game(void)
 {
 	Fill_Double_Buffer(0);
 
-	Blit_String_DB(0,  0, 15, "You've always wanted to play one of", 0);
-	Blit_String_DB(0,  8, 15, "those 'Escape the Room' games, so you", 0);
-	Blit_String_DB(0, 16, 15, "get together a group of friends and go", 0);
-	Blit_String_DB(0, 24, 15, "to a local one.", 0);
+	Draw_Wrapped_Font(0, 0, SCREEN_WIDTH, 32, 15, "You've always wanted to play one of those 'Escape the Room' games, so you get together a group of friends and go to a local one.", FNT, false);
 	gSave.header.num_characters = 6;
 
-	Blit_String_DB(0, 40, 15, "Who's the bossy one?", 0);
+	Draw_Font(0, 40, 15, "Who's the bossy one?", FNT, true);
 	Input_String(168, 40, gSave.characters[0].header.name, NAME_SIZE);
 	/*                                                  Str Int Dex  HP MP*/
 	Initialise_Character(&gSave.characters[0], jBard,     8, 13, 13, 10, 0);
 
-	Blit_String_DB(0, 56, 15, "Who's the strong one?", 0);
+	Draw_Font(0, 56, 15, "Who's the strong one?", FNT, true);
 	Input_String(176, 56, gSave.characters[1].header.name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[1], jFighter, 14,  9, 11, 20, 0);
 
-	Blit_String_DB(0, 72, 15, "Who's the nerd?", 0);
+	Draw_Font(0, 72, 15, "Who's the nerd?", FNT, true);;
 	Input_String(128, 72, gSave.characters[2].header.name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[2], jMage,     9, 14, 11,  8, 8);
 
-	Blit_String_DB(0, 88, 15, "Who's kinda shifty?", 0);
+	Draw_Font(0, 88, 15, "Who's kinda shifty?", FNT, true);
 	Input_String(160, 88, gSave.characters[3].header.name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[3], jRogue,    9, 11, 14, 12, 0);
 
-	Blit_String_DB(0, 104, 15, "Who cares a lot?", 0);
+	Draw_Font(0, 104, 15, "Who cares a lot?", FNT, true);
 	Input_String(136, 104, gSave.characters[4].header.name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[4], jCleric,  13, 13,  8, 14, 6);
 
-	Blit_String_DB(0, 120, 15, "Who likes guns?", 0);
+	Draw_Font(0, 120, 15, "Who likes guns?", FNT, true);
 	Input_String(128, 120, gSave.characters[5].header.name, NAME_SIZE);
 	Initialise_Character(&gSave.characters[5], jRanger,  13,  8, 13, 13, 0);
 

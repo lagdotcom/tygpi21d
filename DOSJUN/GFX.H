@@ -14,10 +14,4 @@ void Draw_HorzTrapezium_DB(colour col, int x0, int x1, int x2, int x3, int y0, i
 void Draw_VertTrapezium_DB(colour col, int x0, int x1, int y0, int y1, int y2, int y3, bool filled);
 void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled);
 
-/* Clears an area, then prints a string into it, with wrapping. */
-void Draw_Wrapped_String(int x, int y, int w, int h, colour col, char *string, bool margin);
-
-/* Wrap a string to fit in a given box size. You must Free() the returned string. */
-char *Word_Wrap(char *string, int width, int height);
-
 #endif

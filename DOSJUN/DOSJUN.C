@@ -114,7 +114,7 @@ wall* Get_Wall(coord x, coord y, dir dir, relative rel)
 
 void Show_Game_String(char *string, bool wait_for_key)
 {
-	Draw_Wrapped_String(8, 144, 304, 48, 15, string, true);
+	Draw_Wrapped_Font(8, 144, 304, 48, 15, string, FNT, true);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();
@@ -129,9 +129,8 @@ void Draw_Description(void)
 {
 	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
 
-	Draw_Square_DB(0, 12, 148, 12 + 37*8, 148 + 5*8, 1);
 	if (under->description > 0) {
-		Draw_Bounded_String(12, 148, 37, 5, 15, gZone.strings[under->description - 1], 0);
+		Show_Game_String(gZone.strings[under->description - 1], false);
 	}
 
 	redraw_description = false;
