@@ -9,6 +9,7 @@
 #include "campaign.h"
 #include "code.h"
 #include "combat.h"
+#include "font.h"
 #include "fp.h"
 #include "gfx.h"
 #include "items.h"

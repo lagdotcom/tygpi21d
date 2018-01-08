@@ -38,13 +38,15 @@ noexport UINT32 Image_Size(pcx_picture_ptr image)
 	return width * height;
 }
 
-noexport bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
+bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
 {
 	FILE *fp;
 	int num_bytes, index;
 	UINT32 count, size;
 	unsigned char data;
 	char far *header, *write;
+
+	Log("Load_Picture: %s", filename);
 
 	fp = fopen(filename, "rb");
 	if (!fp) {

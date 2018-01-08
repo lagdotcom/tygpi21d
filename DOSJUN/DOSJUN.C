@@ -21,6 +21,8 @@ bool trigger_on_enter,
 	just_moved,
 	can_save;
 
+font font6x8;
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 char Get_X_Offset(dir dir)
@@ -338,6 +340,7 @@ void main(void)
 	Log("main: Init");
 
 	printf("Initialising DOSJUN...\n");
+	Load_Font("6x8.FNT", &font6x8);
 	Initialise_Campaign(&gCampaign);
 	Initialise_Items(&gItems);
 	Initialise_Monsters(&gMonsters);
@@ -384,6 +387,7 @@ void main(void)
 	Free_Jobs();
 	Free_Sound();
 	Delete_Picture();
+	Free_Font(&font6x8);
 
 	Delete_Double_Buffer();
 
