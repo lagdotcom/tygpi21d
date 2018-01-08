@@ -36,11 +36,12 @@ typedef struct {
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-unsigned long peak_use = 0;
-unsigned long current_use = 0;
-unsigned int entry_count = 0;
-unsigned int allocated_entries = 0;
-entry PtrDist *entries = null;
+noexport unsigned long peak_use = 0;
+noexport unsigned long current_use = 0;
+noexport unsigned long start_free = 0;
+noexport unsigned int entry_count = 0;
+noexport unsigned int allocated_entries = 0;
+noexport entry PtrDist *entries = null;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -147,10 +148,16 @@ void Free(void *mem)
 	}
 }
 
+void Start_Memory_Tracking(void)
+{
+	start_free = coreleft();
+}
+
 void Stop_Memory_Tracking(void)
 {
 	FILE *fp;
 	unsigned int i;
+	unsigned long end_free;
 
 	for (i = 0; i < entry_count; i++) {
 		if (entries[i].freed == false) {
@@ -166,9 +173,14 @@ void Stop_Memory_Tracking(void)
 	for (i = 0; i < entry_count; i++) {
 		fprintf(fp, "#%u [%s]: @%p, %lu bytes%s\n", i, entries[i].tag, entries[i].address, entries[i].size, entries[i].freed ? "" : " NOT FREED");
 	}
-	fclose(fp);
 
 	_free(entries);
+	end_free = coreleft();
+
+	printf("coreleft: %lu => %lu\n", start_free, end_free);
+	fprintf(fp, "\ncoreleft: %lu => %lu\n", start_free, end_free);
+
+	fclose(fp);
 }
 
 #endif

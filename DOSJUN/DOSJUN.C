@@ -333,6 +333,7 @@ gamestate Show_Dungeon_Screen(void)
 
 void main(void)
 {
+	Start_Memory_Tracking();
 	Clear_Log();
 	Log("main: Init");
 

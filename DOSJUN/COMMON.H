@@ -102,11 +102,13 @@ typedef UINT8 zone_id;
 	void PtrDist *Allocate(MemSz count, MemSz size, char *tag);
 	void Free(void *mem);
 	void PtrDist *Reallocate(void PtrDist *mem, MemSz count, MemSz size, char *tag);
+	void Start_Memory_Tracking(void);
 	void Stop_Memory_Tracking(void);
 
 #else /* no MEMORY_DEBUG */
 
 	#define Duplicate_String(src, tag) strdup(src)
+	#define Start_Memory_Tracking()
 	#define Stop_Memory_Tracking()
 
 	#ifdef FAR_MEMORY
