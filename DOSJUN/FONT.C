@@ -3,25 +3,20 @@
 #include "dosjun.h"
 #include "gamelib.h"
 
-/* D E F I N E S ///////////////////////////////////////////////////////// */
-
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
-/* G L O B A L S ///////////////////////////////////////////////////////// */
-
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 int Draw_Font_Char(int sx, int sy, colour col, char ch, font *f, bool trans_flag)
 {
-	int c, r;
-	int font_row = ch / 16;
-	int font_col = ch % 16;
-	int fx = font_col * f->header.width;
-	int fy = font_row * f->header.height;
-	int char_width = f->header.c_width[ch];
-	int i = fy * f->header.width * 16 + fx;
-	int x = sx;
-	int y = sy;
+	int c,
+		r,
+		font_row = ch / 16,
+		font_col = ch % 16,
+		fx = font_col * f->header.width,
+		fy = font_row * f->header.height,
+		char_width = f->header.c_width[ch],
+		i = fy * f->header.width * 16 + fx,
+		x = sx,
+		y = sy;
 	colour fc;
 
 	for (r = 0; r < f->header.height; r++) {
@@ -35,7 +30,7 @@ int Draw_Font_Char(int sx, int sy, colour col, char ch, font *f, bool trans_flag
 			i++;
 		}
 
-		i += f->stride - char_width + 1;
+		i += f->stride - char_width;
 		x = sx;
 		y++;
 	}
@@ -45,8 +40,8 @@ int Draw_Font_Char(int sx, int sy, colour col, char ch, font *f, bool trans_flag
 
 void Draw_Font(int sx, int sy, colour col, char *string, font *f, bool trans_flag)
 {
-	int x = sx;
-	int y = sy;
+	int x = sx,
+		y = sy;
 	char *ch = string;
 
 	while (*ch != 0) {
@@ -66,6 +61,7 @@ void Draw_Font(int sx, int sy, colour col, char *string, font *f, bool trans_fla
 noexport char *Font_Wrap(int w, int h, char *string, font *f)
 {
 	/* TODO: use Duplicate_String()? */
+	/* TODO: pay attention to height */
 	char wrapped[200],
 		*ch,
 		*last_space;
@@ -139,7 +135,7 @@ bool Load_Font(char *filename, font *f)
 	}
 
 	f->img = pcx.buffer;
-	f->stride = pcx.header.width;
+	f->stride = pcx.header.width + 1; /* PCX header correction */
 	return true;
 }
 
