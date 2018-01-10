@@ -14,6 +14,10 @@ typedef struct list {
 	unsigned int capacity;
 	void **items;
 	char *tag;
+
+#ifdef LIST_REPORT
+	unsigned int max_size;
+#endif
 } list;
 
 void Add_to_List(list *l, void *item);

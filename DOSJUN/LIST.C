@@ -104,6 +104,10 @@ void Free_List(list *l)
 	if (l == null)
 		return;
 
+#ifdef LIST_REPORT
+	Log("Free_List(%s): max_size %d, capacity %d", l->tag, l->max_size, l->capacity);
+#endif
+
 	Free(l->items);
 	Free(l);
 }
@@ -116,6 +120,12 @@ void Add_to_List(list *l, void *item)
 
 	l->items[l->size] = item;
 	l->size++;
+
+#ifdef LIST_REPORT
+	if (l->size > l->max_size) {
+		l->max_size = l->size;
+	}
+#endif
 }
 
 void Add_String_to_List(list *l, char *s)
