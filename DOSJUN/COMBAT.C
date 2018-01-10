@@ -11,6 +11,9 @@
 #define COLOUR_ACTIVE	14
 #define COLOUR_SELECT	11
 
+#define PRIORITY_WIGGLE	5
+#define MAX_PRIORITY	(255 - PRIORITY_WIGGLE)
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
@@ -18,14 +21,15 @@ typedef struct {
 	action_do_fn act;
 	char *name;
 	targetflags targeting;
-	UINT8 priority; /* TODO */
+	pri priority; /* TODO */
 } action;
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 noexport pcx_picture combat_bg;
 
-noexport list *combatants;
+list *combatants;
+noexport list *active_combatants;
 noexport action *combat_actions;
 noexport list *combat_groups[ENCOUNTER_SIZE];
 noexport int group_y[ENCOUNTER_SIZE];
@@ -344,6 +348,7 @@ void Add_Monster(groupnum group, monster* template)
 	c->name = template->name;
 	c->pc = null;
 	c->row = template->row;
+	c->self = combatants->size;
 	c->skills = null;	/* TODO */
 	c->stats = stats;
 	c->weapon = template->weapon;
@@ -368,6 +373,7 @@ noexport void Add_Pc(unsigned int pc)
 	c->name = ch->header.name;
 	c->pc = ch;
 	c->row = In_Front_Row(pc) ? rowFront : rowBack;
+	c->self = combatants->size;
 	c->skills = ch->skills;
 	c->stats = ch->header.stats;
 	c->weapon = Get_Equipped_Weapon(pc)->id;
@@ -375,13 +381,13 @@ noexport void Add_Pc(unsigned int pc)
 	Add_to_List(combatants, c);
 }
 
-void Add_Combat_Action(act id, char *name, action_check_fn check_fn, action_do_fn act_fn, targetflags target, UINT8 priority)
+void Add_Combat_Action(act id, char *name, action_check_fn check_fn, action_do_fn act_fn, targetflags target, pri priority)
 {
 	combat_actions[id].check = check_fn;
 	combat_actions[id].act = act_fn;
 	combat_actions[id].name = name;
 	combat_actions[id].targeting = target;
-	combat_actions[id].priority = priority;
+	combat_actions[id].priority = priority > MAX_PRIORITY ? MAX_PRIORITY : priority;
 }
 
 void Initialise_Combat(void)
@@ -393,9 +399,12 @@ void Initialise_Combat(void)
 		combat_groups[i] = New_List(ltInteger, "Initialise_Combat.group_x");
 	}
 
+	/* HACK: ltInteger makes sure Clear_List() doesn't Free() items */
+	active_combatants = New_List(ltInteger, "Initialise_Combat.active_combatants");
+
 	combat_actions = SzAlloc(NUM_ACTIONS, action, "Initialise_Combat.actions");
 	Add_Combat_Action(aAttack, "Attack", Check_Attack, Attack, tfEnemy, 100);
-	Add_Combat_Action(aSneakAttack, "Sneak Attack", Check_SneakAttack, SneakAttack, tfEnemy, 90);
+	Add_Combat_Action(aSneakAttack, "Sneak Attack", Check_SneakAttack, SneakAttack, tfEnemy, 130);
 	Add_Combat_Action(aBlock, "Block", Check_Block, Block, tfSelf, 120);
 	Add_Combat_Action(aDefend, "Defend", Check_Defend, Defend, tfAlly, 120);
 	Add_Combat_Action(aSing, "Sing", Check_Sing, Sing, tfSelf, 200);
@@ -416,6 +425,8 @@ void Free_Combat(void)
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
 		Free_List(combat_groups[i]);
 	}
+
+	Free_List(active_combatants);
 
 	Free(combat_actions);
 	PCX_Delete(&combat_bg);
@@ -675,6 +686,32 @@ noexport void Show_Combat_Pc_Stats(void)
 	}
 }
 
+noexport void Sort_by_Priority(list *active)
+{
+	int size = active->size,
+		i, j;
+
+	combatant *a, *b, *temp;
+
+	for (i = 0; i < size - 1; i++) {
+		a = List_At(active, i);
+		for (j = i + 1; j < size; j++) {
+			b = List_At(active, j);
+
+			if (b->priority > a->priority) {
+				/* Swap place in list */
+				active->items[i] = b;
+				active->items[j] = a;
+
+				/* Swap place in memory for later comparisons */
+				temp = a;
+				a = b;
+				b = temp;
+			}
+		}
+	}
+}
+
 noexport void Enter_Combat_Loop(void)
 {
 	int i;
@@ -706,19 +743,25 @@ noexport void Enter_Combat_Loop(void)
 						break;
 				}
 			}
-		}
 
-		/* TODO: move priorities, randomising order? */
-		for (i = 0; i < combatants->size; i++) {
-			c = Get_Combatant(i);
-
-			/* TODO: could have self-res enemies? */
-			if (c->action != NO_ACTION && !Is_Dead(i)) {
-				/* TODO: retarget dead enemies? */
-				combat_actions[c->action].act(i, c->target);
+			if (c->action != NO_ACTION) {
+				c->priority = combat_actions[c->action].priority + randint(0, PRIORITY_WIGGLE);
+				Add_to_List(active_combatants, c);
 			}
 		}
 
+		Sort_by_Priority(active_combatants);
+		for (i = 0; i < active_combatants->size; i++) {
+			c = List_At(active_combatants, i);
+
+			/* TODO: could have self-res enemies? */
+			if (c->action != NO_ACTION && !Is_Dead(c->self)) {
+				/* TODO: retarget dead enemies? */
+				combat_actions[c->action].act(c->self, c->target);
+			}
+		}
+
+		Clear_List(active_combatants);
 		first_turn = false;
 	}
 

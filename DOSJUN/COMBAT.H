@@ -13,6 +13,7 @@
 typedef int act;
 typedef int targ;
 typedef int groupnum;
+typedef UINT8 pri;
 
 typedef bool(*action_check_fn)(targ source);
 typedef void(*action_do_fn)(targ source, targ target);
@@ -70,9 +71,15 @@ typedef struct combatant {
 	row_id row;
 	bool is_pc;
 
+	targ self;
 	act action;
 	targ target;
+	pri priority;
 } combatant;
+
+/* G L O B A L S ///////////////////////////////////////////////////////// */
+
+extern list *combatants;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 

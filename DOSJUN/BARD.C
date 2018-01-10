@@ -6,35 +6,38 @@
 
 #define SING_HITBONUS		1
 
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
-/* G L O B A L S ///////////////////////////////////////////////////////// */
-
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 bool Check_Sing(targ source)
 {
-	/* TODO: check for silence? */
+	/* TODO: use Silenced somewhere */
+	if (Has_Buff(source, "Silenced")) {
+		return false;
+	}
+
+	if (Has_Buff(source, SING_BUFF_NAME)) {
+		return false;
+	}
+
 	return Has_Skill(Get_Combatant(source), skSing);
 }
 
 noexport void Sing_Expires(targ target, int argument)
 {
 	combatant *c;
-	int pc;
+	int i;
+	bool is_pc = IS_PC(target);
 
-	if (!IS_PC(target)) {
-		/* TODO */
-		return;
-	}
+	for (i = 0; i < combatants->size; i++) {
+		c = List_At(combatants, i);
 
-	for (pc = 0; pc < PARTY_SIZE; pc++) {
-		c = Get_Combatant(TARGET_PC(pc));
-		c->stats[sHitBonus] -= argument;
+		if (c->is_pc == is_pc) {
+			c->stats[sHitBonus] -= argument;
+		}
 	}
 
 	if (gState == gsCombat) {
-		c = Get_Combatant(TARGET_PC(target));
+		c = Get_Combatant(target);
 		Combat_Message("%s stops singing.", c->name);
 	}
 }
@@ -42,18 +45,17 @@ noexport void Sing_Expires(targ target, int argument)
 void Sing(targ source, targ target)
 {
 	combatant *c;
-	int pc;
+	int i;
+	bool is_pc = IS_PC(target);
 
-	if (!IS_PC(source)) {
-		/* TODO */
-		return;
+	for (i = 0; i < combatants->size; i++) {
+		c = List_At(combatants, i);
+
+		if (c->is_pc == is_pc) {
+			c->stats[sHitBonus] += SING_HITBONUS;
+		}
 	}
 
-	for (pc = 0; pc < PARTY_SIZE; pc++) {
-		c = Get_Combatant(TARGET_PC(pc));
-		c->stats[sHitBonus] += SING_HITBONUS;
-	}
-
-	Add_Buff(source, "Singing", exTurns, 1, Sing_Expires, SING_HITBONUS);
-	Combat_Message("%s sings, and the party is inspired!", Get_Combatant(TARGET_PC(source))->name);
+	Add_Buff(source, SING_BUFF_NAME, exTurns, 1, Sing_Expires, SING_HITBONUS);
+	Combat_Message("%s sings, and the party is inspired!", NAME(source));
 }

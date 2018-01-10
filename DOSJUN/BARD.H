@@ -5,6 +5,10 @@
 
 #include "combat.h"
 
+/* D E F I N E S ///////////////////////////////////////////////////////// */
+
+#define SING_BUFF_NAME "Singing"
+
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 bool Check_Sing(targ source);
