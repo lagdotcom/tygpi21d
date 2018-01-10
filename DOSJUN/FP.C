@@ -15,16 +15,19 @@
 #define TXNR	2
 #define TXFR	3
 
+#define MAX_FILENAME_LENGTH	20
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 bool redraw_fp;
-pcx_picture current_pic;
-bool picture_loaded = false;
+noexport pcx_picture current_pic;
+noexport bool picture_loaded = false;
+noexport char shown_picture[MAX_FILENAME_LENGTH];
 
-pcx_picture *textures = null;
-int num_textures = 0;
+noexport pcx_picture *textures = null;
+noexport int num_textures = 0;
 
-pcx_picture *things = null;
+noexport pcx_picture *things = null;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -151,7 +154,7 @@ noexport tile *Get_Offset_Tile(int forward, int left)
 noexport void Load_Texture_Pieces(char *name, int index)
 {
 	int i;
-	char filename[20];
+	char filename[MAX_FILENAME_LENGTH];
 
 	for (i = 0; i < TEXTURE_PIECES; i++) {
 		sprintf(filename, "WALL\\%s%d.PCX", name, i + 1);
@@ -164,7 +167,7 @@ noexport void Load_Texture_Pieces(char *name, int index)
 
 noexport void Load_Thing(char *name, thing_id th)
 {
-	char filename[20];
+	char filename[MAX_FILENAME_LENGTH];
 
 	sprintf(filename, "THING\\%s.PCX", name);
 	if (!Load_Picture(filename, &things[th - 1], name)) {
@@ -328,6 +331,7 @@ void Delete_Picture(void)
 {
 	if (picture_loaded) {
 		picture_loaded = false;
+		shown_picture[0] = 0;
 		Free(current_pic.buffer);
 	}
 }
@@ -337,21 +341,29 @@ void Show_Picture(char *name)
 	int y;
 	unsigned char *output;
 	char *input;
-	char filename[20];
+	char filename[MAX_FILENAME_LENGTH];
+
 	sprintf(filename, "PICS\\%s.PCX", name);
 
-	Delete_Picture();
-	
-	if (Load_Picture(filename, &current_pic, "Show_Picture")) {
-		output = &double_buffer[8 * SCREEN_WIDTH + 96];
-		input = current_pic.buffer;
-		for (y = 0; y < 128; y++) {
-			memcpy(output, input, 128);
-			input += 128;
-			output += SCREEN_WIDTH;
+	/* don't bother loading the picture if it's already loaded */
+	if (!picture_loaded || strcmp(filename, shown_picture)) {
+		Delete_Picture();
+
+		if (!Load_Picture(filename, &current_pic, "Show_Picture")) {
+			die("Show_Picture: could not load");
 		}
 
 		picture_loaded = true;
+		strcpy(shown_picture, filename);
+	}
+
+	/* copy picture to screen */
+	output = &double_buffer[8 * SCREEN_WIDTH + 96];
+	input = current_pic.buffer;
+	for (y = 0; y < 128; y++) {
+		memcpy(output, input, 128);
+		input += 128;
+		output += SCREEN_WIDTH;
 	}
 }
 
