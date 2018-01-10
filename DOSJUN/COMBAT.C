@@ -319,6 +319,8 @@ noexport void Clear_Encounter(void)
 	combatant *c;
 	int i;
 
+	Log("Clear_Encounter: %d to remove", combatants->size);
+
 	for (i = 0; i < combatants->size; i++) {
 		c = Get_Combatant(i);
 
@@ -345,6 +347,7 @@ void Add_Monster(groupnum group, monster* template)
 	stats[sHP] = stats[sMaxHP];
 	stats[sMP] = stats[sMaxMP];
 
+	c->action = NO_ACTION;
 	c->buffs = buffs;
 	c->group = group;
 	c->is_pc = false;
@@ -370,6 +373,7 @@ noexport void Add_Pc(unsigned int pc)
 	if (c == null)
 		die("Add_Pc: out of memory");
 
+	c->action = NO_ACTION;
 	c->buffs = ch->buffs;
 	c->group = -1;
 	c->is_pc = true;
@@ -455,7 +459,7 @@ noexport act Get_Pc_Action(unsigned char pc)
 		}
 	}
 
-	/* TODO */
+	/* TODO: tiered menu? */
 	Highlight_Ally(pc, -1);
 	Draw_Square_DB(0, 8, 144, 87, 191, true);
 	i = Input_Menu(action_names, count, 8, 144);
@@ -762,6 +766,7 @@ noexport void Enter_Combat_Loop(void)
 	bool first_turn = true;
 
 	while (monsters_alive > 0) {
+		Log("Enter_Combat_Loop: begin round");
 		if (!first_turn) Expire_Buffs();
 
 		Show_Combat_Pc_Stats();
@@ -800,8 +805,6 @@ noexport void Enter_Combat_Loop(void)
 		first_turn = false;
 	}
 
-	Clear_Encounter();
-
 	redraw_description = true;
 	redraw_fp = true;
 	redraw_party = true;
@@ -821,7 +824,6 @@ void Start_Combat(encounter_id id)
 	monster *m;
 
 	Log("Start_Combat: #%d", id);
-	Clear_Encounter();
 
 	for (i = 0; i < PARTY_SIZE; i++) {
 		Add_Pc(i);
@@ -870,6 +872,8 @@ void Start_Combat(encounter_id id)
 			Add_Experience(Get_Pc(count), earned_experience);
 		}
 	}
+
+	Clear_Encounter();
 
 	gState = gsDungeon;
 	Expire_Combat_Buffs();

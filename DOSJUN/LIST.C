@@ -8,14 +8,18 @@
 
 #define LIST_START_CAPACITY		10
 
+/* G L O B A L S ///////////////////////////////////////////////////////// */
+
+char err_buf[100];
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 noexport void Resize_List(list *l, unsigned int new_capacity)
 {
 	void *new_storage = Reallocate(l->items, new_capacity, sizeof(void *), "Resize_List");
 	if (new_storage == null) {
-		printf("Resize_List failed: going from %u to %u\n", l->capacity, new_capacity);
-		exit(1);
+		sprintf(err_buf, "Resize_List(%s) failed: going from %u to %u", l->tag, l->capacity, new_capacity);
+		die(err_buf);
 	}
 
 	l->items = new_storage;
@@ -57,14 +61,17 @@ noexport void Free_Item(list_type type, void *item)
 list *New_List(list_type type, char *tag)
 {
 	list *l = SzAlloc(1, list, tag);
-	if (l == null)
-		die("New_List: Out of memory");
+	if (l == null) {
+		sprintf(err_buf, "New_List(%s): Out of memory", tag);
+		die(err_buf);
+	}
 
 	l->type = type;
 	l->object_size = 0;
 	l->capacity = 0;
 	l->size = 0;
 	l->items = null;
+	l->tag = tag;
 
 	Resize_List(l, LIST_START_CAPACITY);
 	return l;
@@ -114,8 +121,8 @@ void Add_to_List(list *l, void *item)
 void Add_String_to_List(list *l, char *s)
 {
 	if (l->type != ltString) {
-		printf("%s", "Add_String_to_List failed: wrong type of list\n");
-		exit(1);
+		sprintf(err_buf, "Add_String_to_List(%s) failed: wrong type of list", l->tag);
+		die(err_buf);
 	}
 
 	Add_to_List(l, Duplicate_String(s, "Add_String_to_List"));
@@ -166,7 +173,7 @@ bool Remove_from_List(list *l, void *match)
 void *List_At(list *l, unsigned int index)
 {
 	if (index >= l->size) {
-		printf("List_At failed: size %u, asked for %u\n", l->size, index);
+		Log("List_At(%s): size %u, asked for %u", l->tag, l->size, index);
 		return null;
 	}
 
@@ -213,8 +220,8 @@ list *Read_List(FILE *fp, char *tag)
 				break;
 
 			default:
-				printf("Cannot read a list of type %d from file.", l->type);
-				abort();
+				sprintf(err_buf, "Read_List: Cannot read a list of type %d from file.", l->type);
+				die(err_buf);
 		}
 	}
 
@@ -244,8 +251,8 @@ void Write_List(list *l, FILE *fp)
 				break;
 
 			default:
-				printf("Cannot write a list of type %d to file.", l->type);
-				exit(1);
+				sprintf(err_buf, "Write_List: Cannot write a list of type %d to file.", l->type);
+				die(err_buf);
 		}
 	}
 }

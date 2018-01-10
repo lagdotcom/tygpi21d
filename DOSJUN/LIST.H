@@ -13,6 +13,7 @@ typedef struct list {
 	unsigned int size;
 	unsigned int capacity;
 	void **items;
+	char *tag;
 } list;
 
 void Add_to_List(list *l, void *item);

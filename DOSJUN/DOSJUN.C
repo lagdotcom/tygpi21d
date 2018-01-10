@@ -358,6 +358,7 @@ void main(void)
 
 	Set_Video_Mode(VGA256);
 
+	Log("main: Menu");
 	gState = gsMainMenu;
 
 	while (gState != gsQuit) {
@@ -374,6 +375,7 @@ void main(void)
 
 	Set_Video_Mode(TEXT_MODE);
 
+	Log("main: Cleanup");
 	printf("Cleaning up after DOSJUN...");
 
 	Free_Campaign(&gCampaign);
