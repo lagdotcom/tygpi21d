@@ -90,35 +90,39 @@ noexport void Format_Enemy_Group(groupnum group, char *buffer)
 #define EPANEL_Y	8
 #define EPANEL_W	10
 #define EPANEL_H	2
+noexport char enemy_panel_buffer[100];
 
 noexport void Show_Enemies(void)
 {
 	groupnum i;
 	int y = EPANEL_Y;
-	char buffer[100];
 
 	Draw_Square_DB(0, EPANEL_X, EPANEL_Y, 87, 135, 1);
 
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
 		if (combat_groups[i]->size > 0) {
 			group_y[i] = y;
-			Format_Enemy_Group(i, buffer);
-			Draw_Bounded_String(EPANEL_X, y, EPANEL_W, EPANEL_H, 15, buffer, 0);
+			Format_Enemy_Group(i, enemy_panel_buffer);
+			Draw_Bounded_String(EPANEL_X, y, EPANEL_W, EPANEL_H, 15, enemy_panel_buffer, 0);
 
 			y += 16;
 		}
 	}
 }
 
-noexport void Highlight_Enemy_Group(groupnum group, int colour)
+noexport void Highlight_Enemy_Group(groupnum active, groupnum select)
 {
 	groupnum i;
-	char buffer[100];
+	colour col;
 
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
 		if (combat_groups[i]->size > 0) {
-			Format_Enemy_Group(i, buffer);
-			Draw_Bounded_String(EPANEL_X, group_y[i], EPANEL_W, EPANEL_H, (i == group) ? colour : 15, buffer, 0);
+			Format_Enemy_Group(i, enemy_panel_buffer);
+			
+			col = 15;
+			if (i == active) col = COLOUR_ACTIVE;
+			if (i == select) col = COLOUR_SELECT;
+			Draw_Bounded_String(EPANEL_X, group_y[i], EPANEL_W, EPANEL_H, col, enemy_panel_buffer, 0);
 		}
 	}
 }
@@ -495,7 +499,7 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 		if (IS_PC(choice)) {
 			Highlight_Ally(pc, choice);
 		} else {
-			Highlight_Enemy_Group(choice - PARTY_SIZE, COLOUR_SELECT);
+			Highlight_Enemy_Group(-1, choice - PARTY_SIZE);
 		}
 
 		Show_Double_Buffer();
@@ -549,7 +553,7 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 
 				Highlight_Ally(pc, -1);
 			} else {
-				Highlight_Enemy_Group(-1, 0);
+				Highlight_Enemy_Group(-1, -1);
 			}
 
 			choice = change;
@@ -712,6 +716,45 @@ noexport void Sort_by_Priority(list *active)
 	}
 }
 
+noexport void Do_Combat_Actions(list *active)
+{
+	int i;
+	combatant *c;
+	targ pc_self,
+		pc_targ;
+	groupnum egroup_self,
+		egroup_targ;
+
+	for (i = 0; i < active->size; i++) {
+		c = List_At(active, i);
+
+		/* TODO: could have self-res enemies? */
+		if (c->action != NO_ACTION && !Is_Dead(c->self)) {
+			if (c->is_pc) {
+				pc_self = c->self;
+				egroup_self = -1;
+			} else {
+				pc_self = -1;
+				egroup_self = c->group;
+			}
+
+			if (IS_PC(c->target)) {
+				pc_targ = c->target;
+				egroup_targ = -1;
+			} else {
+				pc_targ = -1;
+				egroup_targ = Get_Combatant(c->target)->group;
+			}
+
+			Highlight_Ally(pc_self, pc_targ);
+			Highlight_Enemy_Group(egroup_self, egroup_targ);
+
+			/* TODO: retarget dead enemies? */
+			combat_actions[c->action].act(c->self, c->target);
+		}
+	}
+}
+
 noexport void Enter_Combat_Loop(void)
 {
 	int i;
@@ -751,15 +794,7 @@ noexport void Enter_Combat_Loop(void)
 		}
 
 		Sort_by_Priority(active_combatants);
-		for (i = 0; i < active_combatants->size; i++) {
-			c = List_At(active_combatants, i);
-
-			/* TODO: could have self-res enemies? */
-			if (c->action != NO_ACTION && !Is_Dead(c->self)) {
-				/* TODO: retarget dead enemies? */
-				combat_actions[c->action].act(c->self, c->target);
-			}
-		}
+		Do_Combat_Actions(active_combatants);
 
 		Clear_List(active_combatants);
 		first_turn = false;
