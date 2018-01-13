@@ -1,18 +1,14 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "monsters.h"
+#include "dosjun.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 bool Load_Monsters(char *filename, monsters *m)
 {
 	FILE *fp = fopen(filename, "rb");
-	if (!fp) {
-		printf("Could not open for reading: %s\n", filename);
-		return false;
-	}
+	if (!fp)
+		dief("Load_Monsters: Could not open for reading: %s\n", filename);
 
 	fread(&m->header, sizeof(monsters_header), 1, fp);
 	Check_Version_Header(m->header);
@@ -38,10 +34,8 @@ void Initialise_Monsters(monsters *m)
 bool Save_Monsters(char *filename, monsters *m)
 {
 	FILE *fp = fopen(filename, "wb");
-	if (!fp) {
-		printf("Could not open for writing: %s\n", filename);
-		return false;
-	}
+	if (!fp)
+		dief("Save_Monsters: Could not open for writing: %s\n", filename);
 
 	Set_Version_Header(m->header);
 	fwrite(&m->header, sizeof(monsters_header), 1, fp);

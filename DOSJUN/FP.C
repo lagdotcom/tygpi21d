@@ -49,13 +49,13 @@ bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
 	unsigned char data;
 	char far *header, *write;
 
-	Log("Load_Picture: %s", filename);
-
 	fp = fopen(filename, "rb");
 	if (!fp) {
-		printf("Could not open for reading: %s\n", filename);
+		dief("Load_Picture: Could not open for reading: %s\n", filename);
 		return false;
 	}
+
+	Log("Load_Picture: %s", filename);
 
 	header = (char far*)image;
 	for (index = 0; index < 128; index++) {
@@ -66,7 +66,7 @@ bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
 	image->buffer = Allocate(size, 1, tag);
 	if (image->buffer == null) {
 		fclose(fp);
-		printf("Could not allocate picture buffer.\n");
+		dief("Load_Picture: Could not allocate picture buffer.\n");
 		return false;
 	}
 
@@ -158,10 +158,8 @@ noexport void Load_Texture_Pieces(char *name, int index)
 
 	for (i = 0; i < TEXTURE_PIECES; i++) {
 		sprintf(filename, "WALL\\%s%d.PCX", name, i + 1);
-		if (!Load_Picture(filename, &textures[index * TEXTURE_PIECES + i], "Load_Texture_Pieces.n")) {
-			printf("Could not load: %s\n", filename);
-			exit(1);
-		}
+		if (!Load_Picture(filename, &textures[index * TEXTURE_PIECES + i], "Load_Texture_Pieces.n"))
+			dief("Load_Texture_Pieces: Could not load: %s\n", filename);
 	}
 }
 
@@ -170,10 +168,8 @@ noexport void Load_Thing(char *name, thing_id th)
 	char filename[MAX_FILENAME_LENGTH];
 
 	sprintf(filename, "THING\\%s.PCX", name);
-	if (!Load_Picture(filename, &things[th - 1], name)) {
-		printf("Could not load: %s\n", filename);
-		exit(1);
-	}
+	if (!Load_Picture(filename, &things[th - 1], name))
+		dief("Load_Thing: Could not load: %s\n", filename);
 }
 
 noexport void Load_Things(void)

@@ -8,19 +8,13 @@
 
 #define LIST_START_CAPACITY		10
 
-/* G L O B A L S ///////////////////////////////////////////////////////// */
-
-char err_buf[100];
-
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 noexport void Resize_List(list *l, unsigned int new_capacity)
 {
 	void *new_storage = Reallocate(l->items, new_capacity, sizeof(void *), "Resize_List");
-	if (new_storage == null) {
-		sprintf(err_buf, "Resize_List(%s) failed: going from %u to %u", l->tag, l->capacity, new_capacity);
-		die(err_buf);
-	}
+	if (new_storage == null)
+		dief("Resize_List(%s) failed: going from %u to %u", l->tag, l->capacity, new_capacity);
 
 	l->items = new_storage;
 	l->capacity = new_capacity;
@@ -61,10 +55,8 @@ noexport void Free_Item(list_type type, void *item)
 list *New_List(list_type type, char *tag)
 {
 	list *l = SzAlloc(1, list, tag);
-	if (l == null) {
-		sprintf(err_buf, "New_List(%s): Out of memory", tag);
-		die(err_buf);
-	}
+	if (l == null)
+		dief("New_List(%s): Out of memory", tag);
 
 	l->type = type;
 	l->object_size = 0;
@@ -130,10 +122,8 @@ void Add_to_List(list *l, void *item)
 
 void Add_String_to_List(list *l, char *s)
 {
-	if (l->type != ltString) {
-		sprintf(err_buf, "Add_String_to_List(%s) failed: wrong type of list", l->tag);
-		die(err_buf);
-	}
+	if (l->type != ltString)
+		dief("Add_String_to_List(%s) failed: wrong type of list", l->tag);
 
 	Add_to_List(l, Duplicate_String(s, "Add_String_to_List"));
 }
@@ -230,8 +220,7 @@ list *Read_List(FILE *fp, char *tag)
 				break;
 
 			default:
-				sprintf(err_buf, "Read_List: Cannot read a list of type %d from file.", l->type);
-				die(err_buf);
+				dief("Read_List: Cannot read a list of type %d from file.", l->type);
 		}
 	}
 
@@ -261,8 +250,7 @@ void Write_List(list *l, FILE *fp)
 				break;
 
 			default:
-				sprintf(err_buf, "Write_List: Cannot write a list of type %d to file.", l->type);
-				die(err_buf);
+				dief("Write_List: Cannot write a list of type %d to file.", l->type);
 		}
 	}
 }

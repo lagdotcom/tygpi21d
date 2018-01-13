@@ -1,8 +1,6 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "zone.h"
+#include "dosjun.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -30,10 +28,8 @@ bool Load_Zone(char *filename, zone *z)
 	unsigned int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "rb");
-	if (!fp) {
-		printf("Could not open for reading: %s\n", filename);
-		return false;
-	}
+	if (!fp)
+		dief("Load_Zone: Could not open for reading: %s\n", filename);
 
 	Log("Load_Zone: %s", filename);
 
@@ -156,10 +152,8 @@ bool Save_Zone(char *filename, zone *z)
 	unsigned int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "wb");
-	if (!fp) {
-		printf("Could not open for writing: %s\n", filename);
-		return false;
-	}
+	if (!fp)
+		dief("Save_Zone: Could not open for writing: %s\n", filename);
 
 	Set_Version_Header(z->header);
 	fwrite(h, sizeof(zone_header), 1, fp);

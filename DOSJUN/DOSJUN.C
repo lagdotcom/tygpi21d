@@ -25,6 +25,18 @@ font font6x8;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
+void dief(char *format, ...)
+{
+	va_list vargs;
+	char buf[500];
+
+	va_start(vargs, format);
+	vsprintf(buf, format, vargs);
+	va_end(vargs);
+
+	die(buf);
+}
+
 char Get_X_Offset(dir dir)
 {
 	switch (dir) {
@@ -350,7 +362,7 @@ void main(void)
 	Initialise_Sound();
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
-		printf("\nNot enough memory to create double buffer.");
+		dief("main: Not enough memory to create double buffer.");
 		return;
 	}
 

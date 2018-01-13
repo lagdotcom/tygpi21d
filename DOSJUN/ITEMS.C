@@ -1,19 +1,14 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "files.h"
-#include "items.h"
+#include "dosjun.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 bool Load_Items(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "rb");
-	if (!fp) {
-		printf("Could not open for reading: %s\n", filename);
-		return false;
-	}
+	if (!fp)
+		dief("Load_Items: Could not open for reading: %s\n", filename);
 
 	fread(&i->header, sizeof(items_header), 1, fp);
 	Check_Version_Header(i->header);
@@ -41,10 +36,8 @@ void Initialise_Items(items *i)
 bool Save_Items(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "wb");
-	if (!fp) {
-		printf("Could not open for writing: %s\n", filename);
-		return false;
-	}
+	if (!fp)
+		dief("Save_Items: Could not open for writing: %s\n", filename);
 
 	Set_Version_Header(i->header);
 	fwrite(&i->header, sizeof(items_header), 1, fp);

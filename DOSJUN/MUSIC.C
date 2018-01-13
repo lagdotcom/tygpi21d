@@ -440,16 +440,13 @@ noexport bool Load_SOP(char *filename)
 {
 	int i, j;
 	FILE *fp = fopen(filename, "rb");
-	if (!fp) {
-		printf("Could not open for reading: %s\n", filename);
-		return false;
-	}
+	if (!fp)
+		dief("Load_SOP: Could not open for reading: %s\n", filename);
 
 	fread(&header, sizeof(sop_header), 1, fp);
 	if (strncmp(header.signature, SOP_SIGNATURE, 7) != 0) {
-		printf("Not a SOPEPOS: %s\n", filename);
 		fclose(fp);
-		return false;
+		dief("Not a SOPEPOS: %s\n", filename);
 	}
 
 	channelTypes = SzAlloc(header.nTracks, BYTE, "Load_SOP.channelTypes");

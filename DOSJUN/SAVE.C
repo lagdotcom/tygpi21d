@@ -26,10 +26,8 @@ bool Load_Savefile(char *filename, save *s)
 	int i;
 
 	FILE *fp = fopen(filename, "rb");
-	if (!fp) {
-		printf("Could not open for reading: %s\n", filename);
-		return false;
-	}
+	if (!fp)
+		dief("Load_Savefile: Could not open for reading: %s\n", filename);
 
 	Log("Load_Savefile: %s", filename);
 
@@ -88,10 +86,8 @@ bool Save_Savefile(char *filename, save *s)
 	int i;
 
 	FILE *fp = fopen(filename, "wb");
-	if (!fp) {
-		printf("Could not open for reading: %s\n", filename);
-		return false;
-	}
+	if (!fp)
+		dief("Save_Savefile: Could not open for reading: %s\n", filename);
 
 	Log("Save_Savefile: %s", filename);
 

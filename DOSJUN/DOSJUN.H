@@ -55,6 +55,7 @@ extern font font6x8;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+void dief(char *format, ...);
 wall *Get_Wall(coord x, coord y, dir dir, relative rel);
 char Get_X_Offset(dir dir);
 char Get_Y_Offset(dir dir);

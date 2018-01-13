@@ -1,7 +1,6 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include "common.h"
-#include "campaign.h"
+#include "dosjun.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -16,7 +15,7 @@ bool Load_Campaign(char *filename, campaign *c)
 
 	FILE *fp = fopen(filename, "rb");
 	if (!fp) {
-		printf("Could not open for reading: %s\n", filename);
+		dief("Load_Campaign: Could not open for reading: %s\n", filename);
 		return false;
 	}
 
@@ -52,7 +51,7 @@ bool Save_Campaign(char *filename, campaign *c)
 	int i;
 	FILE *fp = fopen(filename, "wb");
 	if (!fp) {
-		printf("Could not open for writing: %s\n", filename);
+		dief("Save_Campaign: Could not open for writing: %s\n", filename);
 		return false;
 	}
 
