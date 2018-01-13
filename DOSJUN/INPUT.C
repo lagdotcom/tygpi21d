@@ -173,8 +173,8 @@ int Input_Menu(char **menu, int choices, int x, int y)
 	unsigned char key;
 
 	for (i = 0; i < choices; i++) {
-		Draw_Font(x, y + i*height, 15, "  ", FNT, false);
-		Draw_Font(x + 16, y + i*height, 15, menu[i], FNT, false);
+		Draw_Font(x, y + i*height, 15, " ", FNT, false);
+		Draw_Font(x + 8, y + i*height, 15, menu[i], FNT, false);
 	}
 
 	Draw_Font_Char(x, y + choice*height, 15, '>', FNT, false);
