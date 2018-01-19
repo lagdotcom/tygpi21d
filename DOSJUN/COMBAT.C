@@ -21,7 +21,7 @@ typedef struct {
 	action_do_fn act;
 	char *name;
 	targetflags targeting;
-	pri priority; /* TODO */
+	pri priority;
 } action;
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
