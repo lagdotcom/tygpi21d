@@ -167,8 +167,8 @@ noexport void Pop_Temp(code_host *h)
 
 noexport void Add(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "add");
 #endif
@@ -177,8 +177,8 @@ noexport void Add(code_host *h)
 
 noexport void Sub(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "sub");
 #endif
@@ -187,8 +187,8 @@ noexport void Sub(code_host *h)
 
 noexport void Mul(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "mul");
 #endif
@@ -197,8 +197,8 @@ noexport void Mul(code_host *h)
 
 noexport void Div(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "div");
 #endif
@@ -207,8 +207,8 @@ noexport void Div(code_host *h)
 
 noexport void And(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "and");
 #endif
@@ -217,8 +217,8 @@ noexport void And(code_host *h)
 
 noexport void Or(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "or");
 #endif
@@ -227,8 +227,8 @@ noexport void Or(code_host *h)
 
 noexport void Eq(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "eq");
 #endif
@@ -237,8 +237,8 @@ noexport void Eq(code_host *h)
 
 noexport void Neq(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "neq");
 #endif
@@ -247,8 +247,8 @@ noexport void Neq(code_host *h)
 
 noexport void Lt(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "lt");
 #endif
@@ -257,8 +257,8 @@ noexport void Lt(code_host *h)
 
 noexport void Lte(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "lte");
 #endif
@@ -267,8 +267,8 @@ noexport void Lte(code_host *h)
 
 noexport void Gt(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "gt");
 #endif
@@ -277,8 +277,8 @@ noexport void Gt(code_host *h)
 
 noexport void Gte(code_host *h)
 {
-	int left = Pop_Stack(h);
 	int right = Pop_Stack(h);
+	int left = Pop_Stack(h);
 #ifdef TRACE_CODE
 	fprintf(trace, "gte");
 #endif
@@ -325,8 +325,8 @@ noexport void Combat(code_host *h)
 noexport void PcSpeak(code_host *h)
 {
 	char buffer[300];
-	int pc = Pop_Stack(h);
 	string_id string = Pop_Stack(h);
+	int pc = Pop_Stack(h);
 
 #ifdef TRACE_CODE
 	fprintf(trace, "pcspeak %d, #%d", pc, string);
@@ -350,9 +350,9 @@ noexport void Text(code_host *h)
 noexport void Unlock(code_host *h)
 {
 	tile *tile;
-	coord x = Pop_Stack(h);
-	coord y = Pop_Stack(h);
 	dir dir = Pop_Stack(h);
+	coord y = Pop_Stack(h);
+	coord x = Pop_Stack(h);
 
 #ifdef TRACE_CODE
 	fprintf(trace, "unlock %d, %d, %d", x, y, dir);
@@ -367,9 +367,9 @@ noexport void Unlock(code_host *h)
 noexport void GiveItem(code_host *h)
 {
 	bool result;
-	int pc = Pop_Stack(h);
-	item_id item = Pop_Stack(h);
 	int qty = Pop_Stack(h);
+	item_id item = Pop_Stack(h);
+	int pc = Pop_Stack(h);
 
 #ifdef TRACE_CODE
 	fprintf(trace, "giveitem %d, %d, %d", pc, item, qty);
@@ -382,8 +382,8 @@ noexport void GiveItem(code_host *h)
 noexport void EquipItem(code_host *h)
 {
 	bool result;
-	int pc = Pop_Stack(h);
 	item_id item = Pop_Stack(h);
+	int pc = Pop_Stack(h);
 
 #ifdef TRACE_CODE
 	fprintf(trace, "equipitem %d, %d", pc, item);
@@ -395,9 +395,9 @@ noexport void EquipItem(code_host *h)
 
 noexport void SetTileDescription(code_host *h)
 {
-	coord x = Pop_Stack(h);
-	coord y = Pop_Stack(h);
 	string_id string = Pop_Stack(h);
+	coord y = Pop_Stack(h);
+	coord x = Pop_Stack(h);
 
 #ifdef TRACE_CODE
 	fprintf(trace, "settiledescription %d, %d, #%d", x, y, string);
@@ -408,10 +408,10 @@ noexport void SetTileDescription(code_host *h)
 
 noexport void SetTileColour(code_host *h)
 {
-	coord x = Pop_Stack(h);
-	coord y = Pop_Stack(h);
-	int f = Pop_Stack(h);
 	colour c = Pop_Stack(h);
+	int f = Pop_Stack(h);
+	coord y = Pop_Stack(h);
+	coord x = Pop_Stack(h);
 
 #ifdef TRACE_CODE
 	fprintf(trace, "settilecolour %d, %d, %d, %d", x, y, facing, colour);
@@ -436,9 +436,9 @@ noexport void SetTileColour(code_host *h)
 
 noexport void SetTileThing(code_host *h)
 {
-	coord x = Pop_Stack(h);
-	coord y = Pop_Stack(h);
 	thing_id th = Pop_Stack(h);
+	coord y = Pop_Stack(h);
+	coord x = Pop_Stack(h);
 
 #ifdef TRACE_CODE
 	fprintf(trace, "settilething %d, %d, %d", x, y, th);
@@ -450,11 +450,11 @@ noexport void SetTileThing(code_host *h)
 
 noexport void Teleport(code_host *h)
 {
-	zone_id zone = Pop_Stack(h);
-	coord x = Pop_Stack(h);
-	coord y = Pop_Stack(h);
-	dir facing = Pop_Stack(h);
 	int transition = Pop_Stack(h);
+	dir facing = Pop_Stack(h);
+	coord y = Pop_Stack(h);
+	coord x = Pop_Stack(h);
+	zone_id zone = Pop_Stack(h);
 
 #ifdef TRACE_CODE
 	fprintf(trace, "teleport %d, %d, %d, %d, %d", zone, x, y, facing, transition);
