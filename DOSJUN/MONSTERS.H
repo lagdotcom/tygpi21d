@@ -9,7 +9,8 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define MONSTERS_HEADER_PADDING		26
-#define MONSTER_PADDING				2
+#define MONSTER_PADDING				1
+#define MONSTER_SIZE				32
 
 typedef enum row {
 	rowFront,
@@ -19,6 +20,10 @@ typedef enum row {
 typedef enum ai {
 	aiMindless
 } ai;
+
+typedef enum monsterflag {
+	mHasSkills,
+} monsterflag;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -31,8 +36,10 @@ typedef struct monster {
 	ai_id ai;
 	UINT32 experience;
 	item_id weapon;
-
+	monsterflag_id flags;
 	unsigned char unused[MONSTER_PADDING];
+
+	list* skills;
 } monster;
 
 typedef struct monsters_header {

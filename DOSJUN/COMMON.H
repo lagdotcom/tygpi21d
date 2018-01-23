@@ -70,6 +70,7 @@ typedef UINT8 item_type;
 typedef UINT8 job_id;
 typedef UINT16 length;
 typedef UINT16 monster_id;
+typedef UINT8 monsterflag_id;
 typedef UINT8 row_id;
 typedef UINT16 script_id;
 typedef UINT8 itemspecial_id;

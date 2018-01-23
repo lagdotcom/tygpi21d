@@ -6,7 +6,9 @@
 
 bool Load_Monsters(char *filename, monsters *m)
 {
+	int i;
 	FILE *fp = fopen(filename, "rb");
+	monster *mon;
 	if (!fp)
 		dief("Load_Monsters: Could not open for reading: %s\n", filename);
 
@@ -15,6 +17,18 @@ bool Load_Monsters(char *filename, monsters *m)
 
 	m->monsters = SzAlloc(m->header.num_monsters, monster, "Load_Monsters");
 	if (m->monsters == null) die("Load_Monsters: out of memory");
+
+	for (i = 0; i < m->header.num_monsters; i++) {
+		mon = &m->monsters[i];
+
+		fread(mon, MONSTER_SIZE, 1, fp);
+		if (mon->flags & mHasSkills) {
+			mon->skills = Read_List(fp, "Load_Monsters");
+		} else {
+			mon->skills = null;
+		}
+	}
+
 	fread(m->monsters, sizeof(monster), m->header.num_monsters, fp);
 
 	fclose(fp);
@@ -23,6 +37,17 @@ bool Load_Monsters(char *filename, monsters *m)
 
 void Free_Monsters(monsters *m)
 {
+	int i;
+	monster *mon;
+
+	for (i = 0; i < m->header.num_monsters; i++) {
+		mon = &m->monsters[i];
+
+		if (mon->flags & mHasSkills) {
+			Free_List(mon->skills);
+		}
+	}
+
 	Free(m->monsters);
 }
 
@@ -33,13 +58,24 @@ void Initialise_Monsters(monsters *m)
 
 bool Save_Monsters(char *filename, monsters *m)
 {
+	int i;
+	monster *mon;
 	FILE *fp = fopen(filename, "wb");
 	if (!fp)
 		dief("Save_Monsters: Could not open for writing: %s\n", filename);
 
 	Set_Version_Header(m->header);
 	fwrite(&m->header, sizeof(monsters_header), 1, fp);
-	fwrite(m->monsters, sizeof(monster), m->header.num_monsters, fp);
+
+	for (i = 0; i < m->header.num_monsters; i++) {
+		mon = &m->monsters[i];
+		fwrite(mon, MONSTER_SIZE, 1, fp);
+
+		if (mon->flags & mHasSkills) {
+			Write_List(mon->skills, fp);
+		}
+	}
+
 	fclose(fp);
 	return true;
 }

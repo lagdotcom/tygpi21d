@@ -356,7 +356,7 @@ void Add_Monster(groupnum group, monster* template)
 	c->pc = null;
 	c->row = template->row;
 	c->self = combatants->size;
-	c->skills = null;	/* TODO */
+	c->skills = template->skills;
 	c->stats = stats;
 	c->weapon = template->weapon;
 
