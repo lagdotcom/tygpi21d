@@ -10,7 +10,7 @@
 
 #define MONSTERS_HEADER_PADDING		26
 #define MONSTER_PADDING				1
-#define MONSTER_SIZE				32
+#define MONSTER_SIZE				76
 
 typedef enum row {
 	rowFront,
@@ -18,11 +18,12 @@ typedef enum row {
 } row;
 
 typedef enum ai {
-	aiMindless
+	aiMindless,
+	aiRogue
 } ai;
 
 typedef enum monsterflag {
-	mHasSkills,
+	mHasSkills = 1,
 } monsterflag;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */

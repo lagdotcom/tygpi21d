@@ -674,15 +674,32 @@ void Expire_Combat_Buffs(void)
 
 /* A I  R O U T I N E S ////////////////////////////////////////////////// */
 
-noexport void AI_Mindless(int monster, act *action, targ *target)
+noexport targ Random_Alive_Pc(void)
 {
+	/* TODO: make this less awkward */
 	int t = randint(0, PARTY_SIZE - 1);
 	while (Is_Dead(t)) {
 		t = randint(0, PARTY_SIZE - 1);
 	}
 
-	*action = aAttack;
-	*target = t;
+	return t;
+}
+
+noexport void AI_Mindless(combatant *c)
+{
+	c->action = aAttack;
+	c->target = Random_Alive_Pc();
+}
+
+noexport void AI_Rogue(combatant *c)
+{
+	if (Check_Hide(c->self) && randint(0, 1) == 1) {
+		c->action = aHide;
+		c->target = c->self;
+	} else {
+		c->action = Has_Buff(c->self, HIDE_BUFF_NAME) ? aSneakAttack : aAttack;
+		c->target = Random_Alive_Pc();
+	}
 }
 
 noexport void Show_Combat_Pc_Stats(void)
@@ -787,7 +804,11 @@ noexport void Enter_Combat_Loop(void)
 			} else {
 				switch (c->monster->ai) {
 					case aiMindless:
-						AI_Mindless(i, &c->action, &c->target);
+						AI_Mindless(c);
+						break;
+
+					case aiRogue:
+						AI_Rogue(c);
 						break;
 				}
 			}
@@ -841,6 +862,7 @@ void Start_Combat(encounter_id id)
 
 		count = randint(en->minimum[i], en->maximum[i]);
 		if (count > 0) {
+			Log("Start_Combat: adding %dx%s (#%04x)", count, m->name, en->monsters[i]);
 			write += sprintf(write, " %s x%d", m->name, count);
 
 			while (count > 0) {

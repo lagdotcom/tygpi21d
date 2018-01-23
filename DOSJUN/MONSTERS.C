@@ -18,15 +18,17 @@ bool Load_Monsters(char *filename, monsters *m)
 	m->monsters = SzAlloc(m->header.num_monsters, monster, "Load_Monsters");
 	if (m->monsters == null) die("Load_Monsters: out of memory");
 
+	mon = m->monsters;
 	for (i = 0; i < m->header.num_monsters; i++) {
-		mon = &m->monsters[i];
-
 		fread(mon, MONSTER_SIZE, 1, fp);
+
 		if (mon->flags & mHasSkills) {
 			mon->skills = Read_List(fp, "Load_Monsters");
 		} else {
 			mon->skills = null;
 		}
+
+		mon++;
 	}
 
 	fread(m->monsters, sizeof(monster), m->header.num_monsters, fp);

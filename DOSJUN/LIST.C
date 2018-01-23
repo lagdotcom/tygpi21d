@@ -54,9 +54,14 @@ noexport void Free_Item(list_type type, void *item)
 
 list *New_List(list_type type, char *tag)
 {
+	return New_List_of_Capacity(type, LIST_START_CAPACITY, tag);
+}
+
+list *New_List_of_Capacity(list_type type, int capacity, char *tag)
+{
 	list *l = SzAlloc(1, list, tag);
 	if (l == null)
-		dief("New_List(%s): Out of memory", tag);
+		dief("New_List_with_Capacity(%s): Out of memory", tag);
 
 	l->type = type;
 	l->object_size = 0;
@@ -65,7 +70,7 @@ list *New_List(list_type type, char *tag)
 	l->items = null;
 	l->tag = tag;
 
-	Resize_List(l, LIST_START_CAPACITY);
+	Resize_List(l, capacity);
 	return l;
 }
 
@@ -181,7 +186,7 @@ void *List_At(list *l, unsigned int index)
 }
 
 /* The size of the list header when written to a file */
-#define LIST_FILE_HEADER_SZ		sizeof(list_type) + sizeof(unsigned int) + sizeof(unsigned int)
+#define LIST_FILE_HEADER_SZ		sizeof(list_type) + sizeof(unsigned int) + sizeof(unsigned int) + sizeof(unsigned int)
 
 list *Read_List(FILE *fp, char *tag)
 {
@@ -190,13 +195,9 @@ list *Read_List(FILE *fp, char *tag)
 	void **obj;
 	
 	fread(&fake, LIST_FILE_HEADER_SZ, 1, fp);
-	l = New_List(fake.type, tag);
+	l = New_List_of_Capacity(fake.type, fake.capacity, tag);
 	l->object_size = fake.object_size;
-
-	if (fake.size > l->capacity)
-		Resize_List(l, fake.size);
-	else
-		l->size = fake.size;
+	l->size = fake.size;
 
 	if (l->size > 0) {
 		switch (l->type) {
