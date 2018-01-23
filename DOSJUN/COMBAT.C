@@ -698,7 +698,7 @@ noexport void AI_Rogue(combatant *c)
 		c->action = aHide;
 		c->target = c->self;
 	} else {
-		c->action = Has_Buff(c->self, HIDE_BUFF_NAME) ? aSneakAttack : aAttack;
+		c->action = Check_SneakAttack(c->self) ? aSneakAttack : aAttack;
 		c->target = Random_Alive_Pc();
 	}
 }
