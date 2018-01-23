@@ -676,11 +676,12 @@ void Expire_Combat_Buffs(void)
 
 noexport targ Random_Alive_Pc(void)
 {
+	int t;
+
 	/* TODO: make this less awkward */
-	int t = randint(0, PARTY_SIZE - 1);
-	while (Is_Dead(t)) {
+	do {
 		t = randint(0, PARTY_SIZE - 1);
-	}
+	} while (Is_Dead(t));
 
 	return t;
 }
