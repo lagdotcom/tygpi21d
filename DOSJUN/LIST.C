@@ -12,7 +12,7 @@
 
 noexport void Resize_List(list *l, unsigned int new_capacity)
 {
-	void *new_storage = Reallocate(l->items, new_capacity, sizeof(void *), "Resize_List");
+	void *new_storage = Reallocate(l->items, new_capacity, sizeof(void *), l->tag);
 	if (new_storage == null)
 		dief("Resize_List(%s) failed: going from %u to %u", l->tag, l->capacity, new_capacity);
 
@@ -190,7 +190,7 @@ void *List_At(list *l, unsigned int index)
 
 list *Read_List(FILE *fp, char *tag)
 {
-	int i;
+	int i, temp;
 	list fake, *l;
 	void **obj;
 	
@@ -202,7 +202,10 @@ list *Read_List(FILE *fp, char *tag)
 	if (l->size > 0) {
 		switch (l->type) {
 			case ltInteger:
-				fread(l->items, sizeof(int), l->size, fp);
+				for (i = 0; i < l->size; i++) {
+					fread(&temp, sizeof(int), 1, fp);
+					l->items[i] = (void *)temp;
+				}
 				break;
 
 			case ltString:
@@ -230,14 +233,17 @@ list *Read_List(FILE *fp, char *tag)
 
 void Write_List(list *l, FILE *fp)
 {
-	int i;
+	int i, temp;
 
 	fwrite(l, LIST_FILE_HEADER_SZ, 1, fp);
 
 	if (l->size > 0) {
 		switch (l->type) {
 			case ltInteger:
-				fwrite(l->items, sizeof(int), l->size, fp);
+				for (i = 0; i < l->size; i++) {
+					temp = (int)l->items[i];
+					fwrite(&temp, sizeof(int), 1, fp);
+				}
 				break;
 
 			case ltString:
