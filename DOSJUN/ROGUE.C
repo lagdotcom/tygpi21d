@@ -66,20 +66,17 @@ void SneakAttack(targ source, targ target)
 	if (randint(1, 20) <= base) {
 		Combat_Message("%s strikes %s from the shadows!", source_name, target_name);
 
-		min = Get_Stat(source, sMinDamage);
-		max = Get_Stat(source, sMaxDamage);
-
-		if (weapon != null) {
-			min += weapon->stats[sMinDamage];
-			max += weapon->stats[sMaxDamage];
-		}
-
+		Get_Weapon_Damage(source, weapon, &min, &max);
 		roll = randint(min, max) * HIDE_MULTIPLIER - Get_Stat(target, sArmour);
 		if (roll > 0) {
 			Damage(target, roll);
 
+			if (Is_Dead(target)) {
+				return;
+			}
+
 			if (Has_Skill(attacker, skBludgeon)) {
-				/* TODO: stun */
+				Try_Stun(source, target, sStrength);
 			}
 
 			if (Has_Skill(attacker, skVenom)) {

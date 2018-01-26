@@ -135,8 +135,21 @@ item *Get_Weapon(targ source)
 
 stat_value Get_Stat(targ source, statistic st)
 {
+	stat_value base;
 	combatant *c = Get_Combatant(source);
-	return c->stats[st];
+
+	switch (st)
+	{
+		case sToughness:
+			base = c->stats[sStrength] / 3;
+			break;
+
+		default:
+			base = 0;
+			break;
+	}
+
+	return base + c->stats[st];
 }
 
 noexport void Set_Stat(targ source, statistic st, stat_value num)
@@ -204,6 +217,17 @@ void Damage(targ victim, int amount)
 	}
 }
 
+void Get_Weapon_Damage(targ source, item *weapon, stat_value *min, stat_value *max)
+{
+	min = Get_Stat(source, sMinDamage);
+	max = Get_Stat(source, sMaxDamage);
+
+	if (weapon != null) {
+		min += weapon->stats[sMinDamage];
+		max += weapon->stats[sMaxDamage];
+	}
+}
+
 /* C O M B A T  A C T I O N S //////////////////////////////////////////// */
 
 noexport bool Check_Attack(targ source)
@@ -242,14 +266,7 @@ noexport void Attack(targ source, targ target)
 	if (randint(1, 20) <= base) {
 		Combat_Message("%s hits %s!", NAME(source), NAME(target));
 
-		min = Get_Stat(source, sMinDamage);
-		max = Get_Stat(source, sMaxDamage);
-
-		if (weapon != null) {
-			min += weapon->stats[sMinDamage];
-			max += weapon->stats[sMaxDamage];
-		}
-
+		Get_Weapon_Damage(source, weapon, &min, &max);
 		roll = randint(min, max) - Get_Stat(target, sArmour);
 		if (roll > 0) {
 			Damage(target, roll);
@@ -607,7 +624,9 @@ bool Has_Buff(targ target, char *name)
 
 noexport void Remove_Buff_from_List(targ owner, list *buffs, buff *b)
 {
-	b->expiry(owner, b->argument);
+	if (b->expiry != null)
+		b->expiry(owner, b->argument);
+
 	Remove_from_List(buffs, b);
 }
 
@@ -795,6 +814,12 @@ noexport void Enter_Combat_Loop(void)
 
 			/* TODO: could have self-res enemies? */
 			if (Is_Dead(i)) {
+				c->action = NO_ACTION;
+				continue;
+			}
+
+			if (Has_Buff(c->self, LOSE_MOVE_BUFF_NAME)) {
+				Remove_Buff(c->self, LOSE_MOVE_BUFF_NAME);
 				c->action = NO_ACTION;
 				continue;
 			}

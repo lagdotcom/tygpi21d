@@ -22,6 +22,7 @@
 #include "party.h"
 #include "save.h"
 #include "sound.h"
+#include "status.h"
 #include "zone.h"
 
 #include "bard.h"

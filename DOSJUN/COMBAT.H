@@ -90,6 +90,7 @@ void Free_Combat(void);
 combatant *Get_Combatant(targ target);
 stat_value Get_Stat(targ source, statistic st);
 item *Get_Weapon(targ source);
+void Get_Weapon_Damage(targ source, item *weapon, stat_value *min, stat_value *max);
 statistic Get_Weapon_Stat(item *weapon);
 bool Has_Buff(targ target, char *name);
 bool Is_Dead(targ victim);

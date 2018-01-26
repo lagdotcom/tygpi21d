@@ -43,7 +43,7 @@ typedef enum statistic {
 	sMP,
 	sHitBonus,
 	sDodgeBonus,
-	sUNUSED1,
+	sToughness,
 	sUNUSED2,
 	sUNUSED3,
 	sUNUSED4,
