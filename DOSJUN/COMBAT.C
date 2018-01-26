@@ -219,12 +219,12 @@ void Damage(targ victim, int amount)
 
 void Get_Weapon_Damage(targ source, item *weapon, stat_value *min, stat_value *max)
 {
-	min = Get_Stat(source, sMinDamage);
-	max = Get_Stat(source, sMaxDamage);
+	*min = Get_Stat(source, sMinDamage);
+	*max = Get_Stat(source, sMaxDamage);
 
 	if (weapon != null) {
-		min += weapon->stats[sMinDamage];
-		max += weapon->stats[sMaxDamage];
+		*min += weapon->stats[sMinDamage];
+		*max += weapon->stats[sMaxDamage];
 	}
 }
 
