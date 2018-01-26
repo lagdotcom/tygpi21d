@@ -53,7 +53,7 @@ void SneakAttack(targ source, targ target)
 	item *weapon = Get_Weapon(source);
 	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
 	stat_value min, max;
-	int roll;
+	int roll, potency;
 
 	if (Is_Dead(target)) {
 		Combat_Message("%s missed their chance.", source_name);
@@ -80,7 +80,9 @@ void SneakAttack(targ source, targ target)
 			}
 
 			if (Has_Skill(attacker, skVenom)) {
-				/* TODO: poison */
+				potency = attacker->stats[sIntelligence] / 3;
+				potency = potency < 1 ? 1 : potency;
+				Try_Poison(source, target, sDexterity, potency);
 			}
 		} else {
 			Combat_Message("The blow glances off.");
