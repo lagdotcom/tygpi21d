@@ -115,7 +115,7 @@ EndScript
 
 Script Z_ENTER
 	If q_status >= q_key_found
-		SetTileThing 5, 4, 0
+		SetTileThing 5, 3, 0
 	EndIf
 	If q_status >= q_door_unlocked
 		Unlock 7, 6, South

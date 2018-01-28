@@ -17,6 +17,7 @@ typedef enum thing {
 	thNone = 0,
 
 	thShiny,
+	thBarrel,
 
 	thINVALID
 } thing;

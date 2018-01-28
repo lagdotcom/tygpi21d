@@ -178,6 +178,7 @@ noexport void Load_Things(void)
 
 	things = SzAlloc(thINVALID - 1, pcx_picture, "Load_Things");
 	Load_Thing("SHINY", thShiny);
+	Load_Thing("BARREL", thBarrel);
 }
 
 noexport void Free_Things(void)
