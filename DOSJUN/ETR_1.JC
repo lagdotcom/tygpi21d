@@ -9,6 +9,8 @@ Const q_key_found = 3
 Const q_door_unlocked = 4
 Const q_gone_outside = 5
 Const q_fought_rat = 6
+Const q_secret_found = 7
+Const q_secret_open = 8
 Local q_status
 
 Script wake_up
@@ -119,5 +121,30 @@ Script Z_ENTER
 	EndIf
 	If q_status >= q_door_unlocked
 		Unlock 7, 6, South
+	EndIf
+	If q_status >= q_secret_open
+		RemoveWall 2, 14, North
+	EndIf
+EndScript
+
+Script secret_tile
+	If @Facing != North
+		Return
+	EndIf
+
+	If q_status == q_secret_found
+		Text "You face the uneven wall again."
+		PcSpeak nra, "I'm not convinced by this wall."
+		Text "Your party agrees, and looks around to see if anything else is out of place."
+		PcSpeak shifty, "What's this?"
+		Text "An oddly-shaped stone. You pick it up and examine the wall a little more closely."
+		Text "After a moment, you find an indentation that is roughly the same shape."
+		RemoveWall @X, @Y, North
+		Refresh
+		PcSpeak nerd, "Does that count as a puzzle?"
+		q_status = q_secret_open
+	ElseIf q_status < q_secret_found
+		Text "The wall ahead of you looks uneven, as if it were made hastily."
+		q_status = q_secret_found
 	EndIf
 EndScript

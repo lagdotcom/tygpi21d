@@ -499,6 +499,34 @@ noexport void Safe(code_host *h)
 	can_save = true;
 }
 
+noexport void RemoveWall(code_host *h)
+{
+	tile *tile;
+	dir dir = Pop_Stack(h);
+	coord y = Pop_Stack(h);
+	coord x = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "removewall %d, %d, %d", x, y, dir);
+#endif
+
+	tile = TILE(gZone, x, y);
+	tile->walls[dir].texture = 0;
+	tile->walls[dir].texture = wtNormal;
+
+	redraw_fp = true;
+}
+
+noexport void Refresh(code_host *h)
+{
+#ifdef TRACE_CODE
+	fprintf(trace, "refresh");
+#endif
+
+	Draw_FP();
+	Draw_Party_Status();
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -548,6 +576,8 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coSetTileThing: SetTileThing(h); return;
 		case coSetDanger:	SetDanger(h); return;
 		case coSafe:		Safe(h); return;
+		case coRemoveWall:	RemoveWall(h); return;
+		case coRefresh:		Refresh(h); return;
 	}
 
 	h->running = false;
