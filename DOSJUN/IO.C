@@ -4,9 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "common.h"
-#include "files.h"
-#include "gamelib.h"
+#include "dosjun.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
