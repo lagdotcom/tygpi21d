@@ -8,7 +8,7 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-bool Check_Sing(targ source)
+bool Check_Sing(combatant *source)
 {
 	/* TODO: use Silenced somewhere */
 	if (Has_Buff(source, "Silenced")) {
@@ -19,14 +19,14 @@ bool Check_Sing(targ source)
 		return false;
 	}
 
-	return Has_Skill(Get_Combatant(source), skSing);
+	return Has_Skill(source, skSing);
 }
 
-noexport void Sing_Expires(targ target, int argument)
+noexport void Sing_Expires(combatant *target, int argument)
 {
 	combatant *c;
 	int i;
-	bool is_pc = IS_PC(target);
+	bool is_pc = target->is_pc;
 
 	for (i = 0; i < combatants->size; i++) {
 		c = List_At(combatants, i);
@@ -37,16 +37,15 @@ noexport void Sing_Expires(targ target, int argument)
 	}
 
 	if (gState == gsCombat) {
-		c = Get_Combatant(target);
-		Combat_Message("%s stops singing.", c->name);
+		Combat_Message("%s stops singing.", target->name);
 	}
 }
 
-void Sing(targ source, targ target)
+void Sing(combatant *source, combatant *target)
 {
 	combatant *c;
 	int i;
-	bool is_pc = IS_PC(target);
+	bool is_pc = target->is_pc;
 
 	for (i = 0; i < combatants->size; i++) {
 		c = List_At(combatants, i);
@@ -57,5 +56,5 @@ void Sing(targ source, targ target)
 	}
 
 	Add_Buff(source, SING_BUFF_NAME, exTurns, 1, Sing_Expires, SING_HITBONUS);
-	Combat_Message("%s sings, and the party is inspired!", NAME(source));
+	Combat_Message("%s sings, and the party is inspired!", source->name);
 }

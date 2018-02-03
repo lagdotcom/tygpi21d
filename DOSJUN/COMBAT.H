@@ -11,13 +11,8 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 typedef int act;
-typedef int targ;
 typedef int groupnum;
 typedef UINT8 pri;
-
-typedef bool(*action_check_fn)(targ source);
-typedef void(*action_do_fn)(targ source, targ target);
-typedef void(*buff_expiry_fn)(targ target, int argument);
 
 typedef enum targetflags {
 	tfAlly = 1,
@@ -45,20 +40,6 @@ typedef enum expiry_type {
 	exTurnEndChance,
 } expiry_type;
 
-#define IS_PC(n) ((n) < PARTY_SIZE)
-#define NAME(n) (Get_Combatant(n)->name)
-#define TARGET_PC(n) (targ)(n)
-
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
-typedef struct buff {
-	char *name;
-	buff_expiry_fn expiry;
-	expiry_type type;
-	int duration;
-	int argument;
-} buff;
-
 typedef struct combatant {
 	char *name;
 	stat_value *stats;
@@ -71,11 +52,25 @@ typedef struct combatant {
 	row_id row;
 	bool is_pc;
 
-	targ self;
 	act action;
-	targ target;
+	void *target; /* combatant */
 	pri priority;
+	unsigned int index;
 } combatant;
+
+typedef bool(*action_check_fn)(combatant *source);
+typedef void(*action_do_fn)(combatant *source, combatant *target);
+typedef void(*buff_expiry_fn)(combatant *target, int argument);
+
+typedef struct buff {
+	char *name;
+	buff_expiry_fn expiry;
+	expiry_type type;
+	int duration;
+	int argument;
+} buff;
+
+#define TARGET_PC(i) (i)
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
@@ -83,20 +78,20 @@ extern list *combatants;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-void Add_Buff(targ target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument);
+void Add_Buff(combatant *target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument);
 void Combat_Message(char *format, ...);
-void Damage(targ victim, int amount);
+void Damage(combatant *victim, int amount);
 void Free_Combat(void);
-combatant *Get_Combatant(targ target);
-stat_value Get_Stat(targ source, statistic st);
-item *Get_Weapon(targ source);
-void Get_Weapon_Damage(targ source, item *weapon, stat_value *min, stat_value *max);
+combatant *Get_Combatant(combatant *target);
+stat_value Get_Stat(combatant *source, statistic st);
+item *Get_Weapon(combatant *source);
+void Get_Weapon_Damage(combatant *source, item *weapon, stat_value *min, stat_value *max);
 statistic Get_Weapon_Stat(item *weapon);
-bool Has_Buff(targ target, char *name);
-bool Is_Dead(targ victim);
+bool Has_Buff(combatant *target, char *name);
+bool Is_Dead(combatant *victim);
 void Initialise_Combat(void);
 int randint(int minimum, int maximum);
-void Remove_Buff(targ target, char *name);
+void Remove_Buff(combatant *target, char *name);
 void Start_Combat(encounter_id id);
 
 #endif

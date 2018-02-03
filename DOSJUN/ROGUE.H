@@ -11,9 +11,9 @@
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-bool Check_Hide(targ source);
-bool Check_SneakAttack(targ source);
-void Hide(targ source, targ target);
-void SneakAttack(targ source, targ target);
+bool Check_Hide(combatant *source);
+bool Check_SneakAttack(combatant *source);
+void Hide(combatant *source, combatant *target);
+void SneakAttack(combatant *source, combatant *target);
 
 #endif

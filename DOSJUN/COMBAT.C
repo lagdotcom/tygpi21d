@@ -82,8 +82,8 @@ noexport void Highlight_Ally(int pc_active, int pc_select)
 
 noexport void Format_Enemy_Group(groupnum group, char *buffer)
 {
-	int enemy = (int)List_At(combat_groups[group], 0);
-	sprintf(buffer, "%s x%u", Get_Combatant(enemy)->name, combat_groups[group]->size);
+	combatant* enemy = List_At(combat_groups[group], 0);
+	sprintf(buffer, "%s x%u", enemy->name, combat_groups[group]->size);
 }
 
 #define EPANEL_X	8
@@ -127,16 +127,14 @@ noexport void Highlight_Enemy_Group(groupnum active, groupnum select)
 	}
 }
 
-item *Get_Weapon(targ source)
+item *Get_Weapon(combatant *c)
 {
-	combatant *c = Get_Combatant(source);
 	return c->weapon ? Lookup_Item(&gItems, c->weapon) : null;
 }
 
-stat_value Get_Stat(targ source, statistic st)
+stat_value Get_Stat(combatant *c, statistic st)
 {
 	stat_value base;
-	combatant *c = Get_Combatant(source);
 
 	switch (st)
 	{
@@ -152,9 +150,8 @@ stat_value Get_Stat(targ source, statistic st)
 	return base + c->stats[st];
 }
 
-noexport void Set_Stat(targ source, statistic st, stat_value num)
+noexport void Set_Stat(combatant *c, statistic st, stat_value num)
 {
-	combatant *c = Get_Combatant(source);
 	c->stats[st] = num;
 }
 
@@ -164,28 +161,22 @@ statistic Get_Weapon_Stat(item *weapon)
 	return (weapon->flags & ifDexterityWeapon) ? sDexterity : sStrength;
 }
 
-combatant *Get_Combatant(targ target)
-{
-	return List_At(combatants, target);
-}
-
-noexport targ Get_Random_Target(groupnum group)
+noexport combatant *Get_Random_Target(groupnum group)
 {
 	int i;
 
 	i = randint(0, combat_groups[group]->size - 1);
-	return (targ)List_At(combat_groups[group], i);
+	return List_At(combat_groups[group], i);
 }
 
-bool Is_Dead(targ victim)
+bool Is_Dead(combatant *victim)
 {
 	return Get_Stat(victim, sHP) <= 0;
 }
 
-noexport void Kill(targ victim)
+noexport void Kill(combatant *c)
 {
 	groupnum group;
-	combatant *c = Get_Combatant(victim);
 
 	Combat_Message("%s dies!", c->name);
 
@@ -197,7 +188,7 @@ noexport void Kill(targ victim)
 
 		group = c->group;
 		if (group >= 0) {
-			Remove_from_List(combat_groups[group], (void*)victim);
+			Remove_from_List(combat_groups[group], (void*)c);
 			if (combat_groups[group]->size == 0) {
 				groups_alive--;
 			}
@@ -205,19 +196,19 @@ noexport void Kill(targ victim)
 	}
 }
 
-void Damage(targ victim, int amount)
+void Damage(combatant *victim, int amount)
 {
 	stat_value hp = Get_Stat(victim, sHP);
 	hp -= amount;
 
-	Combat_Message("%s takes %d damage.", NAME(victim), amount);
+	Combat_Message("%s takes %d damage.", victim->name, amount);
 	Set_Stat(victim, sHP, hp);
 	if (hp <= 0) {
 		Kill(victim);
 	}
 }
 
-void Get_Weapon_Damage(targ source, item *weapon, stat_value *min, stat_value *max)
+void Get_Weapon_Damage(combatant *source, item *weapon, stat_value *min, stat_value *max)
 {
 	*min = Get_Stat(source, sMinDamage);
 	*max = Get_Stat(source, sMaxDamage);
@@ -230,16 +221,15 @@ void Get_Weapon_Damage(targ source, item *weapon, stat_value *min, stat_value *m
 
 /* C O M B A T  A C T I O N S //////////////////////////////////////////// */
 
-noexport bool Check_Attack(targ source)
+noexport bool Check_Attack(combatant *source)
 {
 	bool in_front_row;
 	item *weapon;
-	combatant *c = Get_Combatant(source);
 
 	/* Sneak Attack is handled separately */
 	if (Has_Buff(source, HIDE_BUFF_NAME)) return false;
 
-	in_front_row = c->row == rowFront;
+	in_front_row = source->row == rowFront;
 	weapon = Get_Weapon(source);
 
 	if (weapon == null) return in_front_row;
@@ -248,7 +238,7 @@ noexport bool Check_Attack(targ source)
 	return in_front_row;
 }
 
-noexport void Attack(targ source, targ target)
+noexport void Attack(combatant *source, combatant *target)
 {
 	item *weapon = Get_Weapon(source);
 	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
@@ -264,7 +254,7 @@ noexport void Attack(targ source, targ target)
 	base -= Get_Stat(target, sDodgeBonus);
 
 	if (randint(1, 20) <= base) {
-		Combat_Message("%s hits %s!", NAME(source), NAME(target));
+		Combat_Message("%s hits %s!", source->name, target->name);
 
 		Get_Weapon_Damage(source, weapon, &min, &max);
 		roll = randint(min, max) - Get_Stat(target, sArmour);
@@ -274,25 +264,22 @@ noexport void Attack(targ source, targ target)
 			Combat_Message("The blow glances off.");
 		}
 	} else {
-		Combat_Message("%s attacks %s and misses.", NAME(source), NAME(target));
+		Combat_Message("%s attacks %s and misses.", source->name, target->name);
 	}
 }
 
-noexport bool Check_Block(targ source)
+noexport bool Check_Block(combatant *source)
 {
 	return true;
 }
 
-noexport void Block_Expires(targ target, int argument)
+noexport void Block_Expires(combatant *c, int argument)
 {
-	combatant *c = Get_Combatant(target);
-
 	c->stats[sArmour] -= argument;
 }
 
-noexport void Block(targ source, targ target)
+noexport void Block(combatant *c, combatant *target)
 {
-	combatant *c = Get_Combatant(target);
 	int bonus = c->stats[sStrength];
 
 	c->stats[sArmour] += bonus;
@@ -301,16 +288,19 @@ noexport void Block(targ source, targ target)
 	Combat_Message("%s braces themselves.", c->name);
 }
 
-noexport bool Check_Defend(targ source)
+noexport bool Check_Defend(combatant *source)
 {
 	/* TODO: fix for enemy */
 	unsigned int i;
+	combatant *c;
 
 	/* There must be an alive ally to Defend */
-	if (IS_PC(source)) {
+	if (source->is_pc) {
 		for (i = 0; i < PARTY_SIZE; i++) {
-			if (TARGET_PC(i) == source) continue;
-			if (!Is_Dead(TARGET_PC(i))) return true;
+			c = List_At(combatants, i);
+
+			if (c == source) continue;
+			if (!Is_Dead(c)) return true;
 		}
 	} else {
 		/* TODO */
@@ -319,7 +309,7 @@ noexport bool Check_Defend(targ source)
 	return false;
 }
 
-noexport void Defend(targ source, targ target)
+noexport void Defend(combatant *source, combatant *target)
 {
 	/* TODO */
 }
@@ -339,7 +329,7 @@ noexport void Clear_Encounter(void)
 	Log("Clear_Encounter: %d to remove", combatants->size);
 
 	for (i = 0; i < combatants->size; i++) {
-		c = Get_Combatant(i);
+		c = List_At(combatants, i);
 
 		if (!c->is_pc) {
 			Free(c->stats);
@@ -372,12 +362,12 @@ void Add_Monster(groupnum group, monster* template)
 	c->name = template->name;
 	c->pc = null;
 	c->row = template->row;
-	c->self = combatants->size;
+	c->index = combatants->size;
 	c->skills = template->skills;
 	c->stats = stats;
 	c->weapon = template->weapon;
 
-	Add_to_List(combat_groups[group], (void*)combatants->size);
+	Add_to_List(combat_groups[group], c);
 	Add_to_List(combatants, c);
 	monsters_alive++;
 }
@@ -398,7 +388,7 @@ noexport void Add_Pc(unsigned int pc)
 	c->name = ch->header.name;
 	c->pc = ch;
 	c->row = In_Front_Row(pc) ? rowFront : rowBack;
-	c->self = combatants->size;
+	c->index = combatants->size;
 	c->skills = ch->skills;
 	c->stats = ch->header.stats;
 	c->weapon = Get_Equipped_Weapon(pc)->id;
@@ -421,6 +411,7 @@ void Initialise_Combat(void)
 
 	combatants = New_List(ltObject, "Initialise_Combat.combatants");
 	for (i = 0; i < ENCOUNTER_SIZE; i++) {
+		/* HACK: ltInteger makes sure Clear_List() doesn't Free() items */
 		combat_groups[i] = New_List(ltInteger, "Initialise_Combat.group_x");
 	}
 
@@ -463,6 +454,7 @@ noexport act Get_Pc_Action(unsigned char pc)
 	act ai;
 	int *action_ids;
 	char **action_names;
+	combatant *self = List_At(combatants, pc);
 
 	action_ids = SzAlloc(NUM_ACTIONS, int, "Get_Pc_Action.ids");
 	action_names = SzAlloc(NUM_ACTIONS, char *, "Get_Pc_Action.names");
@@ -470,7 +462,7 @@ noexport act Get_Pc_Action(unsigned char pc)
 		die("Get_Pc_Action: out of memory");
 
 	for (i = 0; i < NUM_ACTIONS; i++) {
-		if (combat_actions[i].check(TARGET_PC(pc))) {
+		if (combat_actions[i].check(self)) {
 			action_names[count] = combat_actions[i].name;
 			action_ids[count++] = i;
 		}
@@ -489,42 +481,46 @@ noexport act Get_Pc_Action(unsigned char pc)
 	return ai;
 }
 
-noexport bool Is_Valid_Target(targ source, targ target, targetflags tf)
+noexport bool Is_Valid_Target(combatant *source, combatant *target, targetflags tf)
 {
 	if (source == target) return tf & tfSelf;
 	if (Is_Dead(target) && !(tf & tfDead)) return false;
 
-	if (IS_PC(target)) return tf & tfAlly;
+	if (target->is_pc) return tf & tfAlly;
 	return tf & tfEnemy;
 }
 
-noexport targ Get_Pc_Target(unsigned char pc, act action_id)
+noexport combatant *Get_Pc_Target(unsigned char pc, act action_id)
 {
+	/* TODO: needs big fixing */
 	bool done = false;
 	action *a = &combat_actions[action_id];
 	char ch;
-	int choice, change;
-	int diff;
+	combatant *self, *c, *temp;
+	int index, change, diff;
+
+	self = List_At(combatants, pc);
 
 	/* get the easiest case out of the way */
-	if (a->targeting == tfSelf) return pc;
+	if (a->targeting == tfSelf) return self;
 
 	if (a->targeting & tfEnemy) {
-		choice = PARTY_SIZE;
+		index = PARTY_SIZE;
 	} else {
-		choice = TARGET_PC(0);
+		index = TARGET_PC(0);
 	}
 
-	Highlight_Ally(pc, COLOUR_ACTIVE);
 	while (!done) {
-		if (IS_PC(choice)) {
-			Highlight_Ally(pc, choice);
+		c = List_At(combatants, index);
+
+		if (c->is_pc) {
+			Highlight_Ally(pc, index);
 		} else {
-			Highlight_Enemy_Group(-1, choice - PARTY_SIZE);
+			Highlight_Enemy_Group(-1, index - PARTY_SIZE);
 		}
 
 		Show_Double_Buffer();
-		change = choice;
+		change = index;
 		ch = Get_Next_Scan_Code();
 
 		switch (ch) {
@@ -533,43 +529,46 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 				break;
 
 			case SCAN_LEFT:
-				if (IS_PC(choice) && a->targeting & tfEnemy) {
+				if (c->is_pc && a->targeting & tfEnemy) {
 					change = PARTY_SIZE;
 				}
 				break;
 
 			case SCAN_RIGHT:
-				if (!IS_PC(choice) && a->targeting & tfAlly) {
+				if (!c->is_pc && a->targeting & tfAlly) {
 					change = TARGET_PC(0);
 				}
 				break;
 
 			case SCAN_UP:
-				if (IS_PC(choice) && choice != TARGET_PC(0)) {
-					change = choice - 1;
+				if (c->is_pc && index != 0) {
+					change = index - 1;
 				}
-				else if (!IS_PC(choice) && choice > PARTY_SIZE) {
-					change = choice - 1;
+				else if (!c->is_pc && index > PARTY_SIZE) {
+					change = index - 1;
 				}
 				break;
 
 			case SCAN_DOWN:
-				if (IS_PC(choice) && choice != TARGET_PC(PARTY_SIZE - 1)) {
-					change = choice + 1;
+				if (c->is_pc && index != TARGET_PC(PARTY_SIZE - 1)) {
+					change = index + 1;
 				}
-				else if (!IS_PC(choice) && choice < (groups_alive + PARTY_SIZE - 1)) {
-					change = choice + 1;
+				else if (!c->is_pc && index < (groups_alive + PARTY_SIZE - 1)) {
+					change = index + 1;
 				}
 				break;
 		}
 
-		if (change != choice || done) {
-			if (IS_PC(change)) {
-				diff = IS_PC(choice) ? change - choice : -1;
-				while (!Is_Valid_Target(pc, change, a->targeting)) {
+		if (change != index || done) {
+			temp = List_At(combatants, change);
+			if (temp->is_pc) {
+				diff = c->is_pc ? change - index : -1;
+				while (!Is_Valid_Target(self, temp, a->targeting)) {
 					change += diff;
 					if (change == PARTY_SIZE) change = TARGET_PC(0);
 					if (change == -1) change = TARGET_PC(PARTY_SIZE - 1);
+
+					temp = List_At(combatants, change);
 				}
 
 				Highlight_Ally(pc, -1);
@@ -577,18 +576,18 @@ noexport targ Get_Pc_Target(unsigned char pc, act action_id)
 				Highlight_Enemy_Group(-1, -1);
 			}
 
-			choice = change;
+			index = change;
 		}
 	}
 
-	if (!IS_PC(choice)) {
-		choice = Get_Random_Target(choice - PARTY_SIZE);
+	if (!c->is_pc) {
+		return Get_Random_Target(c->group);
 	}
 
-	return choice;
+	return List_At(combatants, index);
 }
 
-void Add_Buff(targ target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument)
+void Add_Buff(combatant *target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument)
 {
 	buff *b;
 
@@ -602,14 +601,13 @@ void Add_Buff(targ target, char *name, expiry_type exty, int duration, buff_expi
 	b->expiry = expiry;			/* is this dangerous to Read/Write? */
 	b->argument = argument;
 
-	Add_to_List(Get_Combatant(target)->buffs, b);
+	Add_to_List(target->buffs, b);
 }
 
-bool Has_Buff(targ target, char *name)
+bool Has_Buff(combatant *c, char *name)
 {
 	buff *b;
 	int i;
-	combatant *c = Get_Combatant(target);
 
 	for (i = 0; i < c->buffs->size; i++) {
 		b = List_At(c->buffs, i);
@@ -622,25 +620,24 @@ bool Has_Buff(targ target, char *name)
 	return false;
 }
 
-noexport void Remove_Buff_from_List(targ owner, list *buffs, buff *b)
+noexport void Remove_Buff_from_List(combatant *owner, buff *b)
 {
 	if (b->expiry != null)
 		b->expiry(owner, b->argument);
 
-	Remove_from_List(buffs, b);
+	Remove_from_List(owner->buffs, b);
 }
 
-void Remove_Buff(targ target, char *name)
+void Remove_Buff(combatant *target, char *name)
 {
 	buff *b;
 	int i;
-	combatant *c = Get_Combatant(target);
 
-	for (i = c->buffs->size - 1; i >= 0; i--) {
-		b = List_At(c->buffs, i);
+	for (i = target->buffs->size - 1; i >= 0; i--) {
+		b = List_At(target->buffs, i);
 
 		if (strcmp(b->name, name) == 0) {
-			Remove_Buff_from_List(target, c->buffs, b);
+			Remove_Buff_from_List(target, b);
 			return;
 		}
 	}
@@ -653,7 +650,7 @@ void Expire_Buffs(void)
 	int i, j;
 
 	for (i = 0; i < combatants->size; i++) {
-		c = Get_Combatant(i);
+		c = List_At(combatants, i);
 
 		for (j = c->buffs->size - 1; j >= 0; j--) {
 			b = List_At(c->buffs, j);
@@ -661,13 +658,13 @@ void Expire_Buffs(void)
 				b->duration--;
 
 				if (b->duration <= 0) {
-					Remove_Buff_from_List(i, c->buffs, b);
+					Remove_Buff_from_List(c, b);
 				}
 			}
 
 			if (b->type == exTurnEndChance) {
 				if (randint(0, 100) < b->duration) {
-					Remove_Buff_from_List(i, c->buffs, b);
+					Remove_Buff_from_List(c, b);
 				}
 			}
 		}
@@ -681,11 +678,11 @@ void Expire_Combat_Buffs(void)
 	int i, j;
 
 	for (i = 0; i < combatants->size; i++) {
-		c = Get_Combatant(i);
+		c = List_At(combatants, i);
 		for (j = c->buffs->size - 1; j >= 0; j--) {
 			b = List_At(c->buffs, j);
 			if (b->type == exTurns || b->type == exTurnEndChance) {
-				Remove_Buff_from_List(i, c->buffs, b);
+				Remove_Buff_from_List(c, b);
 			}
 		}
 	}
@@ -693,16 +690,18 @@ void Expire_Combat_Buffs(void)
 
 /* A I  R O U T I N E S ////////////////////////////////////////////////// */
 
-noexport targ Random_Alive_Pc(void)
+noexport combatant *Random_Alive_Pc(void)
 {
 	int t;
+	combatant *c;
 
 	/* TODO: make this less awkward */
 	do {
 		t = randint(0, PARTY_SIZE - 1);
-	} while (Is_Dead(t));
+		c = List_At(combatants, t);
+	} while (Is_Dead(c));
 
-	return t;
+	return c;
 }
 
 noexport void AI_Mindless(combatant *c)
@@ -713,11 +712,11 @@ noexport void AI_Mindless(combatant *c)
 
 noexport void AI_Rogue(combatant *c)
 {
-	if (Check_Hide(c->self) && randint(0, 1) == 1) {
+	if (Check_Hide(c) && randint(0, 1) == 1) {
 		c->action = aHide;
-		c->target = c->self;
+		c->target = c;
 	} else {
-		c->action = Check_SneakAttack(c->self) ? aSneakAttack : aAttack;
+		c->action = Check_SneakAttack(c) ? aSneakAttack : aAttack;
 		c->target = Random_Alive_Pc();
 	}
 }
@@ -760,38 +759,39 @@ noexport void Sort_by_Priority(list *active)
 noexport void Do_Combat_Actions(list *active)
 {
 	int i;
-	combatant *c;
-	targ pc_self,
+	combatant *c, *t;
+	int pc_self,
 		pc_targ;
 	groupnum egroup_self,
 		egroup_targ;
 
 	for (i = 0; i < active->size; i++) {
 		c = List_At(active, i);
+		t = (combatant *)c->target;
 
 		/* TODO: could have self-res enemies? */
-		if (c->action != NO_ACTION && !Is_Dead(c->self)) {
+		if (c->action != NO_ACTION && !Is_Dead(c)) {
 			if (c->is_pc) {
-				pc_self = c->self;
+				pc_self = i;
 				egroup_self = -1;
 			} else {
 				pc_self = -1;
 				egroup_self = c->group;
 			}
 
-			if (IS_PC(c->target)) {
-				pc_targ = c->target;
+			if (t->is_pc) {
+				pc_targ = c->index;
 				egroup_targ = -1;
 			} else {
 				pc_targ = -1;
-				egroup_targ = Get_Combatant(c->target)->group;
+				egroup_targ = t->group;
 			}
 
 			Highlight_Ally(pc_self, pc_targ);
 			Highlight_Enemy_Group(egroup_self, egroup_targ);
 
 			/* TODO: retarget dead enemies? */
-			combat_actions[c->action].act(c->self, c->target);
+			combat_actions[c->action].act(c, c->target);
 		}
 	}
 }
@@ -810,16 +810,16 @@ noexport void Enter_Combat_Loop(void)
 		Show_Enemies();
 
 		for (i = 0; i < combatants->size; i++) {
-			c = Get_Combatant(i);
+			c = List_At(combatants, i);
 
 			/* TODO: could have self-res enemies? */
-			if (Is_Dead(i)) {
+			if (Is_Dead(c)) {
 				c->action = NO_ACTION;
 				continue;
 			}
 
-			if (Has_Buff(c->self, LOSE_MOVE_BUFF_NAME)) {
-				Remove_Buff(c->self, LOSE_MOVE_BUFF_NAME);
+			if (Has_Buff(c, LOSE_MOVE_BUFF_NAME)) {
+				Remove_Buff(c, LOSE_MOVE_BUFF_NAME);
 				c->action = NO_ACTION;
 				continue;
 			}
@@ -869,6 +869,7 @@ void Start_Combat(encounter_id id)
 	int count;
 	encounter *en = &gZone.encounters[id];
 	monster *m;
+	combatant *c;
 
 	Log("Start_Combat: #%d", id);
 
@@ -916,7 +917,8 @@ void Start_Combat(encounter_id id)
 	
 	/* TODO: if you lose... shouldn't do this */
 	for (count = 0; count < PARTY_SIZE; count++) {
-		if (!Is_Dead(count)) {
+		c = List_At(combatants, count);
+		if (!Is_Dead(c)) {
 			Add_Experience(Get_Pc(count), earned_experience);
 		}
 	}

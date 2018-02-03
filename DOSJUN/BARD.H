@@ -11,7 +11,7 @@
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-bool Check_Sing(targ source);
-void Sing(targ source, targ target);
+bool Check_Sing(combatant *source);
+void Sing(combatant *source, combatant *target);
 
 #endif

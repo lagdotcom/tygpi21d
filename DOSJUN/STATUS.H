@@ -14,12 +14,12 @@
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 /* Check whether the source beats the target in a roll-off. outcome contains how much beaten by. */
-bool Roll(targ source, statistic inflict, targ target, statistic defend, int *outcome);
+bool Roll(combatant *source, statistic inflict, combatant *target, statistic defend, int *outcome);
 
 /* Try to poison the target based on source's stat. Returns success value. */
-bool Try_Poison(targ source, targ target, statistic stat, int potency);
+bool Try_Poison(combatant *source, combatant *target, statistic stat, int potency);
 
 /* Try to stun the target based on source's stat. Returns success value. */
-bool Try_Stun(targ source, targ target, statistic check);
+bool Try_Stun(combatant *source, combatant *target, statistic check);
 
 #endif

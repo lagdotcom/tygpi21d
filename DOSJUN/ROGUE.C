@@ -12,44 +12,40 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-bool Check_Hide(targ source)
+bool Check_Hide(combatant *source)
 {
 	if (Has_Buff(source, HIDE_BUFF_NAME))
 		return false;
 
-	return Has_Skill(Get_Combatant(source), skHide);
+	return Has_Skill(source, skHide);
 }
 
-noexport void Hidden_Expires(targ source, int argument)
+noexport void Hidden_Expires(combatant *source, int argument)
 {
-	combatant *c;
-
 	if (gState == gsCombat) {
-		c = Get_Combatant(source);
-		Combat_Message("%s is revealed!", c->name);
+		Combat_Message("%s is revealed!", source->name);
 	}
 }
 
-void Hide(targ source, targ target)
+void Hide(combatant *source, combatant *target)
 {
 	int dexterity = Get_Stat(source, sDexterity);
 
 	if (dexterity > 20) dexterity = 20;
 	if (dexterity < 3) dexterity = 3;
-	Add_Buff(source, HIDE_BUFF_NAME, exTurnEndChance, 101 - (dexterity * 5), Hidden_Expires, 0);
-	Combat_Message("%s is hidden from view.", NAME(source));
+	Add_Buff(target, HIDE_BUFF_NAME, exTurnEndChance, 101 - (dexterity * 5), Hidden_Expires, 0);
+	Combat_Message("%s is hidden from view.", target->name);
 }
 
-bool Check_SneakAttack(targ source)
+bool Check_SneakAttack(combatant *source)
 {
 	return Has_Buff(source, HIDE_BUFF_NAME);
 }
 
-void SneakAttack(targ source, targ target)
+void SneakAttack(combatant *source, combatant *target)
 {
-	combatant *attacker = Get_Combatant(source);
-	char *source_name = attacker->name,
-		*target_name = NAME(target);
+	char *source_name = source->name,
+		*target_name = target->name;
 	item *weapon = Get_Weapon(source);
 	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
 	stat_value min, max;
@@ -75,12 +71,12 @@ void SneakAttack(targ source, targ target)
 				return;
 			}
 
-			if (Has_Skill(attacker, skBludgeon)) {
+			if (Has_Skill(source, skBludgeon)) {
 				Try_Stun(source, target, sStrength);
 			}
 
-			if (Has_Skill(attacker, skVenom)) {
-				potency = attacker->stats[sIntelligence] / 3;
+			if (Has_Skill(source, skVenom)) {
+				potency = source->stats[sIntelligence] / 3;
 				potency = potency < 1 ? 1 : potency;
 				Try_Poison(source, target, sDexterity, potency);
 			}
