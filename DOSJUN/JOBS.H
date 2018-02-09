@@ -16,6 +16,7 @@ typedef enum skill_id {
 	skHide,
 	skBludgeon,
 	skVenom,
+	skConcentrate,
 
 	NUM_SKILLS
 } skill_id;

@@ -74,7 +74,7 @@ noexport void Add_Skill(character *c, skill_id sk)
 void Initialise_Jobs(void)
 {
 	Setup_Job(jFighter, "Fighter", 10, 0);
-	Setup_Job_Level(jFighter, 1, sNONE, skNONE, skNONE);
+	Setup_Job_Level(jFighter, 1, sNONE, skConcentrate, skNONE);
 	Setup_Job_Level(jFighter, 2, sNONE, skNONE, skNONE);
 	Setup_Job_Level(jFighter, 3, sNONE, skNONE, skNONE);
 	Setup_Job_Level(jFighter, 4, sStrength, skNONE, skNONE);

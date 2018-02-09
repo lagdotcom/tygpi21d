@@ -221,7 +221,7 @@ void Get_Weapon_Damage(combatant *source, item *weapon, stat_value *min, stat_va
 
 /* C O M B A T  A C T I O N S //////////////////////////////////////////// */
 
-noexport bool Check_Attack(combatant *source)
+bool Check_Attack(combatant *source)
 {
 	bool in_front_row;
 	item *weapon;
@@ -423,6 +423,9 @@ void Initialise_Combat(void)
 	Add_Combat_Action(aSneakAttack, "Sneak Attack", Check_SneakAttack, SneakAttack, tfEnemy, 130);
 	Add_Combat_Action(aBlock, "Block", Check_Block, Block, tfSelf, 120);
 	Add_Combat_Action(aDefend, "Defend", Check_Defend, Defend, tfAlly, 120);
+
+	Add_Combat_Action(aConcentrate, "Concentrate", Check_Concentrate, Concentrate, tfEnemy, 5);
+
 	Add_Combat_Action(aSing, "Sing", Check_Sing, Sing, tfSelf, 200);
 	Add_Combat_Action(aHide, "Hide", Check_Hide, Hide, tfSelf, 50);
 

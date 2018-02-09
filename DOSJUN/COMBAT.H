@@ -27,6 +27,8 @@ typedef enum action_ids {
 	aBlock,
 	aDefend,
 
+	aConcentrate,
+
 	aSing,
 	aHide,
 
@@ -79,10 +81,10 @@ extern list *combatants;
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Add_Buff(combatant *target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument);
+bool Check_Attack(combatant *source);
 void Combat_Message(char *format, ...);
 void Damage(combatant *victim, int amount);
 void Free_Combat(void);
-combatant *Get_Combatant(combatant *target);
 stat_value Get_Stat(combatant *source, statistic st);
 item *Get_Weapon(combatant *source);
 void Get_Weapon_Damage(combatant *source, item *weapon, stat_value *min, stat_value *max);
