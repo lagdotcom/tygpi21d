@@ -25,9 +25,12 @@
 #include "status.h"
 #include "zone.h"
 
-#include "bard.h"
-#include "fighter.h"
-#include "rogue.h"
+#include "jbard.h"
+#include "jcleric.h"
+#include "jfighter.h"
+#include "jmage.h"
+#include "jranger.h"
+#include "jrogue.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
