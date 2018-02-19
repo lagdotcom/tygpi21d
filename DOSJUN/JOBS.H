@@ -26,12 +26,26 @@ typedef struct skill_spec {
 	char *description;
 } skill_spec;
 
+typedef struct level_spec {
+	statistic stat;
+	skill_id a;
+	skill_id b;
+} level_spec;
+
+typedef struct job_spec {
+	char *name;
+	int hp_per_level;
+	int mp_per_level;
+	level_spec levels[JOB_LEVELS];
+} job_spec;
+
 extern skill_spec skills[NUM_SKILLS];
+extern job_spec jobspecs[NUM_JOBS];
 
 /* Check if a combatant/character has a skill learnt. */
 #define Has_Skill(c, sk) In_List(c->skills, (void*)sk)
 
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
+#define Job_Name(n) (jobspecs[n].name)
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
@@ -40,5 +54,8 @@ void Free_Jobs(void);
 void Initialise_Jobs(void);
 void Level_Up(character *c);
 void Set_Job(character *c, job job);
+
+/* Get string representation of stat */
+char *Stat_Name(statistic st);
 
 #endif

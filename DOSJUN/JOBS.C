@@ -3,21 +3,6 @@
 #include "gamelib.h"
 #include "dosjun.h"
 
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
-typedef struct level_spec {
-	statistic stat;
-	skill_id a;
-	skill_id b;
-} level_spec;
-
-typedef struct job_spec {
-	char *name;
-	int hp_per_level;
-	int mp_per_level;
-	level_spec levels[JOB_LEVELS];
-} job_spec;
-
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define sNONE (-1)
@@ -34,7 +19,7 @@ typedef struct job_spec {
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 noexport char buffer[100];
-noexport job_spec jobspecs[NUM_JOBS];
+job_spec jobspecs[NUM_JOBS];
 skill_spec skills[NUM_SKILLS];
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
@@ -170,8 +155,6 @@ void Set_Job(character *c, job job)
 	}
 }
 
-#define Job_Name(n) (jobspecs[n].name)
-
 char *Stat_Name(statistic st)
 {
 	switch (st) {
@@ -185,6 +168,7 @@ char *Stat_Name(statistic st)
 		case sIntelligence: return "Intelligence";
 		case sHitBonus: return "Hit Bonus";
 		case sDodgeBonus: return "Dodge Bonus";
+		case sToughness: return "Toughness";
 		default: return "???";
 	}
 }

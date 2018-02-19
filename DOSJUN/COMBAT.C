@@ -132,21 +132,21 @@ item *Get_Weapon(combatant *c)
 	return c->weapon ? Lookup_Item(&gItems, c->weapon) : null;
 }
 
-stat_value Get_Stat(combatant *c, statistic st)
+stat_value Get_Stat_Base(stat_value *stats, statistic st)
 {
-	stat_value base;
-
 	switch (st)
 	{
-		case sToughness:
-			base = c->stats[sStrength] / 3;
-			break;
-
-		default:
-			base = 0;
-			break;
+		case sToughness: return stats[sStrength] / 3;
+		case sMinDamage: return stats[sStrength] / 5;
+		case sMaxDamage: return stats[sStrength] / 4;
+		default: return 0;
 	}
+}
 
+stat_value Get_Stat(combatant *c, statistic st)
+{
+	/* TODO: equipment stats? */
+	stat_value base = Get_Stat_Base(c->stats, st);
 	return base + c->stats[st];
 }
 

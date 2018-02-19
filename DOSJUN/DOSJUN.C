@@ -332,7 +332,31 @@ gamestate Show_Dungeon_Screen(void)
 				Try_Move_Forward();
 				break;
 
-			/* TESTING ONLY */
+			case SCAN_1:
+				Show_Pc_Screen(0);
+				break;
+
+			case SCAN_2:
+				Show_Pc_Screen(1);
+				break;
+
+			case SCAN_3:
+				Show_Pc_Screen(2);
+				break;
+
+			case SCAN_4:
+				Show_Pc_Screen(3);
+				break;
+
+			case SCAN_5:
+				Show_Pc_Screen(4);
+				break;
+
+			case SCAN_6:
+				Show_Pc_Screen(5);
+				break;
+
+				/* TESTING ONLY */
 			case SCAN_L:
 				Level_Up(&gSave.characters[3]);
 				break;

@@ -85,6 +85,7 @@ bool Check_Attack(combatant *source);
 void Combat_Message(char *format, ...);
 void Damage(combatant *victim, int amount);
 void Free_Combat(void);
+stat_value Get_Stat_Base(stat_value *stats, statistic st);
 stat_value Get_Stat(combatant *source, statistic st);
 item *Get_Weapon(combatant *source);
 void Get_Weapon_Damage(combatant *source, item *weapon, stat_value *min, stat_value *max);

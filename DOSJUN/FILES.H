@@ -26,7 +26,8 @@ typedef enum itemslot {
 	slFeet,
 	slAccessory,
 
-	NUM_SLOTS
+	NUM_SLOTS,
+	slInvalid
 } itemslot;
 #define INVENTORY_SIZE	10
 

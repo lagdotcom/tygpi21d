@@ -19,4 +19,6 @@ character *Get_Pc(int pc);
 bool In_Front_Row(unsigned char pc);
 void Pc_Select(int num);
 
+void Show_Pc_Screen(int pc);
+
 #endif
