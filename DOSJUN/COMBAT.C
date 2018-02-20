@@ -784,10 +784,11 @@ noexport void Do_Combat_Actions(list *active)
 	for (i = 0; i < active->size; i++) {
 		c = List_At(active, i);
 		t = (combatant *)c->target;
-		a = &combat_actions[c->action];
 
 		/* TODO: could have self-res enemies? */
 		if (c->action != NO_ACTION && !Is_Dead(c)) {
+			a = &combat_actions[c->action];
+
 			if (!Is_Valid_Target(c, t, a->targeting)) {
 				/* retarget on dead enemy */
 				if (!t->is_pc) {
