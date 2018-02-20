@@ -1,0 +1,71 @@
+Publics by module
+
+GRAPH3T 	size = 987
+	_Blit_Char                        _Blit_String
+	_Create_Cool_Palette              _Delay
+	_Fill_Screen                      _Get_Palette_Register
+	_Get_Pixel                        _H_Line
+	_H_Line_Fast                      _Plot_Pixel
+	_Plot_Pixel_Fast                  _Set_Palette_Register
+	_Set_Video_Mode                   _V_Line
+	_rom_char_set                     _video_buffer
+	_video_buffer_w                 
+
+GRAPH4T 	size = 1453
+	_Behind_Sprite                    _Draw_Sprite
+	_Erase_Sprite                     _PCX_Delete
+	_PCX_Grab_Bitmap                  _PCX_Init
+	_PCX_Load                         _PCX_Show_Buffer
+	_Sprite_Collide                   _Sprite_Delete
+	_Sprite_Init                    
+
+GRAPH5T 	size = 6161
+	_Bline                            _Clip_Line
+	_Create_Tables                    _Draw_Boundary
+	_Draw_Polygon                     _Draw_Polygon_Clip
+	_Rotate_Polygon                   _Scale_Polygon
+	_Translate_Polygon                _poly_clip_max_x
+	_poly_clip_max_y                  _poly_clip_min_x
+	_poly_clip_min_y                
+
+GRAPH6T 	size = 2310
+	_Behind_Sprite_DB                 _Blit_Char_DB
+	_Blit_String_DB                   _Create_Double_Buffer
+	_Delete_Double_Buffer             _Dissolve
+	_Draw_Sprite_Clipped_DB           _Draw_Sprite_DB
+	_Erase_Sprite_DB                  _Fade_Lights
+	_Fill_Double_Buffer               _Melt
+	_Plot_Pixel_Fast_DB               _Shear
+	_Show_Double_Buffer               _Wait_For_Vsync
+	_buffer_height                    _buffer_size
+	_double_buffer                  
+
+GRAPH7JT	size = 254
+	_Buttons                          _Buttons_Bios
+	_Joystick                         _Joystick_Available
+	_Joystick_Bios                  
+
+GRAPH7KT	size = 69
+	_Get_Ascii_Key                    _Get_Control_Keys
+	_Get_Scan_Code                  
+
+GRAPH7MT	size = 273
+	_Squeeze_Mouse                  
+
+GRAPH8T 	size = 280
+	_Add_Fixed                        _Assign_Float
+	_Assign_Integer                   _Div_Fixed
+	_Fill_Double_Buffer_I             _Mul_Fixed
+	_Plot_Pixel_Global                _Print_Fixed
+	_Sub_Fixed                        _g_color
+	_g_x                              _g_y
+
+GRAPH9T 	size = 860
+	_Voc_Break_Sound                  _Voc_Continue_Sound
+	_Voc_Get_Version                  _Voc_Init_Driver
+	_Voc_Load_Driver                  _Voc_Load_Sound
+	_Voc_Pause_Sound                  _Voc_Play_Sound
+	_Voc_Set_DMA                      _Voc_Set_Port
+	_Voc_Set_Speaker                  _Voc_Set_Status_Addr
+	_Voc_Stop_Sound                   _Voc_Terminate_Driver
+	_Voc_Unload_Sound                 _driver_ptr

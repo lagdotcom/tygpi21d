@@ -1,6 +1,6 @@
 Publics by module
 
-GRAPH3  	size = 1017
+GRAPH3L 	size = 1029
 	_Blit_Char                        _Blit_String
 	_Create_Cool_Palette              _Delay
 	_Fill_Screen                      _Get_Palette_Register
@@ -11,7 +11,7 @@ GRAPH3  	size = 1017
 	_rom_char_set                     _video_buffer
 	_video_buffer_w                 
 
-GRAPH4  	size = 1767
+GRAPH4L 	size = 1809
 	_Behind_Sprite                    _Draw_Sprite
 	_Erase_Sprite                     _PCX_Delete
 	_PCX_Grab_Bitmap                  _PCX_Init
@@ -19,7 +19,7 @@ GRAPH4  	size = 1767
 	_Sprite_Collide                   _Sprite_Delete
 	_Sprite_Init                    
 
-GRAPH5  	size = 6413
+GRAPH5L 	size = 6430
 	_Bline                            _Clip_Line
 	_Create_Tables                    _Draw_Boundary
 	_Draw_Polygon                     _Draw_Polygon_Clip
@@ -28,7 +28,7 @@ GRAPH5  	size = 6413
 	_poly_clip_max_y                  _poly_clip_min_x
 	_poly_clip_min_y                
 
-GRAPH6  	size = 2606
+GRAPH6L 	size = 2671
 	_Behind_Sprite_DB                 _Blit_Char_DB
 	_Blit_String_DB                   _Create_Double_Buffer
 	_Delete_Double_Buffer             _Dissolve
@@ -40,19 +40,19 @@ GRAPH6  	size = 2606
 	_buffer_height                    _buffer_size
 	_double_buffer                  
 
-GRAPH7J 	size = 258
+GRAPH7JL	size = 266
 	_Buttons                          _Buttons_Bios
 	_Joystick                         _Joystick_Available
 	_Joystick_Bios                  
 
-GRAPH7K 	size = 69
+GRAPH7KL	size = 75
 	_Get_Ascii_Key                    _Get_Control_Keys
 	_Get_Scan_Code                  
 
-GRAPH7M 	size = 303
+GRAPH7ML	size = 315
 	_Squeeze_Mouse                  
 
-GRAPH8  	size = 290
+GRAPH8L 	size = 292
 	_Add_Fixed                        _Assign_Float
 	_Assign_Integer                   _Div_Fixed
 	_Fill_Double_Buffer_I             _Mul_Fixed
@@ -60,7 +60,7 @@ GRAPH8  	size = 290
 	_Sub_Fixed                        _g_color
 	_g_x                              _g_y
 
-GRAPH9  	size = 891
+GRAPH9L 	size = 925
 	_Voc_Break_Sound                  _Voc_Continue_Sound
 	_Voc_Get_Version                  _Voc_Init_Driver
 	_Voc_Load_Driver                  _Voc_Load_Sound
