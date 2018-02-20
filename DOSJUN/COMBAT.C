@@ -165,6 +165,9 @@ noexport combatant *Get_Random_Target(groupnum group)
 {
 	int i;
 
+	if (combat_groups[group]->size <= 0)
+		return null;
+
 	i = randint(0, combat_groups[group]->size - 1);
 	return List_At(combat_groups[group], i);
 }
@@ -495,35 +498,33 @@ noexport bool Is_Valid_Target(combatant *source, combatant *target, targetflags 
 
 noexport combatant *Get_Pc_Target(unsigned char pc, act action_id)
 {
-	/* TODO: needs big fixing */
-	bool done = false;
-	action *a = &combat_actions[action_id];
+	bool done = false,
+		party = false;
+	targetflags tfl = combat_actions[action_id].targeting;
+	combatant *self = List_At(combatants, pc),
+		*c;
+	int targ_pc = 0,
+		scan_pc = 0;
+	groupnum targ_eg = 0,
+		scan_eg = 0;
 	char ch;
-	combatant *self, *c, *temp;
-	int index, change, diff;
+	
+	if (tfl == tfSelf) return self;
 
-	self = List_At(combatants, pc);
-
-	/* get the easiest case out of the way */
-	if (a->targeting == tfSelf) return self;
-
-	if (a->targeting & tfEnemy) {
-		index = PARTY_SIZE;
-	} else {
-		index = TARGET_PC(0);
+	if (tfl & tfAlly) {
+		party = true;
 	}
 
 	while (!done) {
-		c = List_At(combatants, index);
-
-		if (c->is_pc) {
-			Highlight_Ally(pc, index);
+		if (party) {
+			Highlight_Ally(pc, targ_pc);
+			Highlight_Enemy_Group(-1, -1);
 		} else {
-			Highlight_Enemy_Group(-1, index - PARTY_SIZE);
+			Highlight_Ally(pc, -1);
+			Highlight_Enemy_Group(-1, targ_eg);
 		}
 
 		Show_Double_Buffer();
-		change = index;
 		ch = Get_Next_Scan_Code();
 
 		switch (ch) {
@@ -532,62 +533,73 @@ noexport combatant *Get_Pc_Target(unsigned char pc, act action_id)
 				break;
 
 			case SCAN_LEFT:
-				if (c->is_pc && a->targeting & tfEnemy) {
-					change = PARTY_SIZE;
+				if (tfl & tfAlly) {
+					party = true;
 				}
 				break;
 
 			case SCAN_RIGHT:
-				if (!c->is_pc && a->targeting & tfAlly) {
-					change = TARGET_PC(0);
+				if (tfl & tfEnemy) {
+					party = true;
 				}
 				break;
 
 			case SCAN_UP:
-				if (c->is_pc && index != 0) {
-					change = index - 1;
-				}
-				else if (!c->is_pc && index > PARTY_SIZE) {
-					change = index - 1;
+				if (party) {
+					scan_pc = -1;
+				} else {
+					scan_eg = -1;
 				}
 				break;
 
 			case SCAN_DOWN:
-				if (c->is_pc && index != TARGET_PC(PARTY_SIZE - 1)) {
-					change = index + 1;
-				}
-				else if (!c->is_pc && index < (groups_alive + PARTY_SIZE - 1)) {
-					change = index + 1;
+				if (party) {
+					scan_pc = 1;
+				} else {
+					scan_eg = 1;
 				}
 				break;
 		}
 
-		if (change != index || done) {
-			temp = List_At(combatants, change);
-			if (temp->is_pc) {
-				diff = c->is_pc ? change - index : -1;
-				while (!Is_Valid_Target(self, temp, a->targeting)) {
-					change += diff;
-					if (change == PARTY_SIZE) change = TARGET_PC(0);
-					if (change == -1) change = TARGET_PC(PARTY_SIZE - 1);
+		if (scan_pc) {
+			while (true) {
+				targ_pc += scan_pc;
+				if (targ_pc >= PARTY_SIZE) targ_pc = 0;
+				if (targ_pc < 0) targ_pc = PARTY_SIZE - 1;
 
-					temp = List_At(combatants, change);
-				}
-
-				Highlight_Ally(pc, -1);
-			} else {
-				Highlight_Enemy_Group(-1, -1);
+				if (Is_Valid_Target(self, List_At(combatants, targ_pc), tfl))
+					break;
 			}
 
-			index = change;
+			scan_pc = 0;
+		}
+
+		if (scan_eg) {
+			while (true) {
+				targ_eg += scan_eg;
+				if (targ_eg >= ENCOUNTER_SIZE) targ_eg = 0;
+				if (targ_eg < 0) targ_eg = ENCOUNTER_SIZE - 1;
+
+				if (combat_groups[targ_eg]->size > 0) {
+					c = List_At(combat_groups[targ_eg], 0);
+
+					if (Is_Valid_Target(self, c, tfl))
+						break;
+				}
+			}
+
+			scan_eg = 0;
 		}
 	}
 
-	if (!c->is_pc) {
-		return Get_Random_Target(c->group);
-	}
+	Highlight_Ally(-1, -1);
+	Highlight_Enemy_Group(-1, -1);
 
-	return List_At(combatants, index);
+	if (party) {
+		return List_At(combatants, targ_pc);
+	} else {
+		return Get_Random_Target(targ_eg);
+	}
 }
 
 void Add_Buff(combatant *target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument)
@@ -762,39 +774,49 @@ noexport void Sort_by_Priority(list *active)
 noexport void Do_Combat_Actions(list *active)
 {
 	int i;
+	action *a;
 	combatant *c, *t;
-	int pc_self,
-		pc_targ;
-	groupnum egroup_self,
-		egroup_targ;
+	int pc_self = -1,
+		pc_targ = -1;
+	groupnum egroup_self = -1,
+		egroup_targ = -1;
 
 	for (i = 0; i < active->size; i++) {
 		c = List_At(active, i);
 		t = (combatant *)c->target;
+		a = &combat_actions[c->action];
 
 		/* TODO: could have self-res enemies? */
 		if (c->action != NO_ACTION && !Is_Dead(c)) {
+			if (!Is_Valid_Target(c, t, a->targeting)) {
+				/* retarget on dead enemy */
+				if (!t->is_pc) {
+					t = Get_Random_Target(t->group);
+					if (t == null && groups_alive > 0) {
+						Combat_Message("%s misses their chance.", c->name);
+						continue;
+					}
+				}
+				
+				/* TODO: retarget on dead pc */
+			}
+
 			if (c->is_pc) {
 				pc_self = i;
-				egroup_self = -1;
 			} else {
-				pc_self = -1;
 				egroup_self = c->group;
 			}
 
 			if (t->is_pc) {
 				pc_targ = c->index;
-				egroup_targ = -1;
 			} else {
-				pc_targ = -1;
 				egroup_targ = t->group;
 			}
 
 			Highlight_Ally(pc_self, pc_targ);
 			Highlight_Enemy_Group(egroup_self, egroup_targ);
-
-			/* TODO: retarget dead enemies? */
-			combat_actions[c->action].act(c, c->target);
+			
+			combat_actions[c->action].act(c, t);
 		}
 	}
 }
