@@ -132,8 +132,6 @@ gamestate Start_New_Game(void)
 	trigger_zone_enter = true;
 	can_save = false;
 
-	/* TODO: remove at some point */
-	Save_Savefile("ETR.SAV", &gSave);
 	return gsDungeon;
 }
 
