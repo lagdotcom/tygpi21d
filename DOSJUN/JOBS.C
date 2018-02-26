@@ -130,6 +130,8 @@ void Initialise_Jobs(void)
 	Setup_Job_Level(jRanger, 9, sNONE, skNONE, skNONE);
 	Setup_Job_Level(jRanger, 10, sStrength, skNONE, skNONE);
 
+	Setup_Skill(skConcentrate, "Concentrate", "Take your time.\nStrike carefully.");
+
 	Setup_Skill(skSing, "Sing", "Inspire the party to greater deeds.\nAttacks will hit more often.");
 
 	Setup_Skill(skHide, "Hide", "Retreat into the shadows.\nNext attack does bonus damage.");
