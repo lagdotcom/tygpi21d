@@ -19,6 +19,7 @@ typedef struct inventory {
 	item_id item;
 	inventoryflag_id flags;
 	unsigned char quantity;
+	item_slot slot;
 } inventory;
 
 typedef struct character_header {

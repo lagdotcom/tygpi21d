@@ -127,9 +127,11 @@ noexport void Highlight_Enemy_Group(groupnum active, groupnum select)
 	}
 }
 
-item *Get_Weapon(combatant *c)
+item *Get_Weapon(combatant *c, bool primary)
 {
-	return c->weapon ? Lookup_Item(&gItems, c->weapon) : null;
+	item_id iid = primary ? c->primary : c->secondary;
+
+	return iid ? Lookup_Item(&gItems, iid) : null;
 }
 
 stat_value Get_Stat_Base(stat_value *stats, statistic st)
@@ -145,7 +147,6 @@ stat_value Get_Stat_Base(stat_value *stats, statistic st)
 
 stat_value Get_Stat(combatant *c, statistic st)
 {
-	/* TODO: equipment stats? */
 	stat_value base = Get_Stat_Base(c->stats, st);
 	return base + c->stats[st];
 }
@@ -233,7 +234,7 @@ bool Check_Attack(combatant *source)
 	if (Has_Buff(source, HIDE_BUFF_NAME)) return false;
 
 	in_front_row = source->row == rowFront;
-	weapon = Get_Weapon(source);
+	weapon = Get_Weapon(source, true);
 
 	if (weapon == null) return in_front_row;
 
@@ -241,9 +242,8 @@ bool Check_Attack(combatant *source)
 	return in_front_row;
 }
 
-noexport void Attack(combatant *source, combatant *target)
+noexport void Attack_Inner(combatant *source, combatant *target, item* weapon)
 {
-	item *weapon = Get_Weapon(source);
 	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
 	stat_value min, max;
 	int roll;
@@ -269,6 +269,20 @@ noexport void Attack(combatant *source, combatant *target)
 	} else {
 		Combat_Message("%s attacks %s and misses.", source->name, target->name);
 	}
+}
+
+void With_Both_Weapons(combatant *source, combatant *target, weapon_atk_fn func)
+{
+	item *weapon = Get_Weapon(source, true);
+	func(source, target, weapon);
+
+	weapon = Get_Weapon(source, false);
+	if (weapon) func(source, target, weapon);
+}
+
+noexport void Attack(combatant *source, combatant *target)
+{
+	With_Both_Weapons(source, target, Attack_Inner);
 }
 
 noexport bool Check_Block(combatant *source)
@@ -368,7 +382,8 @@ void Add_Monster(groupnum group, monster* template)
 	c->index = combatants->size;
 	c->skills = template->skills;
 	c->stats = stats;
-	c->weapon = template->weapon;
+	c->primary = template->weapon;
+	c->secondary = 0;
 
 	Add_to_List(combat_groups[group], c);
 	Add_to_List(combatants, c);
@@ -377,11 +392,15 @@ void Add_Monster(groupnum group, monster* template)
 
 noexport void Add_Pc(unsigned int pc)
 {
+	item *primary, *secondary;
 	character *ch = Get_Pc(pc);
 
 	combatant *c = SzAlloc(1, combatant, "Add_Pc");
 	if (c == null)
 		die("Add_Pc: out of memory");
+
+	primary = Get_Equipped_Weapon(pc, true);
+	secondary = Get_Equipped_Weapon(pc, false);
 
 	c->action = NO_ACTION;
 	c->buffs = ch->buffs;
@@ -394,7 +413,8 @@ noexport void Add_Pc(unsigned int pc)
 	c->index = combatants->size;
 	c->skills = ch->skills;
 	c->stats = ch->header.stats;
-	c->weapon = Get_Equipped_Weapon(pc)->id;
+	c->primary = primary ? primary->id : 0;
+	c->secondary = secondary ? secondary->id : 0;
 
 	Add_to_List(combatants, c);
 }

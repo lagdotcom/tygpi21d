@@ -42,11 +42,10 @@ bool Check_SneakAttack(combatant *source)
 	return Has_Buff(source, HIDE_BUFF_NAME);
 }
 
-void SneakAttack(combatant *source, combatant *target)
+noexport void SneakAttack_Inner(combatant *source, combatant *target, item *weapon)
 {
 	char *source_name = source->name,
 		*target_name = target->name;
-	item *weapon = Get_Weapon(source);
 	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
 	stat_value min, max;
 	int roll, potency;
@@ -86,6 +85,11 @@ void SneakAttack(combatant *source, combatant *target)
 	} else {
 		Combat_Message("%s sneakily attacks %s, but misses.", source_name, target_name);
 	}
+}
+
+void SneakAttack(combatant *source, combatant *target)
+{
+	With_Both_Weapons(source, target, SneakAttack_Inner);
 
 	/* TODO: should lose hidden sometimes... */
 }

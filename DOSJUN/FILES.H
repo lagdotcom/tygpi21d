@@ -54,7 +54,7 @@ typedef enum statistic {
 
 typedef enum inventoryflag {
 	vfNone = 0,
-	vfEquipped = 1
+	vfEquipped = 1,
 } inventoryflag;
 
 typedef enum walltype {

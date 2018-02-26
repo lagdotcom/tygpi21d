@@ -50,7 +50,7 @@ typedef struct combatant {
 	list *buffs;
 	list *skills;
 	groupnum group;
-	item_id weapon;
+	item_id primary, secondary;
 	row_id row;
 	bool is_pc;
 
@@ -63,6 +63,7 @@ typedef struct combatant {
 typedef bool(*action_check_fn)(combatant *source);
 typedef void(*action_do_fn)(combatant *source, combatant *target);
 typedef void(*buff_expiry_fn)(combatant *target, int argument);
+typedef void(*weapon_atk_fn)(combatant *source, combatant *target, item *weapon);
 
 typedef struct buff {
 	char *name;
@@ -87,7 +88,7 @@ void Damage(combatant *victim, int amount);
 void Free_Combat(void);
 stat_value Get_Stat_Base(stat_value *stats, statistic st);
 stat_value Get_Stat(combatant *source, statistic st);
-item *Get_Weapon(combatant *source);
+item *Get_Weapon(combatant *source, bool primary);
 void Get_Weapon_Damage(combatant *source, item *weapon, stat_value *min, stat_value *max);
 statistic Get_Weapon_Stat(item *weapon);
 bool Has_Buff(combatant *target, char *name);
@@ -96,5 +97,6 @@ void Initialise_Combat(void);
 int randint(int minimum, int maximum);
 void Remove_Buff(combatant *target, char *name);
 void Start_Combat(encounter_id id);
+void With_Both_Weapons(combatant *source, combatant *target, weapon_atk_fn func);
 
 #endif

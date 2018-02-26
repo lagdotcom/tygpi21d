@@ -75,28 +75,143 @@ itemslot Get_Slot_for_Type(itemtype ity)
 		case itShield: return slOffHand;
 
 		case itPrimaryWeapon: return slWeapon;
-		case itTwoHandedWeapon: return slWeapon;
 
-		/* TODO */
-		case itSmallWeapon: return slOffHand;
+		/* fixed manually in Equip_Item_At */
+		case itTwoHandedWeapon: return slWeapon;
 
 		default: return slInvalid;
 	}
 }
 
-bool Equip_Item(unsigned char pc, item_id iid)
+bool Is_Weapon(item *it)
+{
+	switch (it->type)
+	{
+		case itPrimaryWeapon:
+		case itTwoHandedWeapon:
+		case itSmallWeapon:
+			return true;
+
+		default: return false;
+	}
+}
+
+noexport void Apply_Item_Stats(unsigned char pc, item *it, bool add)
+{
+	character *ch = &gSave.characters[pc];
+	statistic st;
+	int multiplier = add ? 1 : -1;
+
+	for (st = 0; st < NUM_STATS; st++) {
+		/* don't count weapon damage stats against both weapons */
+		if (Is_Weapon(it) && (st == sMinDamage || st == sMaxDamage))
+			continue;
+
+		ch->header.stats[st] += multiplier * it->stats[st];
+	}
+}
+
+bool Remove_Item_At(unsigned char pc, int index)
+{
+	inventory *iv = &gSave.characters[pc].header.items[index];
+	item *it = Lookup_Item(&gItems, iv->item);
+	if (it == null) return false;
+
+	/* TODO: curse? */
+
+	iv->flags -= vfEquipped;
+	iv->slot = 0;
+	Apply_Item_Stats(pc, it, false);
+
+	return true;
+}
+
+bool Remove_Item(unsigned char pc, item_id iid)
 {
 	int i;
-	item *it = Lookup_Item(&gItems, iid);
+
+	for (i = 0; i < INVENTORY_SIZE; i++) {
+		if (gSave.characters[pc].header.items[i].item == iid) {
+			return Remove_Item_At(pc, i);
+		}
+	}
+
+	return false;
+}
+
+bool Remove_Equipped_Items(unsigned char pc, itemslot sl)
+{
+	int i;
+
+	for (i = 0; i < INVENTORY_SIZE; i++) {
+		if (gSave.characters[pc].header.items[i].slot == sl) {
+			if (!Remove_Item_At(pc, i)) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+item *Get_Equipped_Item(unsigned char pc, itemslot sl)
+{
+	int i;
+
+	for (i = 0; i < INVENTORY_SIZE; i++) {
+		if (gSave.characters[pc].header.items[i].slot == sl) {
+			return Lookup_Item(&gItems, gSave.characters[pc].header.items[i].item);
+		}
+	}
+	
+	return null;
+}
+
+bool Equip_Item_At(unsigned char pc, int index)
+{
+	inventory *iv = &gSave.characters[pc].header.items[index];
+	item *it = Lookup_Item(&gItems, iv->item);
+	itemslot sl;
+	itemtype ty;
 	if (it == null) return false;
 
 	/* TODO: check char can equip item */
 
+	/* Small Weapons can go in either hand */
+	ty = it->type;
+	if (ty == itSmallWeapon) {
+		if (Get_Equipped_Item(pc, slWeapon) == null) {
+			sl = slWeapon;
+		} else {
+			sl = slOffHand;
+		}
+	} else {
+		sl = Get_Slot_for_Type(ty);
+	}
+
+	/* Unequippable? */
+	if (sl == slInvalid) return false;
+
+	/* Cursed? */
+	if (!Remove_Equipped_Items(pc, sl)) return false;
+	if (ty == itTwoHandedWeapon && !Remove_Equipped_Items(pc, slOffHand)) return false;
+
+	iv->flags = vfEquipped;
+	iv->slot = sl;
+	Apply_Item_Stats(pc, it, true);
+
+	/* TODO: curse? */
+
+	return true;
+}
+
+bool Equip_Item(unsigned char pc, item_id iid)
+{
+	int i;
+
 	for (i = 0; i < INVENTORY_SIZE; i++) {
 		if (gSave.characters[pc].header.items[i].item == iid) {
-			gSave.characters[pc].header.items[i].flags |= vfEquipped;
-			/* TODO: remove other items at same time */
-			return true;
+			return Equip_Item_At(pc, i);
 		}
 	}
 
@@ -127,19 +242,13 @@ bool In_Front_Row(unsigned char pc)
 	return !(gSave.characters[pc].header.flags & cfBackRow);
 }
 
-item *Get_Equipped_Weapon(unsigned char pc)
+item *Get_Equipped_Weapon(unsigned char pc, bool primary)
 {
-	int i;
-	inventory *iv;
+	item *it = Get_Equipped_Item(pc, primary ? slWeapon : slOffHand);
 
-	for (i = 0; i < INVENTORY_SIZE; i++) {
-		iv = &gSave.characters[pc].header.items[i];
-		if (iv->item != 0 && iv->flags & vfEquipped) {
-			return Lookup_Item(&gItems, iv->item);
-		}
-	}
-
-	return null;
+	/* shields don't count! */
+	if (it->type == itShield) return null;
+	return it;
 }
 
 character *Get_Pc(int pc)
@@ -217,9 +326,10 @@ noexport char *Get_Damage_Range(character *c)
 		if (iv->flags & vfEquipped) {
 			it = Lookup_Item(&gItems, iv->item);
 
-			/* TODO: this is temporary */
-			if (it->stats[sMinDamage]) min += it->stats[sMinDamage];
-			if (it->stats[sMaxDamage]) max += it->stats[sMaxDamage];
+			if (Is_Weapon(it)) {
+				min += it->stats[sMinDamage];
+				max += it->stats[sMaxDamage];
+			}
 		}
 	}
 	

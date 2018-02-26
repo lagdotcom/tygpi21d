@@ -11,13 +11,16 @@ bool Add_to_Inventory(unsigned char pc, item_id iid, unsigned char qty);
 void Draw_Character_Status(int index, int x, int y);
 void Draw_Party_Status(void);
 bool Equip_Item(unsigned char pc, item_id iid);
-item *Get_Equipped_Weapon(unsigned char pc);
+item *Get_Equipped_Item(unsigned char pc, itemslot sl);
+item *Get_Equipped_Weapon(unsigned char pc, bool primary);
 
 /* Get the PC whose index this is */
 character *Get_Pc(int pc);
 
 bool In_Front_Row(unsigned char pc);
 void Pc_Select(int num);
+
+bool Remove_Item(unsigned char pc, item_id iid);
 
 void Show_Pc_Screen(int pc);
 

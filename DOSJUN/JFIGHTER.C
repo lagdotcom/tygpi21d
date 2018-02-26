@@ -17,9 +17,8 @@ bool Check_Concentrate(combatant *source)
 	return Check_Attack(source);
 }
 
-void Concentrate(combatant *source, combatant *target)
+noexport void Concentrate_Inner(combatant *source, combatant *target, item *weapon)
 {
-	item *weapon = Get_Weapon(source);
 	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
 	stat_value min, max;
 	int roll;
@@ -45,4 +44,9 @@ void Concentrate(combatant *source, combatant *target)
 	} else {
 		Combat_Message("%s narrowly misses %s.", source->name, target->name);
 	}
+}
+
+void Concentrate(combatant *source, combatant *target)
+{
+	With_Both_Weapons(source, target, Concentrate_Inner);
 }

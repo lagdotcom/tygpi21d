@@ -66,6 +66,7 @@ typedef UINT8 inventoryflag_id;
 typedef UINT8 internal_id;
 typedef UINT16 item_id;
 typedef UINT16 itemflag_id;
+typedef UINT8 item_slot;
 typedef UINT8 item_type;
 typedef UINT8 job_id;
 typedef UINT16 length;
