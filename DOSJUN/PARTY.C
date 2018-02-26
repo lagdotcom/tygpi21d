@@ -345,7 +345,7 @@ noexport char *Get_Damage_Range(character *c)
 	return damage_range_buf;
 }
 
-void Show_Pc_Screen(int pc)
+noexport void Show_Pc_Stats(int pc)
 {
 	character *c = &gSave.characters[pc];
 	char temp[100];
@@ -376,7 +376,53 @@ void Show_Pc_Screen(int pc)
 	Show_Pc_Items(c, 120, 32);
 
 	Show_Double_Buffer();
-	Get_Next_Scan_Code();
+}
 
+void Show_Pc_Screen(int starting_pc)
+{
+	int pc = starting_pc;
 	redraw_everything = true;
+
+	while (true) {
+		Show_Pc_Stats(pc);
+		switch (Get_Next_Scan_Code()) {
+			case SCAN_1:
+				pc = 0;
+				continue;
+
+			case SCAN_2:
+				pc = 1;
+				continue;
+
+			case SCAN_3:
+				pc = 2;
+				continue;
+
+			case SCAN_4:
+				pc = 3;
+				continue;
+
+			case SCAN_5:
+				pc = 4;
+				continue;
+
+			case SCAN_6:
+				pc = 5;
+				continue;
+
+			case SCAN_LEFT:
+				pc--;
+				if (pc < 0) pc = PARTY_SIZE - 1;
+				continue;
+
+			case SCAN_RIGHT:
+				pc++;
+				if (pc >= PARTY_SIZE) pc = 0;
+				continue;
+
+			case SCAN_Q:
+			case SCAN_ESC:
+				return;
+		}
+	}
 }
