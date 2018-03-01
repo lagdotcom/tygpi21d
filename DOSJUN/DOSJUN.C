@@ -126,7 +126,7 @@ wall* Get_Wall(coord x, coord y, dir dir, relative rel)
 
 void Show_Game_String(char *string, bool wait_for_key)
 {
-	Draw_Wrapped_Font(8, 144, 304, 48, 15, string, FNT, true);
+	Draw_Wrapped_Font(8, 144, 304, 48, WHITE, string, FNT, true);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();

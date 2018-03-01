@@ -42,14 +42,14 @@ void Draw_Character_Status(int index, int x, int y)
 
 	strncpy(buffer, ch->header.name, 8);
 	buffer[8] = 0;
-	Draw_Font(x + 16, y, 15, buffer, FNT, false);
+	Draw_Font(x + 16, y, WHITE, buffer, FNT, false);
 
 	sprintf(buffer, "H%3d/%-3d", ch->header.stats[sHP], ch->header.stats[sMaxHP]);
-	Draw_Font(x + 16, y + 8, 15, buffer, FNT, false);
+	Draw_Font(x + 16, y + 8, WHITE, buffer, FNT, false);
 
 	if (ch->header.stats[sMaxMP] > 0) {
 		sprintf(buffer, "M%3d/%-3d", ch->header.stats[sMP], ch->header.stats[sMaxMP]);
-		Draw_Font(x + 16, y + 16, 15, buffer, FNT, false);
+		Draw_Font(x + 16, y + 16, WHITE, buffer, FNT, false);
 	}
 }
 
@@ -297,8 +297,8 @@ noexport void Show_Pc_Stat(character *c, statistic st, int y)
 
 	itoa(Get_Pc_Stat(c, st), temp, 10);
 
-	Draw_Font(8, y, 15, name, FNT, false);
-	Draw_Font(80, y, 15, temp, FNT, false);
+	Draw_Font(8, y, WHITE, name, FNT, false);
+	Draw_Font(80, y, WHITE, temp, FNT, false);
 }
 
 noexport void Show_Pc_Items(int pc, int x, int y, int selected)
@@ -371,10 +371,10 @@ noexport void Show_Pc_Stats(int pc)
 
 	Fill_Double_Buffer(0);
 
-	Draw_Font(8, 8, 15, c->header.name, FNT, false);
+	Draw_Font(8, 8, WHITE, c->header.name, FNT, false);
 
 	sprintf(temp, "Level %d %s", c->header.job_level[c->header.job], Job_Name(c->header.job));
-	Draw_Font(8, 16, 15, temp, FNT, false);
+	Draw_Font(8, 16, WHITE, temp, FNT, false);
 
 	Show_Pc_Stat(c, sStrength, 32);
 	Show_Pc_Stat(c, sDexterity, 40);
@@ -389,8 +389,8 @@ noexport void Show_Pc_Stats(int pc)
 	Show_Pc_Stat(c, sArmour, 112);
 	Show_Pc_Stat(c, sToughness, 120);
 
-	Draw_Font(8, 136, 15, "Damage", FNT, false);
-	Draw_Font(80, 136, 15, Get_Damage_Range(c), FNT, false);
+	Draw_Font(8, 136, WHITE, "Damage", FNT, false);
+	Draw_Font(80, 136, WHITE, Get_Damage_Range(c), FNT, false);
 }
 
 void Show_Pc_Screen(int starting_pc)

@@ -8,8 +8,8 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 /* highlight colours */
-#define COLOUR_ACTIVE	14
-#define COLOUR_SELECT	11
+#define COLOUR_ACTIVE	CYAN
+#define COLOUR_SELECT	YELLOW
 
 #define PRIORITY_WIGGLE	5
 #define MAX_PRIORITY	(255 - PRIORITY_WIGGLE)
@@ -41,7 +41,7 @@ noexport UINT32 earned_experience;
 
 noexport void Show_Combat_String(char *string, bool wait_for_key)
 {
-	Draw_Wrapped_Font(96, 144, 128, 48, 15, string, FNT, true);
+	Draw_Wrapped_Font(96, 144, 128, 48, WHITE, string, FNT, true);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();
