@@ -375,7 +375,7 @@ void main(void)
 	Log("main: Init");
 
 	printf("Initialising DOSJUN...\n");
-	Load_Font("6x8.FNT", &font6x8);
+	Load_Font("6x8.FNT", FNT);
 	Initialise_Campaign(&gCampaign);
 	Initialise_Items(&gItems);
 	Initialise_Monsters(&gMonsters);
@@ -424,7 +424,7 @@ void main(void)
 	Free_Jobs();
 	Free_Sound();
 	Delete_Picture();
-	Free_Font(&font6x8);
+	Free_Font(FNT);
 
 	Delete_Double_Buffer();
 

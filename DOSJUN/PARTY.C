@@ -11,6 +11,8 @@
 #define SX2 232
 #define SY 8
 
+#define ITEM_SELECTED YELLOW
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 noexport char damage_range_buf[10];
@@ -114,7 +116,13 @@ noexport void Apply_Item_Stats(unsigned char pc, item *it, bool add)
 bool Remove_Item_At(unsigned char pc, int index)
 {
 	inventory *iv = &gSave.characters[pc].header.items[index];
-	item *it = Lookup_Item(&gItems, iv->item);
+	item *it;
+
+	/* Sanity checks */
+	if (!iv->item) return false;
+	if (!(iv->flags & vfEquipped)) return false;
+
+	it = Lookup_Item(&gItems, iv->item);
 	if (it == null) return false;
 
 	/* TODO: curse? */
@@ -170,9 +178,15 @@ item *Get_Equipped_Item(unsigned char pc, itemslot sl)
 bool Equip_Item_At(unsigned char pc, int index)
 {
 	inventory *iv = &gSave.characters[pc].header.items[index];
-	item *it = Lookup_Item(&gItems, iv->item);
+	item *it;
 	itemslot sl;
 	itemtype ty;
+
+	/* Sanity checks */
+	if (!iv->item) return false;
+	if (iv->flags & vfEquipped) return false;
+
+	it = Lookup_Item(&gItems, iv->item);
 	if (it == null) return false;
 
 	/* TODO: check char can equip item */
@@ -196,7 +210,7 @@ bool Equip_Item_At(unsigned char pc, int index)
 	if (!Remove_Equipped_Items(pc, sl)) return false;
 	if (ty == itTwoHandedWeapon && !Remove_Equipped_Items(pc, slOffHand)) return false;
 
-	iv->flags = vfEquipped;
+	iv->flags |= vfEquipped;
 	iv->slot = sl;
 	Apply_Item_Stats(pc, it, true);
 
@@ -283,32 +297,37 @@ noexport void Show_Pc_Stat(character *c, statistic st, int y)
 
 	itoa(Get_Pc_Stat(c, st), temp, 10);
 
-	Draw_Font(8, y, 15, name, &font6x8, false);
-	Draw_Font(80, y, 15, temp, &font6x8, false);
+	Draw_Font(8, y, 15, name, FNT, false);
+	Draw_Font(80, y, 15, temp, FNT, false);
 }
 
-noexport void Show_Pc_Items(character *c, int x, int y)
+noexport void Show_Pc_Items(int pc, int x, int y, int selected)
 {
+	character *c = &gSave.characters[pc];
 	inventory *iv;
 	item *it;
 	int i;
+	int col;
 
-	y -= 8;
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		y += 8;
 		iv = &c->header.items[i];
 
 		if (!iv->item) {
-			Draw_Font(x + 16, y, 7, "--", &font6x8, false);
-			continue;
+			col = (i == selected) ? (YELLOW - 8) : GREY;
+			Draw_Font(x + 16, y, col, "--", FNT, false);
+		} else {
+			it = Lookup_Item(&gItems, iv->item);
+			col = (i == selected) ? ITEM_SELECTED : WHITE;
+			Draw_Font(x + 16, y, col, it->name, FNT, false);
 		}
-
-		it = Lookup_Item(&gItems, iv->item);
-		Draw_Font(x + 16, y, 15, it->name, &font6x8, false);
 
 		if (iv->flags & vfEquipped) {
-			Draw_Font(x, y, 14, "E", &font6x8, false);
+			Draw_Font(x, y, CYAN, "E", FNT, false);
+		} else {
+			Draw_Square_DB(BLACK, x, y, x + 15, y + 7, true);
 		}
+
+		y += 8;
 	}
 }
 
@@ -352,10 +371,10 @@ noexport void Show_Pc_Stats(int pc)
 
 	Fill_Double_Buffer(0);
 
-	Draw_Font(8, 8, 15, c->header.name, &font6x8, false);
+	Draw_Font(8, 8, 15, c->header.name, FNT, false);
 
 	sprintf(temp, "Level %d %s", c->header.job_level[c->header.job], Job_Name(c->header.job));
-	Draw_Font(8, 16, 15, temp, &font6x8, false);
+	Draw_Font(8, 16, 15, temp, FNT, false);
 
 	Show_Pc_Stat(c, sStrength, 32);
 	Show_Pc_Stat(c, sDexterity, 40);
@@ -370,44 +389,50 @@ noexport void Show_Pc_Stats(int pc)
 	Show_Pc_Stat(c, sArmour, 112);
 	Show_Pc_Stat(c, sToughness, 120);
 
-	Draw_Font(8, 136, 15, "Damage", &font6x8, false);
-	Draw_Font(80, 136, 15, Get_Damage_Range(c), &font6x8, false);
-
-	Show_Pc_Items(c, 120, 32);
-
-	Show_Double_Buffer();
+	Draw_Font(8, 136, 15, "Damage", FNT, false);
+	Draw_Font(80, 136, 15, Get_Damage_Range(c), FNT, false);
 }
 
 void Show_Pc_Screen(int starting_pc)
 {
 	int pc = starting_pc;
+	int selected = 0;
 	redraw_everything = true;
 
 	while (true) {
 		Show_Pc_Stats(pc);
+		Show_Pc_Items(pc, 120, 32, selected);
+		Show_Double_Buffer();
+
 		switch (Get_Next_Scan_Code()) {
 			case SCAN_1:
 				pc = 0;
+				selected = 0;
 				continue;
 
 			case SCAN_2:
 				pc = 1;
+				selected = 0;
 				continue;
 
 			case SCAN_3:
 				pc = 2;
+				selected = 0;
 				continue;
 
 			case SCAN_4:
 				pc = 3;
+				selected = 0;
 				continue;
 
 			case SCAN_5:
 				pc = 4;
+				selected = 0;
 				continue;
 
 			case SCAN_6:
 				pc = 5;
+				selected = 0;
 				continue;
 
 			case SCAN_LEFT:
@@ -418,6 +443,24 @@ void Show_Pc_Screen(int starting_pc)
 			case SCAN_RIGHT:
 				pc++;
 				if (pc >= PARTY_SIZE) pc = 0;
+				continue;
+
+			case SCAN_UP:
+				selected--;
+				if (selected < 0) selected = INVENTORY_SIZE - 1;
+				continue;
+
+			case SCAN_DOWN:
+				selected++;
+				if (selected >= INVENTORY_SIZE) selected = 0;
+				continue;
+
+			case SCAN_E:
+				Equip_Item_At(pc, selected);
+				continue;
+
+			case SCAN_R:
+				Remove_Item_At(pc, selected);
 				continue;
 
 			case SCAN_Q:

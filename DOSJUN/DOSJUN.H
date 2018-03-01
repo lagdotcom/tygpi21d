@@ -37,6 +37,17 @@
 #define FNT (&font6x8)
 #define TILE(z, x, y) (&z.tiles[(y) * z.header.width + (x)])
 
+#define BLACK	0
+#define GREY	7
+#define DARK	8
+#define RED		9
+#define GREEN	10
+#define YELLOW	11
+#define BLUE	12
+#define MAGENTA 13
+#define CYAN    14
+#define WHITE   15
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 extern campaign gCampaign;

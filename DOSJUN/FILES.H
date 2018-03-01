@@ -19,6 +19,7 @@
 #define PARTY_SIZE		6
 
 typedef enum itemslot {
+	slNone,
 	slWeapon,
 	slOffHand,
 	slHead,
