@@ -11,6 +11,9 @@
 #define SX2 232
 #define SY 8
 
+#define ITEMS_X	120
+#define ITEMS_Y	32
+
 #define ITEM_SELECTED YELLOW
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
@@ -301,30 +304,31 @@ noexport void Show_Pc_Stat(character *c, statistic st, int y)
 	Draw_Font(80, y, WHITE, temp, FNT, false);
 }
 
-noexport void Show_Pc_Items(int pc, int x, int y, int selected)
+noexport void Show_Pc_Items(int pc, int selected)
 {
 	character *c = &gSave.characters[pc];
 	inventory *iv;
 	item *it;
 	int i;
 	int col;
+	int y = ITEMS_Y;
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
 		iv = &c->header.items[i];
 
 		if (!iv->item) {
 			col = (i == selected) ? (YELLOW - 8) : GREY;
-			Draw_Font(x + 16, y, col, "--", FNT, false);
+			Draw_Font(ITEMS_X + 16, y, col, "--", FNT, false);
 		} else {
 			it = Lookup_Item(&gItems, iv->item);
 			col = (i == selected) ? ITEM_SELECTED : WHITE;
-			Draw_Font(x + 16, y, col, it->name, FNT, false);
+			Draw_Font(ITEMS_X + 16, y, col, it->name, FNT, false);
 		}
 
 		if (iv->flags & vfEquipped) {
-			Draw_Font(x, y, CYAN, "E", FNT, false);
+			Draw_Font(ITEMS_X, y, CYAN, "E", FNT, false);
 		} else {
-			Draw_Square_DB(BLACK, x, y, x + 15, y + 7, true);
+			Draw_Square_DB(BLACK, ITEMS_X, y, ITEMS_X + 15, y + 7, true);
 		}
 
 		y += 8;
@@ -393,6 +397,35 @@ noexport void Show_Pc_Stats(int pc)
 	Draw_Font(80, 136, WHITE, Get_Damage_Range(c), FNT, false);
 }
 
+noexport bool Confirm_Drop_Item(int pc, int index)
+{
+	inventory *iv = &gSave.characters[pc].header.items[index];
+	int y = ITEMS_Y + (INVENTORY_SIZE + 1) * 8;
+	bool result = false;
+	bool failed = false;
+
+	/* Sanity check */
+	if (!iv->item) return false;
+
+	Draw_Font(ITEMS_X, y, WHITE, "Are you sure?", FNT, false);
+	Show_Double_Buffer();
+	if (Get_Next_Scan_Code() == SCAN_Y) {
+		if (iv->flags & vfEquipped) {
+			if (!Remove_Item_At(pc, index)) {
+				failed = true;
+			}
+		}
+
+		if (!failed) {
+			iv->item = 0;
+			result = true;
+		}
+	}
+
+	Draw_Square_DB(BLACK, ITEMS_X, y, SCREEN_WIDTH, y + 7, true);
+	return result;
+}
+
 void Show_Pc_Screen(int starting_pc)
 {
 	int pc = starting_pc;
@@ -401,7 +434,7 @@ void Show_Pc_Screen(int starting_pc)
 
 	while (true) {
 		Show_Pc_Stats(pc);
-		Show_Pc_Items(pc, 120, 32, selected);
+		Show_Pc_Items(pc, selected);
 		Show_Double_Buffer();
 
 		switch (Get_Next_Scan_Code()) {
@@ -461,6 +494,11 @@ void Show_Pc_Screen(int starting_pc)
 
 			case SCAN_R:
 				Remove_Item_At(pc, selected);
+				continue;
+
+			case SCAN_D:
+			case SCAN_DEL:
+				Confirm_Drop_Item(pc, selected);
 				continue;
 
 			case SCAN_Q:
