@@ -11,7 +11,7 @@
 #define SX2 232
 #define SY 8
 
-#define ITEMS_X	120
+#define ITEMS_X	140
 #define ITEMS_Y	32
 
 #define CONFIRM_Y (ITEMS_Y + (INVENTORY_SIZE + 1) * 8)
@@ -315,11 +315,22 @@ stat_value Get_Pc_Stat(character *c, statistic st)
 noexport void Show_Pc_Stat(character *c, statistic st, int y)
 {
 	char *name = Stat_Name(st);
-	char temp[10];
+	char temp[5];
 
 	itoa(Get_Pc_Stat(c, st), temp, 10);
 
 	Draw_Font(8, y, WHITE, name, FNT, false);
+	Draw_Font(80, y, WHITE, temp, FNT, false);
+}
+
+noexport void Show_Pc_Stat_Pair(character *c, statistic stc, statistic stm, int y)
+{
+	char *name = Stat_Name(stm);
+	char temp[10];
+
+	Draw_Font(8, y, WHITE, name, FNT, false);
+
+	sprintf(temp, "%3d/%3d", Get_Pc_Stat(c, stc), Get_Pc_Stat(c, stm));
 	Draw_Font(80, y, WHITE, temp, FNT, false);
 }
 
@@ -409,8 +420,8 @@ noexport void Show_Pc_Stats(int pc)
 	Show_Pc_Stat(c, sDexterity, 40);
 	Show_Pc_Stat(c, sIntelligence, 48);
 
-	Show_Pc_Stat(c, sMaxHP, 64);
-	Show_Pc_Stat(c, sMaxMP, 72);
+	Show_Pc_Stat_Pair(c, sHP, sMaxHP, 64);
+	Show_Pc_Stat_Pair(c, sMP, sMaxMP, 72);
 
 	Show_Pc_Stat(c, sHitBonus, 88);
 	Show_Pc_Stat(c, sDodgeBonus, 96);
@@ -458,11 +469,11 @@ noexport bool Confirm_Drop_Item(int pc, int index)
 	return result;
 }
 
-noexport int Confirm_Pc()
+noexport int Confirm_Pc(char *prompt)
 {
 	unsigned char scan;
 
-	scan = Confirm("To whom? (1-6)");
+	scan = Confirm(prompt);
 	Clear_Confirm();
 
 	switch (scan) {
@@ -495,7 +506,7 @@ noexport bool Confirm_Give_Item(int pc, int index)
 	/* Sanity check */
 	if (!iv->item) return false;
 
-	dest_pc = Confirm_Pc();
+	dest_pc = Confirm_Pc("To whom? (1-6)");
 	if (dest_pc < 0 || pc == dest_pc) {
 		return false;
 	}
@@ -542,7 +553,7 @@ noexport bool Confirm_Use_Item(int pc, int index)
 	}
 
 	if (Item_Needs_Target(it)) {
-		dest_pc = Confirm_Pc();
+		dest_pc = Confirm_Pc("On whom? (1-6)");
 		if (dest_pc < 0) {
 			return false;
 		}
