@@ -14,6 +14,8 @@
 #define ITEMS_X	120
 #define ITEMS_Y	32
 
+#define CONFIRM_Y (ITEMS_Y + (INVENTORY_SIZE + 1) * 8)
+
 #define ITEM_SELECTED YELLOW
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
@@ -324,6 +326,7 @@ noexport void Show_Pc_Stat(character *c, statistic st, int y)
 noexport void Show_Pc_Items(int pc, int selected)
 {
 	character *c = &gSave.characters[pc];
+	char temp[4];
 	inventory *iv;
 	item *it;
 	int i;
@@ -340,6 +343,11 @@ noexport void Show_Pc_Items(int pc, int selected)
 			it = Lookup_Item(&gItems, iv->item);
 			col = (i == selected) ? ITEM_SELECTED : WHITE;
 			Draw_Font(ITEMS_X + 16, y, col, it->name, FNT, false);
+
+			if (iv->quantity > 1) {
+				sprintf(temp, "x%d", iv->quantity);
+				Draw_Font(ITEMS_X + 150, y, col, temp, FNT, false);
+			}
 		}
 
 		if (iv->flags & vfEquipped) {
@@ -414,19 +422,25 @@ noexport void Show_Pc_Stats(int pc)
 	Draw_Font(80, 136, WHITE, Get_Damage_Range(c), FNT, false);
 }
 
+noexport unsigned char Confirm(char *prompt)
+{
+	Draw_Font(ITEMS_X, CONFIRM_Y, WHITE, prompt, FNT, false);
+	Show_Double_Buffer();
+	return Get_Next_Scan_Code();
+}
+
+#define Clear_Confirm() Draw_Square_DB(BLACK, ITEMS_X, CONFIRM_Y, SCREEN_WIDTH, CONFIRM_Y + 7, true)
+
 noexport bool Confirm_Drop_Item(int pc, int index)
 {
 	inventory *iv = &gSave.characters[pc].header.items[index];
-	int y = ITEMS_Y + (INVENTORY_SIZE + 1) * 8;
 	bool result = false;
 	bool failed = false;
 
 	/* Sanity check */
 	if (!iv->item) return false;
 
-	Draw_Font(ITEMS_X, y, WHITE, "Are you sure?", FNT, false);
-	Show_Double_Buffer();
-	if (Get_Next_Scan_Code() == SCAN_Y) {
+	if (Confirm("Are you sure?") == SCAN_Y) {
 		if (iv->flags & vfEquipped) {
 			if (!Remove_Item_At(pc, index)) {
 				/* TODO */
@@ -440,51 +454,49 @@ noexport bool Confirm_Drop_Item(int pc, int index)
 		}
 	}
 
-	Draw_Square_DB(BLACK, ITEMS_X, y, SCREEN_WIDTH, y + 7, true);
+	Clear_Confirm();
 	return result;
+}
+
+noexport int Confirm_Pc()
+{
+	unsigned char scan;
+
+	scan = Confirm("To whom? (1-6)");
+	Clear_Confirm();
+
+	switch (scan) {
+		case SCAN_1: return 0;
+		case SCAN_2: return 1;
+		case SCAN_3: return 2;
+		case SCAN_4: return 3;
+		case SCAN_5: return 4;
+		case SCAN_6: return 5;
+
+		default: return -1;
+	}
+}
+
+noexport void Clear_Inventory_Slot(inventory *iv)
+{
+	iv->flags = vfNone;
+	iv->item = 0;
+	iv->quantity = 0;
+	iv->slot = slNone;
 }
 
 noexport bool Confirm_Give_Item(int pc, int index)
 {
 	inventory *iv = &gSave.characters[pc].header.items[index],
 		*dest_iv;
-	int y = ITEMS_Y + (INVENTORY_SIZE + 1) * 8;
-	int dest_pc = -1,
+	int dest_pc,
 		dest_slot;
 
 	/* Sanity check */
 	if (!iv->item) return false;
 
-	Draw_Font(ITEMS_X, y, WHITE, "To whom? (1-6)", FNT, false);
-	Show_Double_Buffer();
-	switch (Get_Next_Scan_Code()) {
-		case SCAN_1:
-			dest_pc = 0;
-			break;
-
-		case SCAN_2:
-			dest_pc = 1;
-			break;
-
-		case SCAN_3:
-			dest_pc = 2;
-			break;
-
-		case SCAN_4:
-			dest_pc = 3;
-			break;
-
-		case SCAN_5:
-			dest_pc = 4;
-			break;
-
-		case SCAN_6:
-			dest_pc = 5;
-			break;
-	}
-
+	dest_pc = Confirm_Pc();
 	if (dest_pc < 0 || pc == dest_pc) {
-		Draw_Square_DB(BLACK, ITEMS_X, y, SCREEN_WIDTH, y + 7, true);
 		return false;
 	}
 	
@@ -498,11 +510,8 @@ noexport bool Confirm_Give_Item(int pc, int index)
 
 	dest_slot = Find_Empty_Inventory_Slot(dest_pc);
 	if (dest_slot < 0) {
-		Draw_Font(ITEMS_X, y, WHITE, "Inventory is full!", FNT, false);
-		Show_Double_Buffer();
-		Get_Next_Scan_Code();
-
-		Draw_Square_DB(BLACK, ITEMS_X, y, SCREEN_WIDTH, y + 7, true);
+		Confirm("Inventory is full!");
+		Clear_Confirm();
 		return false;
 	}
 
@@ -512,12 +521,42 @@ noexport bool Confirm_Give_Item(int pc, int index)
 	dest_iv->quantity = iv->quantity;
 	dest_iv->slot = slNone;
 
-	iv->flags = vfNone;
-	iv->item = 0;
-	iv->quantity = 0;
-	iv->slot = slNone;
-
+	Clear_Inventory_Slot(iv);
 	return true;
+}
+
+noexport bool Confirm_Use_Item(int pc, int index)
+{
+	inventory *iv = &gSave.characters[pc].header.items[index];
+	item *it;
+	int dest_pc = -1;
+
+	/* Sanity check */
+	if (!iv->item) return false;
+
+	it = Lookup_Item(&gItems, iv->item);
+	if (!Item_Has_Use(it)) {
+		Confirm("You can't use that.");
+		Clear_Confirm();
+		return false;
+	}
+
+	if (Item_Needs_Target(it)) {
+		dest_pc = Confirm_Pc();
+		if (dest_pc < 0) {
+			return false;
+		}
+	}
+
+	if (Use_Item(it, pc, dest_pc)) {
+		if (iv->quantity > 1) {
+			iv->quantity--;
+		} else {
+			Clear_Inventory_Slot(iv);
+		}
+	}
+
+	return false;
 }
 
 void Show_Pc_Screen(int starting_pc)
@@ -597,6 +636,11 @@ void Show_Pc_Screen(int starting_pc)
 
 			case SCAN_G:
 				Confirm_Give_Item(pc, selected);
+				continue;
+
+			case SCAN_U:
+			case SCAN_ENTER:
+				Confirm_Use_Item(pc, selected);
 				continue;
 
 			case SCAN_Q:

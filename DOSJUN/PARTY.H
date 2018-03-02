@@ -17,6 +17,8 @@ item *Get_Equipped_Weapon(unsigned char pc, bool primary);
 /* Get the PC whose index this is */
 character *Get_Pc(int pc);
 
+stat_value Get_Pc_Stat(character *c, statistic st);
+
 bool In_Front_Row(unsigned char pc);
 void Pc_Select(int num);
 

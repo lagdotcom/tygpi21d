@@ -71,8 +71,11 @@ typedef struct items {
 
 void Free_Items(items *i);
 void Initialise_Items(items *i);
+bool Item_Has_Use(item *it);
+bool Item_Needs_Target(item *it);
 bool Load_Items(char *filename, items *i);
 item *Lookup_Item(items *lib, item_id id);
 bool Save_Items(char *filename, items *i);
+bool Use_Item(item *it, int pc, int targ);
 
 #endif

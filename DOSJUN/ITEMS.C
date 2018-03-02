@@ -55,3 +55,46 @@ item *Lookup_Item(items *lib, item_id id)
 
 	return null;
 }
+
+bool Item_Has_Use(item *it)
+{
+	return it->special != spNone;
+}
+
+bool Item_Needs_Target(item *it)
+{
+	switch (it->special) {
+		case spHeal:
+			return true;
+
+		default: return false;
+	}
+}
+
+noexport bool Healing_Item(item *it, int pc)
+{
+	character *c = &gSave.characters[pc];
+	stat_value current, maximum;
+	int amount;
+
+	current = Get_Pc_Stat(c, sHP);
+	maximum = Get_Pc_Stat(c, sMaxHP);
+
+	if (current >= maximum)
+		return false;
+
+	amount = randint(it->special_argument1, it->special_argument2);
+	if (current + amount > maximum)
+		amount = maximum - current;
+
+	c->header.stats[sHP] += amount;
+	return true;
+}
+
+bool Use_Item(item *it, int pc, int pc_targ)
+{
+	switch (it->special) {
+		case spHeal: return Healing_Item(it, pc_targ);
+		default: return false;
+	}
+}
