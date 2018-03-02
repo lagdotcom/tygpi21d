@@ -235,16 +235,33 @@ bool Equip_Item(unsigned char pc, item_id iid)
 	return false;
 }
 
+int Find_Empty_Inventory_Slot(unsigned char pc)
+{
+	int i;
+
+	for (i = 0; i < INVENTORY_SIZE; i++) {
+		if (gSave.characters[pc].header.items[i].item == 0) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
 bool Add_to_Inventory(unsigned char pc, item_id iid, unsigned char qty)
 {
 	int i;
+	inventory *iv;
 	item *it = Lookup_Item(&gItems, iid);
 	if (it == null) return false;
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		if (gSave.characters[pc].header.items[i].item == 0) {
-			gSave.characters[pc].header.items[i].item = iid;
-			gSave.characters[pc].header.items[i].quantity = qty;
+		iv = &gSave.characters[pc].header.items[i];
+		if (iv->item == 0) {
+			iv->flags = vfNone;
+			iv->item = iid;
+			iv->quantity = qty;
+			iv->slot = slNone;
 			return true;
 		}
 
@@ -412,6 +429,7 @@ noexport bool Confirm_Drop_Item(int pc, int index)
 	if (Get_Next_Scan_Code() == SCAN_Y) {
 		if (iv->flags & vfEquipped) {
 			if (!Remove_Item_At(pc, index)) {
+				/* TODO */
 				failed = true;
 			}
 		}
@@ -424,6 +442,82 @@ noexport bool Confirm_Drop_Item(int pc, int index)
 
 	Draw_Square_DB(BLACK, ITEMS_X, y, SCREEN_WIDTH, y + 7, true);
 	return result;
+}
+
+noexport bool Confirm_Give_Item(int pc, int index)
+{
+	inventory *iv = &gSave.characters[pc].header.items[index],
+		*dest_iv;
+	int y = ITEMS_Y + (INVENTORY_SIZE + 1) * 8;
+	int dest_pc = -1,
+		dest_slot;
+
+	/* Sanity check */
+	if (!iv->item) return false;
+
+	Draw_Font(ITEMS_X, y, WHITE, "To whom? (1-6)", FNT, false);
+	Show_Double_Buffer();
+	switch (Get_Next_Scan_Code()) {
+		case SCAN_1:
+			dest_pc = 0;
+			break;
+
+		case SCAN_2:
+			dest_pc = 1;
+			break;
+
+		case SCAN_3:
+			dest_pc = 2;
+			break;
+
+		case SCAN_4:
+			dest_pc = 3;
+			break;
+
+		case SCAN_5:
+			dest_pc = 4;
+			break;
+
+		case SCAN_6:
+			dest_pc = 5;
+			break;
+	}
+
+	if (dest_pc < 0 || pc == dest_pc) {
+		Draw_Square_DB(BLACK, ITEMS_X, y, SCREEN_WIDTH, y + 7, true);
+		return false;
+	}
+	
+	/* Equipped? */
+	if (iv->flags & vfEquipped) {
+		if (!Remove_Item_At(pc, index)) {
+			/* TODO */
+			return false;
+		}
+	}
+
+	dest_slot = Find_Empty_Inventory_Slot(dest_pc);
+	if (dest_slot < 0) {
+		Draw_Font(ITEMS_X, y, WHITE, "Inventory is full!", FNT, false);
+		Show_Double_Buffer();
+		Get_Next_Scan_Code();
+
+		Draw_Square_DB(BLACK, ITEMS_X, y, SCREEN_WIDTH, y + 7, true);
+		return false;
+	}
+
+	dest_iv = &gSave.characters[dest_pc].header.items[dest_slot];
+	dest_iv->flags = iv->flags;
+	dest_iv->item = iv->item;
+	dest_iv->quantity = iv->quantity;
+	dest_iv->slot = slNone;
+
+	iv->flags = vfNone;
+	iv->item = 0;
+	iv->quantity = 0;
+	iv->slot = slNone;
+
+	return true;
 }
 
 void Show_Pc_Screen(int starting_pc)
@@ -499,6 +593,10 @@ void Show_Pc_Screen(int starting_pc)
 			case SCAN_D:
 			case SCAN_DEL:
 				Confirm_Drop_Item(pc, selected);
+				continue;
+
+			case SCAN_G:
+				Confirm_Give_Item(pc, selected);
 				continue;
 
 			case SCAN_Q:
