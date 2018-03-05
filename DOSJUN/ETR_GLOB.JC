@@ -19,4 +19,5 @@ Const nra = 5
 # Item IDs
 Const itKnuckleduster = 256
 Const itPenknife = 257
+Const itKnitCap = 512
 Const itPlaster = 2560

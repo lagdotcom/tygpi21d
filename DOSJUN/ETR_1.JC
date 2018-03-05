@@ -13,6 +13,10 @@ Const q_secret_found = 7
 Const q_secret_open = 8
 Local q_status
 
+# Floor items
+Const i_secret = 1
+Local i_found
+
 Script wake_up
 	If q_status != q_first_time
 		Return
@@ -146,5 +150,18 @@ Script secret_tile
 	ElseIf q_status < q_secret_found
 		Text "The wall ahead of you looks uneven, as if it were made hastily."
 		q_status = q_secret_found
+	EndIf
+EndScript
+
+Script secret_item
+	If (i_found & i_secret) == 0
+		AddItem itKnitCap, 1
+
+		If @Success
+			Text "You find a simple cap on the dusty floor."
+			i_found = i_found | i_secret
+		ElseIf
+			Text "There's a cap on the floor, but nobody can carry any more."
+		EndIf
 	EndIf
 EndScript

@@ -124,6 +124,10 @@ noexport void Push_Internal(code_host *h)
 		case internalJustMoved:
 			Push_Stack(h, Bool(just_moved));
 			return;
+
+		case internalSuccess:
+			Push_Stack(h, h->result);
+			return;
 	}
 
 	Code_Error("Unknown internal #%d", index);
@@ -366,7 +370,6 @@ noexport void Unlock(code_host *h)
 
 noexport void GiveItem(code_host *h)
 {
-	bool result;
 	int qty = Pop_Stack(h);
 	item_id item = Pop_Stack(h);
 	int pc = Pop_Stack(h);
@@ -375,13 +378,11 @@ noexport void GiveItem(code_host *h)
 	fprintf(trace, "giveitem %d, %d, %d", pc, item, qty);
 #endif
 
-	result = Add_to_Inventory(pc, item, qty);
-	Push_Stack(h, result);
+	h->result = Add_to_Inventory(pc, item, qty);
 }
 
 noexport void EquipItem(code_host *h)
 {
-	bool result;
 	item_id item = Pop_Stack(h);
 	int pc = Pop_Stack(h);
 
@@ -389,8 +390,7 @@ noexport void EquipItem(code_host *h)
 	fprintf(trace, "equipitem %d, %d", pc, item);
 #endif
 
-	result = Equip_Item(pc, item);
-	Push_Stack(h, result);
+	h->result = Equip_Item(pc, item);
 }
 
 noexport void SetTileDescription(code_host *h)
@@ -414,7 +414,7 @@ noexport void SetTileColour(code_host *h)
 	coord x = Pop_Stack(h);
 
 #ifdef TRACE_CODE
-	fprintf(trace, "settilecolour %d, %d, %d, %d", x, y, facing, colour);
+	fprintf(trace, "settilecolour %d, %d, %d, %d", x, y, f, c);
 #endif
 
 	switch (f) {
@@ -527,6 +527,22 @@ noexport void Refresh(code_host *h)
 	Draw_Party_Status();
 }
 
+noexport void AddItem(code_host *h)
+{
+	int pc;
+	int qty = Pop_Stack(h);
+	item_id item = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "additem %d, %d", item, qty);
+#endif
+
+	for (pc = 0; pc < PARTY_SIZE; pc++) {
+		h->result = Add_to_Inventory(pc, item, qty);
+		if (h->result) break;
+	}
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -578,6 +594,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coSafe:		Safe(h); return;
 		case coRemoveWall:	RemoveWall(h); return;
 		case coRefresh:		Refresh(h); return;
+		case coAddItem:		AddItem(h); return;
 	}
 
 	h->running = false;
@@ -615,6 +632,7 @@ bool Run_Code(script_id id)
 
 #ifdef TRACE_CODE
 	trace = fopen("JUNTRACE.TXT", "w");
+	fprintf(trace, "script #%d\n", id);
 #endif
 
 	h.code = gZone.scripts[id];

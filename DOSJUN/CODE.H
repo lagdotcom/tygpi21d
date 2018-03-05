@@ -58,6 +58,7 @@ typedef enum code_op {
 	coSafe = 0xAB,
 	coRemoveWall = 0xAC,
 	coRefresh = 0xAD,
+	coAddItem = 0xAE,
 } code_op;
 
 typedef enum code_internal {
@@ -66,6 +67,7 @@ typedef enum code_internal {
 	internalFacing,
 	internalDanger,
 	internalJustMoved,
+	internalSuccess,
 
 	internalInvalid = 0xFF
 } code_internal;
