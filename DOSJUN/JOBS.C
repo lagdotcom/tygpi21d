@@ -297,10 +297,21 @@ void Level_Up(character *c)
 	ch->total_level++;
 }
 
+UINT32 Experience_to_Level(character *c)
+{
+	UINT32 clevel = c->header.job_level[c->header.job];
+
+	/* TODO: xp penalties, better formula */
+	if (clevel > 10) clevel = 10;
+	return (clevel * 200) - 100;
+}
+
 void Add_Experience(character *c, UINT32 xp)
 {
 	character_header *ch = &c->header;
 
-	/* TODO: xp penalties, level up trigger */
 	ch->experience += xp;
+	if (ch->experience >= Experience_to_Level(c)) {
+		Level_Up(c);
+	}
 }
