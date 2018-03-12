@@ -7,6 +7,8 @@
 #define CONCENTRATE_HITBONUS	4
 #define CONCENTRATE_DMGBONUS	4
 
+#define CLEAVE_USED_BUFF		"Cleave Fatigue"
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 bool Check_Concentrate(combatant *source)
@@ -49,4 +51,19 @@ noexport void Concentrate_Inner(combatant *source, combatant *target, item *weap
 void Concentrate(combatant *source, combatant *target)
 {
 	With_Both_Weapons(source, target, Concentrate_Inner);
+}
+
+void Cleave(combatant *source, combatant *target)
+{
+	combatant *retarget;
+
+	if (Has_Buff(source, CLEAVE_USED_BUFF)) return;
+
+	retarget = Get_Random_Target(target->group);
+	if (retarget != null) {
+		Combat_Message("%s swings again!", source->name);
+		Add_Buff(source, CLEAVE_USED_BUFF, exTurns, 1, null, 0);
+
+		Attack(source, retarget);
+	}
 }

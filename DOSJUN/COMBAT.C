@@ -14,6 +14,10 @@
 #define PRIORITY_WIGGLE	5
 #define MAX_PRIORITY	(255 - PRIORITY_WIGGLE)
 
+#define GROUP_PCFRONT	ENCOUNTER_SIZE
+#define GROUP_PCBACK	(ENCOUNTER_SIZE + 1)
+#define GROUPS_SIZE		(ENCOUNTER_SIZE + 2)
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
@@ -31,13 +35,15 @@ noexport pcx_picture combat_bg;
 list *combatants;
 noexport list *active_combatants;
 noexport action *combat_actions;
-noexport list *combat_groups[ENCOUNTER_SIZE];
+noexport list *combat_groups[GROUPS_SIZE];
 noexport int group_y[ENCOUNTER_SIZE];
 noexport int monsters_alive;
 noexport int groups_alive;
 noexport UINT32 earned_experience;
 
 /* H E L P E R  F U N C T I O N S //////////////////////////////////////// */
+
+#define Is_Enemy_Group(g) ((g) < GROUP_PCFRONT)
 
 noexport void Show_Combat_String(char *string, bool wait_for_key)
 {
@@ -162,7 +168,7 @@ statistic Get_Weapon_Stat(item *weapon)
 	return (weapon->flags & ifDexterityWeapon) ? sDexterity : sStrength;
 }
 
-noexport combatant *Get_Random_Target(groupnum group)
+combatant *Get_Random_Target(groupnum group)
 {
 	int i;
 
@@ -193,7 +199,7 @@ noexport void Kill(combatant *c)
 		group = c->group;
 		if (group >= 0) {
 			Remove_from_List(combat_groups[group], (void*)c);
-			if (combat_groups[group]->size == 0) {
+			if (Is_Enemy_Group(group) && combat_groups[group]->size == 0) {
 				groups_alive--;
 			}
 		}
@@ -280,7 +286,7 @@ void With_Both_Weapons(combatant *source, combatant *target, weapon_atk_fn func)
 	if (weapon) func(source, target, weapon);
 }
 
-noexport void Attack(combatant *source, combatant *target)
+void Attack(combatant *source, combatant *target)
 {
 	With_Both_Weapons(source, target, Attack_Inner);
 }
@@ -404,7 +410,7 @@ noexport void Add_Pc(unsigned int pc)
 
 	c->action = NO_ACTION;
 	c->buffs = ch->buffs;
-	c->group = -1;
+	c->group = In_Front_Row(pc) ? GROUP_PCFRONT : GROUP_PCBACK;
 	c->is_pc = true;
 	c->monster = null;
 	c->name = ch->header.name;
@@ -416,6 +422,7 @@ noexport void Add_Pc(unsigned int pc)
 	c->primary = primary ? primary->id : 0;
 	c->secondary = secondary ? secondary->id : 0;
 
+	Add_to_List(combat_groups[c->group], c);
 	Add_to_List(combatants, c);
 }
 
@@ -433,7 +440,7 @@ void Initialise_Combat(void)
 	groupnum i;
 
 	combatants = New_List(ltObject, "Initialise_Combat.combatants");
-	for (i = 0; i < ENCOUNTER_SIZE; i++) {
+	for (i = 0; i < GROUPS_SIZE; i++) {
 		/* HACK: ltInteger makes sure Clear_List() doesn't Free() items */
 		combat_groups[i] = New_List(ltInteger, "Initialise_Combat.group_x");
 	}
@@ -464,7 +471,7 @@ void Free_Combat(void)
 
 	Clear_Encounter();
 	Free_List(combatants);
-	for (i = 0; i < ENCOUNTER_SIZE; i++) {
+	for (i = 0; i < GROUPS_SIZE; i++) {
 		Free_List(combat_groups[i]);
 	}
 
@@ -512,7 +519,7 @@ noexport bool Is_Valid_Target(combatant *source, combatant *target, targetflags 
 	if (source == target) return tf & tfSelf;
 	if (Is_Dead(target) && !(tf & tfDead)) return false;
 
-	if (target->is_pc) return tf & tfAlly;
+	if (source->is_pc == target->is_pc) return tf & tfAlly;
 	return tf & tfEnemy;
 }
 
@@ -741,12 +748,14 @@ noexport combatant *Random_Alive_Pc(void)
 
 noexport void AI_Mindless(combatant *c)
 {
+	/* TODO: player row */
 	c->action = aAttack;
 	c->target = Random_Alive_Pc();
 }
 
 noexport void AI_Rogue(combatant *c)
 {
+	/* TODO: player row */
 	if (Check_Hide(c) && randint(0, 1) == 1) {
 		c->action = aHide;
 		c->target = c;
@@ -809,17 +818,22 @@ noexport void Do_Combat_Actions(list *active)
 		if (c->action != NO_ACTION && !Is_Dead(c)) {
 			a = &combat_actions[c->action];
 
+			Log("Do_Combat_Actions: %s is doing %s on %s(%d/g%d).", c->name, a->name, t->name, t->index, t->group);
+
 			if (!Is_Valid_Target(c, t, a->targeting)) {
-				/* retarget on dead enemy */
-				if (!t->is_pc) {
-					t = Get_Random_Target(t->group);
-					if (t == null && groups_alive > 0) {
+				Log("Do_Combat_Actions: %s(%d/g%d) is an invalid target.", t->name, t->index, t->group);
+				t = Get_Random_Target(t->group);
+				if (t == null) {
+					Log("%s", "Do_Combat_Actions: Could not find another target.");
+
+					/* only report the failure if we're still fighting */
+					if (groups_alive > 0)
 						Combat_Message("%s misses their chance.", c->name);
-						continue;
-					}
+
+					continue;
 				}
-				
-				/* TODO: retarget on dead pc */
+
+				Log("Do_Combat_Actions: Retargeted to %s(%d/g%d).", t->name, t->index, t->group);
 			}
 
 			if (c->is_pc) {
@@ -969,9 +983,9 @@ void Start_Combat(encounter_id id)
 		}
 	}
 
-	Clear_Encounter();
-
 	gState = gsDungeon;
 	Expire_Combat_Buffs();
+	Clear_Encounter();
+
 	Redraw_Dungeon_Screen(false);
 }

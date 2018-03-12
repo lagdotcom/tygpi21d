@@ -82,10 +82,12 @@ extern list *combatants;
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Add_Buff(combatant *target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument);
+void Attack(combatant *source, combatant *target);
 bool Check_Attack(combatant *source);
 void Combat_Message(char *format, ...);
 void Damage(combatant *victim, int amount);
 void Free_Combat(void);
+combatant *Get_Random_Target(groupnum group);
 stat_value Get_Stat_Base(stat_value *stats, statistic st);
 stat_value Get_Stat(combatant *source, statistic st);
 item *Get_Weapon(combatant *source, bool primary);
