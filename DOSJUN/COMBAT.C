@@ -469,6 +469,8 @@ void Free_Combat(void)
 {
 	groupnum i;
 
+	Log("Free_Combat: %p", combatants);
+
 	Clear_Encounter();
 	Free_List(combatants);
 	for (i = 0; i < GROUPS_SIZE; i++) {

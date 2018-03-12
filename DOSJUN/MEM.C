@@ -27,21 +27,24 @@
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct {
+struct entry {
+	UINT32 index;
 	char *tag;
 	void PtrDist *address;
 	MemSz size;
-	bool freed;
-} entry;
+	struct entry *prev, *next;
+};
+
+typedef struct entry entry;
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-noexport unsigned long peak_use = 0;
-noexport unsigned long current_use = 0;
-noexport unsigned long start_free = 0;
-noexport unsigned int entry_count = 0;
-noexport unsigned int allocated_entries = 0;
-noexport entry PtrDist *entries = null;
+noexport UINT32 peak_use = 0,
+	current_use = 0,
+	start_free = 0,
+	allocated_entries = 0,
+	entry_count = 0;
+noexport entry PtrDist *first = null, *last = null;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -53,23 +56,24 @@ noexport void Update_Peak(long change)
 
 noexport void Add_Entry(void *mem, MemSz size, char *tag)
 {
-	entry *old_entries = entries;
-	if (entry_count == allocated_entries) {
-		allocated_entries += 20;
-		entries = _realloc(old_entries, sizeof(entry) * allocated_entries);
-		if (!entries) {
-			printf("MEM: Could not allocate another entry (already have %u).\n", allocated_entries - 20);
-			entries = old_entries;
-			Stop_Memory_Tracking();
-			abort();
-			return;
-		}
+	entry *e = _calloc(1, sizeof(entry));
+	if (!e) {
+		printf("MEM: Could not allocate another entry (already have %u).\n", allocated_entries);
+		Stop_Memory_Tracking();
+		abort();
+		return;
 	}
 
-	entries[entry_count].tag = tag;
-	entries[entry_count].address = mem;
-	entries[entry_count].size = size;
-	entries[entry_count].freed = false;
+	allocated_entries++;
+	e->index = entry_count;
+	e->tag = tag;
+	e->address = mem;
+	e->size = size;
+
+	last->next = e;
+	e->prev = last;
+	e->next = null;
+	last = e;
 
 	Update_Peak(size);
 	entry_count++;
@@ -77,13 +81,26 @@ noexport void Add_Entry(void *mem, MemSz size, char *tag)
 
 noexport void Mark_Entry_Freed(void *mem)
 {
-	unsigned int i;
-	for (i = 0; i < entry_count; i++) {
-		if (entries[i].address == mem && entries[i].freed == false) {
-			Update_Peak(-entries[i].size);
-			entries[i].freed = true;
+	entry *e = first;
+
+	while (e) {
+		if (e->address == mem) {
+			Update_Peak(-e->size);
+
+			if (e->prev)
+				e->prev->next = e->next;
+
+			if (e->next)
+				e->next->prev = e->prev;
+			else
+				last = e->prev;
+
+			allocated_entries--;
+			_free(e);
 			return;
 		}
+
+		e = e->next;
 	}
 
 	fprintf(stderr, "WARNING: Cannot free %p - not found.\n", mem);
@@ -91,13 +108,16 @@ noexport void Mark_Entry_Freed(void *mem)
 
 noexport void Update_Entry_Size(void *mem, MemSz size)
 {
-	unsigned int i;
-	for (i = 0; i < entry_count; i++) {
-		if (entries[i].address == mem && entries[i].freed == false) {
-			Update_Peak(size - entries[i].size);
-			entries[i].size = size;
+	entry *e = first;
+
+	while (e) {
+		if (e->address == mem) {
+			Update_Peak(size - e->size);
+			e->size = size;
 			return;
 		}
+
+		e = e->next;
 	}
 
 	fprintf(stderr, "WARNING: Cannot update %p - not found.\n", mem);
@@ -116,7 +136,7 @@ void PtrDist *Reallocate(void PtrDist *mem, MemSz count, MemSz size, char *tag)
 {
 	void PtrDist *nu = _realloc(mem, count * size);
 	if (nu == mem) {
-		Update_Entry_Size(mem, count * size);
+		Update_Entry_Size(nu, count * size);
 	} else {
 		if (mem != null) Mark_Entry_Freed(mem);
 		Add_Entry(nu, count * size, tag);
@@ -151,30 +171,51 @@ void Free(void *mem)
 void Start_Memory_Tracking(void)
 {
 	start_free = coreleft();
+
+	first = _calloc(1, sizeof(entry));
+	if (!first) {
+		printf("%s", "MEM: could not allocate first entry!\n");
+		abort();
+		return;
+	}
+
+	allocated_entries++;
+	entry_count++;
+	last = first;
 }
 
 void Stop_Memory_Tracking(void)
 {
 	FILE *fp;
-	unsigned int i;
+	entry *e, *temp;
 	unsigned long end_free;
 
-	for (i = 0; i < entry_count; i++) {
-		if (entries[i].freed == false) {
-			printf("#%u [%s]: @%p, %lu bytes not freed\n", i, entries[i].tag, entries[i].address, entries[i].size);
-			_free(entries[i].address);
+	e = first;
+	while (e != null) {
+		if (e != first) {
+			printf("#%u [%s]: @%p, %lu bytes not freed\n", e->index, e->tag, e->address, e->size);
+			_free(e->address);
 		}
+
+		e = e->next;
 	}
 
 	printf("Tracked %u memory entries overall.\n", entry_count);
 
 	fp = fopen("memory.txt", "w");
 	fprintf(fp, "Peak use: %lu bytes\n\n", peak_use);
-	for (i = 0; i < entry_count; i++) {
-		fprintf(fp, "#%u [%s]: @%p, %lu bytes%s\n", i, entries[i].tag, entries[i].address, entries[i].size, entries[i].freed ? "" : " NOT FREED");
+
+	e = first;
+	while (e != null) {
+		if (e != first) {
+			fprintf(fp, "#%u [%s]: @%p, %lu bytes not freed\n", e->index, e->tag, e->address, e->size);
+		}
+
+		temp = e;
+		e = e->next;
+		_free(temp);
 	}
 
-	_free(entries);
 	end_free = coreleft();
 
 	printf("coreleft: %lu => %lu\n", start_free, end_free);

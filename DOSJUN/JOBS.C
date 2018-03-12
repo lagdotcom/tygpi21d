@@ -146,6 +146,7 @@ void Initialise_Jobs(void)
 
 void Free_Jobs(void)
 {
+	Log("Free_Jobs: %p", jobspecs);
 }
 
 void Set_Job(character *c, job job)

@@ -42,6 +42,8 @@ void Free_Monsters(monsters *m)
 	int i;
 	monster *mon;
 
+	Log("Free_Monsters: %p", m);
+
 	for (i = 0; i < m->header.num_monsters; i++) {
 		mon = &m->monsters[i];
 

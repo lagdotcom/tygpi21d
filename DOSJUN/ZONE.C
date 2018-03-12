@@ -111,6 +111,8 @@ void Free_Zone(zone *z)
 {
 	unsigned int i;
 
+	Log("Free_Zone: %p", z);
+
 	Free(z->tiles);
 
 	if (z->strings != null) {

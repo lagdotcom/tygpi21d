@@ -65,6 +65,9 @@ void Free_Savefile(save *s)
 {
 	character *c;
 	int i;
+
+	Log("Free_Savefile: %p", s);
+
 	Free(s->script_globals);
 
 	for (i = 0; i < s->header.num_zones; i++)

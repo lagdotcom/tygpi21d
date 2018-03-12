@@ -141,5 +141,7 @@ bool Load_Font(char *filename, font *f)
 
 void Free_Font(font *f)
 {
+	Log("Free_Font: %p", f);
+
 	Free(f->img);
 }

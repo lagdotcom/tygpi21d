@@ -38,6 +38,8 @@ void Free_Campaign(campaign *c)
 {
 	int i;
 
+	Log("Free_Campaign: %p", c);
+
 	if (c->zones != null) {
 		for (i = 0; i < c->header.num_zones; i++) {
 			Free(c->zones[i]);

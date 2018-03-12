@@ -25,6 +25,8 @@ bool Load_Items(char *filename, items *i)
 
 void Free_Items(items *i)
 {
+	Log("Free_Items: %p", i);
+
 	Free(i->items);
 }
 

@@ -256,6 +256,7 @@ void Initialise_Sound(void)
 void Free_Sound(void)
 {
 	/* No teardown yet. */
+	Log("Free_Sound: %p", null);
 }
 
 void Play_Sound(char *name)

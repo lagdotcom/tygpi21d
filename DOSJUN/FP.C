@@ -185,6 +185,8 @@ noexport void Free_Things(void)
 {
 	int i = 0;
 
+	Log("Free_Things: %p", things);
+
 	if (things == null) return;
 
 	for (i = 0; i < thINVALID - 1; i++)
@@ -326,6 +328,8 @@ void Draw_FP(void)
 
 void Delete_Picture(void)
 {
+	Log("Delete_Picture: %p", &current_pic);
+
 	if (picture_loaded) {
 		picture_loaded = false;
 		shown_picture[0] = 0;
@@ -367,6 +371,8 @@ void Show_Picture(char *name)
 void Free_Textures(void)
 {
 	int i;
+
+	Log("Free_Textures: %d", num_textures);
 
 	if (num_textures > 0) {
 		for (i = 0; i < num_textures * TEXTURE_PIECES; i++)
