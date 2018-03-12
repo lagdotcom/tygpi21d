@@ -12,11 +12,11 @@
 
 typedef enum skill_id {
 	skSing,
-
 	skHide,
 	skBludgeon,
 	skVenom,
 	skConcentrate,
+	skReverberation,
 
 	NUM_SKILLS
 } skill_id;

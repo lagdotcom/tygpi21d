@@ -101,7 +101,7 @@ void Initialise_Jobs(void)
 	Setup_Job_Level(jBard, 1, sNONE, skSing, skNONE);
 	Setup_Job_Level(jBard, 2, sNONE, skNONE, skNONE);
 	Setup_Job_Level(jBard, 3, sNONE, skNONE, skNONE);
-	Setup_Job_Level(jBard, 4, sDexterity, skNONE, skNONE);
+	Setup_Job_Level(jBard, 4, sDexterity, skReverberation, skNONE);
 	Setup_Job_Level(jBard, 5, sNONE, skNONE, skNONE);
 	Setup_Job_Level(jBard, 6, sNONE, skNONE, skNONE);
 	Setup_Job_Level(jBard, 7, sNONE, skNONE, skNONE);
@@ -136,6 +136,7 @@ void Initialise_Jobs(void)
 	Setup_Skill(skConcentrate, "Concentrate", "Take your time.\nStrike carefully.");
 
 	Setup_Skill(skSing, "Sing", "Inspire the party to greater deeds.\nAttacks will hit more often.");
+	Setup_Skill(skReverberation, "Reverberation", "Singing is more effective and lasts a few rounds.");
 
 	Setup_Skill(skHide, "Hide", "Retreat into the shadows.\nNext attack does bonus damage.");
 	Setup_Skill(skBludgeon, "Bludgeon", "Carry a large stick.\nYour hidden strikes stun your target.");
