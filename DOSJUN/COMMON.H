@@ -9,18 +9,6 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define noexport static
-
-#define true 1
-#define false 0
-#ifndef bool
-typedef unsigned char bool;
-#endif
-
-#ifndef null
-#define null 0
-#endif
-
 typedef enum dir {
 	dNorth,
 	dEast,
