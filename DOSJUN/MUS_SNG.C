@@ -213,8 +213,6 @@ noexport void Write(UINT8 reg, UINT8 value)
 	int loop;
 	ghost_regs[reg] = value;
 
-	printf(" [%02x=%02x]", reg, value);
-
 	outportb(0x388, reg);
 	for (loop = 0; loop < 6; loop++) inportb(0x388);
 
@@ -277,10 +275,14 @@ void Start_Music(sng *s)
 	p.tempo = 6;
 	p.counter = 5;
 
+	memset(channels, 0, sizeof(chan)*NUM_CHANNELS);
+	memset(ghost_regs, 0, 256);
+
 	Convert_Instruments(s->instruments);
 	All_Note_Off();
 
-	/* TODO: register timer function */
+	Reset_Adlib();
+
 	if (!p.playing) {
 		disable();
 		oldtimer = getvect(TIMER);
@@ -324,7 +326,6 @@ noexport void Play_Note(UINT8 channel, UINT8 inst, UINT16 freq, UINT8 volume)
 	chan *ch;
 	if (channel >= NUM_CHANNELS) return;
 
-	printf("\nc%d i%d f%d v%d", channel, inst, freq, volume);
 	p.note_volume = volume;
 
 	ch = &channels[channel];
@@ -373,6 +374,21 @@ noexport void Play_Notes_On(void)
 			Play_Note(i, ch->instr, ch->freq, ch->volume);
 		}
 	}
+}
+
+noexport void Set_Note(chan* ch)
+{
+	INT16 freq;
+
+	freq = ((ch->noteslot & 0xff) - 1) << 4;
+	ch->freq = freq;
+	ch->basefreq = freq;
+	ch->volume = 63;
+	ch->soundon = 3;
+	ch->arpeggio = 2;
+	ch->vibdir = 0;
+	ch->vibcounter = 0;
+	ch->vibrato = 0;
 }
 
 noexport void Play_Notes_Update(void)
@@ -432,8 +448,6 @@ noexport void Play_Notes_Update(void)
 						p.song_position = 0;
 						break;
 				}
-
-				printf("\n--- starting pattern %d", patt);
 			}
 
 			/* read note data */
@@ -462,6 +476,7 @@ noexport void Play_Notes_Update(void)
 					}
 
 					if (ch->effect1 != FX_SPECIAL || ch->effect2 != SP_DELAY) {
+						Set_Note(ch);
 						freq = ((ch->note & 0xff) - 1) << 4;
 						ch->freq = freq;
 						ch->basefreq = freq;
@@ -476,156 +491,136 @@ noexport void Play_Notes_Update(void)
 
 				data += PATTERN_SIZE * 3;
 			}
+		}
 
-			/* channel effects */
-			for (i = 0, ch = channels; i < p.s->channels; i++, ch++) {
-				arg = (ch->effect2 << 4) | ch->effect3;
-				switch (ch->effect1) {
-					case FX_SPEED:
-						if (arg) {
-							p.tempo = arg;
-							printf("\n--- tempo: %d", arg);
+		/* channel effects */
+		for (i = 0, ch = channels; i < p.s->channels; i++, ch++) {
+			arg = (ch->effect2 << 4) | ch->effect3;
+			switch (ch->effect1) {
+				case FX_SPEED:
+					if (arg) {
+						p.tempo = arg;
+					} else {
+						p.playing = 0;
+					}
+					break;
+				case FX_BREAK:
+					p.patt_position = PATTERN_SIZE - 1;
+					break;
+				case FX_ORDER_JUMP:
+					p.patt_position = PATTERN_SIZE - 1;
+					p.song_position = arg - 1;
+					break;
+				case FX_SLIDE_UP:
+					ch->freq += arg;
+					ch->basefreq += arg;
+					if (ch->basefreq > MAX_FREQ) {
+						ch->basefreq = MAX_FREQ;
+						ch->freq = MAX_FREQ;
+					}
+					break;
+				case FX_SLIDE_DOWN:
+					ch->freq -= arg;
+					ch->basefreq -= arg;
+					if (ch->basefreq < 0) {
+						ch->basefreq = 0;
+						ch->freq = 0;
+					}
+					break;
+				case FX_PORTAMENTO:
+					if (ch->tonedir) {
+						if (arg) ch->tonespeed = arg;
+
+						portafinish = false;
+						if (ch->tonedir == -1) {
+							ch->freq -= ch->tonespeed;
+							ch->basefreq -= ch->tonespeed;
+							portafinish = ch->basefreq <= ch->target;
 						} else {
-							p.playing = 0;
+							ch->freq += ch->tonespeed;
+							ch->basefreq += ch->tonespeed;
+							portafinish = ch->basefreq >= ch->target;
 						}
-						break;
-					case FX_BREAK:
-						printf("\n--- break pattern");
-						p.patt_position = PATTERN_SIZE - 1;
-						break;
-					case FX_ORDER_JUMP:
-						printf("\n--- jump: %d", arg);
-						p.patt_position = PATTERN_SIZE - 1;
-						p.song_position = arg - 1;
-						break;
-					case FX_SLIDE_UP:
-						printf("\n--- c%d slideup: %d", i, arg);
-						ch->freq += arg;
-						ch->basefreq += arg;
-						if (ch->basefreq > MAX_FREQ) {
-							ch->basefreq = MAX_FREQ;
-							ch->freq = MAX_FREQ;
-						}
-						break;
-					case FX_SLIDE_DOWN:
-						printf("\n--- c%d slidedown: %d", i, arg);
-						ch->freq -= arg;
-						ch->basefreq -= arg;
-						if (ch->basefreq < 0) {
-							ch->basefreq = 0;
-							ch->freq = 0;
-						}
-						break;
-					case FX_PORTAMENTO:
-						printf("\n--- c%d portamento: %d", i, arg);
-						if (ch->tonedir) {
-							if (arg) ch->tonespeed = arg;
 
-							portafinish = false;
-							if (ch->tonedir == -1) {
-								ch->freq -= ch->tonespeed;
-								ch->basefreq -= ch->tonespeed;
-								portafinish = ch->basefreq <= ch->target;
-							} else {
-								ch->freq += ch->tonespeed;
-								ch->basefreq += ch->tonespeed;
-								portafinish = ch->basefreq >= ch->target;
+						if (portafinish) {
+							ch->tonedir = 0;
+							ch->freq = ch->target;
+							ch->basefreq = ch->target;
+						}
+					}
+					break;
+				case FX_VIBRATO:
+					if (ch->soundon == 3 || p.counter == 0) {
+						if (ch->effect2 != 0) {
+							ch->vibspeed = ch->effect2;
+							ch->vibrato = 0;
+							ch->vibcounter = ch->effect2 >> 1;
+						}
+
+						if (ch->effect3 != 0) {
+							ch->vibdepth = ch->effect3;
+						}
+					}
+
+					ch->vibcounter--;
+					if (ch->vibcounter < 0) {
+						ch->vibcounter = ch->vibspeed;
+						ch->vibdir = 1;
+					}
+
+					if (ch->vibdir == 0) {
+						ch->vibrato += ch->vibdepth;
+					} else {
+						ch->vibrato -= ch->vibdepth;
+					}
+					ch->freq = ch->basefreq + ch->vibrato;
+					break;
+				case FX_NOTE_OFF:
+					if (ch->soundon != 3) ch->soundon = 4;
+					break;
+				case FX_SPECIAL:
+					switch (ch->effect2) {
+						case SP_DELAY:
+						case SP_RETRIGGER:
+							if (ch->effect3 == p.counter) {
+								Set_Note(ch);
 							}
-
-							if (portafinish) {
-								ch->tonedir = 0;
-								ch->freq = ch->target;
-								ch->basefreq = ch->target;
-							}
-						}
-						break;
-					case FX_VIBRATO:
-						printf("\n--- c%d vibrato: %d/%d", i, ch->effect2, ch->effect3);
-						if (ch->soundon == 3 || p.counter == 0) {
-							if (ch->effect2 != 0) {
-								ch->vibspeed = ch->effect2;
-								ch->vibrato = 0;
-								ch->vibcounter = ch->effect2 >> 1;
-							}
-
-							if (ch->effect3 != 0) {
-								ch->vibdepth = ch->effect3;
-							}
-						}
-
-						ch->vibcounter--;
-						if (ch->vibcounter < 0) {
-							ch->vibcounter = ch->vibspeed;
-							ch->vibdir = 1;
-						}
-
-						if (ch->vibdir == 0) {
-							ch->vibrato += ch->vibdepth;
+							break;
+					}
+					break;
+				case FX_VOLUME:
+					if (arg > 63) arg = 63;
+					ch->volume = arg;
+					if (ch->soundon != 3) ch->soundon = 2;
+					break;
+				case FX_ARPEGGIO:
+					if (ch->effect2 || ch->effect3) {
+						ch->arpeggio++;
+						if (ch->arpeggio == 3) {
+							ch->arpeggio = 0;
+							ch->freq = ch->basefreq;
+						} else if (ch->arpeggio == 2) {
+							temp = ch->note + ch->effect3;
+							if (temp > 96) temp = 96;
+							freq = (temp - 1) << 4;
+							ch->freq = freq;
+							ch->basefreq = freq;
 						} else {
-							ch->vibrato -= ch->vibdepth;
+							temp = ch->note + ch->effect2;
+							if (temp > 96) temp = 96;
+							freq = (temp - 1) << 4;
+							ch->freq = freq;
+							ch->basefreq = freq;
 						}
-						ch->freq = ch->basefreq + ch->vibrato;
-						break;
-					case FX_NOTE_OFF:
-						printf("\n--- c%d noteoff", i);
-						if (ch->soundon != 3) ch->soundon = 4;
-						break;
-					case FX_SPECIAL:
-						printf("\n--- c%d special: %d", i, ch->effect3);
-						switch (ch->effect2) {
-							case SP_DELAY:
-							case SP_RETRIGGER:
-								if (ch->effect3 == p.counter) {
-									freq = ((ch->noteslot & 0xff) - 1) << 4;
-									ch->freq = freq;
-									ch->basefreq = freq;
-									ch->volume = 63;
-									ch->soundon = 3;
-									ch->arpeggio = 2;
-									ch->vibdir = 0;
-									ch->vibcounter = 0;
-									ch->vibrato = 0;
-								}
-								break;
-						}
-						break;
-					case FX_VOLUME:
-						printf("\n--- c%d volume: %d", i, arg);
-						if (arg > 63) arg = 63;
-						ch->volume = arg;
-						if (ch->soundon != 3) ch->soundon = 2;
-						break;
-					case FX_ARPEGGIO:
-						if (ch->effect2 || ch->effect3) {
-							printf("\n--- c%d arpeggio: %d/%d", i, ch->effect2, ch->effect3);
-							ch->arpeggio++;
-							if (ch->arpeggio == 3) {
-								ch->arpeggio = 0;
-								ch->freq = ch->basefreq;
-							} else if (ch->arpeggio == 2) {
-								temp = ch->note + ch->effect3;
-								if (temp > 96) temp = 96;
-								freq = (temp - 1) << 4;
-								ch->freq = freq;
-								ch->basefreq = freq;
-							} else {
-								temp = ch->note + ch->effect2;
-								if (temp > 96) temp = 96;
-								freq = (temp - 1) << 4;
-								ch->freq = freq;
-								ch->basefreq = freq;
-							}
-						}
-						break;
-					case FX_VOLUME_SLIDE:
-						printf("\n--- c%d volslide: %d/%d", i, ch->effect2, ch->effect3);
-						ch->volume += ch->effect2;
-						if (ch->volume > 63) ch->volume = 63;
-						ch->volume -= ch->effect3;
-						if (ch->volume < 0) ch->volume = 0;
-						if (ch->soundon != 3) ch->soundon = 2;
-						break;
-				}
+					}
+					break;
+				case FX_VOLUME_SLIDE:
+					ch->volume += ch->effect2;
+					if (ch->volume > 63) ch->volume = 63;
+					ch->volume -= ch->effect3;
+					if (ch->volume < 0) ch->volume = 0;
+					if (ch->soundon != 3) ch->soundon = 2;
+					break;
 			}
 		}
 	}
