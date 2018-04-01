@@ -384,6 +384,7 @@ void main(void)
 	Initialise_Combat();
 	Initialise_Jobs();
 	Initialise_Sound();
+	Initialise_Music();
 
 	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
 		dief("main: Not enough memory to create double buffer.");
@@ -423,6 +424,7 @@ void main(void)
 	Free_Combat();
 	Free_Jobs();
 	Free_Sound();
+	Free_Music();
 	Delete_Picture();
 	Free_Font(FNT);
 

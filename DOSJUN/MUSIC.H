@@ -3,14 +3,15 @@
 
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include "common.h"
+/* D E F I N E S ///////////////////////////////////////////////////////// */
+
+/* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-void Initialise_Music();
-bool Play_Music(char *filename);
-void Stop_Music();
-void Free_Music();
-void Process_Music();
+void Initialise_Music(void);
+bool Play_Music(char *track);
+void Free_Music(void);
+void Stop_Music(void);
 
 #endif

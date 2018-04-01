@@ -1,9 +1,8 @@
-/* TODO: pitch bend? volume issues? re-fire? */
-
 #include "COMMON.H"
 #include "mus_sng.h"
 #include <stdio.h>
 #include <dos.h>
+#include <string.h>
 
 #define SNG_MAGIC		"FMC!"
 #define SNG_SEP			0x666
@@ -14,6 +13,7 @@
 #define ORDER_REPEAT	0xff
 
 #define MAX_FREQ		1535
+#define TIMER_INT		0x1c
 
 noexport UINT16 note_frequencies[] = {
 	344,345,346,348,349,350,351,352,354,355,356,357,358,359,361,362,
@@ -65,7 +65,7 @@ typedef enum special {
 typedef struct player {
 	sng* s;
 	bool playing;
-	long stride;
+	int stride;
 	UINT8 note_volume;
 	UINT8 time_counter;
 	UINT8 song_position;
@@ -114,30 +114,18 @@ typedef struct chan {
 
 noexport player p;
 noexport chan channels[NUM_CHANNELS];
-noexport UINT8 ghost_regs[256] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
+noexport UINT8 ghost_regs[256];
 noexport UINT8 instrument_data[NUM_INSTRUMENTS][16];
 
-noexport UINT16 filesize(FILE* fp)
+noexport void interrupt (*oldtimer)(void);
+noexport void interrupt Play_Music(void);
+noexport int tick_freq = 0x427d / 5;
+
+noexport long filesize(FILE* fp)
 {
-	UINT16 size;
-	UINT16 pos = ftell(fp);
+	long size, pos;
+
+	pos = ftell(fp);
 	fseek(fp, 0, SEEK_END);
 	size = ftell(fp);
 	fseek(fp, pos, SEEK_SET);
@@ -146,7 +134,7 @@ noexport UINT16 filesize(FILE* fp)
 
 bool Load_SNG(char *filename, sng* s)
 {
-	int pattern_data;
+	long pattern_data;
 	FILE *fp = fopen(filename, "rb");
 	fread(s, SNG_HEADER_LEN, 1, fp);
 
@@ -158,6 +146,8 @@ bool Load_SNG(char *filename, sng* s)
 
 	pattern_data = filesize(fp) - SNG_HEADER_LEN;
 	s->patterns = Allocate(1, pattern_data, "Load_SNG");
+
+	/* TODO: fix warning (fread takes size_t, not long) */
 	fread(s->patterns, pattern_data, 1, fp);
 
 	fclose(fp);
@@ -260,12 +250,7 @@ noexport void Reset_Adlib(void)
 	Write(0xBD, 0xC0);
 }
 
-#define TIMER 0x1c
-void interrupt (*oldtimer)(void);
-noexport void interrupt Play_Music(void);
-int tick_freq = 0x427d / 5;
-
-void Start_Music(sng *s)
+void Start_SNG(sng *s)
 {
 	p.s = s;
 	p.time_counter = 240;
@@ -285,8 +270,8 @@ void Start_Music(sng *s)
 
 	if (!p.playing) {
 		disable();
-		oldtimer = getvect(TIMER);
-		setvect(TIMER, Play_Music);
+		oldtimer = getvect(TIMER_INT);
+		setvect(TIMER_INT, Play_Music);
 
 		outportb(0x43, 0x36);
 		outportb(0x40, tick_freq & 0xff);
@@ -296,13 +281,13 @@ void Start_Music(sng *s)
 	p.playing = true;
 }
 
-void Stop_Music(void)
+void Stop_SNG(void)
 {
 	int i;
 	if (!p.playing) return;
 
 	disable();
-	setvect(TIMER, oldtimer);
+	setvect(TIMER_INT, oldtimer);
 
 	outportb(0x43, 0x36);
 	outportb(0x40, 0);
@@ -322,14 +307,14 @@ noexport void Play_Note(UINT8 channel, UINT8 inst, UINT16 freq, UINT8 volume)
 {
 	int reg, i;
 	char *cdata;
-	UINT8 *idata, ah, al, cl;
+	UINT8 ah, al, cl;
 	chan *ch;
 	if (channel >= NUM_CHANNELS) return;
 
 	p.note_volume = volume;
 
 	ch = &channels[channel];
-	cdata = (UINT8 *)ch;
+	cdata = (char *)ch;
 	memcpy(ch, &instrument_data[inst], 14);
 
 	ah = 63 - volume;
@@ -398,7 +383,7 @@ noexport void Play_Notes_Update(void)
 	UINT8 bp, al;
 	UINT8 octave, note, temp, patt, arg;
 	UINT16 freq;
-	UINT16 offset;
+	int offset;
 	char *data;
 	bool portafinish;
 
@@ -473,19 +458,8 @@ noexport void Play_Notes_Update(void)
 						ch->target = freq;
 						if (ch->freq < ch->target) ch->tonedir = 1;
 						else ch->tonedir = -1;
-					}
-
-					if (ch->effect1 != FX_SPECIAL || ch->effect2 != SP_DELAY) {
+					} else if (ch->effect1 != FX_SPECIAL || ch->effect2 != SP_DELAY) {
 						Set_Note(ch);
-						freq = ((ch->note & 0xff) - 1) << 4;
-						ch->freq = freq;
-						ch->basefreq = freq;
-						ch->volume = 63;
-						ch->soundon = 3;
-						ch->arpeggio = 2;
-						ch->vibdir = 0;
-						ch->vibcounter = 0;
-						ch->vibrato = 0;
 					}
 				}
 

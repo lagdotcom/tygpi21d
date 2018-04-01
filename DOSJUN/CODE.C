@@ -543,6 +543,17 @@ noexport void AddItem(code_host *h)
 	}
 }
 
+noexport void Music(code_host *h)
+{
+	string_id string = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "music #%d", string);
+#endif
+
+	Play_Music(gZone.code_strings[string]);
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -595,6 +606,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coRemoveWall:	RemoveWall(h); return;
 		case coRefresh:		Refresh(h); return;
 		case coAddItem:		AddItem(h); return;
+		case coMusic:		Music(h); return;
 	}
 
 	h->running = false;

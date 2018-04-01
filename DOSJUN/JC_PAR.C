@@ -647,6 +647,27 @@ noexport bool Call_SetDanger_State(jc_parser *p)
 	return true;
 }
 
+noexport bool Call_Music_State(jc_parser *p)
+{
+	jc_token *val;
+	int sindex;
+
+	CONSUME();
+	val = CONSUME();
+
+	if (val->type == ttNumber) {
+		EMIT_ARG(coPushLiteral, atoi(val->value));
+	} else if (val->type == ttString) {
+		sindex = Save_String(p, val->value);
+		EMIT_ARG(coPushLiteral, sindex);
+	} else {
+		return Parse_Error(p, "Invalid argument to Music");
+	}
+
+	EMIT(coMusic);
+	return true;
+}
+
 noexport bool Keyword_State(jc_parser *p)
 {
 	if (!p->in_script) {
@@ -668,6 +689,7 @@ noexport bool Keyword_State(jc_parser *p)
 		if (MATCH("SetTileThing")) return Call_SetTileThing_State(p);
 		if (MATCH("SetDanger")) return Call_SetDanger_State(p);
 		if (MATCH("Safe")) return Call_Safe_State(p);
+		if (MATCH("Music")) return Call_Music_State(p);
 
 		if (MATCH("If")) return Start_If_State(p);
 		if (MATCH("ElseIf")) return Start_ElseIf_State(p);

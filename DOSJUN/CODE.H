@@ -59,6 +59,7 @@ typedef enum code_op {
 	coRemoveWall = 0xAC,
 	coRefresh = 0xAD,
 	coAddItem = 0xAE,
+	coMusic = 0xAF,
 } code_op;
 
 typedef enum code_internal {

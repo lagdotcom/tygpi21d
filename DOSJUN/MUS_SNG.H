@@ -49,7 +49,7 @@ typedef struct sng {
 
 void Free_SNG(sng *s);
 bool Load_SNG(char *filename, sng *s);
-void Start_Music(sng *s);
-void Stop_Music(void);
+void Start_SNG(sng *s);
+void Stop_SNG(void);
 
 #endif

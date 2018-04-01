@@ -12,11 +12,11 @@ void main(void)
 	puts("OK");
 
 	puts("Playing...");
-	Start_Music(&s);
+	Start_SNG(&s);
 
 	while (!kbhit());
 
 	puts("Stopping...");
-	Stop_Music();
+	Stop_SNG();
 	Free_SNG(&s);
 }

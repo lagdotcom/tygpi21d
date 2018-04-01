@@ -18,6 +18,7 @@
 #include "jobs.h"
 #include "list.h"
 #include "main.h"
+#include "music.h"
 #include "monsters.h"
 #include "party.h"
 #include "save.h"
