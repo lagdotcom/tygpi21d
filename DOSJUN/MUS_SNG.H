@@ -1,12 +1,18 @@
 #ifndef DOSJUN_MUS_SNG_H
 #define DOSJUN_MUS_SNG_H
 
+/* I N C L U D E S /////////////////////////////////////////////////////// */
+
 #include "types.h"
+
+/* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define NUM_INSTRUMENTS	32
 #define NUM_CHANNELS	9
 
-typedef struct inst {
+/* S T R U C T U R E S /////////////////////////////////////////////////// */
+
+typedef struct sng_inst {
 	UINT8 freqmod;
 	UINT8 feedback;
 	UINT8 mod_attack;
@@ -35,7 +41,7 @@ typedef struct inst {
 	UINT8 car_volume_vibrato;
 	UINT8 pitch_shift;
 	char name[21];
-} inst;
+} sng_inst;
 
 typedef struct sng {
 	char magic[4];
@@ -43,9 +49,11 @@ typedef struct sng {
 	UINT8 channels;
 	UINT8 order[256];
 	UINT16 sep;
-	inst instruments[NUM_INSTRUMENTS];
+	sng_inst instruments[NUM_INSTRUMENTS];
 	char *patterns;
 } sng;
+
+/* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Free_SNG(sng *s);
 bool Load_SNG(char *filename, sng *s);

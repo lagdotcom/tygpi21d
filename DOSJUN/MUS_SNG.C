@@ -1,11 +1,16 @@
+/* I N C L U D E S /////////////////////////////////////////////////////// */
+
 #include "COMMON.H"
 #include "mus_sng.h"
 #include <stdio.h>
 #include <dos.h>
 #include <string.h>
 
+/* D E F I N E S ///////////////////////////////////////////////////////// */
+
 #define SNG_MAGIC		"FMC!"
 #define SNG_SEP			0x666
+#define SNG_HEADER_LEN	0x71c
 
 #define PATTERN_SIZE	64
 
@@ -14,33 +19,7 @@
 
 #define MAX_FREQ		1535
 #define TIMER_INT		0x1c
-
-noexport UINT16 note_frequencies[] = {
-	344,345,346,348,349,350,351,352,354,355,356,357,358,359,361,362,
-	363,364,366,367,369,370,371,373,374,375,377,378,380,381,382,384,
-	385,386,388,389,391,392,394,395,397,398,399,401,402,404,405,407,
-	408,410,411,413,414,416,417,419,420,422,423,425,426,428,429,431,
-	432,434,435,437,439,440,442,443,445,447,448,450,452,453,455,456,
-	458,460,461,463,465,466,468,470,472,473,475,477,478,480,482,483,
-	485,487,489,490,492,494,496,498,500,501,503,505,507,509,510,512,
-	514,516,518,520,522,523,525,527,529,531,533,535,537,538,540,542,
-	544,546,548,550,552,554,556,558,561,563,565,567,569,571,573,575,
-	577,579,581,583,586,588,590,592,594,596,598,600,603,605,607,609,
-	611,613,616,618,620,622,625,627,629,631,634,636,638,640,643,645,
-	647,649,652,654,657,659,662,664,667,669,671,674,676,679,681,684
-};
-
-noexport UINT8 adlib_regs[] = {
-	0x20,0x40,0x60,0x80,0xe0,0x23,0x43,0x63,0x83,0xe3,0xc0,0xa0,0xb0,
-	0x21,0x41,0x61,0x81,0xe1,0x24,0x44,0x64,0x84,0xe4,0xc1,0xa1,0xb1,
-	0x22,0x42,0x62,0x82,0xe2,0x25,0x45,0x65,0x85,0xe5,0xc2,0xa2,0xb2,
-	0x28,0x48,0x68,0x88,0xe8,0x2b,0x4b,0x6b,0x8b,0xeb,0xc3,0xa3,0xb3,
-	0x29,0x49,0x69,0x89,0xe9,0x2c,0x4c,0x6c,0x8c,0xec,0xc4,0xa4,0xb4,
-	0x2a,0x4a,0x6a,0x8a,0xea,0x2d,0x4d,0x6d,0x8d,0xed,0xc5,0xa5,0xb5,
-	0x30,0x50,0x70,0x90,0xf0,0x33,0x53,0x73,0x93,0xf3,0xc6,0xa6,0xb6,
-	0x31,0x51,0x71,0x91,0xf1,0x34,0x54,0x74,0x94,0xf4,0xc7,0xa7,0xb7,
-	0x32,0x52,0x72,0x92,0xf2,0x35,0x55,0x75,0x95,0xf5,0xc8,0xa8,0xb8
-};
+#define TIMER_TICK_FREQ	(0x427d / 5)
 
 typedef enum effect {
 	FX_ARPEGGIO = 0,
@@ -61,6 +40,16 @@ typedef enum special {
 	SP_RETRIGGER = 0x9,
 	SP_DELAY = 0xD,
 } special;
+
+typedef enum notestate {
+	S_OFF = 0,
+	S_PLAYED = 1,
+	S_TRIGGER = 2,
+	S_SOON = 3,
+	S_RELEASE = 4
+} notestate;
+
+/* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct player {
 	sng* s;
@@ -110,15 +99,34 @@ typedef struct chan {
 	INT16 basefreq;
 } chan;
 
-typedef enum notestate {
-	S_OFF = 0,
-	S_PLAYED = 1,
-	S_TRIGGER = 2,
-	S_SOON = 3,
-	S_RELEASE = 4
-} notestate;
+/* G L O B A L S ///////////////////////////////////////////////////////// */
 
-#define SNG_HEADER_LEN	0x71c
+noexport UINT16 note_frequencies[] = {
+	344,345,346,348,349,350,351,352,354,355,356,357,358,359,361,362,
+	363,364,366,367,369,370,371,373,374,375,377,378,380,381,382,384,
+	385,386,388,389,391,392,394,395,397,398,399,401,402,404,405,407,
+	408,410,411,413,414,416,417,419,420,422,423,425,426,428,429,431,
+	432,434,435,437,439,440,442,443,445,447,448,450,452,453,455,456,
+	458,460,461,463,465,466,468,470,472,473,475,477,478,480,482,483,
+	485,487,489,490,492,494,496,498,500,501,503,505,507,509,510,512,
+	514,516,518,520,522,523,525,527,529,531,533,535,537,538,540,542,
+	544,546,548,550,552,554,556,558,561,563,565,567,569,571,573,575,
+	577,579,581,583,586,588,590,592,594,596,598,600,603,605,607,609,
+	611,613,616,618,620,622,625,627,629,631,634,636,638,640,643,645,
+	647,649,652,654,657,659,662,664,667,669,671,674,676,679,681,684
+};
+
+noexport UINT8 adlib_regs[] = {
+	0x20,0x40,0x60,0x80,0xe0,0x23,0x43,0x63,0x83,0xe3,0xc0,0xa0,0xb0,
+	0x21,0x41,0x61,0x81,0xe1,0x24,0x44,0x64,0x84,0xe4,0xc1,0xa1,0xb1,
+	0x22,0x42,0x62,0x82,0xe2,0x25,0x45,0x65,0x85,0xe5,0xc2,0xa2,0xb2,
+	0x28,0x48,0x68,0x88,0xe8,0x2b,0x4b,0x6b,0x8b,0xeb,0xc3,0xa3,0xb3,
+	0x29,0x49,0x69,0x89,0xe9,0x2c,0x4c,0x6c,0x8c,0xec,0xc4,0xa4,0xb4,
+	0x2a,0x4a,0x6a,0x8a,0xea,0x2d,0x4d,0x6d,0x8d,0xed,0xc5,0xa5,0xb5,
+	0x30,0x50,0x70,0x90,0xf0,0x33,0x53,0x73,0x93,0xf3,0xc6,0xa6,0xb6,
+	0x31,0x51,0x71,0x91,0xf1,0x34,0x54,0x74,0x94,0xf4,0xc7,0xa7,0xb7,
+	0x32,0x52,0x72,0x92,0xf2,0x35,0x55,0x75,0x95,0xf5,0xc8,0xa8,0xb8
+};
 
 noexport player p;
 noexport chan channels[NUM_CHANNELS];
@@ -127,7 +135,8 @@ noexport char instrument_data[NUM_INSTRUMENTS*16];
 
 noexport void interrupt (*oldtimer)(void);
 noexport void interrupt Play_Music(void);
-noexport int tick_freq = 0x427d / 5;
+
+/* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 noexport long filesize(FILE* fp)
 {
@@ -167,7 +176,7 @@ void Free_SNG(sng* s)
 	Free(s->patterns);
 }
 
-noexport void Convert_Instruments(inst *x)
+noexport void Convert_Instruments(sng_inst *x)
 {
 	int i;
 	UINT8 temp;
@@ -285,8 +294,8 @@ void Start_SNG(sng *s)
 		setvect(TIMER_INT, Play_Music);
 
 		outportb(0x43, 0x36);
-		outportb(0x40, tick_freq & 0xff);
-		outportb(0x40, (tick_freq & 0xff00) >> 8);
+		outportb(0x40, TIMER_TICK_FREQ & 0xff);
+		outportb(0x40, (TIMER_TICK_FREQ & 0xff00) >> 8);
 		enable();
 	}
 	p.playing = true;
