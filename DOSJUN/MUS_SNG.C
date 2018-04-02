@@ -110,12 +110,20 @@ typedef struct chan {
 	INT16 basefreq;
 } chan;
 
+typedef enum notestate {
+	S_OFF = 0,
+	S_PLAYED = 1,
+	S_TRIGGER = 2,
+	S_SOON = 3,
+	S_RELEASE = 4
+} notestate;
+
 #define SNG_HEADER_LEN	0x71c
 
 noexport player p;
 noexport chan channels[NUM_CHANNELS];
-noexport UINT8 ghost_regs[256];
-noexport UINT8 instrument_data[NUM_INSTRUMENTS][16];
+noexport char ghost_regs[256];
+noexport char instrument_data[NUM_INSTRUMENTS*16];
 
 noexport void interrupt (*oldtimer)(void);
 noexport void interrupt Play_Music(void);
@@ -163,38 +171,41 @@ noexport void Convert_Instruments(inst *x)
 {
 	int i;
 	UINT8 temp;
+	char *idata = instrument_data;
 	for (i = 0; i < NUM_INSTRUMENTS; i++) {
 		temp = 1;
 		if (x[i].freqmod) temp--;
 		temp |= x[i].feedback << 1;
-		instrument_data[i][10] = temp;
-		instrument_data[i][13] = x[i].pitch_shift;
+		idata[10] = temp;
+		idata[13] = x[i].pitch_shift;
 
 		/* modulator data */
-		instrument_data[i][2] = (x[i].mod_attack << 4) | x[i].mod_decay;
-		instrument_data[i][3] = ((15 - x[i].mod_sustain) << 4) | x[i].mod_release;
-		instrument_data[i][1] = (63 - x[i].mod_volume) | (x[i].mod_level_scale);
-		instrument_data[i][4] = x[i].mod_waveform;
+		idata[2] = (x[i].mod_attack << 4) | x[i].mod_decay;
+		idata[3] = ((15 - x[i].mod_sustain) << 4) | x[i].mod_release;
+		idata[1] = (63 - x[i].mod_volume) | (x[i].mod_level_scale);
+		idata[4] = x[i].mod_waveform;
 
 		temp = x[i].mod_multiplier;
 		if (x[i].mod_sustain_sound) temp |= 0x20;
 		if (x[i].mod_scale) temp |= 0x10;
 		if (x[i].mod_pitch_vibrato) temp |= 0x40;
 		if (x[i].mod_volume_vibrato) temp |= 0x80;
-		instrument_data[i][0] = temp;
+		idata[0] = temp;
 
 		/* carrier data */
-		instrument_data[i][7] = (x[i].car_attack << 4) | x[i].car_decay;
-		instrument_data[i][8] = ((15 - x[i].car_sustain) << 4) | x[i].car_release;
-		instrument_data[i][6] = (63 - x[i].car_volume) | (x[i].car_level_scale);
-		instrument_data[i][9] = x[i].car_waveform;
+		idata[7] = (x[i].car_attack << 4) | x[i].car_decay;
+		idata[8] = ((15 - x[i].car_sustain) << 4) | x[i].car_release;
+		idata[6] = (63 - x[i].car_volume) | (x[i].car_level_scale);
+		idata[9] = x[i].car_waveform;
 
 		temp = x[i].car_multiplier;
 		if (x[i].car_sustain_sound) temp |= 0x20;
 		if (x[i].car_scale) temp |= 0x10;
 		if (x[i].car_pitch_vibrato) temp |= 0x40;
 		if (x[i].car_volume_vibrato) temp |= 0x80;
-		instrument_data[i][5] = temp;
+		idata[5] = temp;
+
+		idata += 16;
 	}
 }
 
@@ -221,7 +232,7 @@ noexport void Note_Off(UINT8 i)
 {
 	if (i >= NUM_CHANNELS) return;
 
-	channels[i].soundon = 0;
+	channels[i].soundon = S_OFF;
 	Smart_Write(0xb0 + i, channels[i].msb & 0xdf);
 }
 
@@ -315,7 +326,7 @@ noexport void Play_Note(UINT8 channel, UINT8 inst, UINT16 freq, UINT8 volume)
 
 	ch = &channels[channel];
 	cdata = (char *)ch;
-	memcpy(ch, &instrument_data[inst], 14);
+	memcpy(ch, &instrument_data[inst*16], 14);
 
 	ah = 63 - volume;
 	al = (ah + (ch->op1_volume & 0x3f)) >> 1;
@@ -332,7 +343,7 @@ noexport void Play_Note(UINT8 channel, UINT8 inst, UINT16 freq, UINT8 volume)
 	for (i = 0; i < 11; i++) Smart_Write(adlib_regs[reg + i], cdata[i]);
 
 	ch->freq = freq;
-	ch->soundon = 1;
+	ch->soundon = S_PLAYED;
 }
 
 noexport void Play_Notes_Off(void)
@@ -341,8 +352,8 @@ noexport void Play_Notes_Off(void)
 	chan *ch = channels;
 
 	for (i = 0; i < NUM_CHANNELS; i++, ch++) {
-		if (ch->soundon == 3) {
-			ch->soundon = 2;
+		if (ch->soundon == S_SOON) {
+			ch->soundon = S_TRIGGER;
 			Smart_Write(0xb0 + i, ch->msb & 0xdf);
 		}
 	}
@@ -354,8 +365,7 @@ noexport void Play_Notes_On(void)
 	chan *ch = channels;
 
 	for (i = 0; i < NUM_CHANNELS; i++, ch++) {
-		if (ch->soundon == 2) {
-			ch->soundon = 1;
+		if (ch->soundon == S_TRIGGER) {
 			Play_Note(i, ch->instr, ch->freq, ch->volume);
 		}
 	}
@@ -369,7 +379,7 @@ noexport void Set_Note(chan* ch)
 	ch->freq = freq;
 	ch->basefreq = freq;
 	ch->volume = 63;
-	ch->soundon = 3;
+	ch->soundon = S_SOON;
 	ch->arpeggio = 2;
 	ch->vibdir = 0;
 	ch->vibcounter = 0;
@@ -390,7 +400,7 @@ noexport void Play_Notes_Update(void)
 	p.time_counter = 0;
 	bp = 0;
 	for (i = 0; i < NUM_CHANNELS; i++, ch++) {
-		if (ch->soundon != 0) {
+		if (ch->soundon != S_OFF) {
 			ch->freq += ch->addvalue;
 			if (ch->freq < 0) ch->freq = 0;
 
@@ -405,7 +415,7 @@ noexport void Play_Notes_Update(void)
 			Smart_Write(adlib_regs[bp+11], ch->lsb);
 
 			temp = al;
-			if (ch->soundon == 1) {
+			if (ch->soundon == S_PLAYED) {
 				temp |= 0x20;
 			}
 			ch->msb = temp;
@@ -524,7 +534,7 @@ noexport void Play_Notes_Update(void)
 					}
 					break;
 				case FX_VIBRATO:
-					if (ch->soundon == 3 || p.counter == 0) {
+					if (ch->soundon == S_SOON || p.counter == 0) {
 						if (ch->effect2 != 0) {
 							ch->vibspeed = ch->effect2;
 							ch->vibrato = 0;
@@ -550,7 +560,7 @@ noexport void Play_Notes_Update(void)
 					ch->freq = ch->basefreq + ch->vibrato;
 					break;
 				case FX_NOTE_OFF:
-					if (ch->soundon != 3) ch->soundon = 4;
+					if (ch->soundon != S_SOON) ch->soundon = S_RELEASE;
 					break;
 				case FX_SPECIAL:
 					switch (ch->effect2) {
@@ -565,7 +575,7 @@ noexport void Play_Notes_Update(void)
 				case FX_VOLUME:
 					if (arg > 63) arg = 63;
 					ch->volume = arg;
-					if (ch->soundon != 3) ch->soundon = 2;
+					if (ch->soundon != S_SOON) ch->soundon = S_TRIGGER;
 					break;
 				case FX_ARPEGGIO:
 					if (ch->effect2 || ch->effect3) {
@@ -593,7 +603,7 @@ noexport void Play_Notes_Update(void)
 					if (ch->volume > 63) ch->volume = 63;
 					ch->volume -= ch->effect3;
 					if (ch->volume < 0) ch->volume = 0;
-					if (ch->soundon != 3) ch->soundon = 2;
+					if (ch->soundon != S_SOON) ch->soundon = S_TRIGGER;
 					break;
 			}
 		}

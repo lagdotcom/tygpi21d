@@ -60,15 +60,14 @@ void Draw_Font(int sx, int sy, colour col, char *string, font *f, bool trans_fla
 /* Wrap a string to fit in a given box size. You must NOT Free() the returned string. */
 noexport char *Font_Wrap(int w, int h, char *string, font *f)
 {
-	/* TODO: use Duplicate_String()? */
 	/* TODO: pay attention to height */
-	char wrapped[200],
+	char *wrapped,
 		*ch,
 		*last_space;
 	int last_space_x = 0,
 		x = 0;
 
-	strcpy(wrapped, string);
+	wrapped = Duplicate_String(string, "Font_Wrap");
 	ch = wrapped;
 
 	while (*ch) {
@@ -112,6 +111,7 @@ void Draw_Wrapped_Font(int x, int y, int w, int h, colour col, char *string, fon
 	wrapped = Font_Wrap(w, h, string, f);
 	Draw_Square_DB(0, x, y, x + w - 1, y + h - 1, true);
 	Draw_Font(x, y, col, wrapped, f, true);
+	Free(wrapped);
 }
 
 bool Load_Font(char *filename, font *f)
