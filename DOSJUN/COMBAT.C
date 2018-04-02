@@ -61,13 +61,17 @@ noexport void Show_Combat_String(char *string, bool wait_for_key)
 void Combat_Message(char *format, ...)
 {
 	va_list vargs;
-	char message[500];
+	char *message;
+	int size;
 
 	va_start(vargs, format);
+	size = vsprintf(NULL, format, vargs);
+	message = Allocate(size+1, 1, "Combat_Message");
 	vsprintf(message, format, vargs);
 	va_end(vargs);
 
 	Show_Combat_String(message, true);
+	Free(message);
 }
 
 noexport void Highlight_Ally(int pc_active, int pc_select)
@@ -924,7 +928,7 @@ noexport void Enter_Combat_Loop(void)
 
 void Start_Combat(encounter_id id)
 {
-	char description[1000],
+	char *description,
 		*write,
 		*first = null;
 	groupnum i;
@@ -939,7 +943,8 @@ void Start_Combat(encounter_id id)
 		Add_Pc(i);
 	}
 
-	description[0] = 0;
+	description = Allocate(10 + (NAME_SIZE+ENCOUNTER_SIZE)*6, 1, "Start_Combat");
+
 	write = description;
 	write += sprintf(write, "You face:");
 	groups_alive = 0;
@@ -966,6 +971,8 @@ void Start_Combat(encounter_id id)
 	/* Briefly show encounter on Dungeon screen */
 	Show_Picture(first);
 	Show_Game_String(description, true);
+	Free(description);
+	Free_Textures();
 
 	/* Set up Combat screen */
 	redraw_everything = true;
@@ -989,5 +996,6 @@ void Start_Combat(encounter_id id)
 	Expire_Combat_Buffs();
 	Clear_Encounter();
 
+	Load_Textures(&gZone);
 	Redraw_Dungeon_Screen(false);
 }

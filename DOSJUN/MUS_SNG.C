@@ -129,9 +129,9 @@ noexport UINT8 adlib_regs[] = {
 };
 
 noexport player p;
-noexport chan channels[NUM_CHANNELS];
-noexport char ghost_regs[256];
-noexport char instrument_data[NUM_INSTRUMENTS*16];
+noexport chan *channels;
+noexport char *ghost_regs;
+noexport char *instrument_data;
 
 noexport void interrupt (*oldtimer)(void);
 noexport void interrupt Play_Music(void);
@@ -280,8 +280,9 @@ void Start_SNG(sng *s)
 	p.tempo = 6;
 	p.counter = 5;
 
-	memset(channels, 0, sizeof(chan)*NUM_CHANNELS);
-	memset(ghost_regs, 0, 256);
+	channels = SzAlloc(NUM_CHANNELS, chan, "Start_SNG.channels");
+	ghost_regs = SzAlloc(256, UINT8, "Start_SNG.ghost_regs");
+	instrument_data = Allocate(NUM_INSTRUMENTS, 16, "Start_SNG.instrument_data");
 
 	Convert_Instruments(s->instruments);
 	All_Note_Off();
@@ -321,6 +322,10 @@ void Stop_SNG(void)
 		Write(0x40 + i, 0x3f);
 	Write(0x53, 0x3f);
 	Write(0x54, 0x3f);
+
+	Free(instrument_data);
+	Free(ghost_regs);
+	Free(channels);
 }
 
 noexport void Play_Note(UINT8 channel, UINT8 inst, UINT16 freq, UINT8 volume)

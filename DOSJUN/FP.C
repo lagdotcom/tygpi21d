@@ -350,7 +350,7 @@ void Show_Picture(char *name)
 	if (!picture_loaded || strcmp(filename, shown_picture)) {
 		Delete_Picture();
 
-		if (!Load_Picture(filename, &current_pic, "Show_Picture")) {
+		if (!Load_Picture(filename, &current_pic, name)) {
 			die("Show_Picture: could not load");
 		}
 

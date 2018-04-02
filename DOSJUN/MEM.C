@@ -5,9 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "common.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
+
+#define LOG_FILE "MEMORY.LOG"
 
 #ifdef FAR_MEMORY
 
@@ -28,7 +31,7 @@
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 struct entry {
-	UINT32 index;
+	UINT16 index;
 	char *tag;
 	void PtrDist *address;
 	MemSz size;
@@ -48,6 +51,35 @@ noexport entry PtrDist *first = null, *last = null;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
+noexport void Clear_MLog(void)
+{
+	FILE *f = fopen(LOG_FILE, "w");
+	if (f == NULL) {
+		/* TODO */
+		return;
+	}
+
+	fclose(f);
+}
+
+noexport void MLog(entry *e, char *op)
+{
+	FILE *f = fopen(LOG_FILE, "a");
+	if (f == NULL) {
+		/* TODO */
+		return;
+	}
+
+#ifdef FAR_MEMORY
+	fprintf(f, "%05u.%s @%p+%-9lu | %s", e->index, op, e->address, e->size, e->tag);
+#else
+	fprintf(f, "%05u.%s @%p+%-5u | %s", e->index, op, e->address, e->size, e->tag);
+#endif
+
+	fputc('\n', f);
+	fclose(f);
+}
+
 noexport void Update_Peak(long change)
 {
 	current_use += change;
@@ -56,8 +88,17 @@ noexport void Update_Peak(long change)
 
 noexport void Add_Entry(void *mem, MemSz size, char *tag)
 {
-	entry *e = _calloc(1, sizeof(entry));
-	if (!e) {
+	entry *e;
+
+	if (mem == null) {
+		printf("MEM: Could not allocate %u bytes for %s.\n", size, tag);
+		Stop_Memory_Tracking();
+		abort();
+		return;
+	}
+
+	e = _calloc(1, sizeof(entry));
+	if (e == null) {
 		printf("MEM: Could not allocate another entry (already have %u).\n", allocated_entries);
 		Stop_Memory_Tracking();
 		abort();
@@ -69,6 +110,8 @@ noexport void Add_Entry(void *mem, MemSz size, char *tag)
 	e->tag = tag;
 	e->address = mem;
 	e->size = size;
+
+	MLog(e, "A");
 
 	last->next = e;
 	e->prev = last;
@@ -85,6 +128,8 @@ noexport void Mark_Entry_Freed(void *mem)
 
 	while (e) {
 		if (e->address == mem) {
+			MLog(e, "F");
+
 			Update_Peak(-e->size);
 
 			if (e->prev)
@@ -114,6 +159,8 @@ noexport void Update_Entry_Size(void *mem, MemSz size)
 		if (e->address == mem) {
 			Update_Peak(size - e->size);
 			e->size = size;
+
+			MLog(e, "U");
 			return;
 		}
 
@@ -182,6 +229,8 @@ void Start_Memory_Tracking(void)
 	allocated_entries++;
 	entry_count++;
 	last = first;
+
+	Clear_MLog();
 }
 
 void Stop_Memory_Tracking(void)
@@ -193,7 +242,11 @@ void Stop_Memory_Tracking(void)
 	e = first;
 	while (e != null) {
 		if (e != first) {
+#ifdef FAR_MEMORY
 			printf("#%u [%s]: @%p, %lu bytes not freed\n", e->index, e->tag, e->address, e->size);
+#else
+			printf("#%u [%s]: @%p, %u bytes not freed\n", e->index, e->tag, e->address, e->size);
+#endif
 			_free(e->address);
 		}
 
@@ -208,7 +261,11 @@ void Stop_Memory_Tracking(void)
 	e = first;
 	while (e != null) {
 		if (e != first) {
+#ifdef FAR_MEMORY
 			fprintf(fp, "#%u [%s]: @%p, %lu bytes not freed\n", e->index, e->tag, e->address, e->size);
+#else
+			fprintf(fp, "#%u [%s]: @%p, %u bytes not freed\n", e->index, e->tag, e->address, e->size);
+#endif
 		}
 
 		temp = e;
