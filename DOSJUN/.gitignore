@@ -1,4 +1,10 @@
-.vs/
+*.log
+*.sav
+*.sublime*
 *.vcxproj*
-Debug/
-MSFIX/
+/.vs/
+/Debug/
+/dosjun.txt
+/memory.txt
+/MSFIX/
+demo.*
