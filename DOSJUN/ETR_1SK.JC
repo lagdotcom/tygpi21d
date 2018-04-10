@@ -1,0 +1,113 @@
+#JUNCODE
+
+Local sk_flags
+Const sk_met = 1
+Const sk_dead = 2
+Const sk_stole = 4
+Const sk_intimidated = 8
+
+Const npc_sk = 100
+Const combat_sk = 100
+
+# Helpers
+State sk_fight
+	EndConverse
+	Combat combat_sk
+	sk_flags = sk_flags | sk_dead
+	a_liberal = a_liberal - 10
+	a_colony = a_colony - 20
+	a_cult = a_cult + 1
+	a_penitents = a_penitents - 5
+	PcSpeak liberal, "Did we really have to to do this?"
+EndState
+
+# Conversation States
+State sk_main
+	#TODO
+EndState
+
+State sk_agree
+	NpcSpeak npc_sk, "Good."
+	Text "The man relaxes, sitting back in a simple chair."
+	If (sk_flags & sk_intimidated) == 0
+		a_liberal = a_liberal + 5
+	EndIf
+
+	sk_flags = sk_flags | sk_met
+	NpcSpeak npc_sk, "I'm Gareth. I sell stuff."
+	NpcSpeak npc_sk, "I'm sure you have some questions. Ask away."
+	ChangeState sk_main
+EndState
+
+State sk_makefight
+	Text "The man shakes his head, drawing a blade from under his cloak."
+	a_shifty = a_shifty + 10
+	Call sk_fight
+EndState
+
+State sk_intimidate
+	sk_flags = sk_flags | sk_intimidated
+	a_liberal = a_liberal - 5
+	Text "The man looks uneasy."
+	NpcSpeak npc_sk, "It doesn't have to come to that. The rules are for your protection as much as mine."
+	Option sk_agree, "We'll behave."
+	Option sk_makefight, "Does it look like we need protection?"
+EndState
+
+State sk_rude
+	Text "The man narrows his eyes."
+	NpcSpeak npc_sk, "You're going to play nice, or get out."
+	PcAction shifty, "whispers to you, \"He's alone. We could take him.\""
+	PcAction liberal, "frowns."
+
+	Option sk_intimidate, "Do you think you can make us?"
+	Option sk_makefight, "You're dead!"
+	Option sk_cowed, "We'll be nice."
+EndState
+
+State sk_rules
+	Text "The man holds up his hands and begins to tick off his fingers. He's missing two."
+	NpcSpeak npc_sk, "Don't take what isn't yours."
+	NpcSpeak npc_sk, "Tell someone if you feel sick."
+	NpcSpeak npc_sk, "Don't attack anybody who can talk."
+	Text "He regards his hand for a moment, and lowers it."
+	NpcSpeak npc_sk, "Stay away from the bad stuff."
+
+	Option sk_agree, "Seems simple enough."
+	Option sk_rude, "I don't know..."
+EndState
+
+State sk_start
+	If sk_flags & sk_met
+		NpcSpeak npc_sk, "You've returned. This time with more coin, I hope."
+		Call sk_main
+	Else
+		sk_flags = sk_flags | sk_met
+		Text "Before you stands a short man with unruly facial hair. He studies your party with wild eyes for a moment, then shifts slightly under his cloak."
+		NpcSpeak npc_sk, "I don't know who you are. You're welcome as long as you follow the rules."
+		PcAction strong, "whispers to you, \"He has a weapon.\""
+
+		Option sk_rules, "Rules?"
+		Option sk_rude, "We do what we want!"
+	EndIf
+EndState
+
+# Main Entry Point
+Script shopkeeper
+	If sk_flags & sk_dead
+		Return
+	EndIf
+
+	If sk_flags & sk_stole
+		If sk_flags & sk_met
+			NpcSpeak npc_sk, "You're going to meet a sorry end here, acting the way you do."
+		Else
+			NpcSpeak npc_sk, "I don't know who you are, but you're going to regret taking my things."
+		EndIf
+
+		Call sk_fight
+		Return
+	EndIf
+
+	Converse npc_sk, sk_start
+EndScript

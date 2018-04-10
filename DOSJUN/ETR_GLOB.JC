@@ -21,3 +21,19 @@ Const itKnuckleduster = 256
 Const itPenknife = 257
 Const itKnitCap = 512
 Const itPlaster = 2560
+
+# Attitude Values
+Global a_leader
+Global a_strong
+Global a_nerd
+Global a_shifty
+Global a_liberal
+Global a_nra
+
+Global a_colony
+Global a_colony_p
+Global a_colony_x
+Global a_cult
+Global a_reanimated
+Global a_ascended
+Global a_penitents

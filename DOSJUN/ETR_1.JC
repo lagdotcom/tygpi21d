@@ -29,6 +29,22 @@ Script wake_up
 	EquipItem shifty, itPenknife
 	GiveItem liberal, itPlaster, 4
 
+	# Set up party attitudes
+	a_leader = 100
+	a_strong = 100
+	a_nerd = 100
+	a_shifty = 100
+	a_liberal = 100
+	a_nra = 100
+
+	a_colony = 50
+	a_colony_p = 50
+	a_colony_x = 50
+	a_cult = -50
+	a_reanimated = -100
+	a_ascended = -100
+	a_penitents = 0
+
 	Text "You slowly come to your senses, and find yourself in unfamiliar surroundings. You rouse your friends."
 	PcSpeak strong, "Ugh... where are we?"
 	PcSpeak nerd, "I don't think it matters. We're supposed to escape, right?"
@@ -154,14 +170,17 @@ Script secret_tile
 EndScript
 
 Script secret_item
-	If (i_found & i_secret) == 0
-		AddItem itKnitCap, 1
+	If i_found & i_secret
+		Return
+	EndIf
 
-		If @Success
-			Text "You find a simple cap on the dusty floor."
-			i_found = i_found | i_secret
-		ElseIf
-			Text "There's a cap on the floor, but nobody can carry any more."
-		EndIf
+	AddItem itKnitCap, 1
+	If @Success
+		Text "You find a simple cap on the dusty floor."
+		i_found = i_found | i_secret
+	ElseIf
+		Text "There's a cap on the floor, but nobody can carry any more."
 	EndIf
 EndScript
+
+Include "ETR_1SK.JC"
