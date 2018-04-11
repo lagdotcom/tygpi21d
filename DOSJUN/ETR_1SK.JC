@@ -18,7 +18,8 @@ State sk_fight
 	a_colony = a_colony - 20
 	a_cult = a_cult + 1
 	a_penitents = a_penitents - 5
-	PcSpeak liberal, "Did we really have to to do this?"
+	PcSpeak liberal, "Did we really have to do this?"
+	PcSpeak shifty, "Well... let's take his stuff."
 EndState
 
 # Conversation States

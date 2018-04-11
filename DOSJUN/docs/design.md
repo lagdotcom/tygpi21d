@@ -53,3 +53,21 @@ DOSJUN keeps track of Attitude values for PCs and factions. PCs will act differe
 | 0 | Neutral | Penitents |
 | -50 | Distrust | Cult |
 | -100 | Hatred | Reanimated, Ascended |
+
+Each faction and PC has things they like or don't like. This will affect their Attitude.
+
+| Faction | Likes | Dislikes |
+| ------- | ----- | -------- |
+| (Leader)   | ? | ? |
+| (Strong)   | getting swole | getting corrupted |
+| (Nerd)     | learning more about the dungeon | destroying information |
+| (Shifty)   | acquiring more stuff | helping others for no gain |
+| (Liberal)  | being nice to people | being nasty to people |
+| (NRA)      | free speech | big government |
+| Colony     | protecting settlements | ? |
+| Cult       | spreading corruption | ? |
+| Reanimated | ? | ? |
+| Ascended   | ? | ? |
+| Penitents  | rejecting corruption | getting corrupted, spreading corruption |
+
+The Colony also has two sub-factions - protectionist and expansionist. When considering their attitude, their value is added onto the base Colony value.
