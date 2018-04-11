@@ -5,7 +5,7 @@ DOSJUN is a turn-based dungeon crawler.
 The party turned up to play an Escape the Room game but it turns out to be an actual dungeon. Bizarre-ty insues. See Setting doc.
 
 ## Party
-The party consists of 6 characters.
+The party consists of 6 characters. You get to pick their names and [pronouns](http://pronoun.is).
 
 ## Character
 A character has these stats:
@@ -25,9 +25,23 @@ A character has these stats:
 Zone tiles can have scripts attached them. Scripts are written in a fairly simple syntax but then compiled to a bytecode which the engine will execute. The engine is a stack machine with a some partitioned storage.
 
 ### Commands
+- `AddItem item_id, qty`: adds to any PC, sets `@Success`
+- `Combat enc_id`: starts encounter
+- `EquipItem pc, item_id`: sets `@Success`
+- `GiveItem pc, item_id, qty`: sets `@Success`
+- `Music string_id`
+- `PcSpeak pc, string_id`
+- `Refresh`: force screen update
+- `Return`: exit current function
+- `RemoveWall x, y, dir`: changes wall to `wtNormal`, no texture
+- `Safe`: allow saving the game until party movement
+- `SetDanger danger`: change per-move danger value
+- `SetTileColour x, y, surface, colour_id`: colour is actually a texture index
 - `SetTileDescription x, y, string_id`
-- `SetTileColour x, y, surface, colour_id`: surface can be N/E/S/W/C/F
+- `SetTileThing x, y, thing_id`
 - `Teleport zone, x, y, facing, transition`: transition types - silent, stairs, teleport
+- `Text string_id`
+- `Unlock x, y, dir`: changes wall to `wtDoor`
 
 ### Variables
 There are three variable scopes.
@@ -41,6 +55,29 @@ Globals and Locals need to be declared using `Global x` or `Local x`. Globals ne
 Conversations work using a pseudo-state machine. A conversation is stated with `Converse npc, state`. States are declared with `State...EndState` instead of `Script...EndScript` but otherwise function similarly. `State`s are not visible in the dungeon editor. Conversation options are declared with `Option state, string`. When the script interpreter exits a `State` function, it checks to see if any options were declared; if so, it waits for the user to pick one, then jumps to the state of the option that was picked. If there were no options, it internally runs `EndConverse`. Either way, it clears all declared options at this point. Calling `Combat` does not automatically end conversations.
 
 The commands `Text`, `PcSpeak`, `PcAction`, `NpcSpeak`, and `NpcAction` use the conversation window in conversation mode, rather than the normal dungeon text box.
+
+### Text Formatting
+Text in script files can have formatting characters in it:
+
+| Spec | Description | Example |
+| ---- | ----------- | ------- |
+| `%?e` | subject-pronoun | he/she |
+| `%?m` | object-pronoun | him/her |
+| `%?r` | posessive-determiner | his/her |
+| `%?s` | posessive-pronoun | his/hers |
+| `%?f` | reflexive | himself/herself |
+| `^xx` | colour | xx = palette index, hex |
+
+The '?' char refers to a given person and is optional and derived from context. `PcAction/PcSpeak/NpcAction/NpcSpeak` default to the given PC/NPC. `Text` defaults to the 'leader' PC.
+
+| Char | Description |
+| ---- | ----------- |
+| 0 | leader |
+| 1 | strong |
+| 2 | nerd |
+| 3 | shifty |
+| 4 | liberal |
+| 5 | nra |
 
 ## Attitude System
 DOSJUN keeps track of Attitude values for PCs and factions. PCs will act differently depending on their Attitude, and many faction tasks will be unavailable if the Attitude value is out of a given range.
