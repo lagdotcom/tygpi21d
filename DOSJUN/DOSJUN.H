@@ -11,6 +11,7 @@
 #include "combat.h"
 #include "font.h"
 #include "fp.h"
+#include "grf.h"
 #include "gfx.h"
 #include "items.h"
 #include "input.h"

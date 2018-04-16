@@ -5,7 +5,13 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
+#define EXPLORE_GRF 1
+
+#if EXPLORE_GRF
+grf explore_bg;
+#else
 pcx_picture explore_bg;
+#endif
 
 campaign gCampaign;
 gamestate gState;
@@ -252,7 +258,15 @@ void Check_Random_Encounter(void)
 
 void Redraw_Dungeon_Screen(bool script)
 {
-	if (redraw_everything) memcpy(double_buffer, explore_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
+	if (redraw_everything) {
+#if EXPLORE_GRF
+		Fill_Double_Buffer(0);
+		Draw_GRF(0, 0, &explore_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+#else
+		memcpy(double_buffer, explore_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
+#endif
+	}
+
 	if (redraw_fp || redraw_everything) Draw_FP();
 	if (redraw_party || redraw_everything) Draw_Party_Status();
 	if (script && just_moved) {
@@ -282,8 +296,12 @@ gamestate Show_Dungeon_Screen(void)
 	gamestate new;
 
 	/* Get background image and palette */
+#if EXPLORE_GRF
+	Load_GRF("BACK.GRF", &explore_bg, "Show_Dungeon_Screen.explore_bg");
+#else
 	PCX_Init(&explore_bg);
 	PCX_Load("BACK.PCX", &explore_bg, 1);
+#endif
 
 	redraw_everything = true;
 	redraw_description = true;
@@ -364,7 +382,11 @@ gamestate Show_Dungeon_Screen(void)
 	}
 
 	/* Cleanup */
+#if EXPLORE_GRF
+	Free_GRF(&explore_bg);
+#else
 	PCX_Delete(&explore_bg);
+#endif
 	return new;
 }
 
