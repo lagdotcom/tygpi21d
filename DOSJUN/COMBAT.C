@@ -19,6 +19,8 @@
 #define GROUPS_SIZE		(ENCOUNTER_SIZE + 2)
 
 #define COMBAT_GRF		1
+#define COMBAT_DYNALLOC	0
+#define COMBAT_RECLAIM	0
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -67,17 +69,25 @@ noexport void Show_Combat_String(char *string, bool wait_for_key)
 void Combat_Message(char *format, ...)
 {
 	va_list vargs;
+#if COMBAT_DYNALLOC
 	char *message;
 	int size;
+#else
+	char message[400];
+#endif
 
 	va_start(vargs, format);
+#if COMBAT_DYNALLOC
 	size = vsprintf(NULL, format, vargs);
 	message = Allocate(size+1, 1, "Combat_Message");
+#endif
 	vsprintf(message, format, vargs);
 	va_end(vargs);
 
 	Show_Combat_String(message, true);
+#if COMBAT_DYNALLOC
 	Free(message);
+#endif
 }
 
 noexport void Highlight_Ally(int pc_active, int pc_select)
@@ -987,7 +997,9 @@ void Start_Combat(encounter_id id)
 	Show_Picture(first);
 	Show_Game_String(description, true);
 	Free(description);
+#if COMBAT_RECLAIM
 	Free_Textures();
+#endif
 
 	/* Set up Combat screen */
 	redraw_everything = true;
@@ -1016,6 +1028,8 @@ void Start_Combat(encounter_id id)
 	Expire_Combat_Buffs();
 	Clear_Encounter();
 
+#if COMBAT_RECLAIM
 	Load_Textures(&gZone);
+#endif
 	Redraw_Dungeon_Screen(false);
 }
