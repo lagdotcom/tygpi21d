@@ -103,3 +103,5 @@ if __name__ == '__main__':
 
 	full_spec = [(0, 0, 320, 200)]
 	convert_grf('..\\BACK', full_spec)
+	convert_grf('..\\COMBAT', full_spec)
+	convert_grf('..\\MAIN', full_spec)

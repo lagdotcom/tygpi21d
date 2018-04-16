@@ -13,5 +13,6 @@ void Draw_Bounded_String(int x, int y, int w, int h, colour col, char *string, b
 void Draw_HorzTrapezium_DB(colour col, int x0, int x1, int x2, int x3, int y0, int y1, bool filled);
 void Draw_VertTrapezium_DB(colour col, int x0, int x1, int y0, int y1, int y2, int y3, bool filled);
 void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled);
+void Load_Palette(char *filename);
 
 #endif

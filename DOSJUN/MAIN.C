@@ -10,7 +10,13 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
+#define MENU_GRF 1
+
+#if MENU_GRF
+grf menu_bg;
+#else
 pcx_picture menu_bg;
+#endif
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -176,11 +182,20 @@ gamestate Show_Main_Menu(void)
 	menu[1] = "LOAD GAME";
 	menu[2] = "QUIT";
 
+#if MENU_GRF
+	Load_GRF("MAIN.GRF", &menu_bg, "Show_Main_Menu.menu_bg");
+#else
 	PCX_Init(&menu_bg);
 	PCX_Load("MAIN.PCX", &menu_bg, true);
+#endif
 
 	while (!done) {
+#if MENU_GRF
+		Fill_Double_Buffer(0);
+		Draw_GRF(0, 0, &menu_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+#else
 		memcpy(double_buffer, menu_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
+#endif
 		option = Input_Menu(menu, 3, 100, 140);
 
 		switch (option) {
@@ -203,6 +218,10 @@ gamestate Show_Main_Menu(void)
 		}
 	}
 
+#if MENU_GRF
+	Free_GRF(&menu_bg);
+#else
 	PCX_Delete(&menu_bg);
+#endif
 	return next;
 }

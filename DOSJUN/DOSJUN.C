@@ -416,6 +416,7 @@ void main(void)
 	printf("OK\n");
 
 	Set_Video_Mode(VGA256);
+	Load_Palette("DOSJUN.PAL");
 
 	Log("main: Menu");
 	gState = gsMainMenu;

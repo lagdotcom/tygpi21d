@@ -18,6 +18,8 @@
 #define GROUP_PCBACK	(ENCOUNTER_SIZE + 1)
 #define GROUPS_SIZE		(ENCOUNTER_SIZE + 2)
 
+#define COMBAT_GRF		1
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct {
@@ -30,7 +32,11 @@ typedef struct {
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
+#if COMBAT_GRF
+noexport grf combat_bg;
+#else
 noexport pcx_picture combat_bg;
+#endif
 
 list *combatants;
 noexport list *active_combatants;
@@ -463,8 +469,12 @@ void Initialise_Combat(void)
 	Add_Combat_Action(aSing, "Sing", Check_Sing, Sing, tfSelf, 200);
 	Add_Combat_Action(aHide, "Hide", Check_Hide, Hide, tfSelf, 50);
 
+#if COMBAT_GRF
+	Load_GRF("COMBAT.GRF", &combat_bg, "Initialise_Combat.combat_bg");
+#else
 	PCX_Init(&combat_bg);
 	PCX_Load("COMBAT.PCX", &combat_bg, 0);
+#endif
 
 	randomize();
 }
@@ -484,7 +494,12 @@ void Free_Combat(void)
 	Free_List(active_combatants);
 
 	Free(combat_actions);
+
+#if COMBAT_GRF
+	Free_GRF(&combat_bg);
+#else
 	PCX_Delete(&combat_bg);
+#endif
 }
 
 noexport act Get_Pc_Action(unsigned char pc)
@@ -976,7 +991,12 @@ void Start_Combat(encounter_id id)
 
 	/* Set up Combat screen */
 	redraw_everything = true;
+#if COMBAT_GRF
+	Fill_Double_Buffer(0);
+	Draw_GRF(0, 0, &combat_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+#else
 	memcpy(double_buffer, combat_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
+#endif
 	Show_Picture(first);
 
 	/* DO IT */
