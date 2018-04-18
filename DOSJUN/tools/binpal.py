@@ -12,4 +12,4 @@ def convert_pal_to_binary(jasc, outf):
 		rgb = [int(x)>>2 for x in i.readline().strip().split(' ')]
 		o.write(bytes(rgb))
 
-convert_pal_to_binary('PALETTE.PAL', 'DOSJUN.PAL')
+convert_pal_to_binary('..\\PALETTE.PAL', '..\\DOSJUN.PAL')
