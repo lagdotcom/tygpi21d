@@ -32,6 +32,7 @@ noexport bool Item_Matches(list_type type, void *a, void *b)
 			return (int)a == (int)b;
 
 		case ltObject:
+		case ltReference:
 			/* TODO: ? */
 			return a == b;
 	}
@@ -48,6 +49,7 @@ noexport void Free_Item(list_type type, void *item)
 			break;
 
 		case ltInteger:
+		case ltReference:
 			return;
 	}
 }

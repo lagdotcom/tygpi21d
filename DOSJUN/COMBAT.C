@@ -199,7 +199,6 @@ statistic Get_Weapon_Stat(item *weapon)
 combatant *Get_Random_Target(groupnum group)
 {
 	int i;
-
 	assert(group < GROUPS_SIZE, "Get_Random_Target: group number too high");
 
 	if (combat_groups[group]->size <= 0)
@@ -218,6 +217,7 @@ noexport void Kill(combatant *c)
 {
 	groupnum group;
 
+	Log("Kill: %s(%d/g%d)", c->name, c->index, c->group);
 	Combat_Message("%s dies!", c->name);
 
 	if (c->is_pc) {
@@ -227,11 +227,11 @@ noexport void Kill(combatant *c)
 		earned_experience += c->monster->experience;
 
 		group = c->group;
-		if (group >= 0) {
-			Remove_from_List(combat_groups[group], (void*)c);
-			if (Is_Enemy_Group(group) && combat_groups[group]->size == 0) {
-				groups_alive--;
-			}
+		Log("Kill: shrinking group #%d", group);
+		Remove_from_List(combat_groups[group], (void*)c);
+		if (combat_groups[group]->size == 0) {
+			groups_alive--;
+			Log("Kill: groups alive=%d", groups_alive);
 		}
 	}
 }
@@ -426,7 +426,7 @@ void Add_Monster(groupnum group, monster* template)
 	monsters_alive++;
 }
 
-noexport void Add_Pc(unsigned int pc)
+noexport void Add_Pc(pcnum pc)
 {
 	item *primary, *secondary;
 	character *ch = Get_Pc(pc);
@@ -471,12 +471,10 @@ void Initialise_Combat(void)
 
 	combatants = New_List(ltObject, "Initialise_Combat.combatants");
 	for (i = 0; i < GROUPS_SIZE; i++) {
-		/* HACK: ltInteger makes sure Clear_List() doesn't Free() items */
-		combat_groups[i] = New_List(ltInteger, "Initialise_Combat.group_x");
+		combat_groups[i] = New_List(ltReference, "Initialise_Combat.group_x");
 	}
 
-	/* HACK: ltInteger makes sure Clear_List() doesn't Free() items */
-	active_combatants = New_List(ltInteger, "Initialise_Combat.active_combatants");
+	active_combatants = New_List(ltReference, "Initialise_Combat.active_combatants");
 
 	combat_actions = SzAlloc(NUM_ACTIONS, action, "Initialise_Combat.actions");
 	Add_Combat_Action(aAttack, "Attack", Check_Attack, Attack, tfEnemy, 100);
@@ -522,7 +520,7 @@ void Free_Combat(void)
 #endif
 }
 
-noexport act Get_Pc_Action(unsigned char pc)
+noexport act Get_Pc_Action(pcnum pc)
 {
 	int i, count = 0;
 	act ai;
@@ -564,14 +562,14 @@ noexport bool Is_Valid_Target(combatant *source, combatant *target, targetflags 
 	return tf & tfEnemy;
 }
 
-noexport combatant *Get_Pc_Target(unsigned char pc, act action_id)
+noexport combatant *Get_Pc_Target(pcnum pc, act action_id)
 {
 	bool done = false,
 		party = false;
 	targetflags tfl = combat_actions[action_id].targeting;
 	combatant *self = List_At(combatants, pc),
 		*c;
-	int targ_pc = 0,
+	pcnum targ_pc = 0,
 		scan_pc = 0;
 	groupnum targ_eg = 0,
 		scan_eg = 0;
@@ -966,7 +964,8 @@ void Start_Combat(encounter_id id)
 	char *description,
 		*write,
 		*first = null;
-	groupnum i;
+	groupnum group;
+	pcnum pc;
 	int count;
 	encounter *en = &gZone.encounters[id];
 	monster *m;
@@ -974,8 +973,8 @@ void Start_Combat(encounter_id id)
 
 	Log("Start_Combat: #%d", id);
 
-	for (i = 0; i < PARTY_SIZE; i++) {
-		Add_Pc(i);
+	for (pc = 0; pc < PARTY_SIZE; pc++) {
+		Add_Pc(pc);
 	}
 
 	description = Allocate(10 + (NAME_SIZE+ENCOUNTER_SIZE)*6, 1, "Start_Combat");
@@ -984,14 +983,14 @@ void Start_Combat(encounter_id id)
 	write += sprintf(write, "You face:");
 	groups_alive = 0;
 
-	for (i = 0; i < ENCOUNTER_SIZE; i++) {
-		if (!en->monsters[i]) continue;
-		m = Lookup_Monster(&gMonsters, en->monsters[i]);
+	for (group = 0; group < ENCOUNTER_SIZE; group++) {
+		if (!en->monsters[group]) continue;
+		m = Lookup_Monster(&gMonsters, en->monsters[group]);
 		if (first == null) first = m->image;
 
-		count = randint(en->minimum[i], en->maximum[i]);
+		count = randint(en->minimum[group], en->maximum[group]);
 		if (count > 0) {
-			Log("Start_Combat: adding %dx%s (#%04x)", count, m->name, en->monsters[i]);
+			Log("Start_Combat: adding %dx%s (#%04x)", count, m->name, en->monsters[group]);
 			write += sprintf(write, " %s x%d", m->name, count);
 
 			while (count > 0) {

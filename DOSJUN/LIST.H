@@ -4,7 +4,8 @@
 typedef enum list_type {
 	ltString,
 	ltInteger,
-	ltObject
+	ltObject,
+	ltReference
 } list_type;
 
 typedef struct list {
