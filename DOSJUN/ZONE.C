@@ -28,8 +28,10 @@ bool Load_Zone(char *filename, zone *z)
 	unsigned int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "rb");
-	if (!fp)
+	if (!fp) {
 		dief("Load_Zone: Could not open for reading: %s\n", filename);
+		return false;
+	}
 
 	Log("Load_Zone: %s", filename);
 
@@ -154,8 +156,10 @@ bool Save_Zone(char *filename, zone *z)
 	unsigned int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "wb");
-	if (!fp)
+	if (!fp) {
 		dief("Save_Zone: Could not open for writing: %s\n", filename);
+		return false;
+	}
 
 	Set_Version_Header(z->header);
 	fwrite(h, sizeof(zone_header), 1, fp);

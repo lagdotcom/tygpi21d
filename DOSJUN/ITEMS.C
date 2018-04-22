@@ -7,8 +7,10 @@
 bool Load_Items(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "rb");
-	if (!fp)
+	if (!fp) {
 		dief("Load_Items: Could not open for reading: %s\n", filename);
+		return false;
+	}
 
 	fread(&i->header, sizeof(items_header), 1, fp);
 	Check_Version_Header(i->header);
@@ -38,8 +40,10 @@ void Initialise_Items(items *i)
 bool Save_Items(char *filename, items *i)
 {
 	FILE *fp = fopen(filename, "wb");
-	if (!fp)
+	if (!fp) {
 		dief("Save_Items: Could not open for writing: %s\n", filename);
+		return false;
+	}
 
 	Set_Version_Header(i->header);
 	fwrite(&i->header, sizeof(items_header), 1, fp);

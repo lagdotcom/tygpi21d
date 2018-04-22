@@ -9,8 +9,10 @@ bool Load_Monsters(char *filename, monsters *m)
 	int i;
 	FILE *fp = fopen(filename, "rb");
 	monster *mon;
-	if (!fp)
+	if (!fp) {
 		dief("Load_Monsters: Could not open for reading: %s\n", filename);
+		return false;
+	}
 
 	fread(&m->header, sizeof(monsters_header), 1, fp);
 	Check_Version_Header(m->header);
@@ -65,8 +67,10 @@ bool Save_Monsters(char *filename, monsters *m)
 	int i;
 	monster *mon;
 	FILE *fp = fopen(filename, "wb");
-	if (!fp)
+	if (!fp) {
 		dief("Save_Monsters: Could not open for writing: %s\n", filename);
+		return false;
+	}
 
 	Set_Version_Header(m->header);
 	fwrite(&m->header, sizeof(monsters_header), 1, fp);

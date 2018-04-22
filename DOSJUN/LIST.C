@@ -60,8 +60,10 @@ list *New_List(list_type type, char *tag)
 list *New_List_of_Capacity(list_type type, int capacity, char *tag)
 {
 	list *l = SzAlloc(1, list, tag);
-	if (l == null)
+	if (l == null) {
 		dief("New_List_with_Capacity(%s): Out of memory", tag);
+		return null;
+	}
 
 	l->type = type;
 	l->object_size = 0;

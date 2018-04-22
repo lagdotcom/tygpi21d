@@ -214,6 +214,7 @@ void Load_Palette(char *filename)
 	FILE *fp = fopen(filename, "rb");
 	if (!fp) {
 		dief("Could not open: %s", filename);
+		return;
 	}
 
 	for (i = 0; i < 256; i++) {
