@@ -347,7 +347,7 @@ void Show_Picture(char *name)
 	sprintf(filename, "PICS\\%s.PCX", name);
 
 	/* don't bother loading the picture if it's already loaded */
-	if (!picture_loaded || strcmp(filename, shown_picture)) {
+	if (!picture_loaded || !streq(filename, shown_picture)) {
 		Delete_Picture();
 
 		if (!Load_Picture(filename, &current_pic, name)) {

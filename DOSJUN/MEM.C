@@ -256,15 +256,15 @@ void Stop_Memory_Tracking(void)
 	printf("Tracked %u memory entries overall.\n", entry_count);
 
 	fp = fopen("memory.txt", "w");
-	fprintf(fp, "Peak use: %lu bytes\n\n", peak_use);
+	if (fp) fprintf(fp, "Peak use: %lu bytes\n\n", peak_use);
 
 	e = first;
 	while (e != null) {
 		if (e != first) {
 #ifdef FAR_MEMORY
-			fprintf(fp, "#%u [%s]: @%p, %lu bytes not freed\n", e->index, e->tag, e->address, e->size);
+			if (fp) fprintf(fp, "#%u [%s]: @%p, %lu bytes not freed\n", e->index, e->tag, e->address, e->size);
 #else
-			fprintf(fp, "#%u [%s]: @%p, %u bytes not freed\n", e->index, e->tag, e->address, e->size);
+			if (fp) fprintf(fp, "#%u [%s]: @%p, %u bytes not freed\n", e->index, e->tag, e->address, e->size);
 #endif
 		}
 
@@ -276,9 +276,10 @@ void Stop_Memory_Tracking(void)
 	end_free = coreleft();
 
 	printf("coreleft: %lu => %lu\n", start_free, end_free);
-	fprintf(fp, "\ncoreleft: %lu => %lu\n", start_free, end_free);
-
-	fclose(fp);
+	if (fp) {
+		fprintf(fp, "\ncoreleft: %lu => %lu\n", start_free, end_free);
+		fclose(fp);
+	}
 }
 
 #endif

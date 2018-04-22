@@ -71,8 +71,10 @@ bool Load_GRF(char *filename, grf *g, char *tag)
 	int i;
 	grf_image *im;
 	FILE *fp = fopen(filename, "rb");
-	if (!fp)
+	if (!fp) {
 		dief("Load_GRF: Could not open for reading: %s\n", filename);
+		return false;
+	}
 
 	Log("Load_GRF: %s", filename);
 

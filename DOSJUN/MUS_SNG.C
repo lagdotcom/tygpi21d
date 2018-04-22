@@ -53,8 +53,8 @@ typedef enum notestate {
 
 typedef struct player {
 	sng* s;
-	bool playing;
 	int stride;
+	bool playing;
 	UINT8 note_volume;
 	UINT8 time_counter;
 	UINT8 song_position;
@@ -153,8 +153,12 @@ bool Load_SNG(char *filename, sng* s)
 {
 	long pattern_data;
 	FILE *fp = fopen(filename, "rb");
-	fread(s, SNG_HEADER_LEN, 1, fp);
+	if (!fp) {
+		dief("Load_SNG: Could not open for reading: %s\n", filename);
+		return false;
+	}
 
+	fread(s, SNG_HEADER_LEN, 1, fp);
 	if (strncmp(SNG_MAGIC, s->magic, 4) != 0) {
 		fclose(fp);
 		die("Not a FMC/SNG file");

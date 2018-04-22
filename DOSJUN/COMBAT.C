@@ -24,7 +24,7 @@
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct {
+typedef struct action {
 	action_check_fn check;
 	action_do_fn act;
 	char *name;

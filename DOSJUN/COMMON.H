@@ -72,6 +72,9 @@ typedef UINT8 zone_id;
 
 #define die(msg) { Stop_Memory_Tracking(); Log("die/%s", msg); printf("%s", msg); exit(1); }
 
+/* Returns 0 if strings and b are equal */
+#define streq(a, b) (strcmp(a, b) == 0)
+
 /* Memory Debugging */
 
 #ifdef FAR_MEMORY

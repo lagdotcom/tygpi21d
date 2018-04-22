@@ -283,7 +283,7 @@ item *Get_Equipped_Weapon(unsigned char pc, bool primary)
 	item *it = Get_Equipped_Item(pc, primary ? slWeapon : slOffHand);
 
 	/* shields don't count! */
-	if (it->type == itShield) return null;
+	if (it == null || it->type == itShield) return null;
 	return it;
 }
 
