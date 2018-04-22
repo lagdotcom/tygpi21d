@@ -63,7 +63,7 @@ State sk_rude
 
 	Option sk_intimidate, "Do you think you can make us?"
 	Option sk_makefight, "You're dead!"
-	Option sk_cowed, "We'll be nice."
+	Option sk_agree, "We'll be nice."
 EndState
 
 State sk_rules
