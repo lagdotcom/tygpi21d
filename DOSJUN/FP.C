@@ -99,8 +99,12 @@ noexport void Paste_DB(int dx, int dy, pcx_picture *texture, int w, int h, int s
 	unsigned char *output;
 	char PtrDist *input;
 	int x, y, tex_width;
+	assert((dx + w) <= SCREEN_WIDTH, "Paste_DB: dx + w > width");
+	assert((dy + h) <= SCREEN_HEIGHT, "Paste_DB: dy + h > height");
 
 	tex_width = texture->header.width + 1;
+	assert((sx + w) <= tex_width, "Paste_DB: sx + w > img.width");
+	assert((sy + h) <= (texture->header.height + 1), "Paste_DB: sy + h > img.height");
 
 	output = &double_buffer[(dy + SY) * SCREEN_WIDTH + (dx + SX)];
 	input = &texture->buffer[sy * tex_width + sx];
@@ -122,6 +126,9 @@ noexport void Paste_DB(int dx, int dy, pcx_picture *texture, int w, int h, int s
 noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, char piece, int sx, int sy)
 {
 	int pieceStart;
+	assert(piece < TEXTURE_PIECES, "Draw_Tile_Segment: piece number too high");
+	assert(textureId <= num_textures, "Draw_Tile_Segment: texture number too high");
+	
 	if (textureId == 0) return;
 
 	pieceStart = (textureId - 1) * TEXTURE_PIECES;
@@ -130,6 +137,8 @@ noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, 
 
 noexport void Draw_Thing(thing_id th, int dx, int dy, int w, int h, int sx, int sy)
 {
+	assert(th < thINVALID, "Draw_Thing: thing number too high");
+
 	if (th == 0) return;
 
 	Paste_DB(dx, dy, &things[th - 1], w, h, sx, sy);

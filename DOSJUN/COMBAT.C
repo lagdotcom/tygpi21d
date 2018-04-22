@@ -108,7 +108,10 @@ noexport void Highlight_Ally(int pc_active, int pc_select)
 
 noexport void Format_Enemy_Group(groupnum group, char *buffer)
 {
-	combatant* enemy = List_At(combat_groups[group], 0);
+	combatant *enemy;
+	assert(group < GROUPS_SIZE, "Format_Enemy_Group: group number too high");
+
+	enemy = List_At(combat_groups[group], 0);
 	sprintf(buffer, "%s x%u", enemy->name, combat_groups[group]->size);
 }
 
@@ -173,12 +176,17 @@ stat_value Get_Stat_Base(stat_value *stats, statistic st)
 
 stat_value Get_Stat(combatant *c, statistic st)
 {
-	stat_value base = Get_Stat_Base(c->stats, st);
+	stat_value base;
+	assert(st < NUM_STATS, "Get_Stat: stat number too high");
+
+	base = Get_Stat_Base(c->stats, st);
 	return base + c->stats[st];
 }
 
 noexport void Set_Stat(combatant *c, statistic st, stat_value num)
 {
+	assert(st < NUM_STATS, "Get_Stat: stat number too high");
+
 	c->stats[st] = num;
 }
 
@@ -191,6 +199,8 @@ statistic Get_Weapon_Stat(item *weapon)
 combatant *Get_Random_Target(groupnum group)
 {
 	int i;
+
+	assert(group < GROUPS_SIZE, "Get_Random_Target: group number too high");
 
 	if (combat_groups[group]->size <= 0)
 		return null;

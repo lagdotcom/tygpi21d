@@ -1,7 +1,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include "COMMON.H"
-#include "mus_sng.h"
+#include "DOSJUN.H"
+#include "MUS_SNG.h"
 #include <stdio.h>
 #include <dos.h>
 #include <string.h>
@@ -134,7 +134,7 @@ noexport char *ghost_regs;
 noexport char *instrument_data;
 
 noexport void interrupt (*oldtimer)(void);
-noexport void interrupt Play_Music(void);
+noexport void interrupt Play_SNG(void);
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -296,7 +296,7 @@ void Start_SNG(sng *s)
 	if (!p.playing) {
 		disable();
 		oldtimer = getvect(TIMER_INT);
-		setvect(TIMER_INT, Play_Music);
+		setvect(TIMER_INT, Play_SNG);
 
 		outportb(0x43, 0x36);
 		outportb(0x40, TIMER_TICK_FREQ & 0xff);
@@ -628,7 +628,7 @@ noexport void Play_Notes_Update(void)
 	}
 }
 
-noexport void interrupt Play_Music(void)
+noexport void interrupt Play_SNG(void)
 {
 	/* TIMER ROUTINE */
 	p.time_counter++;

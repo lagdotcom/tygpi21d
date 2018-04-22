@@ -201,7 +201,7 @@ bool Try_Move_Forward(void)
 	just_moved = true;
 	can_save = false;
 
-	Log("Try_Move_Forward: moving to %d, %d", ax, ay);
+	Log("Try_Move_Forward: moving to %d,%d", ax, ay);
 
 	return true;
 }
@@ -248,6 +248,8 @@ void Trigger_Zone_Move_Script(void)
 
 void Random_Encounter(encounter_id eid)
 {
+	assert(eid < gZone.header.num_encounters, "Random_Encounter: encounter number too high");
+
 	gSave.header.encounter_chance = 0;
 	Start_Combat(eid);
 }
@@ -411,6 +413,23 @@ gamestate Show_Dungeon_Screen(void)
 	return new;
 }
 
+noexport bool Initialise_DB(void)
+{
+	double_buffer = Allocate(SCREEN_WIDTH, SCREEN_HEIGHT, "Initialise_DB");
+	memset(double_buffer, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
+
+	Log("Initialise_DB: %p", double_buffer);
+
+	return true;
+}
+
+noexport void Free_DB(void)
+{
+	Log("Free_DB: %p", double_buffer);
+
+	Free(double_buffer);
+}
+
 void main(void)
 {
 	Start_Memory_Tracking();
@@ -418,6 +437,12 @@ void main(void)
 	Log("main: Init");
 
 	printf("Initialising DOSJUN...\n");
+
+	if (!Initialise_DB()) {
+		dief("main: Not enough memory to create double buffer.");
+		return;
+	}
+
 	Load_Font("6x8.FNT", FNT);
 	Initialise_Campaign(&gCampaign);
 	Initialise_Items(&gItems);
@@ -428,11 +453,6 @@ void main(void)
 	Initialise_Jobs();
 	Initialise_Sound();
 	Initialise_Music();
-
-	if (!Create_Double_Buffer(SCREEN_HEIGHT)) {
-		dief("main: Not enough memory to create double buffer.");
-		return;
-	}
 
 	printf("OK\n");
 
@@ -472,7 +492,7 @@ void main(void)
 	Delete_Picture();
 	Free_Font(FNT);
 
-	Delete_Double_Buffer();
+	Free_DB();
 
 	printf("OK!\n");
 	Stop_Memory_Tracking();

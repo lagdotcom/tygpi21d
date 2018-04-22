@@ -70,7 +70,11 @@ typedef UINT16 tileflag_id;
 typedef UINT8 walltype_id;
 typedef UINT8 zone_id;
 
+/* Quit with message */
 #define die(msg) { Stop_Memory_Tracking(); Log("die/%s", msg); printf("%s", msg); exit(1); }
+
+/* Quit with die(msg) if expr is false */
+#define assert(expr, msg) { if (!(expr)) die(msg); }
 
 /* Returns 0 if strings and b are equal */
 #define streq(a, b) (strcmp(a, b) == 0)

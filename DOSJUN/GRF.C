@@ -19,8 +19,7 @@ void Draw_GRF(int sx, int sy, grf *g, int img, int minx, int miny, int maxx, int
 	grf_image *im;
 	unsigned char *d, i, len;
 
-	if (img >= g->num_images)
-		dief("Draw_GRF: tried to draw image #%d when count is %d", img, g->num_images);
+	assert(img < g->num_images, "Draw_GRF: image index too high");
 
 	im = &g->images[img];
 	x = sx;

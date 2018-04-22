@@ -30,7 +30,7 @@ noexport void Pc_Select_Box(bool sel, int x, int y)
 	Draw_Square_DB(sel ? 14 : 0, x - 2, y - 2, x + 70, y + 30, false);
 }
 
-void Pc_Select(int num)
+void Pc_Select(pcnum num)
 {
 	Pc_Select_Box(num == 0, SX1, SY);
 	Pc_Select_Box(num == 1, SX1, SY + 34);
@@ -40,10 +40,13 @@ void Pc_Select(int num)
 	Pc_Select_Box(num == 5, SX2, SY + 68);
 }
 
-void Draw_Character_Status(int index, int x, int y)
+void Draw_Character_Status(pcnum pc, int x, int y)
 {
-	character* ch = &gSave.characters[index];
+	character* ch;
 	char buffer[9];
+	assert(pc < PARTY_SIZE, "Draw_Character_Status: pc number too high");
+
+	ch = &gSave.characters[pc];
 
 	strncpy(buffer, ch->header.name, 8);
 	buffer[8] = 0;
@@ -103,11 +106,14 @@ bool Is_Weapon(item *it)
 	}
 }
 
-noexport void Apply_Item_Stats(unsigned char pc, item *it, bool add)
+noexport void Apply_Item_Stats(pcnum pc, item *it, bool add)
 {
-	character *ch = &gSave.characters[pc];
+	character *ch;
 	statistic st;
 	int multiplier = add ? 1 : -1;
+	assert(pc < PARTY_SIZE, "Apply_Item_Stats: pc number too high");
+
+	ch = &gSave.characters[pc];
 
 	for (st = 0; st < NUM_STATS; st++) {
 		/* don't count weapon damage stats against both weapons */
@@ -118,10 +124,13 @@ noexport void Apply_Item_Stats(unsigned char pc, item *it, bool add)
 	}
 }
 
-bool Remove_Item_At(unsigned char pc, int index)
+bool Remove_Item_At(pcnum pc, int index)
 {
-	inventory *iv = &gSave.characters[pc].header.items[index];
+	inventory *iv;
 	item *it;
+	assert(pc < PARTY_SIZE, "Remove_Item_At: pc number too high");
+
+	iv = &gSave.characters[pc].header.items[index];
 
 	/* Sanity checks */
 	if (!iv->item) return false;
@@ -139,9 +148,10 @@ bool Remove_Item_At(unsigned char pc, int index)
 	return true;
 }
 
-bool Remove_Item(unsigned char pc, item_id iid)
+bool Remove_Item(pcnum pc, item_id iid)
 {
 	int i;
+	assert(pc < PARTY_SIZE, "Remove_Item: pc number too high");
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
 		if (gSave.characters[pc].header.items[i].item == iid) {
@@ -152,9 +162,10 @@ bool Remove_Item(unsigned char pc, item_id iid)
 	return false;
 }
 
-bool Remove_Equipped_Items(unsigned char pc, itemslot sl)
+bool Remove_Equipped_Items(pcnum pc, itemslot sl)
 {
 	int i;
+	assert(pc < PARTY_SIZE, "Remove_Equipped_Items: pc number too high");
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
 		if (gSave.characters[pc].header.items[i].slot == sl) {
@@ -167,9 +178,10 @@ bool Remove_Equipped_Items(unsigned char pc, itemslot sl)
 	return true;
 }
 
-item *Get_Equipped_Item(unsigned char pc, itemslot sl)
+item *Get_Equipped_Item(pcnum pc, itemslot sl)
 {
 	int i;
+	assert(pc < PARTY_SIZE, "Get_Equipped_Item: pc number too high");
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
 		if (gSave.characters[pc].header.items[i].slot == sl) {
@@ -180,12 +192,16 @@ item *Get_Equipped_Item(unsigned char pc, itemslot sl)
 	return null;
 }
 
-bool Equip_Item_At(unsigned char pc, int index)
+bool Equip_Item_At(pcnum pc, int index)
 {
-	inventory *iv = &gSave.characters[pc].header.items[index];
+	inventory *iv;
 	item *it;
 	itemslot sl;
 	itemtype ty;
+	assert(pc < PARTY_SIZE, "Equip_Item_At: pc number too high");
+	assert(index < INVENTORY_SIZE, "Equip_Item_At: inventory index too high");
+
+	iv = &gSave.characters[pc].header.items[index];
 
 	/* Sanity checks */
 	if (!iv->item) return false;
@@ -224,9 +240,10 @@ bool Equip_Item_At(unsigned char pc, int index)
 	return true;
 }
 
-bool Equip_Item(unsigned char pc, item_id iid)
+bool Equip_Item(pcnum pc, item_id iid)
 {
 	int i;
+	assert(pc < PARTY_SIZE, "Equip_Item: pc number too high");
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
 		if (gSave.characters[pc].header.items[i].item == iid) {
@@ -237,9 +254,10 @@ bool Equip_Item(unsigned char pc, item_id iid)
 	return false;
 }
 
-int Find_Empty_Inventory_Slot(unsigned char pc)
+int Find_Empty_Inventory_Slot(pcnum pc)
 {
 	int i;
+	assert(pc < PARTY_SIZE, "Find_Empty_Inventory_Slot: pc number too high");
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
 		if (gSave.characters[pc].header.items[i].item == 0) {
@@ -250,11 +268,13 @@ int Find_Empty_Inventory_Slot(unsigned char pc)
 	return -1;
 }
 
-bool Add_to_Inventory(unsigned char pc, item_id iid, unsigned char qty)
+bool Add_to_Inventory(pcnum pc, item_id iid, unsigned char qty)
 {
 	int i;
 	inventory *iv;
 	item *it = Lookup_Item(&gItems, iid);
+	assert(pc < PARTY_SIZE, "Add_to_Inventory: pc number too high");
+
 	if (it == null) return false;
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
@@ -273,22 +293,29 @@ bool Add_to_Inventory(unsigned char pc, item_id iid, unsigned char qty)
 	return false;
 }
 
-bool In_Front_Row(unsigned char pc)
+bool In_Front_Row(pcnum pc)
 {
+	assert(pc < PARTY_SIZE, "In_Front_Row: pc number too high");
+
 	return !(gSave.characters[pc].header.flags & cfBackRow);
 }
 
-item *Get_Equipped_Weapon(unsigned char pc, bool primary)
+item *Get_Equipped_Weapon(pcnum pc, bool primary)
 {
-	item *it = Get_Equipped_Item(pc, primary ? slWeapon : slOffHand);
+	item *it;
+	assert(pc < PARTY_SIZE, "Get_Equipped_Weapon: pc number too high");
+
+	it = Get_Equipped_Item(pc, primary ? slWeapon : slOffHand);
 
 	/* shields don't count! */
 	if (it == null || it->type == itShield) return null;
 	return it;
 }
 
-character *Get_Pc(int pc)
+character *Get_Pc(pcnum pc)
 {
+	assert(pc < PARTY_SIZE, "Get_Pc: pc number too high");
+
 	return &gSave.characters[pc];
 }
 
@@ -309,6 +336,8 @@ char *Slot_Name(itemslot sl)
 
 stat_value Get_Pc_Stat(character *c, statistic st)
 {
+	assert(st < NUM_STATS, "Get_Pc_Stat: stat number too high");
+
 	return Get_Stat_Base(c->header.stats, st) + c->header.stats[st];
 }
 
@@ -334,16 +363,18 @@ noexport void Show_Pc_Stat_Pair(character *c, statistic stc, statistic stm, int 
 	Draw_Font(80, y, WHITE, temp, FNT, false);
 }
 
-noexport void Show_Pc_Items(int pc, int selected)
+noexport void Show_Pc_Items(pcnum pc, int selected)
 {
-	character *c = &gSave.characters[pc];
+	character *c;
 	char temp[4];
 	inventory *iv;
 	item *it;
 	int i;
 	int col;
 	int y = ITEMS_Y;
+	assert(pc < PARTY_SIZE, "Show_Pc_Items: pc number too high");
 
+	c = &gSave.characters[pc];
 	for (i = 0; i < INVENTORY_SIZE; i++) {
 		iv = &c->header.items[i];
 
@@ -404,11 +435,13 @@ noexport char *Get_Damage_Range(character *c)
 	return damage_range_buf;
 }
 
-noexport void Show_Pc_Stats(int pc)
+noexport void Show_Pc_Stats(pcnum pc)
 {
-	character *c = &gSave.characters[pc];
+	character *c;
 	char temp[100];
+	assert(pc < PARTY_SIZE, "Show_Pc_Stats: pc number too high");
 
+	c = &gSave.characters[pc];
 	Fill_Double_Buffer(0);
 
 	Draw_Font(8, 8, WHITE, c->header.name, FNT, false);
@@ -442,11 +475,14 @@ noexport unsigned char Confirm(char *prompt)
 
 #define Clear_Confirm() Draw_Square_DB(BLACK, ITEMS_X, CONFIRM_Y, SCREEN_WIDTH, CONFIRM_Y + 7, true)
 
-noexport bool Confirm_Drop_Item(int pc, int index)
+noexport bool Confirm_Drop_Item(pcnum pc, int index)
 {
-	inventory *iv = &gSave.characters[pc].header.items[index];
+	inventory *iv;
 	bool result = false;
 	bool failed = false;
+	assert(pc < PARTY_SIZE, "Confirm_Drop_Item: pc number too high");
+
+	iv = &gSave.characters[pc].header.items[index];
 
 	/* Sanity check */
 	if (!iv->item) return false;
@@ -496,12 +532,16 @@ noexport void Clear_Inventory_Slot(inventory *iv)
 	iv->slot = slNone;
 }
 
-noexport bool Confirm_Give_Item(int pc, int index)
+noexport bool Confirm_Give_Item(pcnum pc, int index)
 {
-	inventory *iv = &gSave.characters[pc].header.items[index],
+	inventory *iv,
 		*dest_iv;
-	int dest_pc,
-		dest_slot;
+	pcnum dest_pc;
+	int dest_slot;
+	assert(pc < PARTY_SIZE, "Confirm_Give_Item: pc number too high");
+	assert(index < INVENTORY_SIZE, "Confirm_Give_Item: inventory index too high");
+
+	iv = &gSave.characters[pc].header.items[index];
 
 	/* Sanity check */
 	if (!iv->item) return false;
@@ -536,11 +576,15 @@ noexport bool Confirm_Give_Item(int pc, int index)
 	return true;
 }
 
-noexport bool Confirm_Use_Item(int pc, int index)
+noexport bool Confirm_Use_Item(pcnum pc, int index)
 {
-	inventory *iv = &gSave.characters[pc].header.items[index];
+	inventory *iv;
 	item *it;
 	int dest_pc = -1;
+	assert(pc < PARTY_SIZE, "Confirm_Use_Item: pc number too high");
+	assert(index < INVENTORY_SIZE, "Confirm_Use_Item: inventory index too high");
+
+	iv = &gSave.characters[pc].header.items[index];
 
 	/* Sanity check */
 	if (!iv->item) return false;
@@ -570,9 +614,9 @@ noexport bool Confirm_Use_Item(int pc, int index)
 	return false;
 }
 
-void Show_Pc_Screen(int starting_pc)
+void Show_Pc_Screen(pcnum starting_pc)
 {
-	int pc = starting_pc;
+	pcnum pc = starting_pc;
 	int selected = 0;
 	redraw_everything = true;
 
