@@ -160,6 +160,8 @@ bool Try_Move_Forward(void)
 	tile *ahead;
 	coord ax, ay;
 
+	Log("Try_Move_Forward: at %d,%d facing %d", gSave.header.x, gSave.header.y, gSave.header.facing);
+
 	centre = Get_Wall(gSave.header.x, gSave.header.y, gSave.header.facing, rAhead);
 	if (centre == null) {
 		Show_Game_String("There's nothing to walk onto.", true);
@@ -199,6 +201,8 @@ bool Try_Move_Forward(void)
 	just_moved = true;
 	can_save = false;
 
+	Log("Try_Move_Forward: moving to %d, %d", ax, ay);
+
 	return true;
 }
 
@@ -207,15 +211,27 @@ void Trigger_Enter_Script(void)
 	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
 
 	if (under->on_enter) {
+		Log("%s", "Trigger_Enter_Script");
 		Run_Code(under->on_enter - 1);
 	}
 
 	trigger_on_enter = false;
 }
 
+void Trigger_Use_Script(void)
+{
+	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
+
+	if (under->on_use) {
+		Log("%s", "Trigger_Use_Script");
+		Run_Code(under->on_use - 1);
+	}
+}
+
 void Trigger_Zone_Enter_Script(void)
 {
 	if (gZone.header.on_enter) {
+		Log("%s", "Trigger_Zone_Enter_Script");
 		Run_Code(gZone.header.on_enter - 1);
 	}
 
@@ -225,6 +241,7 @@ void Trigger_Zone_Enter_Script(void)
 void Trigger_Zone_Move_Script(void)
 {
 	if (gZone.header.on_move) {
+		Log("%s", "Trigger_Zone_Move_Script");
 		Run_Code(gZone.header.on_move - 1);
 	}
 }
@@ -372,6 +389,10 @@ gamestate Show_Dungeon_Screen(void)
 
 			case SCAN_6:
 				Show_Pc_Screen(5);
+				break;
+
+			case SCAN_SPACE:
+				Trigger_Use_Script();
 				break;
 
 				/* TESTING ONLY */
