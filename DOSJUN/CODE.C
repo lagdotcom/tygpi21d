@@ -6,6 +6,22 @@
 
 /*#define TRACE_CODE*/
 
+/* S T R U C T U R E S /////////////////////////////////////////////////// */
+
+typedef struct code_host {
+	bytecode* code;
+	int* globals;
+	int* locals;
+	int* temps;
+	int* stack;
+
+	int pc, next_pc;
+	int sp;
+	bool running;
+	int result;
+	int call_result;
+} code_host;
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 #ifdef TRACE_CODE
@@ -29,6 +45,8 @@ noexport void Code_Error(const char *format, ...)
 #define Code_Error printf
 
 #endif
+
+noexport int call_depth = 0;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -315,6 +333,17 @@ noexport void Return(code_host *h)
 #endif
 }
 
+noexport void Call(code_host *h)
+{
+	int func = Pop_Stack(h);
+
+#ifdef TRACE_CODE
+	fprintf(trace, "call %d", func);
+#endif
+
+	h->call_result = Run_Code(func);
+}
+
 noexport void Combat(code_host *h)
 {
 	encounter_id combat = Pop_Stack(h);
@@ -590,6 +619,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coJump:		Jump(h); return;
 		case coJumpFalse:	JumpFalse(h); return;
 		case coReturn:		Return(h); return;
+		case coCall:		Call(h); return;
 
 		case coCombat:		Combat(h); return;
 		case coPcSpeak:		PcSpeak(h); return;
@@ -618,7 +648,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 #endif
 }
 
-noexport bool Run_Code_Host(code_host *h)
+noexport int Run_Code_Host(code_host *h)
 {
 	h->running = true;
 
@@ -632,13 +662,13 @@ noexport bool Run_Code_Host(code_host *h)
 		h->pc = h->next_pc;
 	}
 
-	return h->result == 0;
+	return h->result;
 }
 
-bool Run_Code(script_id id)
+int Run_Code(script_id id)
 {
 	bool result;
-	code_host h;
+	code_host *h;
 
 	Log("Run_Code: #%d", id);
 
@@ -647,24 +677,29 @@ bool Run_Code(script_id id)
 	fprintf(trace, "script #%d\n", id);
 #endif
 
-	h.code = gZone.scripts[id];
-	h.globals = gSave.script_globals;
-	h.locals = gSave.script_locals[gSave.header.zone];
-	h.temps = SzAlloc(MAX_TEMPS, int, "Run_Code.temps");
-	h.stack = SzAlloc(MAX_STACK, int, "Run_Code.stack");
+	h = SzAlloc(1, code_host, "Run_Code.host");
 
-	h.pc = 0;
-	h.result = 0;
-	h.sp = 0;
+	h->code = gZone.scripts[id];
+	h->globals = gSave.script_globals;
+	h->locals = gSave.script_locals[gSave.header.zone];
+	h->temps = SzAlloc(MAX_TEMPS, int, "Run_Code.temps");
+	h->stack = SzAlloc(MAX_STACK, int, "Run_Code.stack");
 
-	result = Run_Code_Host(&h);
+	h->pc = 0;
+	h->result = 0;
+	h->sp = 0;
 
-	Free(h.temps);
-	Free(h.stack);
+	call_depth++;
+	result = Run_Code_Host(h);
+
+	Free(h->temps);
+	Free(h->stack);
+	Free(h);
 
 #ifdef TRACE_CODE
 	fclose(trace);
 #endif
 
+	call_depth--;
 	return result;
 }

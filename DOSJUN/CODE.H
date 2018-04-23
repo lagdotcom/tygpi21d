@@ -81,23 +81,8 @@ typedef enum code_internal {
 	internalInvalid = 0xFF
 } code_internal;
 
-/* S T R U C T U R E S /////////////////////////////////////////////////// */
-
-typedef struct code_host {
-	bytecode* code;
-	int* globals;
-	int* locals;
-	int* temps;
-	int* stack;
-
-	int pc, next_pc;
-	int sp;
-	bool running;
-	int result;
-} code_host;
-
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-bool Run_Code(script_id id);
+int Run_Code(script_id id);
 
 #endif

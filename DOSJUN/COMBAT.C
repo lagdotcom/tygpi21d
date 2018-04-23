@@ -21,6 +21,7 @@
 #define COMBAT_GRF		1
 #define COMBAT_DYNALLOC	0
 #define COMBAT_RECLAIM	0
+#define COMBAT_DEBUG	1
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -227,11 +228,15 @@ noexport void Kill(combatant *c)
 		earned_experience += c->monster->experience;
 
 		group = c->group;
+#if COMBAT_DEBUG
 		Log("Kill: shrinking group #%d", group);
+#endif
 		Remove_from_List(combat_groups[group], (void*)c);
 		if (combat_groups[group]->size == 0) {
 			groups_alive--;
+#if COMBAT_DEBUG
 			Log("Kill: groups alive=%d", groups_alive);
+#endif
 		}
 	}
 }
@@ -857,14 +862,19 @@ noexport void Do_Combat_Actions(list *active)
 		if (c->action != NO_ACTION && !Is_Dead(c)) {
 			a = &combat_actions[c->action];
 
+#if COMBAT_DEBUG
 			Log("Do_Combat_Actions: %s is doing %s on %s(%d/g%d).", c->name, a->name, t->name, t->index, t->group);
+#endif
 
 			if (!Is_Valid_Target(c, t, a->targeting)) {
+#if COMBAT_DEBUG
 				Log("Do_Combat_Actions: %s(%d/g%d) is an invalid target.", t->name, t->index, t->group);
+#endif
 				t = Get_Random_Target(t->group);
 				if (t == null) {
+#if COMBAT_DEBUG
 					Log("%s", "Do_Combat_Actions: Could not find another target.");
-
+#endif
 					/* only report the failure if we're still fighting */
 					if (groups_alive > 0)
 						Combat_Message("%s misses their chance.", c->name);
@@ -872,7 +882,9 @@ noexport void Do_Combat_Actions(list *active)
 					continue;
 				}
 
+#if COMBAT_DEBUG
 				Log("Do_Combat_Actions: Retargeted to %s(%d/g%d).", t->name, t->index, t->group);
+#endif
 			}
 
 			if (c->is_pc) {

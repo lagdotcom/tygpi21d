@@ -5,7 +5,8 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-#define EXPLORE_GRF 1
+#define EXPLORE_GRF		1
+#define EXPORE_DEBUG	0
 
 #if EXPLORE_GRF
 grf explore_bg;
@@ -160,7 +161,9 @@ bool Try_Move_Forward(void)
 	tile *ahead;
 	coord ax, ay;
 
+#if EXPLORE_DEBUG
 	Log("Try_Move_Forward: at %d,%d facing %d", gSave.header.x, gSave.header.y, gSave.header.facing);
+#endif
 
 	centre = Get_Wall(gSave.header.x, gSave.header.y, gSave.header.facing, rAhead);
 	if (centre == null) {
@@ -201,7 +204,9 @@ bool Try_Move_Forward(void)
 	just_moved = true;
 	can_save = false;
 
+#if EXPLORE_DEBUG
 	Log("Try_Move_Forward: moving to %d,%d", ax, ay);
+#endif
 
 	return true;
 }
@@ -211,7 +216,9 @@ void Trigger_Enter_Script(void)
 	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
 
 	if (under->on_enter) {
+#if EXPLORE_DEBUG
 		Log("%s", "Trigger_Enter_Script");
+#endif
 		Run_Code(under->on_enter - 1);
 	}
 
@@ -223,7 +230,9 @@ void Trigger_Use_Script(void)
 	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
 
 	if (under->on_use) {
+#if EXPLORE_DEBUG
 		Log("%s", "Trigger_Use_Script");
+#endif
 		Run_Code(under->on_use - 1);
 	}
 }
@@ -231,7 +240,9 @@ void Trigger_Use_Script(void)
 void Trigger_Zone_Enter_Script(void)
 {
 	if (gZone.header.on_enter) {
+#if EXPLORE_DEBUG
 		Log("%s", "Trigger_Zone_Enter_Script");
+#endif
 		Run_Code(gZone.header.on_enter - 1);
 	}
 
@@ -241,7 +252,9 @@ void Trigger_Zone_Enter_Script(void)
 void Trigger_Zone_Move_Script(void)
 {
 	if (gZone.header.on_move) {
+#if EXPLORE_DEBUG
 		Log("%s", "Trigger_Zone_Move_Script");
+#endif
 		Run_Code(gZone.header.on_move - 1);
 	}
 }

@@ -83,6 +83,8 @@ typedef UINT8 zone_id;
 
 #ifdef FAR_MEMORY
 
+	#include <alloc.h>
+
     #define PtrDist far
     #define MemSz unsigned long
 
