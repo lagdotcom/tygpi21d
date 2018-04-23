@@ -83,6 +83,8 @@ typedef enum code_internal {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+void Free_Code(void);
+void Initialise_Code(void);
 int Run_Code(script_id id);
 
 #endif

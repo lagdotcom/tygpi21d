@@ -40,9 +40,9 @@ Script wake_up
 	a_colony = 50
 	a_colony_p = 0
 	a_colony_x = 0
-	a_cult = -50
-	a_reanimated = -100
-	a_ascended = -100
+	a_cult = 0 - 50
+	a_reanimated = 0 - 100
+	a_ascended = 0 - 100
 	a_penitents = 0
 
 	Text "You slowly come to your senses, and find yourself in unfamiliar surroundings. You rouse your friends."

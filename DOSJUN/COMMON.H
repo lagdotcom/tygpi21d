@@ -28,7 +28,8 @@ typedef enum gamestate {
 	gsMainMenu,
 	gsDungeon,
 	gsQuit,
-	gsCombat
+	gsCombat,
+	gsConverse,
 } gamestate;
 
 typedef enum job {

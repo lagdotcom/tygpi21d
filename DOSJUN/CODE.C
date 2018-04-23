@@ -4,7 +4,11 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-/*#define TRACE_CODE*/
+#define CODE_LOG		1
+#define CODE_LOG_STACK	0
+#define MAX_OPTIONS		10
+
+#define INVALID_SCRIPT	32767
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -22,31 +26,16 @@ typedef struct code_host {
 	int call_result;
 } code_host;
 
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-#ifdef TRACE_CODE
-#include <stdio.h>
-FILE *trace;
-
-noexport void Code_Error(const char *format, ...)
-{
-	va_list args;
-	va_start(args, format);
-
-	fputs("[ERROR] ", trace);
-	vfprintf(trace, format, args);
-	fputs("\n", trace);
-
-	va_end(args);
-}
-
-#else
-
-#define Code_Error printf
-
-#endif
-
 noexport int call_depth = 0;
+noexport int converse_npc = 0;
+noexport script_id conversation_state = INVALID_SCRIPT;
+noexport char **option_menu;
+noexport script_id *option_state;
+noexport int num_options = 0;
+noexport char *formatting_buf;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -67,16 +56,16 @@ noexport int Next_Literal(code_host *h)
 noexport void Push_Stack(code_host *h, int value)
 {
 	h->stack[h->sp++] = value;
-#ifdef TRACE_CODE
-	fprintf(trace, " (%d pushed) ", value);
+#if CODE_LOG_STACK
+	Log("C|Push_Stack: %d", value);
 #endif
 }
 
 noexport int Pop_Stack(code_host *h)
 {
 	int value = h->stack[--h->sp];
-#ifdef TRACE_CODE
-	fprintf(trace, " (%d popped) ", value);
+#if CODE_LOG_STACK
+	Log("C|Pop_Stack: %d", value);
 #endif
 	return value;
 }
@@ -86,13 +75,19 @@ noexport int Bool(int result)
 	return result ? 1 : 0;
 }
 
+/* TODO */
+noexport char *Get_Npc_Name(int npc)
+{
+	return "NPC";
+}
+
 /* O P C O D E  F U N C T I O N S //////////////////////////////////////// */
 
 noexport void Push_Global(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "push global.%d", index);
+#if CODE_LOG
+	Log("C|Push_Global.%d", index);
 #endif
 	Push_Stack(h, h->globals[index]);
 }
@@ -100,8 +95,8 @@ noexport void Push_Global(code_host *h)
 noexport void Push_Local(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "push local.%d", index);
+#if CODE_LOG
+	Log("C|Push_Local.%d", index);
 #endif
 	Push_Stack(h, h->locals[index]);
 }
@@ -109,8 +104,8 @@ noexport void Push_Local(code_host *h)
 noexport void Push_Temp(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "push temp.%d", index);
+#if CODE_LOG
+	Log("C|Push_Temp.%d", index);
 #endif
 	Push_Stack(h, h->temps[index]);
 }
@@ -118,8 +113,8 @@ noexport void Push_Temp(code_host *h)
 noexport void Push_Internal(code_host *h)
 {
 	internal_id index = Next_Op(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "push internal.%d", index);
+#if CODE_LOG
+	Log("C|Push_Internal.%d", index);
 #endif
 
 	switch (index) {
@@ -148,14 +143,14 @@ noexport void Push_Internal(code_host *h)
 			return;
 	}
 
-	Code_Error("Unknown internal #%d", index);
+	dief("Push_Internal: Unknown internal #%d", index);
 }
 
 noexport void Push_Literal(code_host *h)
 {
 	int value = Next_Literal(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "push literal");
+#if CODE_LOG
+	Log("C|Push_Literal: %d", value);
 #endif
 	Push_Stack(h, value);
 }
@@ -163,8 +158,8 @@ noexport void Push_Literal(code_host *h)
 noexport void Pop_Global(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "pop global.%d", index);
+#if CODE_LOG
+	Log("C|Pop_Global.%d", index);
 #endif
 	h->globals[index] = Pop_Stack(h);
 }
@@ -172,8 +167,8 @@ noexport void Pop_Global(code_host *h)
 noexport void Pop_Local(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "pop local.%d", index);
+#if CODE_LOG
+	Log("C|Pop_Local.%d", index);
 #endif
 	h->locals[index] = Pop_Stack(h);
 }
@@ -181,8 +176,8 @@ noexport void Pop_Local(code_host *h)
 noexport void Pop_Temp(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "pop temp.%d", index);
+#if CODE_LOG
+	Log("C|Pop_Temp.%d", index);
 #endif
 	h->temps[index] = Pop_Stack(h);
 }
@@ -191,8 +186,8 @@ noexport void Add(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "add");
+#if CODE_LOG
+	Log("C|Add: %d + %d", left, right);
 #endif
 	Push_Stack(h, left + right);
 }
@@ -201,8 +196,8 @@ noexport void Sub(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "sub");
+#if CODE_LOG
+	Log("C|Sub: %d - %d", left, right);
 #endif
 	Push_Stack(h, left - right);
 }
@@ -211,8 +206,8 @@ noexport void Mul(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "mul");
+#if CODE_LOG
+	Log("C|Mul: %d * %d", left, right);
 #endif
 	Push_Stack(h, left * right);
 }
@@ -221,8 +216,8 @@ noexport void Div(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "div");
+#if CODE_LOG
+	Log("C|Div: %d / %d", left, right);
 #endif
 	Push_Stack(h, left / right);
 }
@@ -231,8 +226,8 @@ noexport void And(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "and");
+#if CODE_LOG
+	Log("C|And: %d & %d", left, right);
 #endif
 	Push_Stack(h, left & right);
 }
@@ -241,8 +236,8 @@ noexport void Or(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "or");
+#if CODE_LOG
+	Log("C|Or: %d | %d", left, right);
 #endif
 	Push_Stack(h, left | right);
 }
@@ -251,8 +246,8 @@ noexport void Eq(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "eq");
+#if CODE_LOG
+	Log("C|Eq: %d == %d", left, right);
 #endif
 	Push_Stack(h, Bool(left == right));
 }
@@ -261,8 +256,8 @@ noexport void Neq(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "neq");
+#if CODE_LOG
+	Log("C|Neq: %d != %d", left, right);
 #endif
 	Push_Stack(h, Bool(left != right));
 }
@@ -271,8 +266,8 @@ noexport void Lt(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "lt");
+#if CODE_LOG
+	Log("C|Lt: %d < %d", left, right);
 #endif
 	Push_Stack(h, Bool(left < right));
 }
@@ -281,8 +276,8 @@ noexport void Lte(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "lte");
+#if CODE_LOG
+	Log("C|Lte: %d <= %d", left, right);
 #endif
 	Push_Stack(h, Bool(left <= right));
 }
@@ -291,8 +286,8 @@ noexport void Gt(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "gt");
+#if CODE_LOG
+	Log("C|Gt: %d > %d", left, right);
 #endif
 	Push_Stack(h, Bool(left > right));
 }
@@ -301,8 +296,8 @@ noexport void Gte(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "gte");
+#if CODE_LOG
+	Log("C|Gte: %d >= %d", left, right);
 #endif
 	Push_Stack(h, Bool(left >= right));
 }
@@ -310,16 +305,16 @@ noexport void Gte(code_host *h)
 noexport void Jump(code_host *h)
 {
 	h->next_pc = Next_Literal(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "jump %04x", h->next_pc);
+#if CODE_LOG
+	Log("C|Jump: @%04x", h->next_pc);
 #endif
 }
 
 noexport void JumpFalse(code_host *h)
 {
 	int offset = Next_Literal(h);
-#ifdef TRACE_CODE
-	fprintf(trace, "jnz %04x", offset);
+#if CODE_LOG
+	Log("C|JumpFalse: @%04x", offset);
 #endif
 	if (!Pop_Stack(h)) h->next_pc = offset;
 }
@@ -328,8 +323,8 @@ noexport void Return(code_host *h)
 {
 	h->running = false;
 	h->result = 0;
-#ifdef TRACE_CODE
-	fprintf(trace, "return");
+#if CODE_LOG
+	Log("%s", "C|Return @%04x", h->pc);
 #endif
 }
 
@@ -337,8 +332,8 @@ noexport void Call(code_host *h)
 {
 	int func = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "call %d", func);
+#if CODE_LOG
+	Log("C|Call %d", func);
 #endif
 
 	h->call_result = Run_Code(func);
@@ -348,8 +343,8 @@ noexport void Combat(code_host *h)
 {
 	encounter_id combat = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "combat #%d", combat);
+#if CODE_LOG
+	Log("C|Combat %d", combat);
 #endif
 
 	Start_Combat(combat);
@@ -357,24 +352,62 @@ noexport void Combat(code_host *h)
 
 noexport void PcSpeak(code_host *h)
 {
-	char buffer[300];
 	string_id string = Pop_Stack(h);
 	int pc = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "pcspeak %d, #%d", pc, string);
+#if CODE_LOG
+	Log("C|PcSpeak %d, %d", pc, string);
 #endif
 	
-	sprintf(buffer, "%s:\n%s", Get_Pc(pc)->header.name, gZone.code_strings[string]);
-	Show_Game_String(buffer, true);
+	sprintf(formatting_buf, "%s:\n%s", Get_Pc(pc)->header.name, gZone.code_strings[string]);
+	Show_Game_String(formatting_buf, true);
+}
+
+noexport void PcAction(code_host *h)
+{
+	string_id string = Pop_Stack(h);
+	int pc = Pop_Stack(h);
+
+#if CODE_LOG
+	Log("C|PcAction %d, %d", pc, string);
+#endif
+
+	sprintf(formatting_buf, "%s %s", Get_Pc(pc)->header.name, gZone.code_strings[string]);
+	Show_Game_String(formatting_buf, true);
+}
+
+noexport void NpcSpeak(code_host *h)
+{
+	string_id string = Pop_Stack(h);
+	int npc = Pop_Stack(h);
+
+#if CODE_LOG
+	Log("C|NpcSpeak %d, %d", npc, string);
+#endif
+
+	sprintf(formatting_buf, "%s:\n%s", Get_Npc_Name(npc), gZone.code_strings[string]);
+	Show_Game_String(formatting_buf, true);
+}
+
+noexport void NpcAction(code_host *h)
+{
+	string_id string = Pop_Stack(h);
+	int npc = Pop_Stack(h);
+
+#if CODE_LOG
+	Log("C|NpcAction %d, %d", npc, string);
+#endif
+
+	sprintf(formatting_buf, "%s %s", Get_Npc_Name(npc), gZone.code_strings[string]);
+	Show_Game_String(formatting_buf, true);
 }
 
 noexport void Text(code_host *h)
 {
 	string_id string = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "text #%d", string);
+#if CODE_LOG
+	Log("C|Text %d", string);
 #endif
 
 	Show_Game_String(gZone.code_strings[string], true);
@@ -387,8 +420,8 @@ noexport void Unlock(code_host *h)
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "unlock %d, %d, %d", x, y, dir);
+#if CODE_LOG
+	Log("C|Unlock %d, %d, %d", x, y, dir);
 #endif
 
 	tile = TILE(gZone, x, y);
@@ -403,8 +436,8 @@ noexport void GiveItem(code_host *h)
 	item_id item = Pop_Stack(h);
 	int pc = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "giveitem %d, %d, %d", pc, item, qty);
+#if CODE_LOG
+	Log("C|GiveItem %d, %d, %d", pc, item, qty);
 #endif
 
 	h->result = Add_to_Inventory(pc, item, qty);
@@ -415,8 +448,8 @@ noexport void EquipItem(code_host *h)
 	item_id item = Pop_Stack(h);
 	int pc = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "equipitem %d, %d", pc, item);
+#if CODE_LOG
+	Log("C|EquipItem %d, %d", pc, item);
 #endif
 
 	h->result = Equip_Item(pc, item);
@@ -428,8 +461,8 @@ noexport void SetTileDescription(code_host *h)
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "settiledescription %d, %d, #%d", x, y, string);
+#if CODE_LOG
+	Log("C|SetTileDescription %d, %d, #%d", x, y, string);
 #endif
 
 	TILE(gZone, x, y)->description = string;
@@ -442,8 +475,8 @@ noexport void SetTileColour(code_host *h)
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "settilecolour %d, %d, %d, %d", x, y, f, c);
+#if CODE_LOG
+	Log("C|SetTileColour %d, %d, %d, %d", x, y, f, c);
 #endif
 
 	switch (f) {
@@ -469,8 +502,8 @@ noexport void SetTileThing(code_host *h)
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "settilething %d, %d, %d", x, y, th);
+#if CODE_LOG
+	Log("C|SetTileThing %d, %d, %d", x, y, th);
 #endif
 
 	TILE(gZone, x, y)->thing = th;
@@ -485,8 +518,8 @@ noexport void Teleport(code_host *h)
 	coord x = Pop_Stack(h);
 	zone_id zone = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "teleport %d, %d, %d, %d, %d", zone, x, y, facing, transition);
+#if CODE_LOG
+	Log("C|Teleport %d, %d, %d, %d, %d", zone, x, y, facing, transition);
 #endif
 
 	switch (transition) {
@@ -512,8 +545,8 @@ noexport void SetDanger(code_host *h)
 {
 	int danger = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "setdanger %d", danger);
+#if CODE_LOG
+	Log("C|SetDanger %d", danger);
 #endif
 
 	gSave.header.danger = danger;
@@ -521,8 +554,8 @@ noexport void SetDanger(code_host *h)
 
 noexport void Safe(code_host *h)
 {
-#ifdef TRACE_CODE
-	fprintf(trace, "safe");
+#if CODE_LOG
+	Log("%s", "C|Safe");
 #endif
 
 	can_save = true;
@@ -535,8 +568,8 @@ noexport void RemoveWall(code_host *h)
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "removewall %d, %d, %d", x, y, dir);
+#if CODE_LOG
+	Log("C|RemoveWall %d, %d, %d", x, y, dir);
 #endif
 
 	tile = TILE(gZone, x, y);
@@ -548,8 +581,8 @@ noexport void RemoveWall(code_host *h)
 
 noexport void Refresh(code_host *h)
 {
-#ifdef TRACE_CODE
-	fprintf(trace, "refresh");
+#if CODE_LOG
+	Log("%s", "C|Refresh");
 #endif
 
 	Draw_FP();
@@ -562,8 +595,8 @@ noexport void AddItem(code_host *h)
 	int qty = Pop_Stack(h);
 	item_id item = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "additem %d, %d", item, qty);
+#if CODE_LOG
+	Log("C|AddItem %d, %d", item, qty);
 #endif
 
 	for (pc = 0; pc < PARTY_SIZE; pc++) {
@@ -576,21 +609,75 @@ noexport void Music(code_host *h)
 {
 	string_id string = Pop_Stack(h);
 
-#ifdef TRACE_CODE
-	fprintf(trace, "music #%d", string);
+#if CODE_LOG
+	Log("C|Music %d", string);
 #endif
 
 	Play_Music(gZone.code_strings[string]);
+}
+
+noexport void Converse(code_host *h)
+{
+	conversation_state = Pop_Stack(h);
+	converse_npc = Pop_Stack(h);
+
+#if CODE_LOG
+	Log("C|Converse %d, %d", converse_npc, conversation_state);
+#endif
+
+	gState = gsConverse;
+	/* TODO: show conversation UI */
+}
+
+noexport void EndConverse(code_host *h)
+{
+#if CODE_LOG
+	Log("%s", "C|EndConverse");
+#endif
+
+	gState = gsDungeon;
+
+	/* TODO: remove conversation UI */
+	redraw_everything = true;
+}
+
+noexport void ChangeState(code_host *h)
+{
+	conversation_state = Pop_Stack(h);
+
+#if CODE_LOG
+	Log("C|ChangeState %d", conversation_state);
+#endif
+
+	if (gState != gsConverse) {
+		dief("ChangeState: tried to change to %d while not in gsConverse", conversation_state);
+		return;
+	}
+}
+
+noexport void Option(code_host *h)
+{
+	string_id string = Pop_Stack(h);
+	script_id state = Pop_Stack(h);
+
+#if CODE_LOG
+	Log("C|Option %d, %d", state, string);
+#endif
+
+	if (num_options == MAX_OPTIONS) {
+		dief("Option: too many Options, max is %d", MAX_OPTIONS);
+		return;
+	}
+
+	option_state[num_options] = state;
+	option_menu[num_options] = gZone.code_strings[string];
+	num_options++;
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
 {
-#ifdef TRACE_CODE
-	fprintf(trace, "%04x: [%02x] ", h->pc, op);
-#endif
-
 	switch (op) {
 		case coPushGlobal:	Push_Global(h); return;
 		case coPushLocal:	Push_Local(h); return;
@@ -637,15 +724,19 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coRefresh:		Refresh(h); return;
 		case coAddItem:		AddItem(h); return;
 		case coMusic:		Music(h); return;
+
+		case coConverse:	Converse(h); return;
+		case coEndConverse:	EndConverse(h); return;
+		case coChangeState:	ChangeState(h); return;
+		case coOption:		Option(h); return;
+		case coPcAction:	PcAction(h); return;
+		case coNpcAction:	NpcAction(h); return;
+		case coNpcSpeak:	NpcSpeak(h); return;
 	}
 
 	h->running = false;
 	h->result = -1;
-	Code_Error("Unknown opcode: %2x", op);
-
-#ifdef TRACE_CODE
-	fprintf(trace, "UNKNOWN");
-#endif
+	dief("Run_Code_Instruction: Unknown opcode: %02x", op);
 }
 
 noexport int Run_Code_Host(code_host *h)
@@ -655,14 +746,31 @@ noexport int Run_Code_Host(code_host *h)
 	while (h->running) {
 		h->next_pc = h->pc + 1;
 		Run_Code_Instruction(h, h->code[h->pc]);
-#ifdef TRACE_CODE
-		fprintf(trace, "\n");
-#endif
-
 		h->pc = h->next_pc;
 	}
 
 	return h->result;
+}
+
+noexport script_id Pick_Option(void)
+{
+	int choice;
+
+	if (num_options == 0) {
+		return INVALID_SCRIPT;
+	}
+
+	/* TODO */
+	choice = Input_Menu(option_menu, num_options, 20, 20);
+	return option_state[choice];
+}
+
+noexport void Reset_Host(code_host *h, script_id id)
+{
+	h->code = gZone.scripts[id];
+	h->pc = 0;
+	h->result = 0;
+	h->sp = 0;
 }
 
 int Run_Code(script_id id)
@@ -670,36 +778,63 @@ int Run_Code(script_id id)
 	bool result;
 	code_host *h;
 
-	Log("Run_Code: #%d", id);
-
-#ifdef TRACE_CODE
-	trace = fopen("JUNTRACE.TXT", "w");
-	fprintf(trace, "script #%d\n", id);
-#endif
+	Log("Run_Code: %d", id);
 
 	h = SzAlloc(1, code_host, "Run_Code.host");
 
-	h->code = gZone.scripts[id];
 	h->globals = gSave.script_globals;
 	h->locals = gSave.script_locals[gSave.header.zone];
 	h->temps = SzAlloc(MAX_TEMPS, int, "Run_Code.temps");
 	h->stack = SzAlloc(MAX_STACK, int, "Run_Code.stack");
 
-	h->pc = 0;
-	h->result = 0;
-	h->sp = 0;
-
+	Reset_Host(h, id);
 	call_depth++;
-	result = Run_Code_Host(h);
+
+	do {
+		conversation_state = INVALID_SCRIPT;
+		result = Run_Code_Host(h);
+
+		/* Continue active conversation */
+		if (gState == gsConverse && call_depth == 1) {
+#if CODE_LOG
+			Log("%s", "Run_Code: still in conversation");
+#endif
+			if (conversation_state == INVALID_SCRIPT) {
+				conversation_state = Pick_Option();
+#if CODE_LOG
+				Log("Run_Code: player picked option %d", conversation_state);
+#endif
+			}
+
+			if (conversation_state != INVALID_SCRIPT) {
+				Reset_Host(h, conversation_state);
+				num_options = 0;
+
+				Log("Run_Code: state %d", conversation_state);
+			} else {
+				EndConverse(h);
+			}
+		}
+	} while (gState == gsConverse);
 
 	Free(h->temps);
 	Free(h->stack);
 	Free(h);
 
-#ifdef TRACE_CODE
-	fclose(trace);
-#endif
-
 	call_depth--;
 	return result;
+}
+
+void Initialise_Code(void)
+{
+	option_menu = SzAlloc(MAX_OPTIONS, char *, "Initialise_Code.option_menu");
+	option_state = SzAlloc(MAX_OPTIONS, script_id, "Initialise_Code.option_state");
+	formatting_buf = SzAlloc(300, char, "Initialise_Code.buf");
+}
+
+void Free_Code(void)
+{
+	Free(option_menu);
+	Free(option_state);
+	Free(formatting_buf);
 }

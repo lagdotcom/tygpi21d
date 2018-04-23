@@ -466,6 +466,7 @@ void main(void)
 	Initialise_Jobs();
 	Initialise_Sound();
 	Initialise_Music();
+	Initialise_Code();
 
 	printf("OK\n");
 
@@ -502,6 +503,7 @@ void main(void)
 	Free_Jobs();
 	Free_Sound();
 	Free_Music();
+	Free_Code();
 	Delete_Picture();
 	Free_Font(FNT);
 

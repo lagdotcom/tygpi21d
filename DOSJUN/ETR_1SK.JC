@@ -81,7 +81,7 @@ EndState
 State sk_start
 	If sk_flags & sk_met
 		NpcSpeak npc_sk, "You've returned. This time with more coin, I hope."
-		Call sk_main
+		ChangeState sk_main
 	Else
 		sk_flags = sk_flags | sk_met
 		Text "Before you stands a short man with unruly facial hair. He studies your party with wild eyes for a moment, then shifts slightly under his cloak."
