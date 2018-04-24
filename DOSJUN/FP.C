@@ -17,6 +17,8 @@
 
 #define MAX_FILENAME_LENGTH	20
 
+#define FP_IMSZ		0
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 bool redraw_fp;
@@ -63,7 +65,11 @@ bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
 	}
 
 	size = Image_Size(image);
+#if FP_IMSZ
 	image->buffer = Allocate(size, 1, tag);
+#else
+	image->buffer = Allocate(image->header.width + 1, image->header.height + 1, tag);
+#endif
 	if (image->buffer == null) {
 		fclose(fp);
 		dief("Load_Picture: Could not allocate picture buffer.\n");
