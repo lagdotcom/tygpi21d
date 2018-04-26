@@ -42,7 +42,7 @@ void Pc_Select(pcnum num)
 
 void Draw_Character_Status(pcnum pc, int x, int y)
 {
-	character* ch;
+	character *ch;
 	char buffer[9];
 	assert(pc < PARTY_SIZE, "Draw_Character_Status: pc number too high");
 

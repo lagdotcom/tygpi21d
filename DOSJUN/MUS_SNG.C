@@ -52,7 +52,7 @@ typedef enum notestate {
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct player {
-	sng* s;
+	sng *s;
 	int stride;
 	bool playing;
 	UINT8 note_volume;
@@ -138,7 +138,7 @@ noexport void interrupt Play_SNG(void);
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-noexport long filesize(FILE* fp)
+noexport long filesize(FILE *fp)
 {
 	long size, pos;
 
@@ -149,7 +149,7 @@ noexport long filesize(FILE* fp)
 	return size;
 }
 
-bool Load_SNG(char *filename, sng* s)
+bool Load_SNG(char *filename, sng *s)
 {
 	long pattern_data;
 	FILE *fp = fopen(filename, "rb");
@@ -175,7 +175,7 @@ bool Load_SNG(char *filename, sng* s)
 	return true;
 }
 
-void Free_SNG(sng* s)
+void Free_SNG(sng *s)
 {
 	Free(s->patterns);
 }
@@ -389,7 +389,7 @@ noexport void Play_Notes_On(void)
 	}
 }
 
-noexport void Set_Note(chan* ch)
+noexport void Set_Note(chan *ch)
 {
 	INT16 freq;
 

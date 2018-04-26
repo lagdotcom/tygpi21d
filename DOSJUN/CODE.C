@@ -13,11 +13,11 @@
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct code_host {
-	bytecode* code;
-	int* globals;
-	int* locals;
-	int* temps;
-	int* stack;
+	bytecode *code;
+	int *globals;
+	int *locals;
+	int *temps;
+	int *stack;
 
 	int pc, next_pc;
 	int sp;
@@ -55,6 +55,8 @@ noexport int Next_Literal(code_host *h)
 
 noexport void Push_Stack(code_host *h, int value)
 {
+	assert(h->sp < MAX_STACK, "Push_Stack: stack is full");
+
 	h->stack[h->sp++] = value;
 #if CODE_LOG_STACK
 	Log("C|Push_Stack: %d", value);
@@ -63,7 +65,10 @@ noexport void Push_Stack(code_host *h, int value)
 
 noexport int Pop_Stack(code_host *h)
 {
-	int value = h->stack[--h->sp];
+	int value;
+	assert(h->sp > 0, "Pop_Stack: stack is empty");
+
+	value = h->stack[--h->sp];
 #if CODE_LOG_STACK
 	Log("C|Pop_Stack: %d", value);
 #endif

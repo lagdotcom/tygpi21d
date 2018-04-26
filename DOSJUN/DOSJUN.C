@@ -81,7 +81,7 @@ bool Is_Coord_Valid(coord x, coord y)
 	return true;
 }
 
-tile* Get_Adjacent_Tile(coord x, coord y, dir dir, char multiple)
+tile *Get_Adjacent_Tile(coord x, coord y, dir dir, char multiple)
 {
 	coord ax = x + Get_X_Offset(dir) * multiple;
 	coord ay = y + Get_Y_Offset(dir) * multiple;
@@ -90,9 +90,9 @@ tile* Get_Adjacent_Tile(coord x, coord y, dir dir, char multiple)
 	return (tile*)null;
 }
 
-wall* Get_Wall(coord x, coord y, dir dir, relative rel)
+wall *Get_Wall(coord x, coord y, dir dir, relative rel)
 {
-	tile* under = TILE(gZone, x, y);
+	tile *under = TILE(gZone, x, y);
 
 	switch (dir) {
 		case dNorth:
@@ -146,7 +146,7 @@ void Show_Game_String(char *string, bool wait_for_key)
 
 void Draw_Description(void)
 {
-	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
+	tile *under = TILE(gZone, gSave.header.x, gSave.header.y);
 
 	if (under->description > 0) {
 		Show_Game_String(gZone.strings[under->description - 1], false);
@@ -213,7 +213,7 @@ bool Try_Move_Forward(void)
 
 void Trigger_Enter_Script(void)
 {
-	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
+	tile *under = TILE(gZone, gSave.header.x, gSave.header.y);
 
 	if (under->on_enter) {
 #if EXPLORE_DEBUG
@@ -227,7 +227,7 @@ void Trigger_Enter_Script(void)
 
 void Trigger_Use_Script(void)
 {
-	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
+	tile *under = TILE(gZone, gSave.header.x, gSave.header.y);
 
 	if (under->on_use) {
 #if EXPLORE_DEBUG
@@ -270,8 +270,8 @@ void Random_Encounter(encounter_id eid)
 void Check_Random_Encounter(void)
 {
 	int i;
-	tile* under = TILE(gZone, gSave.header.x, gSave.header.y);
-	etable* et;
+	tile *under = TILE(gZone, gSave.header.x, gSave.header.y);
+	etable *et;
 	if (under->etable == 0) return;
 
 	if (gSave.header.encounter_chance < 200)

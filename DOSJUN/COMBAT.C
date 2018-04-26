@@ -283,7 +283,7 @@ bool Check_Attack(combatant *source)
 	return in_front_row;
 }
 
-noexport void Attack_Inner(combatant *source, combatant *target, item* weapon)
+noexport void Attack_Inner(combatant *source, combatant *target, item *weapon)
 {
 	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
 	stat_value min, max;
@@ -398,7 +398,7 @@ noexport void Clear_Encounter(void)
 	Clear_List(combatants);
 }
 
-void Add_Monster(groupnum group, monster* template)
+void Add_Monster(groupnum group, monster *template)
 {
 	list *buffs;
 	combatant *c = SzAlloc(1, combatant, "Add_Monster.combatant");
