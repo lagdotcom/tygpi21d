@@ -53,8 +53,13 @@ typedef struct sng {
 	char *patterns;
 } sng;
 
+/* G L O B A L S ///////////////////////////////////////////////////////// */
+
+extern bool sng_playing;
+
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+void Continue_SNG(void);
 void Free_SNG(sng *s);
 bool Load_SNG(char *filename, sng *s);
 void Start_SNG(sng *s);

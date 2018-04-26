@@ -20,11 +20,13 @@
 #include "list.h"
 #include "main.h"
 #include "music.h"
+#include "mus_sng.h"
 #include "monsters.h"
 #include "party.h"
 #include "save.h"
 #include "sound.h"
 #include "status.h"
+#include "timer.h"
 #include "zone.h"
 
 #include "jbard.h"

@@ -457,6 +457,7 @@ void main(void)
 	}
 
 	Load_Font("6x8.FNT", FNT);
+	Initialise_Timer();
 	Initialise_Campaign(&gCampaign);
 	Initialise_Items(&gItems);
 	Initialise_Monsters(&gMonsters);
@@ -506,6 +507,7 @@ void main(void)
 	Free_Code();
 	Delete_Picture();
 	Free_Font(FNT);
+	Free_Timer();
 
 	Free_DB();
 

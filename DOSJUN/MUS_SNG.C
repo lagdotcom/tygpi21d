@@ -18,8 +18,6 @@
 #define ORDER_REPEAT	0xff
 
 #define MAX_FREQ		1535
-#define TIMER_INT		0x1c
-#define TIMER_TICK_FREQ	(0x427d / 5)
 
 typedef enum effect {
 	FX_ARPEGGIO = 0,
@@ -133,8 +131,7 @@ noexport chan *channels;
 noexport char *ghost_regs;
 noexport char *instrument_data;
 
-noexport void interrupt (*oldtimer)(void);
-noexport void interrupt Play_SNG(void);
+bool sng_playing = false;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -293,17 +290,8 @@ void Start_SNG(sng *s)
 
 	Reset_Adlib();
 
-	if (!p.playing) {
-		disable();
-		oldtimer = getvect(TIMER_INT);
-		setvect(TIMER_INT, Play_SNG);
-
-		outportb(0x43, 0x36);
-		outportb(0x40, TIMER_TICK_FREQ & 0xff);
-		outportb(0x40, (TIMER_TICK_FREQ & 0xff00) >> 8);
-		enable();
-	}
 	p.playing = true;
+	sng_playing = true;
 }
 
 void Stop_SNG(void)
@@ -311,14 +299,8 @@ void Stop_SNG(void)
 	int i;
 	if (!p.playing) return;
 
-	disable();
-	setvect(TIMER_INT, oldtimer);
-
-	outportb(0x43, 0x36);
-	outportb(0x40, 0);
-	outportb(0x40, 0);
-	enable();
 	p.playing = false;
+	sng_playing = false;
 
 	All_Note_Off();
 
@@ -456,6 +438,7 @@ noexport void Play_Notes_Update(void)
 				switch (patt) {
 					case ORDER_HALT:
 						p.playing = false;
+						sng_playing = false;
 						return;
 					case ORDER_REPEAT:
 						p.song_position = 0;
@@ -628,7 +611,7 @@ noexport void Play_Notes_Update(void)
 	}
 }
 
-noexport void interrupt Play_SNG(void)
+void Continue_SNG(void)
 {
 	/* TIMER ROUTINE */
 	p.time_counter++;
