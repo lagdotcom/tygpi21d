@@ -17,7 +17,7 @@ void Draw_GRF(int sx, int sy, grf *g, int img, int minx, int miny, int maxx, int
 {
 	int x, y, ex;
 	grf_image *im;
-	unsigned char *d, i, len;
+	unsigned char *d, i, len, c;
 
 	assert(img < g->num_images, "Draw_GRF: image index too high");
 
@@ -51,8 +51,9 @@ void Draw_GRF(int sx, int sy, grf *g, int img, int minx, int miny, int maxx, int
 			default:
 				len = *(d++) - OP_DATA + 1;
 				for (i = 0; i < len; i++) {
+					c = *(d++);
 					if (x >= minx && x < maxx && y >= miny && y < maxy)
-						Plot_Pixel_Fast_DB(x, y, *(d++));
+						Plot_Pixel_Fast_DB(x, y, c);
 
 					x++;
 					if (x >= ex) {
