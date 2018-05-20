@@ -4,15 +4,19 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Initialise_Campaign(campaign *c)
+bool Read_Campaign(FILE *fp, campaign *c)
 {
-	c->zones = null;
+	int i;
+
+	fread(&c->header, sizeof(campaign_header), 1, fp);
+	Check_Version_Header(c->header);
+
+	return true;
 }
 
 bool Load_Campaign(char *filename, campaign *c)
 {
-	int i;
-
+	bool res;
 	FILE *fp = fopen(filename, "rb");
 	if (!fp) {
 		dief("Load_Campaign: Could not open for reading: %s\n", filename);
@@ -21,17 +25,9 @@ bool Load_Campaign(char *filename, campaign *c)
 
 	Log("Load_Campaign: %s", filename);
 
-	fread(&c->header, sizeof(campaign_header), 1, fp);
-	Check_Version_Header(c->header);
-
-	c->zones = SzAlloc(c->header.num_zones, char *, "Load_Campaign");
-	if (c->zones == null) die("Load_Campaign: out of memory");
-	for (i = 0; i < c->header.num_zones; i++) {
-		c->zones[i] = Read_LengthString(fp, "Load_Campaign.n");
-	}
-
+	res = Read_Campaign(fp, c);
 	fclose(fp);
-	return true;
+	return res;
 }
 
 void Free_Campaign(campaign *c)
@@ -39,13 +35,6 @@ void Free_Campaign(campaign *c)
 	int i;
 
 	Log("Free_Campaign: %p", c);
-
-	if (c->zones != null) {
-		for (i = 0; i < c->header.num_zones; i++) {
-			Free(c->zones[i]);
-		}
-		Free(c->zones);
-	}
 }
 
 bool Save_Campaign(char *filename, campaign *c)
@@ -59,10 +48,6 @@ bool Save_Campaign(char *filename, campaign *c)
 
 	Set_Version_Header(c->header);
 	fwrite(&c->header, sizeof(campaign_header), 1, fp);
-
-	for (i = 0; i < c->header.num_zones; i++) {
-		Write_LengthString(c->zones[i], fp);
-	}
 
 	fclose(fp);
 	return true;

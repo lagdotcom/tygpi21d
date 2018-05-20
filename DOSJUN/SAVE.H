@@ -39,17 +39,20 @@ typedef struct character {
 	list *buffs;
 } character;
 
+typedef struct partystatus {
+	file_id zone;
+	dir_id facing;
+	coord x, y;
+	UINT8 encounter_chance;
+	UINT8 danger;
+} partystatus;
+
 typedef struct save_header {
 	VERSION_HEADER;
 
 	char campaign_name[8];
-	zone_id zone;
-	dir_id facing;
-	coord x, y;
 	UINT8 num_characters;
 	zone_id num_zones;
-	UINT8 encounter_chance;
-	UINT8 danger;
 
 	unsigned char unused[SAVE_HEADER_PADDING];
 } save_header;

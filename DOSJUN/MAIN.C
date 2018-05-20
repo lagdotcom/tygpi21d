@@ -78,12 +78,12 @@ void Start_Campaign(char *name)
 	Load_Campaign(buffer, &gCampaign);
 
 	gSave.header.zone = gCampaign.header.start_zone;
-	gSave.header.x = gCampaign.header.start_x;
-	gSave.header.y = gCampaign.header.start_y;
-	gSave.header.facing = gCampaign.header.start_facing;
+	gParty.x = gCampaign.header.start_x;
+	gParty.y = gCampaign.header.start_y;
+	gParty.facing = gCampaign.header.start_facing;
 	gSave.header.num_zones = gCampaign.header.num_zones;
-	gSave.header.encounter_chance = 0;
-	gSave.header.danger = 1;
+	gParty.encounter_chance = 0;
+	gParty.danger = 1;
 
 	gSave.script_globals = SzAlloc(MAX_GLOBALS, int, "Start_Campaign.globals");
 	gSave.script_locals = SzAlloc(gSave.header.num_zones, int *, "Start_Campaign.locals");
@@ -177,6 +177,7 @@ gamestate Show_Main_Menu(void)
 	int option;
 	bool done = false;
 	char *menu[3];
+	sng s;
 	gamestate next;
 	menu[0] = "NEW GAME";
 	menu[1] = "LOAD GAME";
@@ -188,6 +189,9 @@ gamestate Show_Main_Menu(void)
 	PCX_Init(&menu_bg);
 	PCX_Load("MAIN.PCX", &menu_bg, true);
 #endif
+
+	Load_SNG("ANTICAR.SNG", &s);
+	Start_SNG(&s);
 
 	while (!done) {
 #if MENU_GRF
@@ -217,6 +221,9 @@ gamestate Show_Main_Menu(void)
 				break;
 		}
 	}
+
+	Stop_SNG();
+	Free_SNG(&s);
 
 #if MENU_GRF
 	Free_GRF(&menu_bg);

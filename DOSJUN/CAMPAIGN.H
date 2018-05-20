@@ -7,17 +7,18 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define CAMPAIGN_HEADER_PADDING		23
+#define CAMPAIGN_HEADER_PADDING		18
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct campaign_header {
 	VERSION_HEADER;
 
-	zone_id start_zone;
-	coord start_x, start_y;
-	dir_id start_facing;
-	zone_id num_zones;
+	UINT16 global_count;
+	UINT16 flag_count;
+	UINT16 script_id;
+	UINT16 name_id;
+	UINT16 desc_id;
 
 	unsigned char unused[CAMPAIGN_HEADER_PADDING];
 } campaign_header;
@@ -30,9 +31,9 @@ typedef struct campaign {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-void Initialise_Campaign(campaign *c);
 bool Load_Campaign(char *filename, campaign *c);
 void Free_Campaign(campaign *c);
+bool Read_Campaign(FILE *fp, campaign *c);
 bool Save_Campaign(char *filename, campaign *c);
 
 #endif

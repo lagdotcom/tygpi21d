@@ -9,6 +9,7 @@
 #include "campaign.h"
 #include "code.h"
 #include "combat.h"
+#include "djn.h"
 #include "font.h"
 #include "fp.h"
 #include "grf.h"
@@ -54,10 +55,12 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
+extern djn *gDjn;
 extern campaign gCampaign;
 extern gamestate gState;
 extern items gItems;
 extern monsters gMonsters;
+extern partystatus gParty;
 extern save gSave;
 extern zone gZone;
 

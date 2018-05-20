@@ -14,10 +14,12 @@ grf explore_bg;
 pcx_picture explore_bg;
 #endif
 
+djn *gDjn;
 campaign gCampaign;
 gamestate gState;
 items gItems;
 monsters gMonsters;
+partystatus gParty;
 save gSave;
 zone gZone;
 
@@ -146,7 +148,7 @@ void Show_Game_String(char *string, bool wait_for_key)
 
 void Draw_Description(void)
 {
-	tile *under = TILE(gZone, gSave.header.x, gSave.header.y);
+	tile *under = TILE(gZone, gParty.x, gParty.y);
 
 	if (under->description > 0) {
 		Show_Game_String(gZone.strings[under->description - 1], false);
@@ -162,10 +164,10 @@ bool Try_Move_Forward(void)
 	coord ax, ay;
 
 #if EXPLORE_DEBUG
-	Log("Try_Move_Forward: at %d,%d facing %d", gSave.header.x, gSave.header.y, gSave.header.facing);
+	Log("Try_Move_Forward: at %d,%d facing %d", gParty.x, gParty.y, gParty.facing);
 #endif
 
-	centre = Get_Wall(gSave.header.x, gSave.header.y, gSave.header.facing, rAhead);
+	centre = Get_Wall(gParty.x, gParty.y, gParty.facing, rAhead);
 	if (centre == null) {
 		Show_Game_String("There's nothing to walk onto.", true);
 		return false;
@@ -183,7 +185,7 @@ bool Try_Move_Forward(void)
 		}
 	}
 
-	ahead = Get_Adjacent_Tile(gSave.header.x, gSave.header.y, gSave.header.facing, 1);
+	ahead = Get_Adjacent_Tile(gParty.x, gParty.y, gParty.facing, 1);
 	if (ahead == null) {
 		Show_Game_String("There's nothing to walk onto.", true);
 		return false;
@@ -193,11 +195,11 @@ bool Try_Move_Forward(void)
 		return false;
 	}
 
-	ax = gSave.header.x + Get_X_Offset(gSave.header.facing);
-	ay = gSave.header.y + Get_Y_Offset(gSave.header.facing);
+	ax = gParty.x + Get_X_Offset(gParty.facing);
+	ay = gParty.y + Get_Y_Offset(gParty.facing);
 
-	gSave.header.x = ax;
-	gSave.header.y = ay;
+	gParty.x = ax;
+	gParty.y = ay;
 	redraw_description = true;
 	redraw_fp = true;
 	trigger_on_enter = true;
@@ -213,7 +215,7 @@ bool Try_Move_Forward(void)
 
 void Trigger_Enter_Script(void)
 {
-	tile *under = TILE(gZone, gSave.header.x, gSave.header.y);
+	tile *under = TILE(gZone, gParty.x, gParty.y);
 
 	if (under->on_enter) {
 #if EXPLORE_DEBUG
@@ -227,7 +229,7 @@ void Trigger_Enter_Script(void)
 
 void Trigger_Use_Script(void)
 {
-	tile *under = TILE(gZone, gSave.header.x, gSave.header.y);
+	tile *under = TILE(gZone, gParty.x, gParty.y);
 
 	if (under->on_use) {
 #if EXPLORE_DEBUG
@@ -263,21 +265,21 @@ void Random_Encounter(encounter_id eid)
 {
 	assert(eid < gZone.header.num_encounters, "Random_Encounter: encounter number too high");
 
-	gSave.header.encounter_chance = 0;
+	gParty.encounter_chance = 0;
 	Start_Combat(eid);
 }
 
 void Check_Random_Encounter(void)
 {
 	int i;
-	tile *under = TILE(gZone, gSave.header.x, gSave.header.y);
+	tile *under = TILE(gZone, gParty.x, gParty.y);
 	etable *et;
 	if (under->etable == 0) return;
 
-	if (gSave.header.encounter_chance < 200)
-		gSave.header.encounter_chance += under->danger + gSave.header.danger;
+	if (gParty.encounter_chance < 200)
+		gParty.encounter_chance += under->danger + gParty.danger;
 
-	if (randint(0, 100) < gSave.header.encounter_chance) {
+	if (randint(0, 100) < gParty.encounter_chance) {
 		et = &gZone.etables[under->etable - 1];
 		for (i = 0; i < et->possibilities; i++) {
 			if (randint(0, 100) < et->percentages[i]) {
@@ -342,7 +344,7 @@ gamestate Show_Dungeon_Screen(void)
 
 	while (!done) {
 		if (just_moved) {
-			Log("Show_Dungeon_Screen: at %d,%d", gSave.header.x, gSave.header.y);
+			Log("Show_Dungeon_Screen: at %d,%d", gParty.x, gParty.y);
 		}
 
 		Redraw_Dungeon_Screen(true);
@@ -367,13 +369,13 @@ gamestate Show_Dungeon_Screen(void)
 				break;
 
 			case SCAN_LEFT:
-				gSave.header.facing = Turn_Left(gSave.header.facing);
+				gParty.facing = Turn_Left(gParty.facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
 				break;
 
 			case SCAN_RIGHT:
-				gSave.header.facing = Turn_Right(gSave.header.facing);
+				gParty.facing = Turn_Right(gParty.facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
 				break;
@@ -443,16 +445,61 @@ noexport void Free_DB(void)
 	Free(double_buffer);
 }
 
-void main(void)
+noexport void Ready_Djn_Chain(int count, char **filenames)
+{
+	int i;
+	djn *chain,
+		*temp;
+
+	gDjn = null;
+	for (i = 1; i < count; i++) {
+		temp = SzAlloc(1, djn, "Ready_Djn_Chain");
+		
+		if (Load_Djn(filenames[i], temp)) {
+			if (gDjn == null) {
+				gDjn = temp;
+				chain = gDjn;
+			} else {
+				chain->next = temp;
+				chain = chain->next;
+			}
+		}
+	}
+}
+
+noexport void Free_Djn_Chain(void)
+{
+	djn *old,
+		*d = gDjn;
+
+	while (d) {
+		Free_Djn(d);
+
+		old = d;
+		d = d->next;
+		Free(old);
+	}
+
+	gDjn = null;
+}
+
+void main(int argc, char **argv)
 {
 	Start_Memory_Tracking();
 	Clear_Log();
 	Log("main: Init");
 
-	printf("Initialising DOSJUN...\n");
+	printf("%s", "Initialising DOSJUN...\n");
+
+	Ready_Djn_Chain(argc, argv);
+	if (gDjn == null) {
+		printf("%s", "Syntax: DOSJUN <file.djn> [file.djn]...\n");
+		Stop_Memory_Tracking();
+		return;
+	}
 
 	if (!Initialise_DB()) {
-		dief("main: Not enough memory to create double buffer.");
+		dief("%s", "main: Not enough memory to create double buffer.");
 		return;
 	}
 
@@ -474,7 +521,7 @@ void main(void)
 	Set_Video_Mode(VGA256);
 	Load_Palette("DOSJUN.PAL");
 
-	Log("main: Menu");
+	Log("%s", "main: Menu");
 	gState = gsMainMenu;
 
 	while (gState != gsQuit) {
@@ -491,8 +538,8 @@ void main(void)
 
 	Set_Video_Mode(TEXT_MODE);
 
-	Log("main: Cleanup");
-	printf("Cleaning up after DOSJUN...");
+	Log("%s", "main: Cleanup");
+	printf("%s", "Cleaning up after DOSJUN...");
 
 	Free_Campaign(&gCampaign);
 	Free_Items(&gItems);
@@ -510,9 +557,10 @@ void main(void)
 	Free_Timer();
 
 	Free_DB();
+	Free_Djn_Chain();
 
-	printf("OK!\n");
+	printf("%s", "OK!\n");
 	Stop_Memory_Tracking();
 
-	Log("main: Done");
+	Log("%s", "main: Done");
 }
