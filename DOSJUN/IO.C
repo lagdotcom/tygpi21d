@@ -18,6 +18,9 @@ char *Read_LengthString(FILE *fp, char *tag)
 	length len;
 
 	fread(&len, sizeof(length), 1, fp);
+	if (len == 0)
+		return null;
+
 	string = SzAlloc(len + 1, char, tag);
 	if (string == null)
 		die("Read_LengthString: out of memory");
