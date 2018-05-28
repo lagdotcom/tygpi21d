@@ -50,11 +50,11 @@ extern job_spec jobspecs[NUM_JOBS];
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-void Add_Experience(character *c, UINT32 xp);
+void Add_Experience(pc *c, UINT32 xp);
 void Free_Jobs(void);
 void Initialise_Jobs(void);
-void Level_Up(character *c);
-void Set_Job(character *c, job job);
+void Level_Up(pc *c);
+void Set_Job(pc *c, job job);
 
 /* Get string representation of stat */
 char *Stat_Name(statistic st);

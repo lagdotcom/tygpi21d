@@ -154,13 +154,13 @@ noexport tile *Get_Offset_Tile(int forward, int left)
 {
 	coord ax, ay;
 
-	char fx = Get_X_Offset(gSave.header.facing);
-	char fy = Get_Y_Offset(gSave.header.facing);
+	char fx = Get_X_Offset(gParty->facing);
+	char fy = Get_Y_Offset(gParty->facing);
 	char lx = fy;
 	char ly = -fx;
 
-	ax = gSave.header.x + fx * forward + lx * left;
-	ay = gSave.header.y + fy * forward + ly * left;
+	ax = gParty->x + fx * forward + lx * left;
+	ay = gParty->y + fy * forward + ly * left;
 
 	if (Is_Coord_Valid(ax, ay)) return TILE(gZone, ax, ay);
 	return null;
@@ -230,7 +230,7 @@ void Draw_FP(void)
 
 	Clear_FP();
 
-	bwall = gSave.header.facing;
+	bwall = gParty->facing;
 	lwall = Turn_Left(bwall);
 	rwall = Turn_Right(bwall);
 
@@ -381,34 +381,4 @@ void Show_Picture(char *name)
 		input += 128;
 		output += SCREEN_WIDTH;
 	}
-}
-
-void Free_Textures(void)
-{
-	int i;
-
-	Log("Free_Textures: %d", num_textures);
-
-	if (num_textures > 0) {
-		for (i = 0; i < num_textures * TEXTURE_PIECES; i++)
-			Free(textures[i].buffer);
-		Free(textures);
-
-		num_textures = 0;
-	}
-
-	Free_Things();
-}
-
-void Load_Textures(zone *z)
-{
-	int i;
-	Free_Textures();
-
-	num_textures = z->header.num_textures;
-	textures = SzAlloc(num_textures * TEXTURE_PIECES, pcx_picture, "Load_Textures");
-	for (i = 0; i < num_textures; i++)
-		Load_Texture_Pieces(z->textures[i], i);
-
-	Load_Things();
 }

@@ -3,7 +3,7 @@
 
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include "files.h"
+#include "save.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -35,7 +35,6 @@ typedef enum itemspecial {
 	spHeal,
 } itemspecial;
 
-#define ITEMS_HEADER_PADDING		26
 #define ITEM_PADDING				6
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
@@ -53,29 +52,12 @@ typedef struct item {
 	stat_value stats[NUM_STATS];
 } item;
 
-typedef struct items_header {
-	VERSION_HEADER;
-
-	UINT16 num_items;
-
-	unsigned char unused[ITEMS_HEADER_PADDING];
-} items_header;
-
-typedef struct items {
-	items_header header;
-
-	item *items;
-} items;
-
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-void Free_Items(items *i);
-void Initialise_Items(items *i);
 bool Item_Has_Use(item *it);
 bool Item_Needs_Target(item *it);
-bool Load_Items(char *filename, items *i);
-item *Lookup_Item(items *lib, item_id id);
-bool Save_Items(char *filename, items *i);
-bool Use_Item(item *it, int pc, int targ);
+bool Read_Item(FILE *fp, item *i);
+bool Save_Item(char *filename, item *i);
+bool Use_Item(item *it, pc *user, pc *targ);
 
 #endif

@@ -5,115 +5,117 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Initialise_Savefile(save *s)
+noexport int Flag_Size(UINT16 count)
+{
+	int size = g->num_flags / 16;
+	if (g->num_flags & 0xf) size++;
+
+	return size;
+}
+
+void Initialise_Savefile(djn *s)
+{
+	partystatus *party;
+	globals *globs;
+
+	party = SzAlloc(1, partystatus, "Initialise_Savefile.party");
+	Add_to_Djn(s, party, 0, ftParty);
+
+	globs = SzAlloc(1, globals, "Initialise_Savefile.globs");
+	Add_to_Djn(s, globs, 0, ftGlobals);
+
+	s->next = gDjn;
+}
+
+bool Load_Savefile(char *filename, djn *s)
+{
+	return Load_Djn(filename, s);
+}
+
+void Free_Savefile(djn *s)
+{
+	Free_Djn(s);
+}
+
+bool Save_Savefile(char *filename, djn *s)
+{
+	return Save_Djn(filename, s);
+}
+
+void Initialise_Globals(globals *g, campaign *c)
+{
+	UINT16 size;
+
+	g->num_globals = c->global_count;
+	g->globals = SzAlloc(g->num_globals, UINT16, "Initialise_Globals.globals");
+
+	g->num_flags = c->flag_count;
+	g->flags = SzAlloc(Flag_Size(g->num_flags), UINT16, "Initialise_Globals.flags");
+}
+
+void Initialise_Overlay(zone_overlay *o, zone *z)
 {
 	int i;
+	itempos *p;
 
-	s->header.num_zones = 0;
+	o->num_locals = z->header.num_locals;
+	o->locals = SzAlloc(o->num_locals, UINT16, "Initialise_Overlay.locals");
 
-	s->script_globals = null;
-	s->script_locals = null;
-
-	for (i = 0; i < PARTY_SIZE; i++) {
-		s->characters[i].skills = null;
-		s->characters[i].buffs = null;
+	o->items = New_List_of_Capacity(ltObject, z->header.num_items, "Initialise_Overlay.items");
+	for (i = 0; i < z->header.num_items; i++) {
+		p = SzAlloc(1, itempos, "Initialise_Overlay.item[i]");
+		memcpy(p, &z->items[i], sizeof(itempos));
+		Add_to_List(o->items, p);
 	}
 }
 
-bool Load_Savefile(char *filename, save *s)
+void Free_Globals(globals *g)
 {
-	character *c;
-	int i;
-
-	FILE *fp = fopen(filename, "rb");
-	if (!fp) {
-		dief("Load_Savefile: Could not open for reading: %s\n", filename);
-		return false;
-	}
-
-	Log("Load_Savefile: %s", filename);
-
-	fread(&s->header, sizeof(save_header), 1, fp);
-	Check_Version_Header(s->header);
-
-	for (i = 0; i < PARTY_SIZE; i++) {
-		c = &s->characters[i];
-		fread(&c->header, sizeof(character_header), 1, fp);
-		c->skills = Read_List(fp, "Load_Savefile.chars.i.skills");
-		c->buffs = Read_List(fp, "Load_Savefile.chars.i.buffs");
-	}
-
-	s->script_globals = SzAlloc(MAX_GLOBALS, int, "Load_Savefile.globals");
-	if (s->script_globals == null) goto _dead;
-	fread(s->script_globals, sizeof(int), MAX_GLOBALS, fp);
-
-	s->script_locals = SzAlloc(s->header.num_zones, int *, "Load_Savefile.locals");
-	if (s->script_locals == null) goto _dead;
-	for (i = 0; i < s->header.num_zones; i++) {
-		s->script_locals[i] = SzAlloc(MAX_LOCALS, int, "Load_Savefile.locals.i");
-		if (s->script_locals[i] == null) goto _dead;
-		fread(s->script_locals[i], sizeof(int), MAX_LOCALS, fp);
-	}
-
-	fclose(fp);
-	return true;
-
-_dead:
-	die("Load_Savefile: out of memory");
-	return false;
+	Free(g->globals);
+	Free(g->flags);
 }
 
-void Free_Savefile(save *s)
+void Free_Overlay(zone_overlay *o)
 {
-	character *c;
-	int i;
-
-	Log("Free_Savefile: %p", s);
-
-	Free(s->script_globals);
-
-	for (i = 0; i < s->header.num_zones; i++)
-		Free(s->script_locals[i]);
-	Free(s->script_locals);
-	s->header.num_zones = 0;
-
-	for (i = 0; i < PARTY_SIZE; i++) {
-		c = &s->characters[i];
-		Free_List(c->skills);
-		Clear_List(c->buffs);
-		Free_List(c->buffs);
-	}
+	Free(o->locals);
+	Clear_List(o->items);
+	Free_List(o->items);
 }
 
-bool Save_Savefile(char *filename, save *s)
+void Read_Globals(FILE *fp, globals *g)
 {
-	character *c;
-	int i;
+	int size;
 
-	FILE *fp = fopen(filename, "wb");
-	if (!fp) {
-		dief("Save_Savefile: Could not open for reading: %s\n", filename);
-		return false;
-	}
+	fread(g, GLOBALS_HEADER_SZ, 1, fp);
 
-	Log("Save_Savefile: %s", filename);
+	g->globals = SzAlloc(g->num_globals, INT16, "Read_Globals.globals");
+	fread(g->globals, sizeof(INT16), g->num_globals, fp);
 
-	Set_Version_Header(s->header);
-	fwrite(&s->header, sizeof(save_header), 1, fp);
+	size = Flag_Size(g->num_flags);
+	g->flags = SzAlloc(size, INT16, "Read_Globals.flags");
+	fread(g->flags, sizeof(INT16), size, fp);
+}
 
-	for (i = 0; i < PARTY_SIZE; i++) {
-		c = &s->characters[i];
-		fwrite(&c->header, sizeof(character_header), 1, fp);
-		Write_List(c->skills, fp);
-		Write_List(c->buffs, fp);
-	}
+void Read_Overlay(FILE *fp, zone_overlay *o)
+{
+	fread(o, OVERLAY_HEADER_SZ, 1, fp);
 
-	fwrite(s->script_globals, sizeof(int), MAX_GLOBALS, fp);
+	o->locals = SzAlloc(o->num_locals, INT16, "Read_Overlay.locals");
+	fread(o->locals, sizeof(INT16), g->locals, fp);
 
-	for (i = 0; i < s->header.num_zones; i++) {
-		fwrite(s->script_locals[i], sizeof(int), MAX_LOCALS, fp);
-	}
+	o->items = Read_List(fp, "Read_Overlay.items");
+}
 
-	fclose(fp);
-	return true;
+void Write_Globals(FILE *fp, globals *g)
+{
+	fwrite(g, GLOBALS_HEADER_SZ, 1, fp);
+	fwrite(g->globals, sizeof(INT16), g->num_globals, fp);
+	fwrite(g->flags, sizeof(INT16), Flag_Size(g->num_flags), fp);
+}
+
+void Write_Overlay(FILE *fp, zone_overlay *o)
+{
+	fwrite(o, OVERLAY_HEADER_SZ, 1, fp);
+	fwrite(o->locals, sizeof(INT16), o->num_locals, fp);
+	Write_List(o->items, fp);
 }

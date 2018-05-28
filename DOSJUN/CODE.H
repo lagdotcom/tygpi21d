@@ -68,6 +68,13 @@ typedef enum code_op {
 	coNpcSpeak,
 	coNpcAction,
 	coOption,
+	coChoosePcName,
+	coJoinParty,
+	coLeaveParty,
+	coChoosePcPortrait,
+	coChoosePcPronouns,
+	coSetAttitude,
+	coGetAttitude,
 } code_op;
 
 typedef enum code_internal {
@@ -77,6 +84,8 @@ typedef enum code_internal {
 	internalDanger,
 	internalJustMoved,
 	internalSuccess,
+	internalReturn,
+	internalPartyFull,
 
 	internalInvalid = 0xFF
 } code_internal;

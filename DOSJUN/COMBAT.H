@@ -45,7 +45,7 @@ typedef enum expiry_type {
 typedef struct combatant {
 	char *name;
 	stat_value *stats;
-	character *pc;
+	pc *pc;
 	monster *monster;
 	list *buffs;
 	list *skills;

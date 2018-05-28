@@ -7,9 +7,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-typedef UINT16 file_id;
-
-#define DJN_FILE_PADDING	4
+#define DJN_FILE_PADDING	3
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -38,7 +36,20 @@ typedef enum djn_type {
 	ftFont,
 	ftStrings,
 	ftPalette,
+
+	ftParty = 0xC0,
+	ftGlobals,
+	ftZoneOverlay,
 } djn_type;
+
+typedef enum djn_subtype {
+	stUnknown,
+	stScreen,
+	stTexture,
+	stPortrait,
+	stThing,
+	stMonster,
+} djn_subtype;
 
 typedef struct djn_file {
 	file_id id;
@@ -46,6 +57,7 @@ typedef struct djn_file {
 	UINT32 size;
 	UINT8 type;
 	UINT8 flags;
+	UINT8 subtype;
 	unsigned char unused[DJN_FILE_PADDING];
 
 	char *name;
@@ -67,10 +79,13 @@ typedef struct djn {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+void Add_to_Djn(djn *d, void *f, file_id id, djn_type ty);
 void Close_Djn(djn *d);
 void *Find_File_Type(djn *chain, djn_type ty);
 void Free_Djn(djn *d);
 bool Load_Djn(char *filename, djn *d);
-void *Lookup_File(djn *d, file_id id);
+void *Lookup_File(djn *chain, file_id id);
+bool Save_Djn(char *filename, djn *d);
+void Unload_File(djn *chain, file_id id);
 
 #endif

@@ -7,6 +7,7 @@
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+void Move_to_Zone(file_id id);
 gamestate Show_Main_Menu(void);
 
 #endif

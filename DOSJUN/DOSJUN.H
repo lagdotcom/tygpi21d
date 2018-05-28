@@ -27,6 +27,7 @@
 #include "save.h"
 #include "sound.h"
 #include "status.h"
+#include "strings.h"
 #include "timer.h"
 #include "zone.h"
 
@@ -40,7 +41,7 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define FNT (&font6x8)
-#define TILE(z, x, y) (&z.tiles[(y) * z.header.width + (x)])
+#define TILE(z, x, y) (&z->tiles[(y) * z->header.width + (x)])
 
 #define BLACK	0
 #define GREY	7
@@ -56,13 +57,13 @@
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 extern djn *gDjn;
-extern campaign gCampaign;
+extern campaign *gCampaign;
 extern gamestate gState;
-extern items gItems;
-extern monsters gMonsters;
-extern partystatus gParty;
-extern save gSave;
-extern zone gZone;
+extern partystatus *gParty;
+extern djn *gSave;
+extern zone *gZone;
+extern zone_overlay *gOverlay;
+extern globals *gGlobals;
 
 extern bool
 	trigger_on_enter,
@@ -84,6 +85,7 @@ char Get_X_Offset(dir dir);
 char Get_Y_Offset(dir dir);
 bool Is_Coord_Valid(coord x, coord y);
 void Redraw_Dungeon_Screen(bool script);
+char *Resolve_String(int id);
 void Show_Game_String(char *string, bool wait_for_key);
 dir Turn_Left(dir dir);
 dir Turn_Right(dir dir);

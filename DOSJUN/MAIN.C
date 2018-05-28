@@ -10,20 +10,14 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-#define MENU_GRF 1
-
-#if MENU_GRF
-grf menu_bg;
-#else
-pcx_picture menu_bg;
-#endif
+grf *menu_bg;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Initialise_Character(character *c, job job, int str,
+void Initialise_Character(pc *c, job job, int str,
 	int intelligence, int dex, int hp, int mp)
 {
-	character_header *ch = &c->header;
+	pc_header *ch = &c->header;
 	int i;
 
 	ch->experience = 0;
@@ -44,107 +38,97 @@ void Initialise_Character(character *c, job job, int str,
 	Set_Job(c, job);
 }
 
-void Load_Campaign_Data(void)
-{
-	char buffer[13];
-
-	strcpy(buffer, gSave.header.campaign_name);
-	strcat(buffer, ".ITM");
-	Free_Items(&gItems);
-	Load_Items(buffer, &gItems);
-
-	strcpy(buffer, gSave.header.campaign_name);
-	strcat(buffer, ".MON");
-	Free_Monsters(&gMonsters);
-	Load_Monsters(buffer, &gMonsters);
-
-	strcpy(buffer, gCampaign.zones[gSave.header.zone]);
-	strcat(buffer, ".ZON");
-	Free_Zone(&gZone);
-	Load_Zone(buffer, &gZone);
-
-	Load_Textures(&gZone);
-}
-
-void Start_Campaign(char *name)
-{
-	char buffer[13];
-	int i;
-
-	strncpy(gSave.header.campaign_name, name, 8);
-
-	strcpy(buffer, name);
-	strcat(buffer, ".CMP");
-	Load_Campaign(buffer, &gCampaign);
-
-	gSave.header.zone = gCampaign.header.start_zone;
-	gParty.x = gCampaign.header.start_x;
-	gParty.y = gCampaign.header.start_y;
-	gParty.facing = gCampaign.header.start_facing;
-	gSave.header.num_zones = gCampaign.header.num_zones;
-	gParty.encounter_chance = 0;
-	gParty.danger = 1;
-
-	gSave.script_globals = SzAlloc(MAX_GLOBALS, int, "Start_Campaign.globals");
-	gSave.script_locals = SzAlloc(gSave.header.num_zones, int *, "Start_Campaign.locals");
-	if (gSave.script_globals == null || gSave.script_locals == null) goto _dead;
-
-	for (i = 0; i < gSave.header.num_zones; i++) {
-		gSave.script_locals[i] = SzAlloc(MAX_LOCALS, int, "Start_Campaign.locals.i");
-		if (gSave.script_locals[i] == null) goto _dead;
-	}
-
-	Load_Campaign_Data();
-	return;
-
-_dead:
-	die("Start_Campaign: out of memory");
-}
-
-gamestate Start_New_Game(void)
+#if 0
+noexport gamestate Start_New_Game(void)
 {
 	Fill_Double_Buffer(0);
 
+	Run_Code(gCampaign->script_id);
+
 	Draw_Wrapped_Font(0, 0, SCREEN_WIDTH, 32, WHITE, "You've always wanted to play one of those 'Escape the Room' games, so you get together a group of friends and go to a local one.", FNT, false);
-	gSave.header.num_characters = 6;
+	gSave->header.num_characters = 6;
 
 	Draw_Font(0, 40, WHITE, "Who's the bossy one?", FNT, true);
-	Input_String(168, 40, gSave.characters[0].header.name, NAME_SIZE);
+	Input_String(168, 40, gSave->characters[0].header.name, NAME_SIZE);
 	/*                                                  Str Int Dex  HP MP*/
-	Initialise_Character(&gSave.characters[0], jBard,     8, 13, 13, 10, 0);
+	Initialise_Character(&gSave->characters[0], jBard,     8, 13, 13, 10, 0);
 
 	Draw_Font(0, 56, WHITE, "Who's the strong one?", FNT, true);
-	Input_String(176, 56, gSave.characters[1].header.name, NAME_SIZE);
-	Initialise_Character(&gSave.characters[1], jFighter, 14,  9, 11, 20, 0);
+	Input_String(176, 56, gSave->characters[1].header.name, NAME_SIZE);
+	Initialise_Character(&gSave->characters[1], jFighter, 14,  9, 11, 20, 0);
 
 	Draw_Font(0, 72, WHITE, "Who's the nerd?", FNT, true);;
-	Input_String(128, 72, gSave.characters[2].header.name, NAME_SIZE);
-	Initialise_Character(&gSave.characters[2], jMage,     9, 14, 11,  8, 8);
+	Input_String(128, 72, gSave->characters[2].header.name, NAME_SIZE);
+	Initialise_Character(&gSave->characters[2], jMage,     9, 14, 11,  8, 8);
 
 	Draw_Font(0, 88, WHITE, "Who's kinda shifty?", FNT, true);
-	Input_String(160, 88, gSave.characters[3].header.name, NAME_SIZE);
-	Initialise_Character(&gSave.characters[3], jRogue,    9, 11, 14, 12, 0);
+	Input_String(160, 88, gSave->characters[3].header.name, NAME_SIZE);
+	Initialise_Character(&gSave->characters[3], jRogue,    9, 11, 14, 12, 0);
 
 	Draw_Font(0, 104, WHITE, "Who cares a lot?", FNT, true);
-	Input_String(136, 104, gSave.characters[4].header.name, NAME_SIZE);
-	Initialise_Character(&gSave.characters[4], jCleric,  13, 13,  8, 14, 6);
+	Input_String(136, 104, gSave->characters[4].header.name, NAME_SIZE);
+	Initialise_Character(&gSave->characters[4], jCleric,  13, 13,  8, 14, 6);
 
 	Draw_Font(0, 120, WHITE, "Who likes guns?", FNT, true);
-	Input_String(128, 120, gSave.characters[5].header.name, NAME_SIZE);
-	Initialise_Character(&gSave.characters[5], jRanger,  13,  8, 13, 13, 0);
+	Input_String(128, 120, gSave->characters[5].header.name, NAME_SIZE);
+	Initialise_Character(&gSave->characters[5], jRanger,  13,  8, 13, 13, 0);
 
 	Start_Campaign("ETR");
+
+	return gsDungeon;
+}
+#endif
+
+gamestate Start_New_Game(void)
+{
+	gSave = SzAlloc(1, djn, "Start_New_Game.save");
+	if (!gSave) goto _dead;
+	Initialise_Savefile(gSave);
+
+	gGlobals = Find_File_Type(gSave, ftGlobals);
+	Initialise_Globals(gGlobals, gCampaign);
+
+	gParty = Find_File_Type(gSave, ftParty);
+	gParty->encounter_chance = 0;
+	gParty->danger = 1;
+
+	redraw_everything = true;
 	trigger_on_enter = true;
 	trigger_zone_enter = true;
 	can_save = false;
 
+	Fill_Double_Buffer(0);
+	gState = gsCutscene;
+	Run_Code(gCampaign->script_id);
+
 	return gsDungeon;
+
+_dead:
+	die("Start_New_Game: out of memory");
+	return gsQuit;
+}
+
+void Move_to_Zone(file_id id)
+{
+	gZone = Lookup_File(gDjn, id);
+	if (gZone == null)
+		dief("Move_to_Zone: could not find zone #%d", id);
+
+	gParty->zone = id;
+
+	gSave->next = null;
+	gOverlay = Lookup_File(gSave, id);
+	gSave->next = gDjn;
+	if (gOverlay == null) {
+		gOverlay = SzAlloc(1, zone_overlay, "Move_to_Zone.overlay");
+		Initialise_Overlay(gOverlay, gZone);
+		Add_to_Djn(gSave, gOverlay, id, ftZoneOverlay);
+	}
 }
 
 bool Load_Game(void)
 {
 	char **filenames;
-	char buffer[13];
 	int choice,
 		count;
 
@@ -153,14 +137,13 @@ bool Load_Game(void)
 	filenames = Get_Directory_Listing("*.SAV", &count);
 	choice = Input_Menu(filenames, count, 0, 0);
 
-	Load_Savefile(filenames[choice], &gSave);
+	Load_Savefile(filenames[choice], gSave);
 
-	strcpy(buffer, gSave.header.campaign_name);
-	strcat(buffer, ".CMP");
-	Load_Campaign(buffer, &gCampaign);
+	/* TODO: check this is the right campaign for the save file!! */
 
-	Load_Campaign_Data();
+	Move_to_Zone(gParty->zone);
 	gState = gsDungeon;
+	redraw_everything = true;
 	trigger_on_enter = false;
 	trigger_zone_enter = true;
 	can_save = true;
@@ -183,23 +166,16 @@ gamestate Show_Main_Menu(void)
 	menu[1] = "LOAD GAME";
 	menu[2] = "QUIT";
 
-#if MENU_GRF
-	Load_GRF("MAIN.GRF", &menu_bg, "Show_Main_Menu.menu_bg");
-#else
-	PCX_Init(&menu_bg);
-	PCX_Load("MAIN.PCX", &menu_bg, true);
-#endif
+	menu_bg = Lookup_File(gDjn, gCampaign->menubg_id);
 
 	Load_SNG("ANTICAR.SNG", &s);
 	Start_SNG(&s);
 
 	while (!done) {
-#if MENU_GRF
 		Fill_Double_Buffer(0);
-		Draw_GRF(0, 0, &menu_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-#else
-		memcpy(double_buffer, menu_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
-#endif
+		if (menu_bg)
+			Draw_GRF(0, 0, menu_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
 		option = Input_Menu(menu, 3, 100, 140);
 
 		switch (option) {
@@ -225,10 +201,8 @@ gamestate Show_Main_Menu(void)
 	Stop_SNG();
 	Free_SNG(&s);
 
-#if MENU_GRF
-	Free_GRF(&menu_bg);
-#else
-	PCX_Delete(&menu_bg);
-#endif
+	if (menu_bg)
+		Unload_File(gDjn, gCampaign->menubg_id);
+
 	return next;
 }

@@ -40,23 +40,23 @@ void Pc_Select(pcnum num)
 	Pc_Select_Box(num == 5, SX2, SY + 68);
 }
 
-void Draw_Character_Status(pcnum pc, int x, int y)
+void Draw_Character_Status(pcnum index, int x, int y)
 {
-	character *ch;
 	char buffer[9];
-	assert(pc < PARTY_SIZE, "Draw_Character_Status: pc number too high");
+	pc *pc;
 
-	ch = &gSave.characters[pc];
+	pc = Get_Pc(index);
+	if (!pc) return;
 
-	strncpy(buffer, ch->header.name, 8);
+	strncpy(buffer, pc->name, 8);
 	buffer[8] = 0;
 	Draw_Font(x + 16, y, WHITE, buffer, FNT, false);
 
-	sprintf(buffer, "H%3d/%-3d", ch->header.stats[sHP], ch->header.stats[sMaxHP]);
+	sprintf(buffer, "H%3d/%-3d", pc->header.stats[sHP], pc->header.stats[sMaxHP]);
 	Draw_Font(x + 16, y + 8, WHITE, buffer, FNT, false);
 
-	if (ch->header.stats[sMaxMP] > 0) {
-		sprintf(buffer, "M%3d/%-3d", ch->header.stats[sMP], ch->header.stats[sMaxMP]);
+	if (pc->header.stats[sMaxMP] > 0) {
+		sprintf(buffer, "M%3d/%-3d", pc->header.stats[sMP], pc->header.stats[sMaxMP]);
 		Draw_Font(x + 16, y + 16, WHITE, buffer, FNT, false);
 	}
 }
@@ -106,37 +106,32 @@ bool Is_Weapon(item *it)
 	}
 }
 
-noexport void Apply_Item_Stats(pcnum pc, item *it, bool add)
+noexport void Apply_Item_Stats(pc *pc, item *it, bool add)
 {
-	character *ch;
 	statistic st;
 	int multiplier = add ? 1 : -1;
-	assert(pc < PARTY_SIZE, "Apply_Item_Stats: pc number too high");
-
-	ch = &gSave.characters[pc];
 
 	for (st = 0; st < NUM_STATS; st++) {
 		/* don't count weapon damage stats against both weapons */
 		if (Is_Weapon(it) && (st == sMinDamage || st == sMaxDamage))
 			continue;
 
-		ch->header.stats[st] += multiplier * it->stats[st];
+		pc->header.stats[st] += multiplier * it->stats[st];
 	}
 }
 
-bool Remove_Item_At(pcnum pc, int index)
+bool Remove_Item_At(pc *pc, int index)
 {
 	inventory *iv;
 	item *it;
-	assert(pc < PARTY_SIZE, "Remove_Item_At: pc number too high");
 
-	iv = &gSave.characters[pc].header.items[index];
+	iv = &pc->header.items[index];
 
 	/* Sanity checks */
 	if (!iv->item) return false;
 	if (!(iv->flags & vfEquipped)) return false;
 
-	it = Lookup_Item(&gItems, iv->item);
+	it = Lookup_File(gDjn, iv->item);
 	if (it == null) return false;
 
 	/* TODO: curse? */
@@ -148,13 +143,12 @@ bool Remove_Item_At(pcnum pc, int index)
 	return true;
 }
 
-bool Remove_Item(pcnum pc, item_id iid)
+bool Remove_Item(pc *pc, item_id iid)
 {
 	int i;
-	assert(pc < PARTY_SIZE, "Remove_Item: pc number too high");
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		if (gSave.characters[pc].header.items[i].item == iid) {
+		if (pc->header.items[i].item == iid) {
 			return Remove_Item_At(pc, i);
 		}
 	}
@@ -162,13 +156,12 @@ bool Remove_Item(pcnum pc, item_id iid)
 	return false;
 }
 
-bool Remove_Equipped_Items(pcnum pc, itemslot sl)
+bool Remove_Equipped_Items(pc *pc, itemslot sl)
 {
 	int i;
-	assert(pc < PARTY_SIZE, "Remove_Equipped_Items: pc number too high");
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		if (gSave.characters[pc].header.items[i].slot == sl) {
+		if (pc->header.items[i].slot == sl) {
 			if (!Remove_Item_At(pc, i)) {
 				return false;
 			}
@@ -178,36 +171,34 @@ bool Remove_Equipped_Items(pcnum pc, itemslot sl)
 	return true;
 }
 
-item *Get_Equipped_Item(pcnum pc, itemslot sl)
+item *Get_Equipped_Item(pc *pc, itemslot sl)
 {
 	int i;
-	assert(pc < PARTY_SIZE, "Get_Equipped_Item: pc number too high");
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		if (gSave.characters[pc].header.items[i].slot == sl) {
-			return Lookup_Item(&gItems, gSave.characters[pc].header.items[i].item);
+		if (pc->header.items[i].slot == sl) {
+			return Lookup_File(gDjn, pc->header.items[i].item);
 		}
 	}
 	
 	return null;
 }
 
-bool Equip_Item_At(pcnum pc, int index)
+bool Equip_Item_At(pc *pc, int index)
 {
 	inventory *iv;
 	item *it;
 	itemslot sl;
 	itemtype ty;
-	assert(pc < PARTY_SIZE, "Equip_Item_At: pc number too high");
 	assert(index < INVENTORY_SIZE, "Equip_Item_At: inventory index too high");
 
-	iv = &gSave.characters[pc].header.items[index];
+	iv = &pc->header.items[index];
 
 	/* Sanity checks */
 	if (!iv->item) return false;
 	if (iv->flags & vfEquipped) return false;
 
-	it = Lookup_Item(&gItems, iv->item);
+	it = Lookup_File(gDjn, iv->item);
 	if (it == null) return false;
 
 	/* TODO: check char can equip item */
@@ -240,13 +231,12 @@ bool Equip_Item_At(pcnum pc, int index)
 	return true;
 }
 
-bool Equip_Item(pcnum pc, item_id iid)
+bool Equip_Item(pc *pc, item_id iid)
 {
 	int i;
-	assert(pc < PARTY_SIZE, "Equip_Item: pc number too high");
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		if (gSave.characters[pc].header.items[i].item == iid) {
+		if (pc->header.items[i].item == iid) {
 			return Equip_Item_At(pc, i);
 		}
 	}
@@ -254,13 +244,12 @@ bool Equip_Item(pcnum pc, item_id iid)
 	return false;
 }
 
-int Find_Empty_Inventory_Slot(pcnum pc)
+int Find_Empty_Inventory_Slot(pc *pc)
 {
 	int i;
-	assert(pc < PARTY_SIZE, "Find_Empty_Inventory_Slot: pc number too high");
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		if (gSave.characters[pc].header.items[i].item == 0) {
+		if (pc->header.items[i].item == 0) {
 			return i;
 		}
 	}
@@ -268,17 +257,16 @@ int Find_Empty_Inventory_Slot(pcnum pc)
 	return -1;
 }
 
-bool Add_to_Inventory(pcnum pc, item_id iid, unsigned char qty)
+bool Add_to_Inventory(pc *pc, item_id iid, unsigned char qty)
 {
 	int i;
 	inventory *iv;
-	item *it = Lookup_Item(&gItems, iid);
-	assert(pc < PARTY_SIZE, "Add_to_Inventory: pc number too high");
+	item *it = Lookup_File(gDjn, iid);
 
 	if (it == null) return false;
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		iv = &gSave.characters[pc].header.items[i];
+		iv = &pc->header.items[i];
 		if (iv->item == 0) {
 			iv->flags = vfNone;
 			iv->item = iid;
@@ -293,17 +281,14 @@ bool Add_to_Inventory(pcnum pc, item_id iid, unsigned char qty)
 	return false;
 }
 
-bool In_Front_Row(pcnum pc)
+bool In_Front_Row(pc *pc)
 {
-	assert(pc < PARTY_SIZE, "In_Front_Row: pc number too high");
-
-	return !(gSave.characters[pc].header.flags & cfBackRow);
+	return !(pc->header.flags & cfBackRow);
 }
 
-item *Get_Equipped_Weapon(pcnum pc, bool primary)
+item *Get_Equipped_Weapon(pc *pc, bool primary)
 {
 	item *it;
-	assert(pc < PARTY_SIZE, "Get_Equipped_Weapon: pc number too high");
 
 	it = Get_Equipped_Item(pc, primary ? slWeapon : slOffHand);
 
@@ -312,11 +297,14 @@ item *Get_Equipped_Weapon(pcnum pc, bool primary)
 	return it;
 }
 
-character *Get_Pc(pcnum pc)
+pc *Get_Pc(pcnum index)
 {
-	assert(pc < PARTY_SIZE, "Get_Pc: pc number too high");
+	file_id ref;
 
-	return &gSave.characters[pc];
+	assert(index < PARTY_SIZE, "Get_Pc: pc number too high");
+
+	ref = gParty->members[index];
+	return Lookup_File(gSave, ref);
 }
 
 char *Slot_Name(itemslot sl)
@@ -334,55 +322,52 @@ char *Slot_Name(itemslot sl)
 	}
 }
 
-stat_value Get_Pc_Stat(character *c, statistic st)
+stat_value Get_Pc_Stat(pc *pc, statistic st)
 {
 	assert(st < NUM_STATS, "Get_Pc_Stat: stat number too high");
 
-	return Get_Stat_Base(c->header.stats, st) + c->header.stats[st];
+	return Get_Stat_Base(pc->header.stats, st) + pc->header.stats[st];
 }
 
-noexport void Show_Pc_Stat(character *c, statistic st, int y)
+noexport void Show_Pc_Stat(pc *pc, statistic st, int y)
 {
 	char *name = Stat_Name(st);
 	char temp[5];
 
-	itoa(Get_Pc_Stat(c, st), temp, 10);
+	itoa(Get_Pc_Stat(pc, st), temp, 10);
 
 	Draw_Font(8, y, WHITE, name, FNT, false);
 	Draw_Font(80, y, WHITE, temp, FNT, false);
 }
 
-noexport void Show_Pc_Stat_Pair(character *c, statistic stc, statistic stm, int y)
+noexport void Show_Pc_Stat_Pair(pc *pc, statistic stc, statistic stm, int y)
 {
 	char *name = Stat_Name(stm);
 	char temp[10];
 
 	Draw_Font(8, y, WHITE, name, FNT, false);
 
-	sprintf(temp, "%3d/%3d", Get_Pc_Stat(c, stc), Get_Pc_Stat(c, stm));
+	sprintf(temp, "%3d/%3d", Get_Pc_Stat(pc, stc), Get_Pc_Stat(pc, stm));
 	Draw_Font(80, y, WHITE, temp, FNT, false);
 }
 
-noexport void Show_Pc_Items(pcnum pc, int selected)
+noexport void Show_Pc_Items(pc *pc, int selected)
 {
-	character *c;
 	char temp[4];
 	inventory *iv;
 	item *it;
 	int i;
 	int col;
 	int y = ITEMS_Y;
-	assert(pc < PARTY_SIZE, "Show_Pc_Items: pc number too high");
 
-	c = &gSave.characters[pc];
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		iv = &c->header.items[i];
+		iv = &pc->header.items[i];
 
 		if (!iv->item) {
 			col = (i == selected) ? (YELLOW - 8) : GREY;
 			Draw_Font(ITEMS_X + 16, y, col, "--", FNT, false);
 		} else {
-			it = Lookup_Item(&gItems, iv->item);
+			it = Lookup_File(gDjn, iv->item);
 			col = (i == selected) ? ITEM_SELECTED : WHITE;
 			Draw_Font(ITEMS_X + 16, y, col, it->name, FNT, false);
 
@@ -402,19 +387,19 @@ noexport void Show_Pc_Items(pcnum pc, int selected)
 	}
 }
 
-noexport char *Get_Damage_Range(character *c)
+noexport char *Get_Damage_Range(pc *pc)
 {
-	int min = Get_Pc_Stat(c, sMinDamage);
-	int max = Get_Pc_Stat(c, sMaxDamage);
+	int min = Get_Pc_Stat(pc, sMinDamage);
+	int max = Get_Pc_Stat(pc, sMaxDamage);
 	int i;
 	inventory *iv;
 	item *it;
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
-		iv = &c->header.items[i];
+		iv = &pc->header.items[i];
 		
 		if (iv->flags & vfEquipped) {
-			it = Lookup_Item(&gItems, iv->item);
+			it = Lookup_File(gDjn, iv->item);
 
 			if (Is_Weapon(it)) {
 				min += it->stats[sMinDamage];
@@ -435,35 +420,32 @@ noexport char *Get_Damage_Range(character *c)
 	return damage_range_buf;
 }
 
-noexport void Show_Pc_Stats(pcnum pc)
+noexport void Show_Pc_Stats(pc *pc)
 {
-	character *c;
 	char temp[100];
-	assert(pc < PARTY_SIZE, "Show_Pc_Stats: pc number too high");
 
-	c = &gSave.characters[pc];
 	Fill_Double_Buffer(0);
 
-	Draw_Font(8, 8, WHITE, c->header.name, FNT, false);
+	Draw_Font(8, 8, WHITE, pc->name, FNT, false);
 
-	sprintf(temp, "Level %d %s", c->header.job_level[c->header.job], Job_Name(c->header.job));
+	sprintf(temp, "Level %d %s", pc->header.job_level[pc->header.job], Job_Name(pc->header.job));
 	Draw_Font(8, 16, WHITE, temp, FNT, false);
 
-	Show_Pc_Stat(c, sStrength, 32);
-	Show_Pc_Stat(c, sDexterity, 40);
-	Show_Pc_Stat(c, sIntelligence, 48);
+	Show_Pc_Stat(pc, sStrength, 32);
+	Show_Pc_Stat(pc, sDexterity, 40);
+	Show_Pc_Stat(pc, sIntelligence, 48);
 
-	Show_Pc_Stat_Pair(c, sHP, sMaxHP, 64);
-	Show_Pc_Stat_Pair(c, sMP, sMaxMP, 72);
+	Show_Pc_Stat_Pair(pc, sHP, sMaxHP, 64);
+	Show_Pc_Stat_Pair(pc, sMP, sMaxMP, 72);
 
-	Show_Pc_Stat(c, sHitBonus, 88);
-	Show_Pc_Stat(c, sDodgeBonus, 96);
+	Show_Pc_Stat(pc, sHitBonus, 88);
+	Show_Pc_Stat(pc, sDodgeBonus, 96);
 
-	Show_Pc_Stat(c, sArmour, 112);
-	Show_Pc_Stat(c, sToughness, 120);
+	Show_Pc_Stat(pc, sArmour, 112);
+	Show_Pc_Stat(pc, sToughness, 120);
 
 	Draw_Font(8, 136, WHITE, "Damage", FNT, false);
-	Draw_Font(80, 136, WHITE, Get_Damage_Range(c), FNT, false);
+	Draw_Font(80, 136, WHITE, Get_Damage_Range(pc), FNT, false);
 }
 
 noexport unsigned char Confirm(char *prompt)
@@ -475,14 +457,13 @@ noexport unsigned char Confirm(char *prompt)
 
 #define Clear_Confirm() Draw_Square_DB(BLACK, ITEMS_X, CONFIRM_Y, SCREEN_WIDTH, CONFIRM_Y + 7, true)
 
-noexport bool Confirm_Drop_Item(pcnum pc, int index)
+noexport bool Confirm_Drop_Item(pc *pc, int index)
 {
 	inventory *iv;
 	bool result = false;
 	bool failed = false;
-	assert(pc < PARTY_SIZE, "Confirm_Drop_Item: pc number too high");
 
-	iv = &gSave.characters[pc].header.items[index];
+	iv = &pc->header.items[index];
 
 	/* Sanity check */
 	if (!iv->item) return false;
@@ -532,22 +513,21 @@ noexport void Clear_Inventory_Slot(inventory *iv)
 	iv->slot = slNone;
 }
 
-noexport bool Confirm_Give_Item(pcnum pc, int index)
+noexport bool Confirm_Give_Item(pc *pc, int index)
 {
 	inventory *iv,
 		*dest_iv;
 	pcnum dest_pc;
 	int dest_slot;
-	assert(pc < PARTY_SIZE, "Confirm_Give_Item: pc number too high");
 	assert(index < INVENTORY_SIZE, "Confirm_Give_Item: inventory index too high");
 
-	iv = &gSave.characters[pc].header.items[index];
+	iv = &pc->header.items[index];
 
 	/* Sanity check */
 	if (!iv->item) return false;
 
 	dest_pc = Confirm_Pc("To whom? (1-6)");
-	if (dest_pc < 0 || pc == dest_pc) {
+	if (dest_pc < 0 || pc == Get_Pc(dest_pc)) {
 		return false;
 	}
 	
@@ -559,14 +539,14 @@ noexport bool Confirm_Give_Item(pcnum pc, int index)
 		}
 	}
 
-	dest_slot = Find_Empty_Inventory_Slot(dest_pc);
+	dest_slot = Find_Empty_Inventory_Slot(Get_Pc(dest_pc));
 	if (dest_slot < 0) {
 		Confirm("Inventory is full!");
 		Clear_Confirm();
 		return false;
 	}
 
-	dest_iv = &gSave.characters[dest_pc].header.items[dest_slot];
+	dest_iv = &pc->header.items[dest_slot];
 	dest_iv->flags = iv->flags;
 	dest_iv->item = iv->item;
 	dest_iv->quantity = iv->quantity;
@@ -576,20 +556,19 @@ noexport bool Confirm_Give_Item(pcnum pc, int index)
 	return true;
 }
 
-noexport bool Confirm_Use_Item(pcnum pc, int index)
+noexport bool Confirm_Use_Item(pc *pc, int index)
 {
 	inventory *iv;
 	item *it;
 	int dest_pc = -1;
-	assert(pc < PARTY_SIZE, "Confirm_Use_Item: pc number too high");
 	assert(index < INVENTORY_SIZE, "Confirm_Use_Item: inventory index too high");
 
-	iv = &gSave.characters[pc].header.items[index];
+	iv = &pc->header.items[index];
 
 	/* Sanity check */
 	if (!iv->item) return false;
 
-	it = Lookup_Item(&gItems, iv->item);
+	it = Lookup_File(gDjn, iv->item);
 	if (!Item_Has_Use(it)) {
 		Confirm("You can't use that.");
 		Clear_Confirm();
@@ -603,7 +582,7 @@ noexport bool Confirm_Use_Item(pcnum pc, int index)
 		}
 	}
 
-	if (Use_Item(it, pc, dest_pc)) {
+	if (Use_Item(it, pc, Get_Pc(dest_pc))) {
 		if (iv->quantity > 1) {
 			iv->quantity--;
 		} else {
@@ -616,54 +595,56 @@ noexport bool Confirm_Use_Item(pcnum pc, int index)
 
 void Show_Pc_Screen(pcnum starting_pc)
 {
-	pcnum pc = starting_pc;
+	pcnum index = starting_pc;
+	pc *pc;
 	int selected = 0;
 	redraw_everything = true;
 
 	while (true) {
+		pc = Get_Pc(index);
 		Show_Pc_Stats(pc);
 		Show_Pc_Items(pc, selected);
 		Show_Double_Buffer();
 
 		switch (Get_Next_Scan_Code()) {
 			case SCAN_1:
-				pc = 0;
+				index = 0;
 				selected = 0;
 				continue;
 
 			case SCAN_2:
-				pc = 1;
+				index = 1;
 				selected = 0;
 				continue;
 
 			case SCAN_3:
-				pc = 2;
+				index = 2;
 				selected = 0;
 				continue;
 
 			case SCAN_4:
-				pc = 3;
+				index = 3;
 				selected = 0;
 				continue;
 
 			case SCAN_5:
-				pc = 4;
+				index = 4;
 				selected = 0;
 				continue;
 
 			case SCAN_6:
-				pc = 5;
+				index = 5;
 				selected = 0;
 				continue;
 
 			case SCAN_LEFT:
-				pc--;
-				if (pc < 0) pc = PARTY_SIZE - 1;
+				index--;
+				if (index < 0) index = PARTY_SIZE - 1;
 				continue;
 
 			case SCAN_RIGHT:
-				pc++;
-				if (pc >= PARTY_SIZE) pc = 0;
+				index++;
+				if (index >= PARTY_SIZE) index = 0;
 				continue;
 
 			case SCAN_UP:

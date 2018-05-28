@@ -114,9 +114,27 @@ void Draw_Wrapped_Font(int x, int y, int w, int h, colour col, char *string, fon
 	Free(wrapped);
 }
 
-bool Load_Font(char *filename, font *f)
+bool Read_Font(FILE *fp, font *f)
 {
 	pcx_picture pcx;
+
+	fread(&f->header, sizeof(font_header), 1, fp);
+	Check_Version_Header(f->header);
+	fclose(fp);
+
+	PCX_Init(&pcx);
+	if (!Load_Picture(f->header.filename, &pcx, "Read_Font")) {
+		return false;
+	}
+
+	f->img = pcx.buffer;
+	f->stride = pcx.header.width + 1; /* PCX header correction */
+	return true;
+}
+
+bool Load_Font(char *filename, font *f)
+{
+	bool success;
 	FILE *fp = fopen(filename, "rb");
 	if (!fp) {
 		printf("Could not open for reading: %s\n", filename);
@@ -124,19 +142,9 @@ bool Load_Font(char *filename, font *f)
 	}
 
 	Log("Load_Font: %s", filename);
-
-	fread(&f->header, sizeof(font_header), 1, fp);
-	Check_Version_Header(f->header);
+	success = Read_Font(fp, f);
 	fclose(fp);
-
-	PCX_Init(&pcx);
-	if (!Load_Picture(f->header.filename, &pcx, filename)) {
-		return false;
-	}
-
-	f->img = pcx.buffer;
-	f->stride = pcx.header.width + 1; /* PCX header correction */
-	return true;
+	return success;
 }
 
 void Free_Font(font *f)

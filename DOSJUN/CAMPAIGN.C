@@ -8,8 +8,8 @@ bool Read_Campaign(FILE *fp, campaign *c)
 {
 	int i;
 
-	fread(&c->header, sizeof(campaign_header), 1, fp);
-	Check_Version_Header(c->header);
+	fread(c, sizeof(campaign), 1, fp);
+	Check_Version_Header_p(c);
 
 	return true;
 }
@@ -46,8 +46,8 @@ bool Save_Campaign(char *filename, campaign *c)
 		return false;
 	}
 
-	Set_Version_Header(c->header);
-	fwrite(&c->header, sizeof(campaign_header), 1, fp);
+	Set_Version_Header_p(c);
+	fwrite(c, sizeof(campaign), 1, fp);
 
 	fclose(fp);
 	return true;

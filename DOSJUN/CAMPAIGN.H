@@ -7,11 +7,11 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define CAMPAIGN_HEADER_PADDING		18
+#define CAMPAIGN_PADDING		10
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
-typedef struct campaign_header {
+typedef struct campaign {
 	VERSION_HEADER;
 
 	UINT16 global_count;
@@ -19,14 +19,12 @@ typedef struct campaign_header {
 	UINT16 script_id;
 	UINT16 name_id;
 	UINT16 desc_id;
+	UINT16 font_id;
+	UINT16 menubg_id;
+	UINT16 dungeonbg_id;
+	UINT16 combatbg_id;
 
-	unsigned char unused[CAMPAIGN_HEADER_PADDING];
-} campaign_header;
-
-typedef struct campaign {
-	campaign_header header;
-
-	char **zones;
+	unsigned char unused[CAMPAIGN_PADDING];
 } campaign;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */

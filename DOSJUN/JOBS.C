@@ -47,12 +47,12 @@ noexport void Setup_Skill(skill_id sk, char *name, char *description)
 	skills[sk].description = description;
 }
 
-noexport void Add_Skill(character *c, skill_id sk)
+noexport void Add_Skill(pc *pc, skill_id sk)
 {
 	if (sk == skNONE) return;
 
-	Log("Add_Skill: %s +%s", c->header.name, skills[sk].name);
-	Add_to_List(c->skills, (void*)sk);
+	Log("Add_Skill: %s +%s", pc->name, skills[sk].name);
+	Add_to_List(pc->skills, (void*)sk);
 }
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
@@ -149,9 +149,9 @@ void Free_Jobs(void)
 	Log("Free_Jobs: %p", jobspecs);
 }
 
-void Set_Job(character *c, job job)
+void Set_Job(pc *c, job job)
 {
-	character_header *ch = &c->header;
+	pc_header *ch = &c->header;
 	ch->job = job;
 
 	if (ch->job_level[job] == 0) {
@@ -214,7 +214,7 @@ noexport skill_id Choose_Skill_Menu(skill_id a, skill_id b)
 }
 
 /* Let the user choose which skill to learn on level up. Returns true if a screen redraw is needed. */
-noexport bool Choose_Skill(character *c, skill_id a, skill_id b)
+noexport bool Choose_Skill(pc *pc, skill_id a, skill_id b)
 {
 	/* TODO: amnesia? */
 	bool immediate = true;
@@ -236,24 +236,24 @@ noexport bool Choose_Skill(character *c, skill_id a, skill_id b)
 	}
 
 	if (immediate) {
-		sprintf(buffer, "%s learns %s!", c->header.name, skills[learnt].name);
+		sprintf(buffer, "%s learns %s!", pc->name, skills[learnt].name);
 		Draw_Font(8, Y_SKILL, WHITE, buffer, FNT, false);
 
 		Draw_Wrapped_Font(8, Y_DESC, SCREEN_WIDTH - 16, 64, SKILL_DESC, skills[learnt].description, FNT, false);
 	}
 
-	Add_Skill(c, learnt);
+	Add_Skill(pc, learnt);
 	return immediate;
 }
 
-void Level_Up(character *c)
+void Level_Up(pc *pc)
 {
-	character_header *ch = &c->header;
+	pc_header *ch = &pc->header;
 	unsigned char *level = &ch->job_level[ch->job];
 	job_spec *j = &jobspecs[ch->job];
 	level_spec *l;
 
-	Log("Level_Up: %s %d+1", ch->name, ch->total_level);
+	Log("Level_Up: %s %d+1", pc->name, ch->total_level);
 
 	/* go to the level up screen */
 	redraw_everything = true;
@@ -279,17 +279,17 @@ void Level_Up(character *c)
 			Draw_Font(8, Y_STAT, WHITE, buffer, FNT, 0);
 		}
 
-		sprintf(buffer, "%s becomes %s level %d!", ch->name, Job_Name(ch->job), *level + 1);
+		sprintf(buffer, "%s becomes %s level %d!", pc->name, Job_Name(ch->job), *level + 1);
 		Draw_Font(8, Y_LEVEL, WHITE, buffer, FNT, 0);
 
-		if (Choose_Skill(c, l->a, l->b)) {
+		if (Choose_Skill(pc, l->a, l->b)) {
 			Show_Double_Buffer();
 			Get_Next_Scan_Code();
 		}
 
 		(*level)++;
 	} else {
-		sprintf(buffer, "%s gains a level!", ch->name);
+		sprintf(buffer, "%s gains a level!", pc->name);
 		Draw_Font(8, Y_LEVEL, WHITE, buffer, FNT, 0);
 
 		Show_Double_Buffer();
@@ -300,21 +300,21 @@ void Level_Up(character *c)
 	ch->total_level++;
 }
 
-UINT32 Experience_to_Level(character *c)
+UINT32 Experience_to_Level(pc *pc)
 {
-	UINT32 clevel = c->header.job_level[c->header.job];
+	UINT32 clevel = pc->header.job_level[pc->header.job];
 
 	/* TODO: xp penalties, better formula */
 	if (clevel > 10) clevel = 10;
 	return (clevel * 200) - 100;
 }
 
-void Add_Experience(character *c, UINT32 xp)
+void Add_Experience(pc *pc, UINT32 xp)
 {
-	character_header *ch = &c->header;
+	pc_header *ch = &pc->header;
 
 	ch->experience += xp;
-	if (ch->experience >= Experience_to_Level(c)) {
-		Level_Up(c);
+	if (ch->experience >= Experience_to_Level(pc)) {
+		Level_Up(pc);
 	}
 }

@@ -18,7 +18,6 @@
 #define GROUP_PCBACK	(ENCOUNTER_SIZE + 1)
 #define GROUPS_SIZE		(ENCOUNTER_SIZE + 2)
 
-#define COMBAT_GRF		1
 #define COMBAT_DYNALLOC	0
 #define COMBAT_RECLAIM	0
 #define COMBAT_DEBUG	1
@@ -35,11 +34,7 @@ typedef struct action {
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-#if COMBAT_GRF
-noexport grf combat_bg;
-#else
-noexport pcx_picture combat_bg;
-#endif
+noexport grf *combat_bg;
 
 list *combatants;
 noexport list *active_combatants;
@@ -97,7 +92,7 @@ noexport void Highlight_Ally(int pc_active, int pc_select)
 	int i, colour;
 
 	for (i = 0; i < PARTY_SIZE; i++) {
-		strncpy(buffer, Get_Pc(i)->header.name, 8);
+		strncpy(buffer, Get_Pc(i)->name, 8);
 		buffer[8] = 0;
 
 		colour = 15;
@@ -161,7 +156,7 @@ item *Get_Weapon(combatant *c, bool primary)
 {
 	item_id iid = primary ? c->primary : c->secondary;
 
-	return iid ? Lookup_Item(&gItems, iid) : null;
+	return iid ? Lookup_File(gDjn, iid) : null;
 }
 
 stat_value Get_Stat_Base(stat_value *stats, statistic st)
@@ -431,10 +426,10 @@ void Add_Monster(groupnum group, monster *template)
 	monsters_alive++;
 }
 
-noexport void Add_Pc(pcnum pc)
+noexport void Add_Pc(pcnum index)
 {
 	item *primary, *secondary;
-	character *ch = Get_Pc(pc);
+	pc *pc = Get_Pc(index);
 
 	combatant *c = SzAlloc(1, combatant, "Add_Pc");
 	if (c == null)
@@ -444,16 +439,16 @@ noexport void Add_Pc(pcnum pc)
 	secondary = Get_Equipped_Weapon(pc, false);
 
 	c->action = NO_ACTION;
-	c->buffs = ch->buffs;
+	c->buffs = pc->buffs;
 	c->group = In_Front_Row(pc) ? GROUP_PCFRONT : GROUP_PCBACK;
 	c->is_pc = true;
 	c->monster = null;
-	c->name = ch->header.name;
-	c->pc = ch;
+	c->name = pc->name;
+	c->pc = pc;
 	c->row = In_Front_Row(pc) ? rowFront : rowBack;
 	c->index = combatants->size;
-	c->skills = ch->skills;
-	c->stats = ch->header.stats;
+	c->skills = pc->skills;
+	c->stats = pc->header.stats;
 	c->primary = primary ? primary->id : 0;
 	c->secondary = secondary ? secondary->id : 0;
 
@@ -492,12 +487,7 @@ void Initialise_Combat(void)
 	Add_Combat_Action(aSing, "Sing", Check_Sing, Sing, tfSelf, 200);
 	Add_Combat_Action(aHide, "Hide", Check_Hide, Hide, tfSelf, 50);
 
-#if COMBAT_GRF
-	Load_GRF("COMBAT.GRF", &combat_bg, "Initialise_Combat.combat_bg");
-#else
-	PCX_Init(&combat_bg);
-	PCX_Load("COMBAT.PCX", &combat_bg, 0);
-#endif
+	combat_bg = Lookup_File(gDjn, gCampaign->combatbg_id);
 
 	randomize();
 }
@@ -518,11 +508,8 @@ void Free_Combat(void)
 
 	Free(combat_actions);
 
-#if COMBAT_GRF
-	Free_GRF(&combat_bg);
-#else
-	PCX_Delete(&combat_bg);
-#endif
+	if (combat_bg)
+		Unload_File(gDjn, gCampaign->combatbg_id);
 }
 
 noexport act Get_Pc_Action(pcnum pc)
@@ -979,7 +966,7 @@ void Start_Combat(encounter_id id)
 	groupnum group;
 	pcnum pc;
 	int count;
-	encounter *en = &gZone.encounters[id];
+	encounter *en = &gZone->encounters[id];
 	monster *m;
 	combatant *c;
 
@@ -997,7 +984,7 @@ void Start_Combat(encounter_id id)
 
 	for (group = 0; group < ENCOUNTER_SIZE; group++) {
 		if (!en->monsters[group]) continue;
-		m = Lookup_Monster(&gMonsters, en->monsters[group]);
+		m = Lookup_File(gDjn, en->monsters[group]);
 		if (first == null) first = m->image;
 
 		count = randint(en->minimum[group], en->maximum[group]);
@@ -1024,12 +1011,9 @@ void Start_Combat(encounter_id id)
 
 	/* Set up Combat screen */
 	redraw_everything = true;
-#if COMBAT_GRF
 	Fill_Double_Buffer(0);
-	Draw_GRF(0, 0, &combat_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-#else
-	memcpy(double_buffer, combat_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
-#endif
+	if (combat_bg)
+		Draw_GRF(0, 0, combat_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	Show_Picture(first);
 
 	/* DO IT */

@@ -15,6 +15,7 @@
 typedef struct code_host {
 	bytecode *code;
 	int *globals;
+	int *flags;
 	int *locals;
 	int *temps;
 	int *stack;
@@ -81,9 +82,20 @@ noexport int Bool(int result)
 }
 
 /* TODO */
-noexport char *Get_Npc_Name(int npc)
+noexport char *Get_Npc_Name(file_id ref)
 {
 	return "NPC";
+
+	/*
+	npc *npc = Lookup_File(gSave, ref);
+	return npc->name;
+	*/
+}
+
+noexport char *Get_Pc_Name(file_id ref)
+{
+	pc *pc = Lookup_File(gSave, ref);
+	return pc->name;
 }
 
 /* O P C O D E  F U N C T I O N S //////////////////////////////////////// */
@@ -124,19 +136,19 @@ noexport void Push_Internal(code_host *h)
 
 	switch (index) {
 		case internalX:
-			Push_Stack(h, gSave.header.x);
+			Push_Stack(h, gParty->x);
 			return;
 
 		case internalY:
-			Push_Stack(h, gSave.header.y);
+			Push_Stack(h, gParty->y);
 			return;
 
 		case internalFacing:
-			Push_Stack(h, gSave.header.facing);
+			Push_Stack(h, gParty->facing);
 			return;
 
 		case internalDanger:
-			Push_Stack(h, gSave.header.danger);
+			Push_Stack(h, gParty->danger);
 			return;
 
 		case internalJustMoved:
@@ -364,7 +376,7 @@ noexport void PcSpeak(code_host *h)
 	Log("C|PcSpeak %d, %d", pc, string);
 #endif
 	
-	sprintf(formatting_buf, "%s:\n%s", Get_Pc(pc)->header.name, gZone.code_strings[string]);
+	sprintf(formatting_buf, "%s:\n%s", Get_Pc_Name(pc), Resolve_String(string));
 	Show_Game_String(formatting_buf, true);
 }
 
@@ -377,7 +389,7 @@ noexport void PcAction(code_host *h)
 	Log("C|PcAction %d, %d", pc, string);
 #endif
 
-	sprintf(formatting_buf, "%s %s", Get_Pc(pc)->header.name, gZone.code_strings[string]);
+	sprintf(formatting_buf, "%s %s", Get_Pc_Name(pc), Resolve_String(string));
 	Show_Game_String(formatting_buf, true);
 }
 
@@ -390,7 +402,7 @@ noexport void NpcSpeak(code_host *h)
 	Log("C|NpcSpeak %d, %d", npc, string);
 #endif
 
-	sprintf(formatting_buf, "%s:\n%s", Get_Npc_Name(npc), gZone.code_strings[string]);
+	sprintf(formatting_buf, "%s:\n%s", Get_Npc_Name(npc), Resolve_String(string));
 	Show_Game_String(formatting_buf, true);
 }
 
@@ -403,7 +415,7 @@ noexport void NpcAction(code_host *h)
 	Log("C|NpcAction %d, %d", npc, string);
 #endif
 
-	sprintf(formatting_buf, "%s %s", Get_Npc_Name(npc), gZone.code_strings[string]);
+	sprintf(formatting_buf, "%s %s", Get_Npc_Name(npc), Resolve_String(string));
 	Show_Game_String(formatting_buf, true);
 }
 
@@ -415,7 +427,7 @@ noexport void Text(code_host *h)
 	Log("C|Text %d", string);
 #endif
 
-	Show_Game_String(gZone.code_strings[string], true);
+	Show_Game_String(Resolve_String(string), true);
 }
 
 noexport void Unlock(code_host *h)
@@ -439,10 +451,11 @@ noexport void GiveItem(code_host *h)
 {
 	int qty = Pop_Stack(h);
 	item_id item = Pop_Stack(h);
-	int pc = Pop_Stack(h);
+	file_id ref = Pop_Stack(h);
+	pc *pc = Lookup_File(gSave, ref);
 
 #if CODE_LOG
-	Log("C|GiveItem %d, %d, %d", pc, item, qty);
+	Log("C|GiveItem %d, %d, %d", pc->name, item, qty);
 #endif
 
 	h->result = Add_to_Inventory(pc, item, qty);
@@ -451,10 +464,11 @@ noexport void GiveItem(code_host *h)
 noexport void EquipItem(code_host *h)
 {
 	item_id item = Pop_Stack(h);
-	int pc = Pop_Stack(h);
+	file_id ref = Pop_Stack(h);
+	pc *pc = Lookup_File(gSave, ref);
 
 #if CODE_LOG
-	Log("C|EquipItem %d, %d", pc, item);
+	Log("C|EquipItem %d, %d", pc->name, item);
 #endif
 
 	h->result = Equip_Item(pc, item);
@@ -531,15 +545,13 @@ noexport void Teleport(code_host *h)
 		/* TODO */
 	}
 
-	if (gSave.header.zone != zone) {
-		/* TODO */
-		gSave.header.zone = zone;
-		trigger_zone_enter = true;
-	}
+	gParty->x = x;
+	gParty->y = y;
+	gParty->facing = facing;
 
-	gSave.header.x = x;
-	gSave.header.y = y;
-	gSave.header.facing = facing;
+	if (gParty->zone != zone) {
+		Move_to_Zone(zone);
+	}
 
 	redraw_description = true;
 	redraw_fp = true;
@@ -554,7 +566,7 @@ noexport void SetDanger(code_host *h)
 	Log("C|SetDanger %d", danger);
 #endif
 
-	gSave.header.danger = danger;
+	gParty->danger = danger;
 }
 
 noexport void Safe(code_host *h)
@@ -596,29 +608,34 @@ noexport void Refresh(code_host *h)
 
 noexport void AddItem(code_host *h)
 {
-	int pc;
+	pcnum index;
 	int qty = Pop_Stack(h);
 	item_id item = Pop_Stack(h);
+	pc *pc;
 
 #if CODE_LOG
 	Log("C|AddItem %d, %d", item, qty);
 #endif
 
-	for (pc = 0; pc < PARTY_SIZE; pc++) {
-		h->result = Add_to_Inventory(pc, item, qty);
+	h->result = false;
+	for (index = 0; index < PARTY_SIZE; index++) {
+		pc = Get_Pc(index);
+		if (!pc) continue;
+
+		h->result = Add_to_Inventory(pc , item, qty);
 		if (h->result) break;
 	}
 }
 
 noexport void Music(code_host *h)
 {
-	string_id string = Pop_Stack(h);
+	file_id id = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|Music %d", string);
+	Log("C|Music %d", id);
 #endif
 
-	Play_Music(gZone.code_strings[string]);
+	Play_Music(Lookup_File(gDjn, id));
 }
 
 noexport void Converse(code_host *h)
@@ -675,7 +692,7 @@ noexport void Option(code_host *h)
 	}
 
 	option_state[num_options] = state;
-	option_menu[num_options] = gZone.code_strings[string];
+	option_menu[num_options] = Resolve_String(string);
 	num_options++;
 }
 
@@ -772,7 +789,7 @@ noexport script_id Pick_Option(void)
 
 noexport void Reset_Host(code_host *h, script_id id)
 {
-	h->code = gZone.scripts[id];
+	h->code = Lookup_File(gDjn, id);
 	h->pc = 0;
 	h->result = 0;
 	h->sp = 0;
@@ -787,8 +804,9 @@ int Run_Code(script_id id)
 
 	h = SzAlloc(1, code_host, "Run_Code.host");
 
-	h->globals = gSave.script_globals;
-	h->locals = gSave.script_locals[gSave.header.zone];
+	h->globals = gGlobals->globals;
+	h->flags = gGlobals->flags;
+	h->locals = gOverlay->locals;
 	h->temps = SzAlloc(MAX_TEMPS, int, "Run_Code.temps");
 	h->stack = SzAlloc(MAX_STACK, int, "Run_Code.stack");
 

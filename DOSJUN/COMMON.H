@@ -30,6 +30,7 @@ typedef enum gamestate {
 	gsQuit,
 	gsCombat,
 	gsConverse,
+	gsCutscene,
 } gamestate;
 
 typedef enum job {
@@ -51,6 +52,7 @@ typedef UINT8 coord;
 typedef UINT8 dir_id;
 typedef UINT16 encounter_id;
 typedef UINT16 etable_id;
+typedef UINT16 file_id;
 typedef UINT8 inventoryflag_id;
 typedef UINT8 internal_id;
 typedef UINT16 item_id;

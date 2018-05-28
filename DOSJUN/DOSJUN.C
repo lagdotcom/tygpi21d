@@ -5,23 +5,19 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-#define EXPLORE_GRF		1
 #define EXPORE_DEBUG	0
 
-#if EXPLORE_GRF
-grf explore_bg;
-#else
-pcx_picture explore_bg;
-#endif
+grf *explore_bg;
 
 djn *gDjn;
-campaign gCampaign;
+campaign *gCampaign;
 gamestate gState;
-items gItems;
-monsters gMonsters;
-partystatus gParty;
-save gSave;
-zone gZone;
+partystatus *gParty;
+djn *gSave;
+strings *gStrings;
+zone *gZone;
+zone_overlay *gOverlay;
+globals *gGlobals;
 
 bool redraw_everything,
 	redraw_description;
@@ -78,8 +74,8 @@ dir Turn_Right(dir dir)
 
 bool Is_Coord_Valid(coord x, coord y)
 {
-	if (x >= gZone.header.width) return false;
-	if (y >= gZone.header.height) return false;
+	if (x >= gZone->header.width) return false;
+	if (y >= gZone->header.height) return false;
 	return true;
 }
 
@@ -148,10 +144,10 @@ void Show_Game_String(char *string, bool wait_for_key)
 
 void Draw_Description(void)
 {
-	tile *under = TILE(gZone, gParty.x, gParty.y);
+	tile *under = TILE(gZone, gParty->x, gParty->y);
 
 	if (under->description > 0) {
-		Show_Game_String(gZone.strings[under->description - 1], false);
+		Show_Game_String(Resolve_String(under->description), false);
 	}
 
 	redraw_description = false;
@@ -164,10 +160,10 @@ bool Try_Move_Forward(void)
 	coord ax, ay;
 
 #if EXPLORE_DEBUG
-	Log("Try_Move_Forward: at %d,%d facing %d", gParty.x, gParty.y, gParty.facing);
+	Log("Try_Move_Forward: at %d,%d facing %d", gParty->x, gParty->y, gParty->facing);
 #endif
 
-	centre = Get_Wall(gParty.x, gParty.y, gParty.facing, rAhead);
+	centre = Get_Wall(gParty->x, gParty->y, gParty->facing, rAhead);
 	if (centre == null) {
 		Show_Game_String("There's nothing to walk onto.", true);
 		return false;
@@ -185,7 +181,7 @@ bool Try_Move_Forward(void)
 		}
 	}
 
-	ahead = Get_Adjacent_Tile(gParty.x, gParty.y, gParty.facing, 1);
+	ahead = Get_Adjacent_Tile(gParty->x, gParty->y, gParty->facing, 1);
 	if (ahead == null) {
 		Show_Game_String("There's nothing to walk onto.", true);
 		return false;
@@ -195,11 +191,11 @@ bool Try_Move_Forward(void)
 		return false;
 	}
 
-	ax = gParty.x + Get_X_Offset(gParty.facing);
-	ay = gParty.y + Get_Y_Offset(gParty.facing);
+	ax = gParty->x + Get_X_Offset(gParty->facing);
+	ay = gParty->y + Get_Y_Offset(gParty->facing);
 
-	gParty.x = ax;
-	gParty.y = ay;
+	gParty->x = ax;
+	gParty->y = ay;
 	redraw_description = true;
 	redraw_fp = true;
 	trigger_on_enter = true;
@@ -215,7 +211,7 @@ bool Try_Move_Forward(void)
 
 void Trigger_Enter_Script(void)
 {
-	tile *under = TILE(gZone, gParty.x, gParty.y);
+	tile *under = TILE(gZone, gParty->x, gParty->y);
 
 	if (under->on_enter) {
 #if EXPLORE_DEBUG
@@ -229,7 +225,7 @@ void Trigger_Enter_Script(void)
 
 void Trigger_Use_Script(void)
 {
-	tile *under = TILE(gZone, gParty.x, gParty.y);
+	tile *under = TILE(gZone, gParty->x, gParty->y);
 
 	if (under->on_use) {
 #if EXPLORE_DEBUG
@@ -241,11 +237,11 @@ void Trigger_Use_Script(void)
 
 void Trigger_Zone_Enter_Script(void)
 {
-	if (gZone.header.on_enter) {
+	if (gZone->header.on_enter) {
 #if EXPLORE_DEBUG
 		Log("%s", "Trigger_Zone_Enter_Script");
 #endif
-		Run_Code(gZone.header.on_enter - 1);
+		Run_Code(gZone->header.on_enter - 1);
 	}
 
 	trigger_zone_enter = false;
@@ -253,34 +249,34 @@ void Trigger_Zone_Enter_Script(void)
 
 void Trigger_Zone_Move_Script(void)
 {
-	if (gZone.header.on_move) {
+	if (gZone->header.on_move) {
 #if EXPLORE_DEBUG
 		Log("%s", "Trigger_Zone_Move_Script");
 #endif
-		Run_Code(gZone.header.on_move - 1);
+		Run_Code(gZone->header.on_move - 1);
 	}
 }
 
 void Random_Encounter(encounter_id eid)
 {
-	assert(eid < gZone.header.num_encounters, "Random_Encounter: encounter number too high");
+	assert(eid < gZone->header.num_encounters, "Random_Encounter: encounter number too high");
 
-	gParty.encounter_chance = 0;
+	gParty->encounter_chance = 0;
 	Start_Combat(eid);
 }
 
 void Check_Random_Encounter(void)
 {
 	int i;
-	tile *under = TILE(gZone, gParty.x, gParty.y);
+	tile *under = TILE(gZone, gParty->x, gParty->y);
 	etable *et;
 	if (under->etable == 0) return;
 
-	if (gParty.encounter_chance < 200)
-		gParty.encounter_chance += under->danger + gParty.danger;
+	if (gParty->encounter_chance < 200)
+		gParty->encounter_chance += under->danger + gParty->danger;
 
-	if (randint(0, 100) < gParty.encounter_chance) {
-		et = &gZone.etables[under->etable - 1];
+	if (randint(0, 100) < gParty->encounter_chance) {
+		et = &gZone->etables[under->etable - 1];
 		for (i = 0; i < et->possibilities; i++) {
 			if (randint(0, 100) < et->percentages[i]) {
 				Random_Encounter(et->encounters[i]);
@@ -293,12 +289,9 @@ void Check_Random_Encounter(void)
 void Redraw_Dungeon_Screen(bool script)
 {
 	if (redraw_everything) {
-#if EXPLORE_GRF
 		Fill_Double_Buffer(0);
-		Draw_GRF(0, 0, &explore_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-#else
-		memcpy(double_buffer, explore_bg.buffer, SCREEN_WIDTH * SCREEN_HEIGHT);
-#endif
+		if (explore_bg)
+			Draw_GRF(0, 0, explore_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	}
 
 	if (redraw_fp || redraw_everything) Draw_FP();
@@ -330,12 +323,7 @@ gamestate Show_Dungeon_Screen(void)
 	gamestate new;
 
 	/* Get background image and palette */
-#if EXPLORE_GRF
-	Load_GRF("BACK.GRF", &explore_bg, "Show_Dungeon_Screen.explore_bg");
-#else
-	PCX_Init(&explore_bg);
-	PCX_Load("BACK.PCX", &explore_bg, 1);
-#endif
+	explore_bg = Lookup_File(gDjn, gCampaign->dungeonbg_id);
 
 	redraw_everything = true;
 	redraw_description = true;
@@ -344,7 +332,7 @@ gamestate Show_Dungeon_Screen(void)
 
 	while (!done) {
 		if (just_moved) {
-			Log("Show_Dungeon_Screen: at %d,%d", gParty.x, gParty.y);
+			Log("Show_Dungeon_Screen: at %d,%d", gParty->x, gParty->y);
 		}
 
 		Redraw_Dungeon_Screen(true);
@@ -358,7 +346,7 @@ gamestate Show_Dungeon_Screen(void)
 
 			case SCAN_S:
 				if (can_save) {
-					if (Save_Savefile("ETR.SAV", &gSave)) {
+					if (Save_Savefile("ETR.SAV", gSave)) {
 						Show_Game_String("Game saved.", true);
 					} else {
 						Show_Game_String("Error while saving.", true);
@@ -369,13 +357,13 @@ gamestate Show_Dungeon_Screen(void)
 				break;
 
 			case SCAN_LEFT:
-				gParty.facing = Turn_Left(gParty.facing);
+				gParty->facing = Turn_Left(gParty->facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
 				break;
 
 			case SCAN_RIGHT:
-				gParty.facing = Turn_Right(gParty.facing);
+				gParty->facing = Turn_Right(gParty->facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
 				break;
@@ -411,20 +399,10 @@ gamestate Show_Dungeon_Screen(void)
 			case SCAN_SPACE:
 				Trigger_Use_Script();
 				break;
-
-				/* TESTING ONLY */
-			case SCAN_L:
-				Level_Up(&gSave.characters[3]);
-				break;
 		}
 	}
 
-	/* Cleanup */
-#if EXPLORE_GRF
-	Free_GRF(&explore_bg);
-#else
-	PCX_Delete(&explore_bg);
-#endif
+	Unload_File(gDjn, gCampaign->dungeonbg_id);
 	return new;
 }
 
@@ -483,17 +461,36 @@ noexport void Free_Djn_Chain(void)
 	gDjn = null;
 }
 
+char *Resolve_String(int id)
+{
+	if (gStrings == null) {
+		gStrings = Find_File_Type(gDjn, ftStrings);
+		if (gStrings == null)
+			die("Resolve_String: no STRINGS resource in DJN chain");
+	}
+
+	return Get_String(gStrings, id);
+}
+
 void main(int argc, char **argv)
 {
 	Start_Memory_Tracking();
 	Clear_Log();
-	Log("main: Init");
+	Log("%s", "main: Init");
 
 	printf("%s", "Initialising DOSJUN...\n");
 
 	Ready_Djn_Chain(argc, argv);
 	if (gDjn == null) {
 		printf("%s", "Syntax: DOSJUN <file.djn> [file.djn]...\n");
+		Stop_Memory_Tracking();
+		return;
+	}
+
+	gCampaign = Find_File_Type(gDjn, ftCampaign);
+	if (gCampaign == null) {
+		printf("%s", "main: No campaign data found in DJN files.");
+		Free_Djn_Chain();
 		Stop_Memory_Tracking();
 		return;
 	}
@@ -505,11 +502,6 @@ void main(int argc, char **argv)
 
 	Load_Font("6x8.FNT", FNT);
 	Initialise_Timer();
-	Initialise_Campaign(&gCampaign);
-	Initialise_Items(&gItems);
-	Initialise_Monsters(&gMonsters);
-	Initialise_Savefile(&gSave);
-	Initialise_Zone(&gZone);
 	Initialise_Combat();
 	Initialise_Jobs();
 	Initialise_Sound();
@@ -541,12 +533,7 @@ void main(int argc, char **argv)
 	Log("%s", "main: Cleanup");
 	printf("%s", "Cleaning up after DOSJUN...");
 
-	Free_Campaign(&gCampaign);
-	Free_Items(&gItems);
-	Free_Monsters(&gMonsters);
-	Free_Savefile(&gSave);
-	Free_Zone(&gZone);
-	Free_Textures();
+	Free_Savefile(gSave);
 	Free_Combat();
 	Free_Jobs();
 	Free_Sound();

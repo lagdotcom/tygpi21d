@@ -63,7 +63,7 @@ void Demo_Campaign(char *filename)
 	c.header.start_y = 0;
 	c.header.start_facing = dEast;
 	c.header.num_zones = 1;
-	Zero(c.header.unused, CAMPAIGN_HEADER_PADDING);
+	Zero(c.header.unused, CAMPAIGN_PADDING);
 
 	c.zones = SzAlloc(1, char *, "Demo_Campaign");
 	c.zones[0] = "DEMO";
@@ -197,7 +197,7 @@ void Etr_Campaign(char *filename)
 	c.header.start_y = 4;
 	c.header.start_facing = dEast;
 	c.header.num_zones = 1;
-	Zero(c.header.unused, CAMPAIGN_HEADER_PADDING);
+	Zero(c.header.unused, CAMPAIGN_PADDING);
 
 	c.zones = SzAlloc(1, char *, "Etr_Campaign");
 	c.zones[0] = "ETR_1";
