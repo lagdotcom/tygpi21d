@@ -66,30 +66,37 @@ void Draw_GRF(int sx, int sy, grf *g, int img, int minx, int miny, int maxx, int
 	}
 }
 
-bool Load_GRF(char *filename, grf *g, char *tag)
+bool Read_GRF(FILE *fp, grf *g)
 {
 	int i;
 	grf_image *im;
+
+	fread(g, GRF_HEADER_SZ, 1, fp);
+	Check_Version_Header_p(g, "Read_GRF");
+
+	g->images = im = SzAlloc(g->num_images, grf_image, "Read_GRF.images");
+	for (i = 0; i < g->num_images; i++, im++) {
+		fread(im, GRF_IMAGE_SZ, 1, fp);
+		im->data = Allocate(im->datasize, 1, "Read_GRF.image");
+		fread(im->data, im->datasize, 1, fp);
+	}
+
+	return true;
+}
+
+bool Load_GRF(char *filename, grf *g, char *tag)
+{
+	bool result;
 	FILE *fp = fopen(filename, "rb");
 	if (!fp) {
 		dief("Load_GRF: Could not open for reading: %s\n", filename);
 		return false;
 	}
 
-	Log("Load_GRF: %s", filename);
-
-	fread(g, GRF_HEADER_SZ, 1, fp);
-	Check_Version_Header((*g));
-
-	g->images = im = SzAlloc(g->num_images, grf_image, tag);
-	for (i = 0; i < g->num_images; i++, im++) {
-		fread(im, GRF_IMAGE_SZ, 1, fp);
-		im->data = Allocate(im->datasize, 1, tag);
-		fread(im->data, im->datasize, 1, fp);
-	}
-
+	Log("Load_GRF: %s (%s)", filename, tag);
+	result = Read_GRF(fp, g);
 	fclose(fp);
-	return true;
+	return result;
 }
 
 void Free_GRF(grf *g)

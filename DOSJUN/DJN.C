@@ -6,8 +6,8 @@
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef void(*ft_free_fn)(void*);
-typedef void(*ft_read_fn)(FILE*, void*);
-typedef void(*ft_write_fn)(FILE*, void*);
+typedef bool(*ft_read_fn)(FILE*, void*);
+typedef bool(*ft_write_fn)(FILE*, void*);
 
 typedef struct loaderspec {
 	djn_type type;
@@ -19,37 +19,37 @@ typedef struct loaderspec {
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
+djn_file *current_reading_file;
+
 noexport loaderspec loaders[] = {
 	{ ftCampaign, sizeof(campaign), Free_Campaign, Read_Campaign, null },
-	{ ftFont, sizeof(font), Free_Font, Read_Font, null },
-	{ ftGlobals, sizeof(globals), Free_Globals, Read_Globals, Write_Globals },
-	{ ftGraphic, sizeof(grf), Free_GRF, Read_GRF, null },
-	{ ftItem, sizeof(item), Free_Item, Read_Item, null },
-	{ ftMonster, sizeof(monster), Free_Monster, Read_Monster, null },
-	{ ftMusic, sizeof(sng), Free_SNG, Read_SNG, null },
-	{ ftNPC, sizeof(npc), Free_NPC, Read_NPC, Write_NPC },
-	{ ftPalette, sizeof(palette), Free_Palette, Read_Palette, null },
-	{ ftParty, sizeof(partystatus), Free_Party, Read_Party, Write_Party },
-	{ ftPC, sizeof(pc), Free_PC, Read_PC, Write_PC },
-	{ ftScript, sizeof(script), Free_Script, Read_Script, null },
-	{ ftSound, sizeof(wav), Free_WAV, Read_WAV, null },
-	{ ftStrings, sizeof(strings), Free_Strings, Read_Strings, null },
-	{ ftZone, sizeof(zone), Free_Zone, Read_Zone, null },
-	{ ftZoneOverlay, sizeof(zone_overlay), Free_Overlay, Read_Overlay, Write_Overlay },
+	{ ftFont,     sizeof(font),     Free_Font,     Read_Font,     null },
+	{ ftGlobals,  sizeof(globals),  Free_Globals,  Read_Globals,  Write_Globals },
+	{ ftGraphic,  sizeof(grf),      Free_GRF,      Read_GRF,      null },
+	{ ftItem,     sizeof(item),     null,          Read_Item,     null },
+	{ ftMonster,  sizeof(monster),  Free_Monster,  Read_Monster,  null },
+	{ ftMusic,    sizeof(sng),      Free_SNG,      Read_SNG,      null },
+	/* { ftNPC,      sizeof(npc),      Free_NPC,      Read_NPC,      Write_NPC }, */
+	{ ftPalette,  sizeof(palette),  null,          Read_Palette,  null },
+	{ ftParty,    sizeof(party),    null,          Read_Party,    Write_Party },
+	{ ftPC,       sizeof(pc),       Free_PC,       Read_PC,       Write_PC },
+	{ ftScript,   sizeof(script),   Free_Script,   Read_Script,   null },
+	/* { ftSound,    sizeof(wav),      Free_WAV,      Read_WAV,      null }, */
+	{ ftStrings,  sizeof(strings),  Free_Strings,  Read_Strings,  null },
+	{ ftZone,     sizeof(zone),     Free_Zone,     Read_Zone,     null },
+	{ ftOverlay,  sizeof(overlay),  Free_Overlay,  Read_Overlay,  Write_Overlay },
 
-	{ ftUnknown, null, null }
+	{ ftUnknown, 0, null, null, null }
 };
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-noexport loaderspec Get_Spec(djn_type ty)
+noexport loaderspec *Get_Spec(djn_type ty)
 {
-	int i;
-	loaderspec spec;
+	loaderspec *spec;
 
-	for (i = 0; ; i++) {
-		spec = loaders[i++];
-		if (spec.type == ty || spec.type == ftUnknown)
+	for (spec = loaders; ; spec++) {
+		if (spec->type == ty || spec->type == ftUnknown)
 			return spec;
 	}
 }
@@ -58,7 +58,7 @@ bool Load_Djn(char *filename, djn *d)
 {
 	FILE *fp = fopen(filename, "rb");
 	djn_file *x;
-	UINT32 i;
+	int i;
 
 	if (!fp) {
 		dief("Load_Djn: Could not open for reading: %s\n", filename);
@@ -93,15 +93,15 @@ void Close_Djn(djn *d)
 
 noexport void Free_Djn_File(djn_file *f)
 {
-	loaderspec spec = Get_Spec(f->type);
+	loaderspec *spec = Get_Spec(f->type);
 
 	Free(f->name);
 
 	if (f->object == null)
 		return;
 
-	if (spec.free)
-		spec.free(f->object);
+	if (spec->free)
+		spec->free(f->object);
 
 	Free(f->object);
 }
@@ -118,22 +118,32 @@ void Free_Djn(djn *d)
 	Free(d->files);
 }
 
-void *Load_File(djn *d, djn_file* f)
+noexport void *Load_File(djn *d, djn_file* f)
 {
-	loaderspec spec = Get_Spec(f->type);
+	loaderspec *spec = Get_Spec(f->type);
+
+	Log("Load_File: #%d t%d %s", f->id, f->type, f->name ? f->name : "(unknown)");
 
 	if (d->f == null) {
 		dief("Load_File: could not load #%x, djn is already closed", f->id);
 		return null;
 	}
 
-	fseek(d->f, f->offset, SEEK_SET);
-
-	if (!spec.read)
+	if (!spec->read)
 		dief("Load_File: don't know how to parse type %d", f->type);
 
-	f->object = Allocate(1, spec.size, "Load_File");
-	spec.read(d->f, f->object);
+	fseek(d->f, f->offset, SEEK_SET);
+	f->object = Allocate(1, spec->size, "Load_File");
+
+	Log("Load_File: @%ld, allocated %d bytes", f->offset, spec->size);
+
+	if (f->object == null) {
+		dief("Load_File: out of memory reading #%d", f->id);
+		return null;
+	}
+
+	current_reading_file = f;
+	spec->read(d->f, f->object);
 	return f->object;
 }
 
@@ -142,6 +152,10 @@ void *Lookup_File(djn *chain, file_id id)
 	int i;
 	djn *d = chain;
 	djn_file *x;
+
+	/* Special case: cannot look up ID 0 */
+	if (id == 0)
+		return null;
 
 	while (d) {
 		for (i = 0; i < d->count; i++) {
@@ -191,7 +205,65 @@ void Unload_File(djn *chain, file_id id)
 {
 	djn_file *f = Lookup_File(chain, id);
 
+	Log("Unload_File: #%d", id);
+
 	if (f != null) {
 		Free_Djn_File(f);
 	}
+}
+
+void Add_to_Djn(djn *d, void *obj, file_id id, djn_type ty)
+{
+	djn_file *f; 
+
+	d->count++;
+	d->files = Reallocate(d->files, d->count, sizeof(djn_file), "Add_to_Djn");
+	if (d->files == null)
+		die("Add_to_Djn: out of memory");
+
+	f = &d->files[d->count - 1];
+	f->id = id;
+	f->object = obj;
+	f->type = ty;
+}
+
+bool Save_Djn(char *filename, djn *d)
+{
+	int i;
+	loaderspec *spec;
+	djn_file *f;
+	FILE *fp = fopen(filename, "wb");
+	if (!fp) {
+		dief("Save_Djn: Could not open for writing: %s\n", filename);
+		return false;
+	}
+
+	fseek(fp, DJN_HEADERSZ, SEEK_SET);
+	for (i = 0, f = d->files; i < d->count; i++, f++) {
+		spec = Get_Spec(f->type);
+
+		if (!spec->write) {
+			fclose(fp);
+			dief("Save_Djn: cannot write file of type %d", f->type);
+			return false;
+		}
+
+		f->offset = ftell(fp);
+		spec->write(fp, f->object);
+		f->size = ftell(fp) - f->offset;
+	}
+
+	d->directory = ftell(fp);
+	for (i = 0, f = d->files; i < d->count; i++, f++) {
+		fwrite(f, DJN_FILESZ, 1, fp);
+
+		if (d->flags & dfDesign)
+			Write_LengthString(f->name, fp);
+	}
+
+	fseek(fp, 0, SEEK_SET);
+	fwrite(d, DJN_HEADERSZ, 1, fp);
+
+	fclose(fp);
+	return true;
 }

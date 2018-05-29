@@ -186,14 +186,14 @@ noexport skill_id Choose_Skill_Menu(skill_id a, skill_id b)
 	unsigned char ch;
 	bool first = true;
 
-	Draw_Font(8, Y_LEARN, WHITE, "Choose a skill to learn:", FNT, true);
+	Draw_Font(8, Y_LEARN, WHITE, "Choose a skill to learn:", gFont, true);
 
-	Draw_Wrapped_Font(  8, Y_DESC, 144, 64, SKILL_DESC, skills[a].description, FNT, false);
-	Draw_Wrapped_Font(168, Y_DESC, 144, 64, SKILL_DESC, skills[b].description, FNT, false);
+	Draw_Wrapped_Font(  8, Y_DESC, 144, 64, SKILL_DESC, skills[a].description, gFont, false);
+	Draw_Wrapped_Font(168, Y_DESC, 144, 64, SKILL_DESC, skills[b].description, gFont, false);
 
 	while (true) {
-		Draw_Font(  8, Y_SKILL, first ? SKILL_SELECTED : WHITE, skills[a].name, FNT, true);
-		Draw_Font(168, Y_SKILL, first ? WHITE : SKILL_SELECTED, skills[b].name, FNT, true);
+		Draw_Font(  8, Y_SKILL, first ? SKILL_SELECTED : WHITE, skills[a].name, gFont, true);
+		Draw_Font(168, Y_SKILL, first ? WHITE : SKILL_SELECTED, skills[b].name, gFont, true);
 		Show_Double_Buffer();
 
 		ch = Get_Next_Scan_Code();
@@ -237,9 +237,9 @@ noexport bool Choose_Skill(pc *pc, skill_id a, skill_id b)
 
 	if (immediate) {
 		sprintf(buffer, "%s learns %s!", pc->name, skills[learnt].name);
-		Draw_Font(8, Y_SKILL, WHITE, buffer, FNT, false);
+		Draw_Font(8, Y_SKILL, WHITE, buffer, gFont, false);
 
-		Draw_Wrapped_Font(8, Y_DESC, SCREEN_WIDTH - 16, 64, SKILL_DESC, skills[learnt].description, FNT, false);
+		Draw_Wrapped_Font(8, Y_DESC, SCREEN_WIDTH - 16, 64, SKILL_DESC, skills[learnt].description, gFont, false);
 	}
 
 	Add_Skill(pc, learnt);
@@ -262,13 +262,13 @@ void Level_Up(pc *pc)
 	ch->stats[sHP] += j->hp_per_level;
 	ch->stats[sMaxHP] += j->hp_per_level;
 	sprintf(buffer, "+%d HP", j->hp_per_level);
-	Draw_Font(8, Y_HP, WHITE, buffer, FNT, 0);
+	Draw_Font(8, Y_HP, WHITE, buffer, gFont, 0);
 
 	if (j->mp_per_level > 0) {
 		ch->stats[sMP] += j->mp_per_level;
 		ch->stats[sMaxMP] += j->mp_per_level;
 		sprintf(buffer, "+%d MP", j->mp_per_level);
-		Draw_Font(8, Y_MP, WHITE, buffer, FNT, 0);
+		Draw_Font(8, Y_MP, WHITE, buffer, gFont, 0);
 	}
 
 	if (ch->job_level[ch->job] < JOB_LEVELS) {
@@ -276,11 +276,11 @@ void Level_Up(pc *pc)
 		if (l->stat != sNONE) {
 			ch->stats[l->stat]++;
 			sprintf(buffer, "+1 %s", Stat_Name(l->stat));
-			Draw_Font(8, Y_STAT, WHITE, buffer, FNT, 0);
+			Draw_Font(8, Y_STAT, WHITE, buffer, gFont, 0);
 		}
 
 		sprintf(buffer, "%s becomes %s level %d!", pc->name, Job_Name(ch->job), *level + 1);
-		Draw_Font(8, Y_LEVEL, WHITE, buffer, FNT, 0);
+		Draw_Font(8, Y_LEVEL, WHITE, buffer, gFont, 0);
 
 		if (Choose_Skill(pc, l->a, l->b)) {
 			Show_Double_Buffer();
@@ -290,7 +290,7 @@ void Level_Up(pc *pc)
 		(*level)++;
 	} else {
 		sprintf(buffer, "%s gains a level!", pc->name);
-		Draw_Font(8, Y_LEVEL, WHITE, buffer, FNT, 0);
+		Draw_Font(8, Y_LEVEL, WHITE, buffer, gFont, 0);
 
 		Show_Double_Buffer();
 		Get_Next_Scan_Code();

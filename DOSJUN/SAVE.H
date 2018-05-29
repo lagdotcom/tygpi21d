@@ -3,6 +3,7 @@
 
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
+#include "campaign.h"
 #include "djn.h"
 #include "zone.h"
 
@@ -55,7 +56,7 @@ typedef struct partystatus {
 	coord x, y;
 	UINT8 encounter_chance;
 	UINT8 danger;
-} partystatus;
+} party;
 
 typedef struct globals {
 	UINT16 num_globals;
@@ -71,22 +72,24 @@ typedef struct zone_overlay {
 
 	list *items;
 	INT16 *locals;
-} zone_overlay;
+} overlay;
 #define OVERLAY_HEADER_SZ	sizeof(UINT16)
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 bool Load_Savefile(char *filename, djn *s);
 void Free_Globals(globals *g);
-void Free_Overlay(zone_overlay *o);
+void Free_Overlay(overlay *o);
 void Free_Savefile(djn *s);
 void Initialise_Globals(globals *g, campaign *c);
-void Initialise_Overlay(zone_overlay *o, zone *z);
+void Initialise_Overlay(overlay *o, zone *z);
 void Initialise_Savefile(djn *s);
-void Read_Globals(FILE *fp, globals *g);
-void Read_Overlay(FILE *fp, zone_overlay *o);
+bool Read_Globals(FILE *fp, globals *g);
+bool Read_Overlay(FILE *fp, overlay *o);
+bool Read_Party(FILE *fp, party *p);
 bool Save_Savefile(char *filename, djn *s);
-void Write_Globals(FILE *fp, globals *g);
-void Write_Overlay(FILE *fp, zone_overlay *g);
+bool Write_Globals(FILE *fp, globals *g);
+bool Write_Overlay(FILE *fp, overlay *g);
+bool Write_Party(FILE *fp, party *p);
 
 #endif

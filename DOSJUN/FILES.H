@@ -77,7 +77,7 @@ typedef enum tileflag {
 
 #define Set_Version_Header(h) strncpy(h.magic, FILE_MAGIC, 3); h.version = VERSION_NOW
 #define Set_Version_Header_p(h) strncpy(h->magic, FILE_MAGIC, 3); h->version = VERSION_NOW
-#define Check_Version_Header(h) if (!Check_Version(h.magic, h.version)) { fclose(fp); return false; }
-#define Check_Version_Header_p(h) if (!Check_Version(h->magic, h->version)) { fclose(fp); return false; }
+#define Check_Version_Header(h, tag) if (!Check_Version(h.magic, h.version, tag)) { fclose(fp); return false; }
+#define Check_Version_Header_p(h, tag) if (!Check_Version(h->magic, h->version, tag)) { fclose(fp); return false; }
 
 #endif

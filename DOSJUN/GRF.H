@@ -29,7 +29,8 @@ typedef struct grf {
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Draw_GRF(int x, int y, grf *g, int img, int minx, int miny, int maxx, int maxy);
-bool Load_GRF(char *filename, grf *g, char *tag);
 void Free_GRF(grf *g);
+bool Load_GRF(char *filename, grf *g, char *tag);
+bool Read_GRF(FILE *fp, grf *g); 
 
 #endif /* DOSJUN_GRF_H */

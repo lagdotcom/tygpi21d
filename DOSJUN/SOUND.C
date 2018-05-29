@@ -169,19 +169,19 @@ noexport void Play_WAV(wave *data)
 noexport bool Load_WAV(wave *data, char *filename)
 {
 	char *err;
-	FILE *f;
+	FILE *fp;
 	riff_header header;
 	wav_fmt_chunk wavefmt;
 	wav_data_chunk wavedata;
 
-	f = fopen(filename, "rb");
-	if (!f)
+	fp = fopen(filename, "rb");
+	if (!fp)
 	{
 		die("Load_WAV: couldn't open file");
 		return false;
 	}
 
-	fread(&header, sizeof(riff_header), 1, f);
+	fread(&header, sizeof(riff_header), 1, fp);
 	if (strncmp(header.riff, "RIFF", 4) != 0) {
 		err = "Load_WAV: not a RIFF file";
 		goto _dead;
@@ -191,7 +191,7 @@ noexport bool Load_WAV(wave *data, char *filename)
 		goto _dead;
 	}
 
-	fread(&wavefmt, sizeof(wav_fmt_chunk), 1, f);
+	fread(&wavefmt, sizeof(wav_fmt_chunk), 1, fp);
 	if (strncmp(wavefmt.fmt, "fmt ", 4) != 0) {
 		err = "Load_WAV: fmt chunk missing";
 		goto _dead;
@@ -209,7 +209,7 @@ noexport bool Load_WAV(wave *data, char *filename)
 		goto _dead;
 	}
 
-	fread(&wavedata, sizeof(wav_data_chunk), 1, f);
+	fread(&wavedata, sizeof(wav_data_chunk), 1, fp);
 	if (strncmp(wavedata.fmt, "data", 4) != 0) {
 		err = "Load_WAV: data chunk missing";
 		goto _dead;
@@ -223,13 +223,13 @@ noexport bool Load_WAV(wave *data, char *filename)
 		err = "Load_WAV: out of memory";
 		goto _dead;
 	}
-	fread(data->sample, data->length, 1, f);
+	fread(data->sample, data->length, 1, fp);
 
-	fclose(f);
+	fclose(fp);
 	return true;
 
 _dead:
-	fclose(f);
+	fclose(fp);
 	die(err);
 	return false;
 }

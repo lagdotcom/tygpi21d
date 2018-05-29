@@ -8,7 +8,6 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define MONSTERS_HEADER_PADDING		26
 #define MONSTER_PADDING				1
 #define MONSTER_SIZE				76
 
@@ -43,26 +42,11 @@ typedef struct monster {
 	list* skills;
 } monster;
 
-typedef struct monsters_header {
-	VERSION_HEADER;
-
-	UINT16 num_monsters;
-
-	unsigned char unused[MONSTERS_HEADER_PADDING];
-} monsters_header;
-
-typedef struct monsters {
-	monsters_header header;
-
-	monster *monsters;
-} monsters;
-
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-void Free_Monsters(monsters *m);
-void Initialise_Monsters(monsters *m);
-bool Load_Monsters(char *filename, monsters *m);
-monster *Lookup_Monster(monsters *lib, monster_id id);
-bool Save_Monsters(char *filename, monsters *m);
+void Free_Monster(monster *m);
+bool Load_Monster(char *filename, monster *m);
+bool Read_Monster(FILE *fp, monster *m);
+bool Save_Monster(char *filename, monster *m);
 
 #endif

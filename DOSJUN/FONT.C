@@ -119,8 +119,7 @@ bool Read_Font(FILE *fp, font *f)
 	pcx_picture pcx;
 
 	fread(&f->header, sizeof(font_header), 1, fp);
-	Check_Version_Header(f->header);
-	fclose(fp);
+	Check_Version_Header(f->header, "Read_Font");
 
 	PCX_Init(&pcx);
 	if (!Load_Picture(f->header.filename, &pcx, "Read_Font")) {

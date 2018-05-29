@@ -207,20 +207,21 @@ void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled)
 	}
 }
 
-void Load_Palette(char *filename)
+bool Read_Palette(FILE *fp, palette *p)
 {
 	int i;
-	RGB_color rgb;
-	FILE *fp = fopen(filename, "rb");
-	if (!fp) {
-		dief("Could not open: %s", filename);
-		return;
-	}
+	RGB_color_ptr col;
 
-	for (i = 0; i < 256; i++) {
-		fread(&rgb, 3, 1, fp);
-		Set_Palette_Register(i, &rgb);
-	}
+	fread(p->colours, sizeof(RGB_color), PALETTE_SIZE, fp);
 
-	fclose(fp);
+	return true;
+}
+
+void Apply_Palette(palette *p)
+{
+	int i;
+
+	for (i = 0; i < PALETTE_SIZE; i++) {
+		Set_Palette_Register(i, &p->colours[i]);
+	}
 }

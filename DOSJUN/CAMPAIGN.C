@@ -9,7 +9,7 @@ bool Read_Campaign(FILE *fp, campaign *c)
 	int i;
 
 	fread(c, sizeof(campaign), 1, fp);
-	Check_Version_Header_p(c);
+	Check_Version_Header_p(c, "Read_Campaign");
 
 	return true;
 }

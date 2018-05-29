@@ -789,7 +789,9 @@ noexport script_id Pick_Option(void)
 
 noexport void Reset_Host(code_host *h, script_id id)
 {
-	h->code = Lookup_File(gDjn, id);
+	script *s = Lookup_File(gDjn, id);
+	
+	h->code = s->code;
 	h->pc = 0;
 	h->result = 0;
 	h->sp = 0;
@@ -860,4 +862,22 @@ void Free_Code(void)
 	Free(option_menu);
 	Free(option_state);
 	Free(formatting_buf);
+}
+
+void Free_Script(script *s)
+{
+	Free(s->code);
+}
+
+bool Read_Script(FILE *fp, script *s)
+{
+	s->code = SzAlloc(current_reading_file->size, char, "Read_Script");
+	if (s->code == null) goto _dead;
+	fread(s->code, current_reading_file->size, 1, fp);
+	
+	return true;
+
+_dead:
+	die("Read_Script: out of memory");
+	return false;
 }

@@ -40,7 +40,6 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define FNT (&font6x8)
 #define TILE(z, x, y) (&z->tiles[(y) * z->header.width + (x)])
 
 #define BLACK	0
@@ -58,11 +57,12 @@
 
 extern djn *gDjn;
 extern campaign *gCampaign;
+extern font *gFont;
 extern gamestate gState;
-extern partystatus *gParty;
+extern party *gParty;
 extern djn *gSave;
 extern zone *gZone;
-extern zone_overlay *gOverlay;
+extern overlay *gOverlay;
 extern globals *gGlobals;
 
 extern bool

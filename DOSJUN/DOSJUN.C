@@ -11,12 +11,13 @@ grf *explore_bg;
 
 djn *gDjn;
 campaign *gCampaign;
+font *gFont;
 gamestate gState;
-partystatus *gParty;
+party *gParty;
 djn *gSave;
 strings *gStrings;
 zone *gZone;
-zone_overlay *gOverlay;
+overlay *gOverlay;
 globals *gGlobals;
 
 bool redraw_everything,
@@ -25,8 +26,6 @@ bool trigger_on_enter,
 	trigger_zone_enter,
 	just_moved,
 	can_save;
-
-font font6x8;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -131,7 +130,7 @@ wall *Get_Wall(coord x, coord y, dir dir, relative rel)
 
 void Show_Game_String(char *string, bool wait_for_key)
 {
-	Draw_Wrapped_Font(8, 144, 304, 48, WHITE, string, FNT, true);
+	Draw_Wrapped_Font(8, 144, 304, 48, WHITE, string, gFont, true);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();
@@ -472,6 +471,19 @@ char *Resolve_String(int id)
 	return Get_String(gStrings, id);
 }
 
+noexport void Load_Djn_Palette(void)
+{
+	palette *pal;
+
+	pal = Find_File_Type(gDjn, ftPalette);
+	if (pal) {
+		Apply_Palette(pal);
+		Log("%s", "Load_Djn_Palette: found");
+	} else {
+		Log("%s", "Load_Djn_Palette: not present");
+	}
+}
+
 void main(int argc, char **argv)
 {
 	Start_Memory_Tracking();
@@ -495,12 +507,19 @@ void main(int argc, char **argv)
 		return;
 	}
 
+	gFont = Lookup_File(gDjn, gCampaign->font_id);
+	if (gFont == null) {
+		printf("%s", "main: No font data found in DJN files.");
+		Free_Djn_Chain();
+		Stop_Memory_Tracking();
+		return;
+	}
+
 	if (!Initialise_DB()) {
 		dief("%s", "main: Not enough memory to create double buffer.");
 		return;
 	}
 
-	Load_Font("6x8.FNT", FNT);
 	Initialise_Timer();
 	Initialise_Combat();
 	Initialise_Jobs();
@@ -511,7 +530,7 @@ void main(int argc, char **argv)
 	printf("OK\n");
 
 	Set_Video_Mode(VGA256);
-	Load_Palette("DOSJUN.PAL");
+	Load_Djn_Palette();
 
 	Log("%s", "main: Menu");
 	gState = gsMainMenu;
@@ -533,14 +552,15 @@ void main(int argc, char **argv)
 	Log("%s", "main: Cleanup");
 	printf("%s", "Cleaning up after DOSJUN...");
 
-	Free_Savefile(gSave);
+	if (gSave)
+		Free_Savefile(gSave);
+
 	Free_Combat();
 	Free_Jobs();
 	Free_Sound();
 	Free_Music();
 	Free_Code();
 	Delete_Picture();
-	Free_Font(FNT);
 	Free_Timer();
 
 	Free_DB();

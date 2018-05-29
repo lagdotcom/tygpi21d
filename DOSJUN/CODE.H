@@ -90,10 +90,16 @@ typedef enum code_internal {
 	internalInvalid = 0xFF
 } code_internal;
 
+typedef struct script {
+	bytecode *code;
+} script;
+
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Free_Code(void);
+void Free_Script(script *s);
 void Initialise_Code(void);
 int Run_Code(script_id id);
+bool Read_Script(FILE *fp, script *s);
 
 #endif

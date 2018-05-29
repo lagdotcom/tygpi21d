@@ -7,7 +7,7 @@
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-bool Check_Version(char *magic, unsigned char version);
+bool Check_Version(char *magic, unsigned char version, char *tag);
 void Free_Directory_Listing(char **listing, int count);
 char **Get_Directory_Listing(char *pattern, int *count);
 unsigned char Get_Next_Scan_Code(void);

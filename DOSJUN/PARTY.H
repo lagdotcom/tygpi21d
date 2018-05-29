@@ -15,6 +15,7 @@ bool Add_to_Inventory(pc *pc, item_id iid, unsigned char qty);
 void Draw_Character_Status(pcnum index, int x, int y);
 void Draw_Party_Status(void);
 bool Equip_Item(pc *pc, item_id iid);
+void Free_PC(pc *pc);
 item *Get_Equipped_Item(pc *pc, itemslot sl);
 item *Get_Equipped_Weapon(pc *pc, bool primary);
 
@@ -25,9 +26,9 @@ stat_value Get_Pc_Stat(pc *c, statistic st);
 
 bool In_Front_Row(pc *pc);
 void Pc_Select(pcnum index);
-
+bool Read_PC(FILE *fp, pc *pc);
 bool Remove_Item(pc *pc, item_id iid);
-
 void Show_Pc_Screen(pcnum index);
+bool Write_PC(FILE *fp, pc *pc);
 
 #endif

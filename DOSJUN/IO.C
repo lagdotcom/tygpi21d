@@ -79,10 +79,10 @@ unsigned char Get_Next_Scan_Code(void)
 	return scan;
 }
 
-bool Check_Version(char *magic, unsigned char version)
+bool Check_Version(char *magic, unsigned char version, char *tag)
 {
 	if (strncmp(magic, FILE_MAGIC, 3) != 0 || version > VERSION_NOW)
-		dief("Check_Version: File does not belong to DOSJUN v%d.\n", VERSION_NOW);
+		dief("%s: File does not belong to DOSJUN v%d.\n", tag, VERSION_NOW);
 
 	return true;
 }

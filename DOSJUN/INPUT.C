@@ -168,16 +168,16 @@ bool Input_Multiline_String(int x, int y, char *string, int max)
 int Input_Menu(char **menu, int choices, int x, int y)
 {
 	int choice = 0,
-		height = FNT->header.height,
+		height = gFont->header.height,
 		i;
 	unsigned char key;
 
 	for (i = 0; i < choices; i++) {
-		Draw_Font(x, y + i*height, WHITE, " ", FNT, false);
-		Draw_Font(x + 8, y + i*height, WHITE, menu[i], FNT, false);
+		Draw_Font(x, y + i*height, WHITE, " ", gFont, false);
+		Draw_Font(x + 8, y + i*height, WHITE, menu[i], gFont, false);
 	}
 
-	Draw_Font_Char(x, y + choice*height, WHITE, '>', FNT, false);
+	Draw_Font_Char(x, y + choice*height, WHITE, '>', gFont, false);
 	Show_Double_Buffer();
 
 	while (true) {
@@ -185,18 +185,18 @@ int Input_Menu(char **menu, int choices, int x, int y)
 
 		switch (key) {
 			case SCAN_DOWN:
-				Draw_Font_Char(x, y + choice*height, WHITE, ' ', FNT, false);
+				Draw_Font_Char(x, y + choice*height, WHITE, ' ', gFont, false);
 				choice++;
 				if (choice == choices) choice = 0;
-				Draw_Font_Char(x, y + choice*height, WHITE, '>', FNT, false);
+				Draw_Font_Char(x, y + choice*height, WHITE, '>', gFont, false);
 				Show_Double_Buffer();
 				break;
 
 			case SCAN_UP:
-				Draw_Font_Char(x, y + choice*height, WHITE, ' ', FNT, false);
+				Draw_Font_Char(x, y + choice*height, WHITE, ' ', gFont, false);
 				if (choice == 0) choice = choices - 1;
 				else choice--;
-				Draw_Font_Char(x, y + choice*height, WHITE, '>', FNT, false);
+				Draw_Font_Char(x, y + choice*height, WHITE, '>', gFont, false);
 				Show_Double_Buffer();
 				break;
 

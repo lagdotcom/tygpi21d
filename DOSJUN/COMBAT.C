@@ -51,7 +51,7 @@ noexport UINT32 earned_experience;
 
 noexport void Show_Combat_String(char *string, bool wait_for_key)
 {
-	Draw_Wrapped_Font(96, 144, 128, 48, WHITE, string, FNT, true);
+	Draw_Wrapped_Font(96, 144, 128, 48, WHITE, string, gFont, true);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();
@@ -98,7 +98,7 @@ noexport void Highlight_Ally(int pc_active, int pc_select)
 		colour = 15;
 		if (i == pc_active) colour = COLOUR_ACTIVE;
 		if (i == pc_select) colour = COLOUR_SELECT;
-		Draw_Font(248, 8 + i * 32, colour, buffer, FNT, true);
+		Draw_Font(248, 8 + i * 32, colour, buffer, gFont, true);
 	}
 }
 

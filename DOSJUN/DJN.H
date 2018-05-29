@@ -7,6 +7,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
+#define DJN_PADDING			18
 #define DJN_FILE_PADDING	3
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
@@ -39,7 +40,7 @@ typedef enum djn_type {
 
 	ftParty = 0xC0,
 	ftGlobals,
-	ftZoneOverlay,
+	ftOverlay,
 } djn_type;
 
 typedef enum djn_subtype {
@@ -70,12 +71,17 @@ typedef struct djn {
 	UINT32 count;
 	UINT32 directory;
 	UINT16 flags;
+	unsigned char unused[DJN_PADDING];
 
 	djn_file *files;
 	FILE *f;
 	void *next; /* djn */
 } djn;
-#define DJN_HEADERSZ 14
+#define DJN_HEADERSZ 32
+
+/* G L O B A L S ///////////////////////////////////////////////////////// */
+
+extern djn_file *current_reading_file;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 

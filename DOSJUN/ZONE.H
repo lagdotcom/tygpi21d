@@ -96,6 +96,7 @@ typedef struct zone {
 void Free_Zone(zone *z);
 void Initialise_Zone(zone *z);
 bool Load_Zone(char *filename, zone *z);
+bool Read_Zone(FILE *fp, zone *z);
 bool Save_Zone(char *filename, zone *z);
 
 #endif

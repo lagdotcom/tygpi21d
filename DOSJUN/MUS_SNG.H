@@ -3,6 +3,7 @@
 
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
+#include <stdio.h>
 #include "types.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
@@ -62,6 +63,7 @@ extern bool sng_playing;
 void Continue_SNG(void);
 void Free_SNG(sng *s);
 bool Load_SNG(char *filename, sng *s);
+bool Read_SNG(FILE *fp, sng *s);
 void Start_SNG(sng *s);
 void Stop_SNG(void);
 

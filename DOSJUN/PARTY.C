@@ -50,14 +50,14 @@ void Draw_Character_Status(pcnum index, int x, int y)
 
 	strncpy(buffer, pc->name, 8);
 	buffer[8] = 0;
-	Draw_Font(x + 16, y, WHITE, buffer, FNT, false);
+	Draw_Font(x + 16, y, WHITE, buffer, gFont, false);
 
 	sprintf(buffer, "H%3d/%-3d", pc->header.stats[sHP], pc->header.stats[sMaxHP]);
-	Draw_Font(x + 16, y + 8, WHITE, buffer, FNT, false);
+	Draw_Font(x + 16, y + 8, WHITE, buffer, gFont, false);
 
 	if (pc->header.stats[sMaxMP] > 0) {
 		sprintf(buffer, "M%3d/%-3d", pc->header.stats[sMP], pc->header.stats[sMaxMP]);
-		Draw_Font(x + 16, y + 16, WHITE, buffer, FNT, false);
+		Draw_Font(x + 16, y + 16, WHITE, buffer, gFont, false);
 	}
 }
 
@@ -336,8 +336,8 @@ noexport void Show_Pc_Stat(pc *pc, statistic st, int y)
 
 	itoa(Get_Pc_Stat(pc, st), temp, 10);
 
-	Draw_Font(8, y, WHITE, name, FNT, false);
-	Draw_Font(80, y, WHITE, temp, FNT, false);
+	Draw_Font(8, y, WHITE, name, gFont, false);
+	Draw_Font(80, y, WHITE, temp, gFont, false);
 }
 
 noexport void Show_Pc_Stat_Pair(pc *pc, statistic stc, statistic stm, int y)
@@ -345,10 +345,10 @@ noexport void Show_Pc_Stat_Pair(pc *pc, statistic stc, statistic stm, int y)
 	char *name = Stat_Name(stm);
 	char temp[10];
 
-	Draw_Font(8, y, WHITE, name, FNT, false);
+	Draw_Font(8, y, WHITE, name, gFont, false);
 
 	sprintf(temp, "%3d/%3d", Get_Pc_Stat(pc, stc), Get_Pc_Stat(pc, stm));
-	Draw_Font(80, y, WHITE, temp, FNT, false);
+	Draw_Font(80, y, WHITE, temp, gFont, false);
 }
 
 noexport void Show_Pc_Items(pc *pc, int selected)
@@ -365,20 +365,20 @@ noexport void Show_Pc_Items(pc *pc, int selected)
 
 		if (!iv->item) {
 			col = (i == selected) ? (YELLOW - 8) : GREY;
-			Draw_Font(ITEMS_X + 16, y, col, "--", FNT, false);
+			Draw_Font(ITEMS_X + 16, y, col, "--", gFont, false);
 		} else {
 			it = Lookup_File(gDjn, iv->item);
 			col = (i == selected) ? ITEM_SELECTED : WHITE;
-			Draw_Font(ITEMS_X + 16, y, col, it->name, FNT, false);
+			Draw_Font(ITEMS_X + 16, y, col, it->name, gFont, false);
 
 			if (iv->quantity > 1) {
 				sprintf(temp, "x%d", iv->quantity);
-				Draw_Font(ITEMS_X + 150, y, col, temp, FNT, false);
+				Draw_Font(ITEMS_X + 150, y, col, temp, gFont, false);
 			}
 		}
 
 		if (iv->flags & vfEquipped) {
-			Draw_Font(ITEMS_X, y, CYAN, "E", FNT, false);
+			Draw_Font(ITEMS_X, y, CYAN, "E", gFont, false);
 		} else {
 			Draw_Square_DB(BLACK, ITEMS_X, y, ITEMS_X + 15, y + 7, true);
 		}
@@ -426,10 +426,10 @@ noexport void Show_Pc_Stats(pc *pc)
 
 	Fill_Double_Buffer(0);
 
-	Draw_Font(8, 8, WHITE, pc->name, FNT, false);
+	Draw_Font(8, 8, WHITE, pc->name, gFont, false);
 
 	sprintf(temp, "Level %d %s", pc->header.job_level[pc->header.job], Job_Name(pc->header.job));
-	Draw_Font(8, 16, WHITE, temp, FNT, false);
+	Draw_Font(8, 16, WHITE, temp, gFont, false);
 
 	Show_Pc_Stat(pc, sStrength, 32);
 	Show_Pc_Stat(pc, sDexterity, 40);
@@ -444,13 +444,13 @@ noexport void Show_Pc_Stats(pc *pc)
 	Show_Pc_Stat(pc, sArmour, 112);
 	Show_Pc_Stat(pc, sToughness, 120);
 
-	Draw_Font(8, 136, WHITE, "Damage", FNT, false);
-	Draw_Font(80, 136, WHITE, Get_Damage_Range(pc), FNT, false);
+	Draw_Font(8, 136, WHITE, "Damage", gFont, false);
+	Draw_Font(80, 136, WHITE, Get_Damage_Range(pc), gFont, false);
 }
 
 noexport unsigned char Confirm(char *prompt)
 {
-	Draw_Font(ITEMS_X, CONFIRM_Y, WHITE, prompt, FNT, false);
+	Draw_Font(ITEMS_X, CONFIRM_Y, WHITE, prompt, gFont, false);
 	Show_Double_Buffer();
 	return Get_Next_Scan_Code();
 }
@@ -684,4 +684,43 @@ void Show_Pc_Screen(pcnum starting_pc)
 				return;
 		}
 	}
+}
+
+void Free_PC(pc *pc)
+{
+	Free_List(pc->skills);
+
+	Clear_List(pc->buffs);
+	Free_List(pc->buffs);
+
+	if (pc->header.name_id == 0)
+		Free(pc->name);
+}
+
+bool Read_PC(FILE *fp, pc *pc)
+{
+	fread(pc, sizeof(pc_header), 1, fp);
+
+	pc->skills = Read_List(fp, "Read_PC.skills");
+	pc->buffs = Read_List(fp, "Read_PC.buffs");
+
+	if (pc->header.name_id)
+		pc->name = Resolve_String(pc->header.name_id);
+	else
+		pc->name = Read_LengthString(fp, "Read_PC.name");
+
+	return true;
+}
+
+bool Write_PC(FILE *fp, pc *pc)
+{
+	fwrite(pc, sizeof(pc_header), 1, fp);
+
+	Write_List(pc->skills, fp);
+	Write_List(pc->buffs, fp);
+
+	if (pc->header.name_id == 0)
+		Write_LengthString(pc->name, fp);
+
+	return true;
 }

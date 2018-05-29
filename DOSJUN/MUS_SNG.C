@@ -146,14 +146,9 @@ noexport long filesize(FILE *fp)
 	return size;
 }
 
-bool Load_SNG(char *filename, sng *s)
+bool Read_SNG(FILE *fp, sng *s)
 {
 	long pattern_data;
-	FILE *fp = fopen(filename, "rb");
-	if (!fp) {
-		dief("Load_SNG: Could not open for reading: %s\n", filename);
-		return false;
-	}
 
 	fread(s, SNG_HEADER_LEN, 1, fp);
 	if (strncmp(SNG_MAGIC, s->magic, 4) != 0) {
@@ -168,8 +163,21 @@ bool Load_SNG(char *filename, sng *s)
 	/* TODO: fix warning (fread takes size_t, not long) */
 	fread(s->patterns, pattern_data, 1, fp);
 
-	fclose(fp);
 	return true;
+}
+
+bool Load_SNG(char *filename, sng *s)
+{
+	bool result;
+	FILE *fp = fopen(filename, "rb");
+	if (!fp) {
+		dief("Load_SNG: Could not open for reading: %s\n", filename);
+		return false;
+	}
+
+	result = Read_SNG(fp, s);
+	fclose(fp);
+	return result;
 }
 
 void Free_SNG(sng *s)

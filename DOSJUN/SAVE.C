@@ -7,18 +7,18 @@
 
 noexport int Flag_Size(UINT16 count)
 {
-	int size = g->num_flags / 16;
-	if (g->num_flags & 0xf) size++;
+	int size = count / 16;
+	if (count & 0xf) size++;
 
 	return size;
 }
 
 void Initialise_Savefile(djn *s)
 {
-	partystatus *party;
+	party *party;
 	globals *globs;
 
-	party = SzAlloc(1, partystatus, "Initialise_Savefile.party");
+	party = SzAlloc(1, party, "Initialise_Savefile.party");
 	Add_to_Djn(s, party, 0, ftParty);
 
 	globs = SzAlloc(1, globals, "Initialise_Savefile.globs");
@@ -44,8 +44,6 @@ bool Save_Savefile(char *filename, djn *s)
 
 void Initialise_Globals(globals *g, campaign *c)
 {
-	UINT16 size;
-
 	g->num_globals = c->global_count;
 	g->globals = SzAlloc(g->num_globals, UINT16, "Initialise_Globals.globals");
 
@@ -53,7 +51,7 @@ void Initialise_Globals(globals *g, campaign *c)
 	g->flags = SzAlloc(Flag_Size(g->num_flags), UINT16, "Initialise_Globals.flags");
 }
 
-void Initialise_Overlay(zone_overlay *o, zone *z)
+void Initialise_Overlay(overlay *o, zone *z)
 {
 	int i;
 	itempos *p;
@@ -75,47 +73,80 @@ void Free_Globals(globals *g)
 	Free(g->flags);
 }
 
-void Free_Overlay(zone_overlay *o)
+void Free_Overlay(overlay *o)
 {
 	Free(o->locals);
 	Clear_List(o->items);
 	Free_List(o->items);
 }
 
-void Read_Globals(FILE *fp, globals *g)
+bool Read_Globals(FILE *fp, globals *g)
 {
 	int size;
 
 	fread(g, GLOBALS_HEADER_SZ, 1, fp);
 
-	g->globals = SzAlloc(g->num_globals, INT16, "Read_Globals.globals");
-	fread(g->globals, sizeof(INT16), g->num_globals, fp);
-
 	size = Flag_Size(g->num_flags);
+
+	g->globals = SzAlloc(g->num_globals, INT16, "Read_Globals.globals");
 	g->flags = SzAlloc(size, INT16, "Read_Globals.flags");
+	if (g->globals == null || g->flags == null) goto _dead;
+
+	fread(g->globals, sizeof(INT16), g->num_globals, fp);
 	fread(g->flags, sizeof(INT16), size, fp);
+
+	return true;
+
+_dead:
+	die("Read_Globals: out of memory");
+	return false;
 }
 
-void Read_Overlay(FILE *fp, zone_overlay *o)
+bool Read_Overlay(FILE *fp, overlay *o)
 {
 	fread(o, OVERLAY_HEADER_SZ, 1, fp);
 
 	o->locals = SzAlloc(o->num_locals, INT16, "Read_Overlay.locals");
-	fread(o->locals, sizeof(INT16), g->locals, fp);
+	if (o->locals == null) goto _dead;
+	fread(o->locals, sizeof(INT16), o->num_locals, fp);
 
 	o->items = Read_List(fp, "Read_Overlay.items");
+
+	return true;
+
+_dead:
+	die("Read_Overlay: out of memory");
+	return false;
 }
 
-void Write_Globals(FILE *fp, globals *g)
+bool Read_Party(FILE *fp, party *p)
+{
+	fread(p, sizeof(party), 1, fp);
+
+	return true;
+}
+
+bool Write_Globals(FILE *fp, globals *g)
 {
 	fwrite(g, GLOBALS_HEADER_SZ, 1, fp);
 	fwrite(g->globals, sizeof(INT16), g->num_globals, fp);
 	fwrite(g->flags, sizeof(INT16), Flag_Size(g->num_flags), fp);
+
+	return true;
 }
 
-void Write_Overlay(FILE *fp, zone_overlay *o)
+bool Write_Overlay(FILE *fp, overlay *o)
 {
 	fwrite(o, OVERLAY_HEADER_SZ, 1, fp);
 	fwrite(o->locals, sizeof(INT16), o->num_locals, fp);
 	Write_List(o->items, fp);
+
+	return true;
+}
+
+bool Write_Party(FILE *fp, party *p)
+{
+	fwrite(p, sizeof(party), 1, fp);
+
+	return true;
 }

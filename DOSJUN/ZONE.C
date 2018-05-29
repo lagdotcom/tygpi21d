@@ -16,27 +16,19 @@ void Initialise_Zone(zone *z)
 	z->items = null;
 }
 
-bool Load_Zone(char *filename, zone *z)
+bool Read_Zone(FILE *fp, zone *z)
 {
-	unsigned int i;
 	zone_header *h = &z->header;
-	FILE *fp = fopen(filename, "rb");
-	if (!fp) {
-		dief("Load_Zone: Could not open for reading: %s\n", filename);
-		return false;
-	}
-
-	Log("Load_Zone: %s", filename);
 
 	fread(h, sizeof(zone_header), 1, fp);
-	Check_Version_Header(z->header);
+	Check_Version_Header(z->header, "Read_Zone");
 
-	z->tiles = SzAlloc(h->width * h->height, tile, "Load_Zone.tiles");
+	z->tiles = SzAlloc(h->width * h->height, tile, "Read_Zone.tiles");
 	if (z->tiles == null) goto _dead;
 	fread(z->tiles, sizeof(tile), h->width * h->height, fp);
 
 	if (h->num_encounters > 0) {
-		z->encounters = SzAlloc(h->num_encounters, encounter, "Load_Zone.encounters");
+		z->encounters = SzAlloc(h->num_encounters, encounter, "Read_Zone.encounters");
 		if (z->encounters == null) goto _dead;
 		fread(z->encounters, sizeof(encounter), h->num_encounters, fp);
 	} else {
@@ -44,7 +36,7 @@ bool Load_Zone(char *filename, zone *z)
 	}
 
 	if (h->num_etables > 0) {
-		z->etables = SzAlloc(h->num_etables, etable, "Load_Zone.etables");
+		z->etables = SzAlloc(h->num_etables, etable, "Read_Zone.etables");
 		if (z->etables == null) goto _dead;
 		fread(z->etables, sizeof(etable), h->num_etables, fp);
 	} else {
@@ -52,25 +44,37 @@ bool Load_Zone(char *filename, zone *z)
 	}
 
 	if (h->num_items > 0) {
-		z->items = SzAlloc(h->num_items, itempos, "Load_Zone.items");
+		z->items = SzAlloc(h->num_items, itempos, "Read_Zone.items");
 		if (z->items == null) goto _dead;
 		fread(z->items, sizeof(itempos), h->num_items, fp);
 	} else {
 		z->items = null;
 	}
 
-	fclose(fp);
 	return true;
 
 _dead:
-	die("Load_Zone: out of memory");
+	die("Read_Zone: out of memory");
 	return false;
+}
+
+bool Load_Zone(char *filename, zone *z)
+{
+	bool result;
+	FILE *fp = fopen(filename, "rb");
+	if (!fp) {
+		dief("Load_Zone: Could not open for reading: %s\n", filename);
+		return false;
+	}
+
+	Log("Load_Zone: %s", filename);
+	result = Read_Zone(fp, z);
+	fclose(fp);
+	return result;
 }
 
 void Free_Zone(zone *z)
 {
-	unsigned int i;
-
 	Log("Free_Zone: %p", z);
 
 	Free(z->tiles);
@@ -81,7 +85,6 @@ void Free_Zone(zone *z)
 
 bool Save_Zone(char *filename, zone *z)
 {
-	unsigned int i;
 	zone_header *h = &z->header;
 	FILE *fp = fopen(filename, "wb");
 	if (!fp) {
