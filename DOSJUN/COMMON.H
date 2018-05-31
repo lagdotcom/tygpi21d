@@ -55,7 +55,6 @@ typedef UINT16 etable_id;
 typedef UINT16 file_id;
 typedef UINT8 inventoryflag_id;
 typedef UINT8 internal_id;
-typedef UINT16 item_id;
 typedef UINT16 itemflag_id;
 typedef UINT8 item_slot;
 typedef UINT8 item_type;
@@ -64,14 +63,11 @@ typedef UINT16 length;
 typedef UINT16 monster_id;
 typedef UINT8 monsterflag_id;
 typedef UINT8 row_id;
-typedef UINT16 script_id;
 typedef UINT8 itemspecial_id;
 typedef INT16 stat_value;
-typedef UINT16 string_id;
 typedef UINT8 thing_id;
 typedef UINT16 tileflag_id;
 typedef UINT8 walltype_id;
-typedef UINT8 zone_id;
 
 /* Quit with message */
 #define die(msg) { Stop_Memory_Tracking(); Log("die/%s", msg); printf("%s", msg); exit(1); }

@@ -16,7 +16,7 @@ typedef struct campaign {
 
 	UINT16 global_count;
 	UINT16 flag_count;
-	UINT16 script_id;
+	UINT16 script_start;
 	UINT16 name_id;
 	UINT16 desc_id;
 	UINT16 font_id;

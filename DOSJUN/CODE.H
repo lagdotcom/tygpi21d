@@ -68,6 +68,8 @@ typedef enum code_op {
 	coNpcSpeak,
 	coNpcAction,
 	coOption,
+
+	/* NOT IMPLEMENTED */
 	coChoosePcName,
 	coJoinParty,
 	coLeaveParty,
@@ -84,6 +86,8 @@ typedef enum code_internal {
 	internalDanger,
 	internalJustMoved,
 	internalSuccess,
+
+	/* NOT IMPLEMENTED */
 	internalReturn,
 	internalPartyFull,
 
@@ -99,7 +103,7 @@ typedef struct script {
 void Free_Code(void);
 void Free_Script(script *s);
 void Initialise_Code(void);
-int Run_Code(script_id id);
+int Run_Code(file_id id);
 bool Read_Script(FILE *fp, script *s);
 
 #endif

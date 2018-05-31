@@ -7,7 +7,7 @@
 
 #define EXPORE_DEBUG	0
 
-grf *explore_bg;
+noexport grf *explore_bg;
 
 djn *gDjn;
 campaign *gCampaign;
@@ -26,6 +26,8 @@ bool trigger_on_enter,
 	trigger_zone_enter,
 	just_moved,
 	can_save;
+
+point topleft = { 0, 0 };
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -290,7 +292,7 @@ void Redraw_Dungeon_Screen(bool script)
 	if (redraw_everything) {
 		Fill_Double_Buffer(0);
 		if (explore_bg)
-			Draw_GRF(0, 0, explore_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+			Draw_GRF(&topleft, explore_bg, 0, 0);
 	}
 
 	if (redraw_fp || redraw_everything) Draw_FP();
@@ -501,7 +503,7 @@ void main(int argc, char **argv)
 
 	gCampaign = Find_File_Type(gDjn, ftCampaign);
 	if (gCampaign == null) {
-		printf("%s", "main: No campaign data found in DJN files.");
+		printf("%s", "main: No campaign data found in DJN files.\n");
 		Free_Djn_Chain();
 		Stop_Memory_Tracking();
 		return;
@@ -509,7 +511,7 @@ void main(int argc, char **argv)
 
 	gFont = Lookup_File(gDjn, gCampaign->font_id);
 	if (gFont == null) {
-		printf("%s", "main: No font data found in DJN files.");
+		printf("%s", "main: No font data found in DJN files.\n");
 		Free_Djn_Chain();
 		Stop_Memory_Tracking();
 		return;

@@ -41,7 +41,7 @@ typedef enum itemspecial {
 
 typedef struct item {
 	char name[NAME_SIZE];
-	item_id id;
+	file_id id;
 	item_type type;
 	itemflag_id flags;
 	UINT32 value;

@@ -18,7 +18,7 @@ typedef enum charflag {
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct inventory {
-	item_id item;
+	file_id item;
 	inventoryflag_id flags;
 	unsigned char quantity;
 	item_slot slot;
@@ -26,10 +26,10 @@ typedef struct inventory {
 
 typedef struct pc_header {
 	VERSION_HEADER;
-	UINT16 name_id;
+	str_id name_id;
 	job_id job;
 	UINT8 pronouns;
-	UINT16 portrait_id;
+	file_id portrait_id;
 	UINT16 total_level;
 	charflag_id flags;
 	UINT32 experience;

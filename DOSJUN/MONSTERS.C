@@ -7,9 +7,10 @@
 bool Read_Monster(FILE *fp, monster *m)
 {
 	fread(m, MONSTER_SIZE, 1, fp);
+	Check_Version_Header_p(m, "Read_Monster");
 
 	if (m->flags & mHasSkills) {
-		m->skills = Read_List(fp, "Load_Monsters");
+		m->skills = Read_List(fp, "Read_Monster");
 	} else {
 		m->skills = null;
 	}

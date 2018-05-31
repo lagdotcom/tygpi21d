@@ -129,6 +129,7 @@ noexport void Paste_DB(int dx, int dy, pcx_picture *texture, int w, int h, int s
 	}
 }
 
+/* TODO: use GRF */
 noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, char piece, int sx, int sy)
 {
 	int pieceStart;
@@ -141,6 +142,7 @@ noexport void Draw_Tile_Segment(colour textureId, int dx, int dy, int w, int h, 
 	Paste_DB(dx, dy, &textures[pieceStart + piece], w, h, sx, sy);
 }
 
+/* TODO: use GRF */
 noexport void Draw_Thing(thing_id th, int dx, int dy, int w, int h, int sx, int sy)
 {
 	assert(th < thINVALID, "Draw_Thing: thing number too high");
@@ -164,50 +166,6 @@ noexport tile *Get_Offset_Tile(int forward, int left)
 
 	if (Is_Coord_Valid(ax, ay)) return TILE(gZone, ax, ay);
 	return null;
-}
-
-noexport void Load_Texture_Pieces(char *name, int index)
-{
-	int i;
-	char filename[MAX_FILENAME_LENGTH];
-
-	for (i = 0; i < TEXTURE_PIECES; i++) {
-		sprintf(filename, "WALL\\%s%d.PCX", name, i + 1);
-		if (!Load_Picture(filename, &textures[index * TEXTURE_PIECES + i], "Load_Texture_Pieces.n"))
-			dief("Load_Texture_Pieces: Could not load: %s\n", filename);
-	}
-}
-
-noexport void Load_Thing(char *name, thing_id th)
-{
-	char filename[MAX_FILENAME_LENGTH];
-
-	sprintf(filename, "THING\\%s.PCX", name);
-	if (!Load_Picture(filename, &things[th - 1], name))
-		dief("Load_Thing: Could not load: %s\n", filename);
-}
-
-noexport void Load_Things(void)
-{
-	if (things != null) return;
-
-	things = SzAlloc(thINVALID - 1, pcx_picture, "Load_Things");
-	Load_Thing("SHINY", thShiny);
-	Load_Thing("BARREL", thBarrel);
-}
-
-noexport void Free_Things(void)
-{
-	int i = 0;
-
-	Log("Free_Things: %p", things);
-
-	if (things == null) return;
-
-	for (i = 0; i < thINVALID - 1; i++)
-		Free(things[i].buffer);
-
-	Free(things);
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -352,6 +310,7 @@ void Delete_Picture(void)
 	}
 }
 
+/* TODO: use file_id instead / GRF */
 void Show_Picture(char *name)
 {
 	int y;

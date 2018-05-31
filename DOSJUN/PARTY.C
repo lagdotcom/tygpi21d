@@ -143,7 +143,7 @@ bool Remove_Item_At(pc *pc, int index)
 	return true;
 }
 
-bool Remove_Item(pc *pc, item_id iid)
+bool Remove_Item(pc *pc, file_id iid)
 {
 	int i;
 
@@ -231,7 +231,7 @@ bool Equip_Item_At(pc *pc, int index)
 	return true;
 }
 
-bool Equip_Item(pc *pc, item_id iid)
+bool Equip_Item(pc *pc, file_id iid)
 {
 	int i;
 
@@ -257,7 +257,7 @@ int Find_Empty_Inventory_Slot(pc *pc)
 	return -1;
 }
 
-bool Add_to_Inventory(pc *pc, item_id iid, unsigned char qty)
+bool Add_to_Inventory(pc *pc, file_id iid, unsigned char qty)
 {
 	int i;
 	inventory *iv;

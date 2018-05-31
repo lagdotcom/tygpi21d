@@ -32,9 +32,9 @@ typedef struct code_host {
 
 noexport int call_depth = 0;
 noexport int converse_npc = 0;
-noexport script_id conversation_state = INVALID_SCRIPT;
+noexport file_id conversation_state = INVALID_SCRIPT;
 noexport char **option_menu;
-noexport script_id *option_state;
+noexport file_id *option_state;
 noexport int num_options = 0;
 noexport char *formatting_buf;
 
@@ -369,7 +369,7 @@ noexport void Combat(code_host *h)
 
 noexport void PcSpeak(code_host *h)
 {
-	string_id string = Pop_Stack(h);
+	str_id string = Pop_Stack(h);
 	int pc = Pop_Stack(h);
 
 #if CODE_LOG
@@ -382,7 +382,7 @@ noexport void PcSpeak(code_host *h)
 
 noexport void PcAction(code_host *h)
 {
-	string_id string = Pop_Stack(h);
+	str_id string = Pop_Stack(h);
 	int pc = Pop_Stack(h);
 
 #if CODE_LOG
@@ -395,7 +395,7 @@ noexport void PcAction(code_host *h)
 
 noexport void NpcSpeak(code_host *h)
 {
-	string_id string = Pop_Stack(h);
+	str_id string = Pop_Stack(h);
 	int npc = Pop_Stack(h);
 
 #if CODE_LOG
@@ -408,7 +408,7 @@ noexport void NpcSpeak(code_host *h)
 
 noexport void NpcAction(code_host *h)
 {
-	string_id string = Pop_Stack(h);
+	str_id string = Pop_Stack(h);
 	int npc = Pop_Stack(h);
 
 #if CODE_LOG
@@ -421,7 +421,7 @@ noexport void NpcAction(code_host *h)
 
 noexport void Text(code_host *h)
 {
-	string_id string = Pop_Stack(h);
+	str_id string = Pop_Stack(h);
 
 #if CODE_LOG
 	Log("C|Text %d", string);
@@ -450,7 +450,7 @@ noexport void Unlock(code_host *h)
 noexport void GiveItem(code_host *h)
 {
 	int qty = Pop_Stack(h);
-	item_id item = Pop_Stack(h);
+	file_id item = Pop_Stack(h);
 	file_id ref = Pop_Stack(h);
 	pc *pc = Lookup_File(gSave, ref);
 
@@ -463,7 +463,7 @@ noexport void GiveItem(code_host *h)
 
 noexport void EquipItem(code_host *h)
 {
-	item_id item = Pop_Stack(h);
+	file_id item = Pop_Stack(h);
 	file_id ref = Pop_Stack(h);
 	pc *pc = Lookup_File(gSave, ref);
 
@@ -476,7 +476,7 @@ noexport void EquipItem(code_host *h)
 
 noexport void SetTileDescription(code_host *h)
 {
-	string_id string = Pop_Stack(h);
+	str_id string = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
@@ -535,7 +535,7 @@ noexport void Teleport(code_host *h)
 	dir facing = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
-	zone_id zone = Pop_Stack(h);
+	file_id zone = Pop_Stack(h);
 
 #if CODE_LOG
 	Log("C|Teleport %d, %d, %d, %d, %d", zone, x, y, facing, transition);
@@ -610,7 +610,7 @@ noexport void AddItem(code_host *h)
 {
 	pcnum index;
 	int qty = Pop_Stack(h);
-	item_id item = Pop_Stack(h);
+	file_id item = Pop_Stack(h);
 	pc *pc;
 
 #if CODE_LOG
@@ -679,8 +679,8 @@ noexport void ChangeState(code_host *h)
 
 noexport void Option(code_host *h)
 {
-	string_id string = Pop_Stack(h);
-	script_id state = Pop_Stack(h);
+	str_id string = Pop_Stack(h);
+	file_id state = Pop_Stack(h);
 
 #if CODE_LOG
 	Log("C|Option %d, %d", state, string);
@@ -774,7 +774,7 @@ noexport int Run_Code_Host(code_host *h)
 	return h->result;
 }
 
-noexport script_id Pick_Option(void)
+noexport file_id Pick_Option(void)
 {
 	int choice;
 
@@ -787,7 +787,7 @@ noexport script_id Pick_Option(void)
 	return option_state[choice];
 }
 
-noexport void Reset_Host(code_host *h, script_id id)
+noexport void Reset_Host(code_host *h, file_id id)
 {
 	script *s = Lookup_File(gDjn, id);
 	
@@ -797,7 +797,7 @@ noexport void Reset_Host(code_host *h, script_id id)
 	h->sp = 0;
 }
 
-int Run_Code(script_id id)
+int Run_Code(file_id id)
 {
 	bool result;
 	code_host *h;
@@ -853,7 +853,7 @@ int Run_Code(script_id id)
 void Initialise_Code(void)
 {
 	option_menu = SzAlloc(MAX_OPTIONS, char *, "Initialise_Code.option_menu");
-	option_state = SzAlloc(MAX_OPTIONS, script_id, "Initialise_Code.option_state");
+	option_state = SzAlloc(MAX_OPTIONS, file_id, "Initialise_Code.option_state");
 	formatting_buf = SzAlloc(300, char, "Initialise_Code.buf");
 }
 

@@ -75,7 +75,7 @@ extern bool
 	just_moved,
 	can_save;
 
-extern font font6x8;
+extern point topleft;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 

@@ -10,7 +10,7 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-grf *menu_bg;
+noexport grf *menu_bg;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -43,7 +43,7 @@ noexport gamestate Start_New_Game(void)
 {
 	Fill_Double_Buffer(0);
 
-	Run_Code(gCampaign->script_id);
+	Run_Code(gCampaign->script_start);
 
 	Draw_Wrapped_Font(0, 0, SCREEN_WIDTH, 32, WHITE, "You've always wanted to play one of those 'Escape the Room' games, so you get together a group of friends and go to a local one.", gFont, false);
 	gSave->header.num_characters = 6;
@@ -99,7 +99,7 @@ gamestate Start_New_Game(void)
 
 	Fill_Double_Buffer(0);
 	gState = gsCutscene;
-	Run_Code(gCampaign->script_id);
+	Run_Code(gCampaign->script_start);
 
 	return gsDungeon;
 
@@ -174,7 +174,7 @@ gamestate Show_Main_Menu(void)
 	while (!done) {
 		Fill_Double_Buffer(0);
 		if (menu_bg)
-			Draw_GRF(0, 0, menu_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+			Draw_GRF(&topleft, menu_bg, 0, 0);
 
 		option = Input_Menu(menu, 3, 100, 140);
 

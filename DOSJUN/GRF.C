@@ -11,20 +11,30 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
+noexport box whole_screen = {
+	{ 0, 0 },
+	{ SCREEN_WIDTH, SCREEN_HEIGHT }
+};
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Draw_GRF(int sx, int sy, grf *g, int img, int minx, int miny, int maxx, int maxy)
+void Draw_GRF(point *xy, grf *g, int img, colour tint)
+{
+	Draw_GRF_Clipped(xy, g, img, tint, &whole_screen);
+}
+
+void Draw_GRF_Clipped(point *xy, grf *g, int img, colour tint, box *bounds)
 {
 	int x, y, ex;
 	grf_image *im;
 	unsigned char *d, i, len, c;
 
-	assert(img < g->num_images, "Draw_GRF: image index too high");
+	assert(img < g->num_images, "Draw_GRF_Clipped: image index too high");
 
 	im = &g->images[img];
-	x = sx;
-	y = sy;
-	ex = sx + im->width;
+	x = xy->x;
+	y = xy->y;
+	ex = x + im->width;
 	d = im->data;
 
 	while (true) {
@@ -52,12 +62,12 @@ void Draw_GRF(int sx, int sy, grf *g, int img, int minx, int miny, int maxx, int
 				len = *(d++) - OP_DATA + 1;
 				for (i = 0; i < len; i++) {
 					c = *(d++);
-					if (x >= minx && x < maxx && y >= miny && y < maxy)
-						Plot_Pixel_Fast_DB(x, y, c);
+					if (x >= bounds->start.x && x < bounds->end.x && y >= bounds->start.y && y < bounds->end.y)
+						Plot_Pixel_Fast_DB(x, y, tint ? tint : c);
 
 					x++;
 					if (x >= ex) {
-						x = sx;
+						x = xy->x;
 						y++;
 					}
 				}

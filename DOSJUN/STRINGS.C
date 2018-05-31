@@ -1,12 +1,12 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include "strings.h"
+#include "dosjun.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 void Free_Strings(strings *s)
 {
-	strid i;
+	str_id i;
 
 	for (i = 0; i < s->count; i++)
 		Free(s->strings[i].string);
@@ -14,9 +14,9 @@ void Free_Strings(strings *s)
 	Free(s->strings);
 }
 
-char *Get_String(strings *s, strid id)
+char *Get_String(strings *s, str_id id)
 {
-	strid i;
+	str_id i;
 
 	for (i = 0; i < s->count; i++)
 	{
@@ -30,7 +30,7 @@ char *Get_String(strings *s, strid id)
 
 bool Read_Strings(FILE *fp, strings *s)
 {
-	strid i;
+	str_id i;
 	fread(s, STRINGS_HEADER_SZ, 1, fp);
 
 	s->strings = SzAlloc(s->count, stringse, "Read_Strings.list");
@@ -40,7 +40,7 @@ bool Read_Strings(FILE *fp, strings *s)
 	}
 
 	for (i = 0; i < s->count; i++) {
-		fread(&s->strings[i].id, sizeof(strid), 1, fp);
+		fread(&s->strings[i].id, sizeof(str_id), 1, fp);
 		s->strings[i].string = Read_LengthString(fp, "Read_Strings[i]");
 	}
 

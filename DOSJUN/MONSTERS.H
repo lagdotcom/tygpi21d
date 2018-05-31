@@ -4,12 +4,13 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "files.h"
+#include "strings.h"
 #include "types.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define MONSTER_PADDING				1
-#define MONSTER_SIZE				76
+#define MONSTER_PADDING				15
+#define MONSTER_SIZE				64
 
 typedef enum row {
 	rowFront,
@@ -28,16 +29,16 @@ typedef enum monsterflag {
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct monster {
-	char name[NAME_SIZE];
-	char image[8];
-	monster_id id;
-	stat_value stats[NUM_STATS];
+	VERSION_HEADER;
+	str_id name_id;
+	file_id image_id;
 	row_id row;
 	ai_id ai;
 	UINT32 experience;
-	item_id weapon;
+	file_id weapon;
 	monsterflag_id flags;
 	unsigned char unused[MONSTER_PADDING];
+	stat_value stats[NUM_STATS];
 
 	list* skills;
 } monster;

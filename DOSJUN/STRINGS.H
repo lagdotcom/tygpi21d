@@ -3,30 +3,31 @@
 
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include "dosjun.h"
+#include <stdio.h>
+#include "types.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-typedef int strid;
+typedef UINT16 str_id;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct stringse {
-	strid id;
+	str_id id;
 	char *string;
 } stringse;
 
 typedef struct strings {
-	strid count;
+	str_id count;
 
 	stringse *strings;
 } strings;
-#define STRINGS_HEADER_SZ	sizeof(strid)
+#define STRINGS_HEADER_SZ	sizeof(str_id)
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Free_Strings(strings *s);
-char *Get_String(strings *s, strid id);
+char *Get_String(strings *s, str_id id);
 bool Read_Strings(FILE *fp, strings *s);
 
 #endif

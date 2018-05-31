@@ -50,7 +50,7 @@ typedef struct combatant {
 	list *buffs;
 	list *skills;
 	groupnum group;
-	item_id primary, secondary;
+	file_id primary, secondary;
 	row_id row;
 	bool is_pc;
 

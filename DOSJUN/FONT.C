@@ -116,6 +116,7 @@ void Draw_Wrapped_Font(int x, int y, int w, int h, colour col, char *string, fon
 
 bool Read_Font(FILE *fp, font *f)
 {
+	/* TODO: rewrite to use GRF */
 	pcx_picture pcx;
 
 	fread(&f->header, sizeof(font_header), 1, fp);

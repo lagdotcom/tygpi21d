@@ -24,9 +24,7 @@ noexport bool Item_Matches(list_type type, void *a, void *b)
 {
 	switch (type) {
 		case ltString:
-			if (strcmp(a, b) == 0)
-				return true;
-			break;
+			return streq(a, b);
 
 		case ltInteger:
 			return (int)a == (int)b;

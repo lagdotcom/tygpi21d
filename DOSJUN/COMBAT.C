@@ -154,7 +154,7 @@ noexport void Highlight_Enemy_Group(groupnum active, groupnum select)
 
 item *Get_Weapon(combatant *c, bool primary)
 {
-	item_id iid = primary ? c->primary : c->secondary;
+	file_id iid = primary ? c->primary : c->secondary;
 
 	return iid ? Lookup_File(gDjn, iid) : null;
 }
@@ -412,7 +412,7 @@ void Add_Monster(groupnum group, monster *template)
 	c->group = group;
 	c->is_pc = false;
 	c->monster = template;
-	c->name = template->name;
+	c->name = Resolve_String(template->name_id);
 	c->pc = null;
 	c->row = template->row;
 	c->index = combatants->size;
@@ -685,7 +685,7 @@ bool Has_Buff(combatant *c, char *name)
 	for (i = 0; i < c->buffs->size; i++) {
 		b = List_At(c->buffs, i);
 
-		if (strcmp(b->name, name) == 0) {
+		if (streq(b->name, name)) {
 			return true;
 		}
 	}
@@ -709,7 +709,7 @@ void Remove_Buff(combatant *target, char *name)
 	for (i = target->buffs->size - 1; i >= 0; i--) {
 		b = List_At(target->buffs, i);
 
-		if (strcmp(b->name, name) == 0) {
+		if (streq(b->name, name)) {
 			Remove_Buff_from_List(target, b);
 			return;
 		}
@@ -962,7 +962,8 @@ void Start_Combat(encounter_id id)
 {
 	char *description,
 		*write,
-		*first = null;
+		*name;
+	file_id first_img = 0;
 	groupnum group;
 	pcnum pc;
 	int count;
@@ -985,12 +986,13 @@ void Start_Combat(encounter_id id)
 	for (group = 0; group < ENCOUNTER_SIZE; group++) {
 		if (!en->monsters[group]) continue;
 		m = Lookup_File(gDjn, en->monsters[group]);
-		if (first == null) first = m->image;
+		if (!first_img) first_img = m->image_id;
 
 		count = randint(en->minimum[group], en->maximum[group]);
 		if (count > 0) {
-			Log("Start_Combat: adding %dx%s (#%04x)", count, m->name, en->monsters[group]);
-			write += sprintf(write, " %s x%d", m->name, count);
+			name = Resolve_String(m->name_id);
+			Log("Start_Combat: adding %dx%s (#%04x)", count, name, en->monsters[group]);
+			write += sprintf(write, " %s x%d", name, count);
 
 			while (count > 0) {
 				Add_Monster(groups_alive, m);
@@ -1002,7 +1004,7 @@ void Start_Combat(encounter_id id)
 	}
 
 	/* Briefly show encounter on Dungeon screen */
-	Show_Picture(first);
+	Show_Picture(first_img);
 	Show_Game_String(description, true);
 	Free(description);
 #if COMBAT_RECLAIM
@@ -1013,8 +1015,8 @@ void Start_Combat(encounter_id id)
 	redraw_everything = true;
 	Fill_Double_Buffer(0);
 	if (combat_bg)
-		Draw_GRF(0, 0, combat_bg, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-	Show_Picture(first);
+		Draw_GRF(&topleft, combat_bg, 0, 0);
+	Show_Picture(first_img);
 
 	/* DO IT */
 	earned_experience = 0;

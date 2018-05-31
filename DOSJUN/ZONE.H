@@ -4,6 +4,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "files.h"
+#include "strings.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -35,13 +36,13 @@ typedef struct tile {
 	wall walls[4];
 	file_id floor;
 	file_id ceil;
-	string_id description;
-	script_id on_enter;
+	str_id description;
+	file_id on_enter;
 	etable_id etable;
 	tileflag_id flags;
 	thing_id thing;
 	UINT8 danger;
-	script_id on_use;
+	file_id on_use;
 
 	unsigned char padding[TILE_PADDING];
 } tile;
@@ -73,9 +74,9 @@ typedef struct zone_header {
 	UINT8 unused;
 	encounter_id num_encounters;
 	etable_id num_etables;
-	script_id on_enter;
-	script_id on_move;
-	UINT16 name_id;
+	file_id on_enter;
+	file_id on_move;
+	str_id name_id;
 	UINT16 num_locals;
 	UINT16 num_items;
 

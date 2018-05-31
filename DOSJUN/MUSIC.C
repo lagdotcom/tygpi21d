@@ -33,7 +33,7 @@ bool Play_Music(char *track)
 {
 	char filename[13];
 
-	if (strcmp(track, active_track) != 0) {
+	if (!streq(track, active_track)) {
 		if (loaded) {
 			Stop_Music();
 		}
