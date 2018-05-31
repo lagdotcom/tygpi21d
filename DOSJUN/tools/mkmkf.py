@@ -6,8 +6,8 @@ DEFINES = ['MEMORY_DEBUG', 'FAR_MEMORY']
 OBJECTS = {
 	'DEMO': ['MKDEMO', 'CAMPAIGN', 'IO', 'ITEMS', 'MONSTERS', 'SAVE', 'ZONE'],
 	'MAIN': ['DOSJUN', 'CAMPAIGN', 'CODE', 'COMBAT', 'DJN', 'FONT', 'FP', 'GFX', 'GRF', 'INPUT', 'IO', 'ITEMS', 'JFIGHTER', 'JCLERIC', 'JMAGE', 'JBARD', 'JROGUE', 'JRANGER', 'JOBS', 'LIST', 'LOGGING', 'MAIN', 'MEM', 'MONSTERS', 'MUS_SNG', 'MUSIC', 'PARTY', 'SAVE', 'SOUND', 'STATUS', 'STRINGS', 'TIMER', 'ZONE'],
-	'EDITOR': ['EDITOR', 'GFX', 'INPUT', 'IO', 'ITEMS', 'JC', 'JC_LEX', 'JC_PAR', 'MEM', 'MONSTERS', 'SAVE', 'ZONE'],
-	'JCC': ['JCC', 'JC', 'JC_LEX', 'JC_PAR', 'MEM']
+	#'EDITOR': ['EDITOR', 'GFX', 'INPUT', 'IO', 'ITEMS', 'JC', 'JC_LEX', 'JC_PAR', 'MEM', 'MONSTERS', 'SAVE', 'ZONE'],
+	#'JCC': ['JCC', 'JC', 'JC_LEX', 'JC_PAR', 'MEM']
 }
 STANDALONE = ['DOSJUN', 'EDITOR', 'JCC', 'MKDEMO']
 HEADERS = [h[h.index('\\')+1:] for h in glob('..\\*.H')]
@@ -52,19 +52,13 @@ f.write('HEADERS = %s\n' % ' '.join(HEADERS))
 f.write("""
 all: dosjun
 
-demo: MKDEMO.EXE DEMO.ZON
 dosjun: DOSJUN.EXE
-editor: EDITOR.EXE
-jcc: JCC.EXE
-
-DEMO.ZON: MKDEMO.EXE
-	MKDEMO
 """)
 
 wexe('DOSJUN', 'MAIN')
-wexe('EDITOR')
-wexe('MKDEMO')
-wexe('JCC')
+#wexe('EDITOR')
+#wexe('MKDEMO')
+#wexe('JCC')
 
 for o in allobjects():
 	obj = objname(o)

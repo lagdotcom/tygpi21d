@@ -32,41 +32,41 @@ jc_token_type Parse_Operator(char *string)
 
 bool Is_Code_Keyword(char *string)
 {
-	if (!strcmp(string, "Combat")) return true;
-	if (!strcmp(string, "Const")) return true;
-	if (!strcmp(string, "Else")) return true;
-	if (!strcmp(string, "ElseIf")) return true;
-	if (!strcmp(string, "EndIf")) return true;
-	if (!strcmp(string, "EndScript")) return true;
-	if (!strcmp(string, "EquipItem")) return true;
-	if (!strcmp(string, "GiveItem")) return true;
-	if (!strcmp(string, "Global")) return true;
-	if (!strcmp(string, "If")) return true;
-	if (!strcmp(string, "Include")) return true;
-	if (!strcmp(string, "Local")) return true;
-	if (!strcmp(string, "Music")) return true;
-	if (!strcmp(string, "PcSpeak")) return true;
-	if (!strcmp(string, "Return")) return true;
-	if (!strcmp(string, "Safe")) return true;
-	if (!strcmp(string, "Script")) return true;
-	if (!strcmp(string, "SetDanger")) return true;
-	if (!strcmp(string, "SetTileColour")) return true;
-	if (!strcmp(string, "SetTileDescription")) return true;
-	if (!strcmp(string, "SetTileThing")) return true;
-	if (!strcmp(string, "Teleport")) return true;
-	if (!strcmp(string, "Text")) return true;
-	if (!strcmp(string, "Unlock")) return true;
+	if (streq(string, "Combat")) return true;
+	if (streq(string, "Const")) return true;
+	if (streq(string, "Else")) return true;
+	if (streq(string, "ElseIf")) return true;
+	if (streq(string, "EndIf")) return true;
+	if (streq(string, "EndScript")) return true;
+	if (streq(string, "EquipItem")) return true;
+	if (streq(string, "GiveItem")) return true;
+	if (streq(string, "Global")) return true;
+	if (streq(string, "If")) return true;
+	if (streq(string, "Include")) return true;
+	if (streq(string, "Local")) return true;
+	if (streq(string, "Music")) return true;
+	if (streq(string, "PcSpeak")) return true;
+	if (streq(string, "Return")) return true;
+	if (streq(string, "Safe")) return true;
+	if (streq(string, "Script")) return true;
+	if (streq(string, "SetDanger")) return true;
+	if (streq(string, "SetTileColour")) return true;
+	if (streq(string, "SetTileDescription")) return true;
+	if (streq(string, "SetTileThing")) return true;
+	if (streq(string, "Teleport")) return true;
+	if (streq(string, "Text")) return true;
+	if (streq(string, "Unlock")) return true;
 
 	return false;
 }
 
 internal_id Get_Internal_Id(char *string)
 {
-	if (!strcmp(string, "Danger")) return internalDanger;
-	if (!strcmp(string, "Facing")) return internalFacing;
-	if (!strcmp(string, "X")) return internalX;
-	if (!strcmp(string, "Y")) return internalY;
-	if (!strcmp(string, "JustMoved")) return internalJustMoved;
+	if (streq(string, "Danger")) return internalDanger;
+	if (streq(string, "Facing")) return internalFacing;
+	if (streq(string, "X")) return internalX;
+	if (streq(string, "Y")) return internalY;
+	if (streq(string, "JustMoved")) return internalJustMoved;
 
 	return internalInvalid;
 }
@@ -120,7 +120,7 @@ int Compile_JC(jc_parser *parser, char *filename, bool toplevel)
 
 		if (success && count > 0) {
 			/* special handling for Include */
-			if (tokens[0].type == ttKeyword && !strcmp(tokens[0].value, "Include")) {
+			if (tokens[0].type == ttKeyword && streq(tokens[0].value, "Include")) {
 				success = Compile_JC(parser, tokens[1].value, false) == 0;
 			} else {
 				success = Parse_Tokens(parser, tokens, count);

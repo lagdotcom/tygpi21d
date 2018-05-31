@@ -101,7 +101,7 @@ noexport jc_token *Consume_Token(jc_parser *p)
 noexport bool Token_Matches(jc_parser *p, char *check)
 {
 	if (p->tokens[p->position].value == null) return false;
-	return !strcmp(p->tokens[p->position].value, check);
+	return streq(p->tokens[p->position].value, check);
 }
 
 noexport bool Parse_Error(jc_parser *p, char *message)
@@ -150,7 +150,7 @@ noexport jc_var *Resolve_Variable(jc_parser *p, char *name)
 	unsigned int i = 0;
 
 	for (i = 0; i < p->var_count; i++) {
-		if (!strcmp(p->vars[i].name, name))
+		if (streq(p->vars[i].name, name))
 			return &p->vars[i];
 	}
 
@@ -167,7 +167,7 @@ noexport void Save_Constant(jc_parser *p, char *name, int value)
 	p->var_count++;
 }
 
-noexport string_id Save_String(jc_parser *p, char *string)
+noexport str_id Save_String(jc_parser *p, char *string)
 {
 	/* TODO: check string count */
 	p->strings[p->string_count] = Duplicate_String(string, "Save_String");
@@ -254,7 +254,7 @@ noexport bool Pop_Stack(jc_parser *p)
 noexport bool Emit_Argument(jc_parser *p, jc_token *token)
 {
 	jc_var *var;
-	string_id sindex;
+	strid sindex;
 	internal_id iindex;
 
 	switch (token->type) {

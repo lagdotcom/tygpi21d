@@ -201,7 +201,7 @@ void Change_Door(dir dir)
 
 #undef DX
 
-string_id Add_Description(void)
+str_id Add_Description(void)
 {
 	char buffer[MAX_STRING_LIST];
 
@@ -375,7 +375,7 @@ void Load_Code(void)
 	}
 }
 
-void Change_Script(script_id *script)
+void Change_Script(file_id *script)
 {
 	char **menu;
 	unsigned int result,
