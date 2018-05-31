@@ -40,6 +40,7 @@ typedef enum itemspecial {
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct item {
+	/* TODO: string_id */
 	char name[NAME_SIZE];
 	file_id id;
 	item_type type;

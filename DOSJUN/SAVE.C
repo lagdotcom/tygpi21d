@@ -15,14 +15,14 @@ noexport int Flag_Size(UINT16 count)
 
 void Initialise_Savefile(djn *s)
 {
-	party *party;
-	globals *globs;
+	party *p;
+	globals *g;
 
-	party = SzAlloc(1, party, "Initialise_Savefile.party");
-	Add_to_Djn(s, party, 0, ftParty);
+	p = SzAlloc(1, party, "Initialise_Savefile.party");
+	Add_to_Djn(s, p, 0, ftParty);
 
-	globs = SzAlloc(1, globals, "Initialise_Savefile.globs");
-	Add_to_Djn(s, globs, 0, ftGlobals);
+	g = SzAlloc(1, globals, "Initialise_Savefile.globals");
+	Add_to_Djn(s, g, 0, ftGlobals);
 
 	s->next = gDjn;
 }
