@@ -209,9 +209,6 @@ void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled)
 
 bool Read_Palette(FILE *fp, palette *p)
 {
-	int i;
-	RGB_color_ptr col;
-
 	fread(p->colours, sizeof(RGB_color), PALETTE_SIZE, fp);
 
 	return true;

@@ -6,8 +6,6 @@
 
 bool Read_Campaign(FILE *fp, campaign *c)
 {
-	int i;
-
 	fread(c, sizeof(campaign), 1, fp);
 	Check_Version_Header_p(c, "Read_Campaign");
 
@@ -32,14 +30,11 @@ bool Load_Campaign(char *filename, campaign *c)
 
 void Free_Campaign(campaign *c)
 {
-	int i;
-
 	Log("Free_Campaign: %p", c);
 }
 
 bool Save_Campaign(char *filename, campaign *c)
 {
-	int i;
 	FILE *fp = fopen(filename, "wb");
 	if (!fp) {
 		dief("Save_Campaign: Could not open for writing: %s\n", filename);

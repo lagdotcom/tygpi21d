@@ -31,7 +31,7 @@
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 struct entry {
-	UINT16 index;
+	UINT32 index;
 	char *tag;
 	void PtrDist *address;
 	MemSz size;
@@ -71,9 +71,9 @@ noexport void MLog(entry *e, char *op)
 	}
 
 #ifdef FAR_MEMORY
-	fprintf(f, "%05u.%s @%p+%-9lu | %s", e->index, op, e->address, e->size, e->tag);
+	fprintf(f, "%09lu.%s @%p+%-9lu | %s", e->index, op, e->address, e->size, e->tag);
 #else
-	fprintf(f, "%05u.%s @%p+%-5u | %s", e->index, op, e->address, e->size, e->tag);
+	fprintf(f, "%09lu.%s @%p+%-5u | %s", e->index, op, e->address, e->size, e->tag);
 #endif
 
 	fputc('\n', f);
@@ -243,9 +243,9 @@ void Stop_Memory_Tracking(void)
 	while (e != null) {
 		if (e != first) {
 #ifdef FAR_MEMORY
-			printf("#%u [%s]: @%p, %lu bytes not freed\n", e->index, e->tag, e->address, e->size);
+			printf("#%lu [%s]: @%p, %lu bytes not freed\n", e->index, e->tag, e->address, e->size);
 #else
-			printf("#%u [%s]: @%p, %u bytes not freed\n", e->index, e->tag, e->address, e->size);
+			printf("#%lu [%s]: @%p, %u bytes not freed\n", e->index, e->tag, e->address, e->size);
 #endif
 			_free(e->address);
 		}
@@ -262,9 +262,9 @@ void Stop_Memory_Tracking(void)
 	while (e != null) {
 		if (e != first) {
 #ifdef FAR_MEMORY
-			if (fp) fprintf(fp, "#%u [%s]: @%p, %lu bytes not freed\n", e->index, e->tag, e->address, e->size);
+			if (fp) fprintf(fp, "#%lu [%s]: @%p, %lu bytes not freed\n", e->index, e->tag, e->address, e->size);
 #else
-			if (fp) fprintf(fp, "#%u [%s]: @%p, %u bytes not freed\n", e->index, e->tag, e->address, e->size);
+			if (fp) fprintf(fp, "#%lu [%s]: @%p, %u bytes not freed\n", e->index, e->tag, e->address, e->size);
 #endif
 		}
 
