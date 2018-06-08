@@ -428,15 +428,11 @@ void Add_Monster(groupnum group, monster *template)
 
 noexport void Add_Pc(pcnum index)
 {
-	item *primary, *secondary;
 	pc *pc = Get_Pc(index);
 
 	combatant *c = SzAlloc(1, combatant, "Add_Pc");
 	if (c == null)
 		die("Add_Pc: out of memory");
-
-	primary = Get_Equipped_Weapon(pc, true);
-	secondary = Get_Equipped_Weapon(pc, false);
 
 	c->action = NO_ACTION;
 	c->buffs = pc->buffs;
@@ -449,8 +445,8 @@ noexport void Add_Pc(pcnum index)
 	c->index = combatants->size;
 	c->skills = pc->skills;
 	c->stats = pc->header.stats;
-	c->primary = primary ? primary->id : 0;
-	c->secondary = secondary ? secondary->id : 0;
+	c->primary = Get_Equipped_Weapon_Id(pc, true);
+	c->secondary = Get_Equipped_Weapon_Id(pc, false);
 
 	Add_to_List(combat_groups[c->group], c);
 	Add_to_List(combatants, c);

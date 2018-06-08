@@ -6,15 +6,14 @@
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef void(*ft_free_fn)(void*);
-typedef bool(*ft_read_fn)(FILE*, void*);
-typedef bool(*ft_write_fn)(FILE*, void*);
+typedef bool(*ft_io_fn)(FILE*, void*);
 
 typedef struct loaderspec {
 	djn_type type;
 	size_t size;
 	ft_free_fn free;
-	ft_read_fn read;
-	ft_write_fn write;
+	ft_io_fn read;
+	ft_io_fn write;
 } loaderspec;
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
@@ -29,7 +28,7 @@ noexport loaderspec loaders[] = {
 	{ ftItem,     sizeof(item),     null,          Read_Item,     null },
 	{ ftMonster,  sizeof(monster),  Free_Monster,  Read_Monster,  null },
 	{ ftMusic,    sizeof(sng),      Free_SNG,      Read_SNG,      null },
-	/* { ftNPC,      sizeof(npc),      Free_NPC,      Read_NPC,      Write_NPC }, */
+	{ ftNPC,      sizeof(npc),      Free_NPC,      Read_NPC,      Write_NPC },
 	{ ftPalette,  sizeof(palette),  null,          Read_Palette,  null },
 	{ ftParty,    sizeof(party),    null,          Read_Party,    Write_Party },
 	{ ftPC,       sizeof(pc),       Free_PC,       Read_PC,       Write_PC },

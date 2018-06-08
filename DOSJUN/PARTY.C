@@ -171,17 +171,22 @@ bool Remove_Equipped_Items(pc *pc, itemslot sl)
 	return true;
 }
 
-item *Get_Equipped_Item(pc *pc, itemslot sl)
+file_id Get_Equipped_Item_Id(pc *pc, itemslot sl)
 {
 	int i;
 
 	for (i = 0; i < INVENTORY_SIZE; i++) {
 		if (pc->header.items[i].slot == sl) {
-			return Lookup_File(gDjn, pc->header.items[i].item);
+			return pc->header.items[i].item;
 		}
 	}
-	
-	return null;
+
+	return 0;
+}
+
+item *Get_Equipped_Item(pc *pc, itemslot sl)
+{
+	return Lookup_File(gDjn, Get_Equipped_Item_Id(pc, sl));
 }
 
 bool Equip_Item_At(pc *pc, int index)
@@ -286,6 +291,20 @@ bool In_Front_Row(pc *pc)
 	return !(pc->header.flags & cfBackRow);
 }
 
+/* TODO: this kind of sucks */
+file_id Get_Equipped_Weapon_Id(pc *pc, bool primary)
+{
+	file_id id;
+	item *it;
+
+	id = Get_Equipped_Item_Id(pc, primary ? slWeapon : slOffHand);
+	it = Lookup_File(gDjn, id);
+
+	/* shields don't count! */
+	if (it == null || it->type == itShield) return 0;
+	return id;
+}
+
 item *Get_Equipped_Weapon(pc *pc, bool primary)
 {
 	item *it;
@@ -369,7 +388,7 @@ noexport void Show_Pc_Items(pc *pc, int selected)
 		} else {
 			it = Lookup_File(gDjn, iv->item);
 			col = (i == selected) ? ITEM_SELECTED : WHITE;
-			Draw_Font(ITEMS_X + 16, y, col, it->name, gFont, false);
+			Draw_Font(ITEMS_X + 16, y, col, Resolve_String(it->name_id), gFont, false);
 
 			if (iv->quantity > 1) {
 				sprintf(temp, "x%d", iv->quantity);

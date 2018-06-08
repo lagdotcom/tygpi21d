@@ -33,7 +33,7 @@ typedef struct pc_header {
 	UINT16 total_level;
 	charflag_id flags;
 	UINT32 experience;
-	UINT16 attitude;
+	INT16 attitude;
 
 	char padding[PC_PADDING];
 

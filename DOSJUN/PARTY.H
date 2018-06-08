@@ -17,7 +17,9 @@ void Draw_Party_Status(void);
 bool Equip_Item(pc *pc, file_id iid);
 void Free_PC(pc *pc);
 item *Get_Equipped_Item(pc *pc, itemslot sl);
+file_id Get_Equipped_Item_Id(pc *pc, itemslot sl);
 item *Get_Equipped_Weapon(pc *pc, bool primary);
+file_id Get_Equipped_Weapon_Id(pc *pc, bool primary);
 
 /* Get the PC whose index this is */
 pc *Get_Pc(pcnum index);

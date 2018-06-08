@@ -31,7 +31,7 @@ typedef struct code_host {
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 noexport int call_depth = 0;
-noexport int converse_npc = 0;
+noexport file_id converse_npc = 0;
 noexport file_id conversation_state = INVALID_SCRIPT;
 noexport char **option_menu;
 noexport file_id *option_state;
@@ -81,15 +81,10 @@ noexport int Bool(int result)
 	return result ? 1 : 0;
 }
 
-/* TODO */
 noexport char *Get_Npc_Name(file_id ref)
 {
-	return "NPC";
-
-	/*
 	npc *npc = Lookup_File(gSave, ref);
-	return npc->name;
-	*/
+	return Resolve_String(npc->name_id);
 }
 
 noexport char *Get_Pc_Name(file_id ref)
@@ -347,13 +342,13 @@ noexport void Return(code_host *h)
 
 noexport void Call(code_host *h)
 {
-	int func = Pop_Stack(h);
+	file_id script_id = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|Call %d", func);
+	Log("C|Call %d", script_id);
 #endif
 
-	h->call_result = Run_Code(func);
+	h->call_result = Run_Code(script_id);
 }
 
 noexport void Combat(code_host *h)
@@ -370,7 +365,7 @@ noexport void Combat(code_host *h)
 noexport void PcSpeak(code_host *h)
 {
 	str_id string = Pop_Stack(h);
-	int pc = Pop_Stack(h);
+	file_id pc = Pop_Stack(h);
 
 #if CODE_LOG
 	Log("C|PcSpeak %d, %d", pc, string);
@@ -383,7 +378,7 @@ noexport void PcSpeak(code_host *h)
 noexport void PcAction(code_host *h)
 {
 	str_id string = Pop_Stack(h);
-	int pc = Pop_Stack(h);
+	file_id pc = Pop_Stack(h);
 
 #if CODE_LOG
 	Log("C|PcAction %d, %d", pc, string);
@@ -396,7 +391,7 @@ noexport void PcAction(code_host *h)
 noexport void NpcSpeak(code_host *h)
 {
 	str_id string = Pop_Stack(h);
-	int npc = Pop_Stack(h);
+	file_id npc = Pop_Stack(h);
 
 #if CODE_LOG
 	Log("C|NpcSpeak %d, %d", npc, string);
@@ -409,7 +404,7 @@ noexport void NpcSpeak(code_host *h)
 noexport void NpcAction(code_host *h)
 {
 	str_id string = Pop_Stack(h);
-	int npc = Pop_Stack(h);
+	file_id npc = Pop_Stack(h);
 
 #if CODE_LOG
 	Log("C|NpcAction %d, %d", npc, string);
@@ -451,8 +446,8 @@ noexport void GiveItem(code_host *h)
 {
 	int qty = Pop_Stack(h);
 	file_id item = Pop_Stack(h);
-	file_id ref = Pop_Stack(h);
-	pc *pc = Lookup_File(gSave, ref);
+	file_id pc_id = Pop_Stack(h);
+	pc *pc = Lookup_File(gSave, pc_id);
 
 #if CODE_LOG
 	Log("C|GiveItem %d, %d, %d", pc->name, item, qty);
@@ -464,8 +459,8 @@ noexport void GiveItem(code_host *h)
 noexport void EquipItem(code_host *h)
 {
 	file_id item = Pop_Stack(h);
-	file_id ref = Pop_Stack(h);
-	pc *pc = Lookup_File(gSave, ref);
+	file_id pc_id = Pop_Stack(h);
+	pc *pc = Lookup_File(gSave, pc_id);
 
 #if CODE_LOG
 	Log("C|EquipItem %d, %d", pc->name, item);
@@ -489,16 +484,16 @@ noexport void SetTileDescription(code_host *h)
 
 noexport void SetTileColour(code_host *h)
 {
-	colour c = Pop_Stack(h);
-	int f = Pop_Stack(h);
+	file_id c = Pop_Stack(h);
+	dir face = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|SetTileColour %d, %d, %d, %d", x, y, f, c);
+	Log("C|SetTileColour %d, %d, %d, %d", x, y, face, c);
 #endif
 
-	switch (f) {
+	switch (face) {
 		case dUp:
 			TILE(gZone, x, y)->ceil = c;
 			break;
@@ -508,7 +503,7 @@ noexport void SetTileColour(code_host *h)
 			break;
 
 		default:
-			TILE(gZone, x, y)->walls[f].texture = c;
+			TILE(gZone, x, y)->walls[face].texture = c;
 			break;
 	}
 
@@ -560,7 +555,7 @@ noexport void Teleport(code_host *h)
 
 noexport void SetDanger(code_host *h)
 {
-	int danger = Pop_Stack(h);
+	UINT8 danger = Pop_Stack(h);
 
 #if CODE_LOG
 	Log("C|SetDanger %d", danger);
@@ -581,17 +576,17 @@ noexport void Safe(code_host *h)
 noexport void RemoveWall(code_host *h)
 {
 	tile *tile;
-	dir dir = Pop_Stack(h);
+	dir face = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|RemoveWall %d, %d, %d", x, y, dir);
+	Log("C|RemoveWall %d, %d, %d", x, y, face);
 #endif
 
 	tile = TILE(gZone, x, y);
-	tile->walls[dir].texture = 0;
-	tile->walls[dir].texture = wtNormal;
+	tile->walls[face].texture = 0;
+	tile->walls[face].texture = wtNormal;
 
 	redraw_fp = true;
 }

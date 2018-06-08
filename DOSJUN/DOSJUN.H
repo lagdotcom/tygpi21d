@@ -23,6 +23,7 @@
 #include "music.h"
 #include "mus_sng.h"
 #include "monsters.h"
+#include "npc.h"
 #include "party.h"
 #include "save.h"
 #include "sound.h"
