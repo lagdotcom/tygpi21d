@@ -5,40 +5,27 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-int Draw_Font_Char(int sx, int sy, colour col, char ch, font *f, bool trans_flag)
+noexport int Char_Width(grf *f, char ch)
 {
-	int c,
-		r,
-		font_row = ch / 16,
-		font_col = ch % 16,
-		fx = font_col * f->header.width,
-		fy = font_row * f->header.height,
-		char_width = f->header.c_width[ch],
-		i = fy * f->header.width * 16 + fx,
-		x = sx,
-		y = sy;
-	colour fc;
-
-	for (r = 0; r < f->header.height; r++) {
-		for (c = 0; c < char_width; c++) {
-			fc = f->img[i] ? col : 0;
-			if (fc || !trans_flag) {
-				Plot_Pixel_Fast_DB(x, y, fc);
-			}
-
-			x++;
-			i++;
-		}
-
-		i += f->stride - char_width;
-		x = sx;
-		y++;
+	if (ch >= f->num_images) {
+		ch = ' ';
 	}
 
-	return sx + char_width;
+	return f->images[ch].width;
 }
 
-void Draw_Font(int sx, int sy, colour col, char *string, font *f, bool trans_flag)
+/* TODO: use trans_flag? */
+int Draw_Font_Char(int sx, int sy, colour col, char ch, grf *f, bool trans_flag)
+{
+	point p;
+	p.x = sx;
+	p.y = sy;
+
+	Draw_GRF(&p, f, ch, col);
+	return sx + Char_Width(f, ch);
+}
+
+void Draw_Font(int sx, int sy, colour col, char *string, grf *f, bool trans_flag)
 {
 	int x = sx,
 		y = sy;
@@ -47,7 +34,7 @@ void Draw_Font(int sx, int sy, colour col, char *string, font *f, bool trans_fla
 	while (*ch != 0) {
 		if (*ch == '\n') {
 			x = sx;
-			y += f->header.height;
+			y += 8; /* TODO */
 			ch++;
 			continue;
 		}
@@ -58,7 +45,7 @@ void Draw_Font(int sx, int sy, colour col, char *string, font *f, bool trans_fla
 }
 
 /* Wrap a string to fit in a given box size. You must NOT Free() the returned string. */
-noexport char *Font_Wrap(int w, int h, char *string, font *f)
+noexport char *Font_Wrap(int w, int h, char *string, grf *f)
 {
 	/* TODO: pay attention to height */
 	char *wrapped,
@@ -81,8 +68,8 @@ noexport char *Font_Wrap(int w, int h, char *string, font *f)
 				break;
 		}
 
-		x += f->header.c_width[*ch];
-		last_space_x += f->header.c_width[*ch];
+		x += Char_Width(f, *ch);
+		last_space_x += Char_Width(f, *ch);
 		if (x >= w && last_space > 0) {
 			*last_space = '\n';
 
@@ -97,7 +84,7 @@ noexport char *Font_Wrap(int w, int h, char *string, font *f)
 }
 
 /* Clears an area, then prints a string into it, with wrapping. */
-void Draw_Wrapped_Font(int x, int y, int w, int h, colour col, char *string, font *f, bool margin)
+void Draw_Wrapped_Font(int x, int y, int w, int h, colour col, char *string, grf *f, bool margin)
 {
 	char *wrapped;
 
@@ -112,44 +99,4 @@ void Draw_Wrapped_Font(int x, int y, int w, int h, colour col, char *string, fon
 	Draw_Square_DB(0, x, y, x + w - 1, y + h - 1, true);
 	Draw_Font(x, y, col, wrapped, f, true);
 	Free(wrapped);
-}
-
-bool Read_Font(FILE *fp, font *f)
-{
-	/* TODO: rewrite to use GRF */
-	pcx_picture pcx;
-
-	fread(&f->header, sizeof(font_header), 1, fp);
-	Check_Version_Header(f->header, "Read_Font");
-
-	PCX_Init(&pcx);
-	if (!Load_Picture(f->header.filename, &pcx, "Read_Font")) {
-		return false;
-	}
-
-	f->img = pcx.buffer;
-	f->stride = pcx.header.width + 1; /* PCX header correction */
-	return true;
-}
-
-bool Load_Font(char *filename, font *f)
-{
-	bool success;
-	FILE *fp = fopen(filename, "rb");
-	if (!fp) {
-		printf("Could not open for reading: %s\n", filename);
-		return false;
-	}
-
-	Log("Load_Font: %s", filename);
-	success = Read_Font(fp, f);
-	fclose(fp);
-	return success;
-}
-
-void Free_Font(font *f)
-{
-	Log("Free_Font: %p", f);
-
-	Free(f->img);
 }

@@ -168,7 +168,7 @@ bool Input_Multiline_String(int x, int y, char *string, int max)
 int Input_Menu(char **menu, int choices, int x, int y)
 {
 	int choice = 0,
-		height = gFont->header.height,
+		height = 8, /* TODO */
 		i;
 	unsigned char key;
 

@@ -11,7 +11,7 @@ noexport grf *explore_bg;
 
 djn *gDjn;
 campaign *gCampaign;
-font *gFont;
+grf *gFont;
 gamestate gState;
 party *gParty;
 djn *gSave;

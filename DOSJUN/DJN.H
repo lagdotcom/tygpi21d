@@ -34,7 +34,7 @@ typedef enum djn_type {
 	ftSound,
 	ftItem,
 	ftMonster,
-	ftFont,
+	ftFont, /* UNUSED */
 	ftStrings,
 	ftPalette,
 

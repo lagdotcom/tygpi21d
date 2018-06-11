@@ -58,7 +58,7 @@
 
 extern djn *gDjn;
 extern campaign *gCampaign;
-extern font *gFont;
+extern grf *gFont;
 extern gamestate gState;
 extern party *gParty;
 extern djn *gSave;
