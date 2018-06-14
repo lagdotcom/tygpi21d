@@ -8,7 +8,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define ZONE_HEADER_PADDING			12
+#define ZONE_HEADER_PADDING			10
 #define WALL_PADDING				1
 #define TILE_PADDING				0
 #define ENCOUNTER_SIZE	6
@@ -68,7 +68,6 @@ typedef struct itempos {
 typedef struct zone_header {
 	VERSION_HEADER;
 
-	char campaign_name[8];
 	coord width, height;
 	UINT8 floor;
 	UINT8 unused;

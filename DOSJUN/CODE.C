@@ -336,7 +336,7 @@ noexport void Return(code_host *h)
 	h->running = false;
 	h->result = 0;
 #if CODE_LOG
-	Log("%s", "C|Return @%04x", h->pc);
+	Log("C|Return @%04x", h->pc);
 #endif
 }
 
@@ -691,6 +691,71 @@ noexport void Option(code_host *h)
 	num_options++;
 }
 
+noexport void ChoosePcName(code_host *h)
+{
+	file_id ref = Pop_Stack(h);
+	pc *pc;
+	char *name;
+
+#if CODE_LOG
+	Log("C|ChoosePcName %d", ref);
+#endif
+
+	/* TODO: import file into save */
+	pc = Lookup_File(gSave, ref);
+	if (pc == null) {
+		dief("ChoosePcName: invalid resource ID: %d", ref);
+		return;
+	}
+
+	name = SzAlloc(50, char, "ChoosePcName");
+	/* TODO: use GotoXY position */
+	Draw_Font(50, 42, WHITE, "Choose a name:", gFont, true);
+	Input_String(50, 50, name, 50);
+	pc->name = name;
+	pc->header.name_id = 0;
+}
+
+noexport void ChoosePcPortrait(code_host *h)
+{
+	file_id ref = Pop_Stack(h);
+	pc *pc;
+
+#if CODE_LOG
+	Log("C|ChoosePcPortrait %d", ref);
+#endif
+
+	/* TODO: import file into save */
+	pc = Lookup_File(gSave, ref);
+	if (pc == null) {
+		dief("ChoosePcPortrait: invalid resource ID: %d", ref);
+		return;
+	}
+
+	/* TODO */
+	pc->header.portrait_id = 0;
+}
+
+noexport void ChoosePcPronouns(code_host *h)
+{
+	file_id ref = Pop_Stack(h);
+	pc *pc;
+
+#if CODE_LOG
+	Log("C|ChoosePcPronouns %d", ref);
+#endif
+
+	/* TODO: import file into save */
+	pc = Lookup_File(gSave, ref);
+	if (pc == null) {
+		dief("ChoosePcPronouns: invalid resource ID: %d", ref);
+		return;
+	}
+
+	/* TODO */
+	pc->header.pronouns = proHe;
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -749,6 +814,10 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coPcAction:	PcAction(h); return;
 		case coNpcAction:	NpcAction(h); return;
 		case coNpcSpeak:	NpcSpeak(h); return;
+
+		case coChoosePcName: ChoosePcName(h); return;
+		case coChoosePcPortrait: ChoosePcPortrait(h); return;
+		case coChoosePcPronouns: ChoosePcPronouns(h); return;
 	}
 
 	h->running = false;

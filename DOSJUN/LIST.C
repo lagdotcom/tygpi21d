@@ -72,7 +72,9 @@ list *New_List_of_Capacity(list_type type, int capacity, char *tag)
 	l->items = null;
 	l->tag = tag;
 
-	Resize_List(l, capacity);
+	if (capacity > 0)
+		Resize_List(l, capacity);
+
 	return l;
 }
 

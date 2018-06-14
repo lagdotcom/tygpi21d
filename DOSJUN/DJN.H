@@ -63,6 +63,7 @@ typedef struct djn_file {
 
 	char *name;
 	void *object;
+	void *parent;	/* djn */
 } djn_file;
 #define DJN_FILESZ 16
 

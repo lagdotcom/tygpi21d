@@ -35,6 +35,7 @@ bool Load_Savefile(char *filename, djn *s)
 void Free_Savefile(djn *s)
 {
 	Free_Djn(s);
+	Free(s);
 }
 
 bool Save_Savefile(char *filename, djn *s)
@@ -55,6 +56,8 @@ void Initialise_Overlay(overlay *o, zone *z)
 {
 	int i;
 	itempos *p;
+
+	Log("Initialise_Overlay: %d locals, %d items", z->header.num_locals, z->header.num_items);
 
 	o->num_locals = z->header.num_locals;
 	o->locals = SzAlloc(o->num_locals, UINT16, "Initialise_Overlay.locals");

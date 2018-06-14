@@ -68,15 +68,13 @@ typedef enum code_op {
 	coNpcSpeak,
 	coNpcAction,
 	coOption,
-
-	/* NOT IMPLEMENTED */
-	coChoosePcName,
-	coJoinParty,
-	coLeaveParty,
-	coChoosePcPortrait,
-	coChoosePcPronouns,
-	coSetAttitude,
-	coGetAttitude,
+	coChoosePcName,		/* TODO */
+	coJoinParty,		/* TODO */
+	coLeaveParty,		/* TODO */
+	coChoosePcPortrait, /* TODO */
+	coChoosePcPronouns,	/* TODO */
+	coSetAttitude,		/* TODO */
+	coGetAttitude,		/* TODO */
 } code_op;
 
 typedef enum code_internal {

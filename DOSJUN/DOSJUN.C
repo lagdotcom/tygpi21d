@@ -403,7 +403,9 @@ gamestate Show_Dungeon_Screen(void)
 		}
 	}
 
-	Unload_File(gDjn, gCampaign->dungeonbg_id);
+	if (explore_bg)
+		Unload_File(gDjn, gCampaign->dungeonbg_id);
+
 	return new;
 }
 

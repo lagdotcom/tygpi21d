@@ -98,10 +98,12 @@ typedef UINT8 walltype_id;
 
 	char PtrDist *Duplicate_String(const char *src, char *tag);
 	void PtrDist *Allocate(MemSz count, MemSz size, char *tag);
-	void Free(void *mem);
+	void Free_Inner(void *mem);
 	void PtrDist *Reallocate(void PtrDist *mem, MemSz count, MemSz size, char *tag);
 	void Start_Memory_Tracking(void);
 	void Stop_Memory_Tracking(void);
+
+	#define Free(mem) { Free_Inner(mem); mem = null; }
 
 #else /* no MEMORY_DEBUG */
 

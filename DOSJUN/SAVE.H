@@ -15,6 +15,13 @@ typedef enum charflag {
 	cfBackRow = 1
 } charflag;
 
+typedef enum pronouns {
+	proHe,
+	proShe,
+	proThey,
+	proIt,
+} pronouns;
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct inventory {

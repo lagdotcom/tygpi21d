@@ -21,8 +21,9 @@ bool Read_Zone(FILE *fp, zone *z)
 	zone_header *h = &z->header;
 
 	fread(h, sizeof(zone_header), 1, fp);
-	Check_Version_Header(z->header, "Read_Zone");
+	Check_Version_Header_p(h, "Read_Zone");
 
+	Log("Read_Zone: zone is %d * %d", h->width, h->height);
 	z->tiles = SzAlloc(h->width * h->height, tile, "Read_Zone.tiles");
 	if (z->tiles == null) goto _dead;
 	fread(z->tiles, sizeof(tile), h->width * h->height, fp);

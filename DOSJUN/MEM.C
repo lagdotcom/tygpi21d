@@ -148,7 +148,7 @@ noexport void Mark_Entry_Freed(void *mem)
 		e = e->next;
 	}
 
-	fprintf(stderr, "WARNING: Cannot free %p - not found.\n", mem);
+	Log("[WARN] Mark_Entry_Freed: %p not found", mem);
 }
 
 noexport void Update_Entry_Size(void *mem, MemSz size)
@@ -167,14 +167,20 @@ noexport void Update_Entry_Size(void *mem, MemSz size)
 		e = e->next;
 	}
 
-	fprintf(stderr, "WARNING: Cannot update %p - not found.\n", mem);
+	Log("[WARN] Update_Entry_Size: %p not found", mem);
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 void PtrDist *Allocate(MemSz count, MemSz size, char *tag)
 {
-	void PtrDist *mem = _calloc(count, size);
+	void PtrDist *mem;
+
+	/* k, here's your zero memory pointer */
+	if (count == 0 || size == 0)
+		return null;
+	
+	mem = _calloc(count, size);
 	Add_Entry(mem, count * size, tag);
 	return mem;
 }
@@ -205,13 +211,11 @@ char PtrDist *Duplicate_String(const char *src, char *tag)
 	return mem;
 }
 
-void Free(void *mem)
+void Free_Inner(void *mem)
 {
 	if (mem != null) {
 		Mark_Entry_Freed(mem);
 		_free(mem);
-
-		mem = null;
 	}
 }
 

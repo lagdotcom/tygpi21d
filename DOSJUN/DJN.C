@@ -42,6 +42,8 @@ noexport loaderspec loaders[] = {
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
+#define NAMEOF(f) (f->name ? f->name : "(unknown)")
+
 noexport loaderspec *Get_Spec(djn_type ty)
 {
 	loaderspec *spec;
@@ -72,6 +74,7 @@ bool Load_Djn(char *filename, djn *d)
 	for (i = 0; i < d->count; i++) {
 		x = &d->files[i];
 		fread(x, 1, DJN_FILESZ, fp);
+		x->parent = d;
 		if (d->flags & dfDesign) {
 			x->name = Read_LengthString(fp, "Load_Djn.filename");
 		}
@@ -93,6 +96,8 @@ noexport void Free_Djn_File(djn_file *f)
 {
 	loaderspec *spec = Get_Spec(f->type);
 
+	Log("Free_Djn_File: @%p, #%d(%d) %s", f, f->id, f->type, NAMEOF(f));
+
 	Free(f->name);
 
 	if (f->object == null)
@@ -108,6 +113,8 @@ void Free_Djn(djn *d)
 {
 	int i;
 
+	Log("Free_Djn: @%p", d);
+
 	Close_Djn(d);
 
 	for (i = 0; i < d->count; i++)
@@ -116,11 +123,12 @@ void Free_Djn(djn *d)
 	Free(d->files);
 }
 
-noexport void *Load_File(djn *d, djn_file* f)
+noexport void *Load_File(djn_file* f)
 {
+	djn *d = f->parent;
 	loaderspec *spec = Get_Spec(f->type);
 
-	Log("Load_File: #%d t%d %s", f->id, f->type, f->name ? f->name : "(unknown)");
+	Log("Load_File: #%d(%d) %s", f->id, f->type, NAMEOF(f));
 
 	if (d->f == null) {
 		dief("Load_File: could not load #%x, djn is already closed", f->id);
@@ -145,7 +153,7 @@ noexport void *Load_File(djn *d, djn_file* f)
 	return f->object;
 }
 
-void *Lookup_File(djn *chain, file_id id)
+noexport djn_file *Lookup_File_Entry(djn *chain, file_id id)
 {
 	int i;
 	djn *d = chain;
@@ -159,18 +167,34 @@ void *Lookup_File(djn *chain, file_id id)
 		for (i = 0; i < d->count; i++) {
 			x = &d->files[i];
 			if (x->id == id) {
-				if (x->object == null) {
-					x->object = Load_File(d, x);
-				}
-
-				return x->object;
+				return x;
 			}
 		}
 
 		d = d->next;
 	}
 
-	Log("Lookup_File: could not find file #%x", id);
+	Log("Lookup_File_Entry: could not find file #%x", id);
+	return null;
+}
+
+void *Lookup_File(djn *chain, file_id id)
+{
+	djn_file *f;
+
+	/* Special case: cannot look up ID 0 */
+	if (id == 0)
+		return null;
+
+	f = Lookup_File_Entry(chain, id);
+	if (f) {
+		if (f->object == null) {
+			f->object = Load_File(f);
+		}
+
+		return f->object;
+	}
+
 	return null;
 }
 
@@ -185,7 +209,7 @@ void *Find_File_Type(djn *chain, djn_type ty)
 			x = &d->files[i];
 			if (x->type == ty) {
 				if (x->object == null) {
-					x->object = Load_File(d, x);
+					x->object = Load_File(x);
 				}
 
 				return x->object;
@@ -201,18 +225,21 @@ void *Find_File_Type(djn *chain, djn_type ty)
 
 void Unload_File(djn *chain, file_id id)
 {
-	djn_file *f = Lookup_File(chain, id);
-
-	Log("Unload_File: #%d", id);
+	djn_file *f = Lookup_File_Entry(chain, id);
 
 	if (f != null) {
+		Log("Unload_File: #%d(%d) %s", id, f->type, NAMEOF(f));
 		Free_Djn_File(f);
+	} else {
+		Log("Unload File: #%d(NOT FOUND)", id);
 	}
 }
 
 void Add_to_Djn(djn *d, void *obj, file_id id, djn_type ty)
 {
 	djn_file *f; 
+
+	Log("Add_to_Djn: adding #%d(%d)", id, ty);
 
 	d->count++;
 	d->files = Reallocate(d->files, d->count, sizeof(djn_file), "Add_to_Djn");
@@ -223,6 +250,8 @@ void Add_to_Djn(djn *d, void *obj, file_id id, djn_type ty)
 	f->id = id;
 	f->object = obj;
 	f->type = ty;
+	f->parent = d;
+	f->name = null;
 }
 
 bool Save_Djn(char *filename, djn *d)
