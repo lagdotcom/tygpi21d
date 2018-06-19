@@ -5,7 +5,7 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-noexport int Char_Width(grf *f, char ch)
+int Char_Width(grf *f, char ch)
 {
 	if (ch >= f->num_images) {
 		ch = ' ';
@@ -14,7 +14,7 @@ noexport int Char_Width(grf *f, char ch)
 	return f->images[ch].width;
 }
 
-noexport int Char_Height(grf *f, char ch)
+int Char_Height(grf *f, char ch)
 {
 	if (ch >= f->num_images) {
 		ch = ' ';

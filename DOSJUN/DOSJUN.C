@@ -530,6 +530,7 @@ void main(int argc, char **argv)
 	Initialise_Sound();
 	Initialise_Music();
 	Initialise_Code();
+	Initialise_Formatter();
 
 	printf("OK\n");
 
@@ -564,6 +565,7 @@ void main(int argc, char **argv)
 	Free_Sound();
 	Free_Music();
 	Free_Code();
+	Free_Formatter();
 	Delete_Picture();
 	Free_Timer();
 

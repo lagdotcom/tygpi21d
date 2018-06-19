@@ -26,8 +26,10 @@ typedef struct strings {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+void Free_Formatter();
 void Free_Strings(strings *s);
 char *Get_String(strings *s, str_id id);
+void Initialise_Formatter();
 bool Read_Strings(FILE *fp, strings *s);
 
 #endif
