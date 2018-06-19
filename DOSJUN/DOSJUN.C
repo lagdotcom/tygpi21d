@@ -324,7 +324,7 @@ gamestate Show_Dungeon_Screen(void)
 	gamestate new;
 
 	/* Get background image and palette */
-	explore_bg = Lookup_File(gDjn, gCampaign->dungeonbg_id);
+	explore_bg = Lookup_File_Chained(gDjn, gCampaign->dungeonbg_id);
 
 	redraw_everything = true;
 	redraw_description = true;
@@ -511,7 +511,7 @@ void main(int argc, char **argv)
 		return;
 	}
 
-	gFont = Lookup_File(gDjn, gCampaign->font_id);
+	gFont = Lookup_File_Chained(gDjn, gCampaign->font_id);
 	if (gFont == null) {
 		printf("%s", "main: No font data found in DJN files.\n");
 		Free_Djn_Chain();

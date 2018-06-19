@@ -131,7 +131,7 @@ bool Remove_Item_At(pc *pc, int index)
 	if (!iv->item) return false;
 	if (!(iv->flags & vfEquipped)) return false;
 
-	it = Lookup_File(gDjn, iv->item);
+	it = Lookup_File_Chained(gDjn, iv->item);
 	if (it == null) return false;
 
 	/* TODO: curse? */
@@ -186,7 +186,7 @@ file_id Get_Equipped_Item_Id(pc *pc, itemslot sl)
 
 item *Get_Equipped_Item(pc *pc, itemslot sl)
 {
-	return Lookup_File(gDjn, Get_Equipped_Item_Id(pc, sl));
+	return Lookup_File_Chained(gDjn, Get_Equipped_Item_Id(pc, sl));
 }
 
 bool Equip_Item_At(pc *pc, int index)
@@ -203,7 +203,7 @@ bool Equip_Item_At(pc *pc, int index)
 	if (!iv->item) return false;
 	if (iv->flags & vfEquipped) return false;
 
-	it = Lookup_File(gDjn, iv->item);
+	it = Lookup_File_Chained(gDjn, iv->item);
 	if (it == null) return false;
 
 	/* TODO: check char can equip item */
@@ -266,7 +266,7 @@ bool Add_to_Inventory(pc *pc, file_id iid, unsigned char qty)
 {
 	int i;
 	inventory *iv;
-	item *it = Lookup_File(gDjn, iid);
+	item *it = Lookup_File_Chained(gDjn, iid);
 
 	if (it == null) return false;
 
@@ -298,7 +298,7 @@ file_id Get_Equipped_Weapon_Id(pc *pc, bool primary)
 	item *it;
 
 	id = Get_Equipped_Item_Id(pc, primary ? slWeapon : slOffHand);
-	it = Lookup_File(gDjn, id);
+	it = Lookup_File_Chained(gDjn, id);
 
 	/* shields don't count! */
 	if (it == null || it->type == itShield) return 0;
@@ -323,7 +323,7 @@ pc *Get_Pc(pcnum index)
 	assert(index < PARTY_SIZE, "Get_Pc: pc number too high");
 
 	ref = gParty->members[index];
-	return Lookup_File(gSave, ref);
+	return Lookup_File_Chained(gSave, ref);
 }
 
 char *Slot_Name(itemslot sl)
@@ -386,7 +386,7 @@ noexport void Show_Pc_Items(pc *pc, int selected)
 			col = (i == selected) ? (YELLOW - 8) : GREY;
 			Draw_Font(ITEMS_X + 16, y, col, "--", gFont, false);
 		} else {
-			it = Lookup_File(gDjn, iv->item);
+			it = Lookup_File_Chained(gDjn, iv->item);
 			col = (i == selected) ? ITEM_SELECTED : WHITE;
 			Draw_Font(ITEMS_X + 16, y, col, Resolve_String(it->name_id), gFont, false);
 
@@ -418,7 +418,7 @@ noexport char *Get_Damage_Range(pc *pc)
 		iv = &pc->header.items[i];
 		
 		if (iv->flags & vfEquipped) {
-			it = Lookup_File(gDjn, iv->item);
+			it = Lookup_File_Chained(gDjn, iv->item);
 
 			if (Is_Weapon(it)) {
 				min += it->stats[sMinDamage];
@@ -587,7 +587,7 @@ noexport bool Confirm_Use_Item(pc *pc, int index)
 	/* Sanity check */
 	if (!iv->item) return false;
 
-	it = Lookup_File(gDjn, iv->item);
+	it = Lookup_File_Chained(gDjn, iv->item);
 	if (!Item_Has_Use(it)) {
 		Confirm("You can't use that.");
 		Clear_Confirm();
@@ -742,4 +742,19 @@ bool Write_PC(FILE *fp, pc *pc)
 		Write_LengthString(pc->name, fp);
 
 	return true;
+}
+
+pc *Duplicate_PC(pc *org)
+{
+	pc *dup = SzAlloc(1, pc, "Duplicate_PC");
+
+	memcpy(dup, org, sizeof(pc_header));
+
+	dup->skills = Duplicate_List(org->skills, "Duplicate_PC.skills");
+	dup->buffs = Duplicate_List(org->buffs, "Duplicate_PC.buffs");
+
+	if (!org->header.name_id)
+		dup->name = Duplicate_String(org->name, "Duplicate_PC.name");
+
+	return dup;
 }

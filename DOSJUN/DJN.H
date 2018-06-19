@@ -90,9 +90,13 @@ void Add_to_Djn(djn *d, void *f, file_id id, djn_type ty);
 void Close_Djn(djn *d);
 void *Find_File_Type(djn *chain, djn_type ty);
 void Free_Djn(djn *d);
+bool In_Djn(djn *d, file_id id, bool chained);
 bool Load_Djn(char *filename, djn *d);
-void *Lookup_File(djn *chain, file_id id);
+void *Lookup_File(djn *chain, file_id id, bool chained);
+djn_file *Lookup_File_Entry(djn *chain, file_id id, bool load, bool chained);
 bool Save_Djn(char *filename, djn *d);
 void Unload_File(djn *chain, file_id id);
+
+#define Lookup_File_Chained(chain, id) Lookup_File(chain, id, true)
 
 #endif

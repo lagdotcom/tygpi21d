@@ -156,7 +156,7 @@ item *Get_Weapon(combatant *c, bool primary)
 {
 	file_id iid = primary ? c->primary : c->secondary;
 
-	return iid ? Lookup_File(gDjn, iid) : null;
+	return iid ? Lookup_File_Chained(gDjn, iid) : null;
 }
 
 stat_value Get_Stat_Base(stat_value *stats, statistic st)
@@ -483,7 +483,7 @@ void Initialise_Combat(void)
 	Add_Combat_Action(aSing, "Sing", Check_Sing, Sing, tfSelf, 200);
 	Add_Combat_Action(aHide, "Hide", Check_Hide, Hide, tfSelf, 50);
 
-	combat_bg = Lookup_File(gDjn, gCampaign->combatbg_id);
+	combat_bg = Lookup_File_Chained(gDjn, gCampaign->combatbg_id);
 
 	randomize();
 }
@@ -981,7 +981,7 @@ void Start_Combat(encounter_id id)
 
 	for (group = 0; group < ENCOUNTER_SIZE; group++) {
 		if (!en->monsters[group]) continue;
-		m = Lookup_File(gDjn, en->monsters[group]);
+		m = Lookup_File_Chained(gDjn, en->monsters[group]);
 		if (!first_img) first_img = m->image_id;
 
 		count = randint(en->minimum[group], en->maximum[group]);
@@ -1000,6 +1000,7 @@ void Start_Combat(encounter_id id)
 	}
 
 	/* Briefly show encounter on Dungeon screen */
+	/* TODO: file_id transformation */
 	Show_Picture(first_img);
 	Show_Game_String(description, true);
 	Free(description);
@@ -1012,6 +1013,7 @@ void Start_Combat(encounter_id id)
 	Fill_Double_Buffer(0);
 	if (combat_bg)
 		Draw_GRF(&topleft, combat_bg, 0, 0);
+	/* TODO: file_id transformation */
 	Show_Picture(first_img);
 
 	/* DO IT */

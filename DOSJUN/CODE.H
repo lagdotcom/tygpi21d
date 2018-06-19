@@ -73,8 +73,8 @@ typedef enum code_op {
 	coLeaveParty,		/* TODO */
 	coChoosePcPortrait, /* TODO */
 	coChoosePcPronouns,	/* TODO */
-	coSetAttitude,		/* TODO */
-	coGetAttitude,		/* TODO */
+	coSetAttitude,
+	coGetAttitude,
 } code_op;
 
 typedef enum code_internal {
@@ -85,9 +85,8 @@ typedef enum code_internal {
 	internalJustMoved,
 	internalSuccess,
 
-	/* NOT IMPLEMENTED */
-	internalReturn,
-	internalPartyFull,
+	internalReturn__Unused,
+	internalPartyFull,	/* TODO */
 
 	internalInvalid = 0xFF
 } code_internal;

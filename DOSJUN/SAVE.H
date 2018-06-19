@@ -5,6 +5,7 @@
 
 #include "campaign.h"
 #include "djn.h"
+#include "npc.h"
 #include "zone.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
@@ -84,10 +85,12 @@ typedef struct zone_overlay {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-bool Load_Savefile(char *filename, djn *s);
+void Add_PC_to_Save(djn *s, pc *pc, file_id id);
+void Add_NPC_to_Save(djn *s, npc *npc, file_id id);
 void Free_Globals(globals *g);
 void Free_Overlay(overlay *o);
 void Free_Savefile(djn *s);
+bool Load_Savefile(char *filename, djn *s);
 void Initialise_Globals(globals *g, campaign *c);
 void Initialise_Overlay(overlay *o, zone *z);
 void Initialise_Savefile(djn *s);

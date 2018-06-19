@@ -14,15 +14,30 @@ noexport int Char_Width(grf *f, char ch)
 	return f->images[ch].width;
 }
 
+noexport int Char_Height(grf *f, char ch)
+{
+	if (ch >= f->num_images) {
+		ch = ' ';
+	}
+
+	return f->images[ch].height;
+}
+
 /* TODO: use trans_flag? */
 int Draw_Font_Char(int sx, int sy, colour col, char ch, grf *f, bool trans_flag)
 {
+	int w;
 	point p;
 	p.x = sx;
 	p.y = sy;
+	w = Char_Width(f, ch);
+
+	if (!trans_flag) {
+		Draw_Square_DB(0, sx, sy, w, Char_Height(f, ch), true);
+	}
 
 	Draw_GRF(&p, f, ch, col);
-	return sx + Char_Width(f, ch);
+	return sx + w;
 }
 
 void Draw_Font(int sx, int sy, colour col, char *string, grf *f, bool trans_flag)

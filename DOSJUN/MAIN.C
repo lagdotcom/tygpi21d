@@ -45,16 +45,13 @@ _dead:
 
 void Move_to_Zone(file_id id)
 {
-	gZone = Lookup_File(gDjn, id);
+	gZone = Lookup_File_Chained(gDjn, id);
 	if (gZone == null)
 		dief("Move_to_Zone: could not find zone #%d", id);
 
 	gParty->zone = id;
 
-	gSave->next = null;
-	gOverlay = Lookup_File(gSave, id);
-	gSave->next = gDjn;
-	if (gOverlay == null) {
+	if (!In_Djn(gSave, id, false)) {
 		gOverlay = SzAlloc(1, overlay, "Move_to_Zone.overlay");
 		Initialise_Overlay(gOverlay, gZone);
 		Add_to_Djn(gSave, gOverlay, id, ftOverlay);
@@ -101,7 +98,7 @@ gamestate Show_Main_Menu(void)
 	menu[1] = "LOAD GAME";
 	menu[2] = "QUIT";
 
-	menu_bg = Lookup_File(gDjn, gCampaign->menubg_id);
+	menu_bg = Lookup_File_Chained(gDjn, gCampaign->menubg_id);
 
 	Load_SNG("ANTICAR.SNG", &s);
 	Start_SNG(&s);

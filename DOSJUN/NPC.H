@@ -24,6 +24,7 @@ typedef struct npc {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+npc *Duplicate_NPC(npc *npc);
 void Free_NPC(npc *npc);
 bool Read_NPC(FILE *fp, npc *npc);
 bool Write_NPC(FILE *fp, npc *npc);

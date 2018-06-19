@@ -27,7 +27,6 @@ typedef struct code_host {
 	int call_result;
 } code_host;
 
-
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 noexport int call_depth = 0;
@@ -83,13 +82,13 @@ noexport int Bool(int result)
 
 noexport char *Get_Npc_Name(file_id ref)
 {
-	npc *npc = Lookup_File(gSave, ref);
+	npc *npc = Lookup_File_Chained(gSave, ref);
 	return Resolve_String(npc->name_id);
 }
 
 noexport char *Get_Pc_Name(file_id ref)
 {
-	pc *pc = Lookup_File(gSave, ref);
+	pc *pc = Lookup_File_Chained(gSave, ref);
 	return pc->name;
 }
 
@@ -364,65 +363,65 @@ noexport void Combat(code_host *h)
 
 noexport void PcSpeak(code_host *h)
 {
-	str_id string = Pop_Stack(h);
-	file_id pc = Pop_Stack(h);
+	str_id s_id = Pop_Stack(h);
+	file_id pc_id = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|PcSpeak %d, %d", pc, string);
+	Log("C|PcSpeak %d, %d", pc_id, s_id);
 #endif
 	
-	sprintf(formatting_buf, "%s:\n%s", Get_Pc_Name(pc), Resolve_String(string));
+	sprintf(formatting_buf, "%s:\n%s", Get_Pc_Name(pc_id), Resolve_String(s_id));
 	Show_Game_String(formatting_buf, true);
 }
 
 noexport void PcAction(code_host *h)
 {
-	str_id string = Pop_Stack(h);
-	file_id pc = Pop_Stack(h);
+	str_id s_id = Pop_Stack(h);
+	file_id pc_id = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|PcAction %d, %d", pc, string);
+	Log("C|PcAction %d, %d", pc_id, s_id);
 #endif
 
-	sprintf(formatting_buf, "%s %s", Get_Pc_Name(pc), Resolve_String(string));
+	sprintf(formatting_buf, "%s %s", Get_Pc_Name(pc_id), Resolve_String(s_id));
 	Show_Game_String(formatting_buf, true);
 }
 
 noexport void NpcSpeak(code_host *h)
 {
-	str_id string = Pop_Stack(h);
-	file_id npc = Pop_Stack(h);
+	str_id s_id = Pop_Stack(h);
+	file_id npc_id = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|NpcSpeak %d, %d", npc, string);
+	Log("C|NpcSpeak %d, %d", npc_id, s_id);
 #endif
 
-	sprintf(formatting_buf, "%s:\n%s", Get_Npc_Name(npc), Resolve_String(string));
+	sprintf(formatting_buf, "%s:\n%s", Get_Npc_Name(npc_id), Resolve_String(s_id));
 	Show_Game_String(formatting_buf, true);
 }
 
 noexport void NpcAction(code_host *h)
 {
-	str_id string = Pop_Stack(h);
-	file_id npc = Pop_Stack(h);
+	str_id s_id = Pop_Stack(h);
+	file_id npc_id = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|NpcAction %d, %d", npc, string);
+	Log("C|NpcAction %d, %d", npc_id, s_id);
 #endif
 
-	sprintf(formatting_buf, "%s %s", Get_Npc_Name(npc), Resolve_String(string));
+	sprintf(formatting_buf, "%s %s", Get_Npc_Name(npc_id), Resolve_String(s_id));
 	Show_Game_String(formatting_buf, true);
 }
 
 noexport void Text(code_host *h)
 {
-	str_id string = Pop_Stack(h);
+	str_id s_id = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|Text %d", string);
+	Log("C|Text %d", s_id);
 #endif
 
-	Show_Game_String(Resolve_String(string), true);
+	Show_Game_String(Resolve_String(s_id), true);
 }
 
 noexport void Unlock(code_host *h)
@@ -445,65 +444,67 @@ noexport void Unlock(code_host *h)
 noexport void GiveItem(code_host *h)
 {
 	int qty = Pop_Stack(h);
-	file_id item = Pop_Stack(h);
+	file_id item_id = Pop_Stack(h);
 	file_id pc_id = Pop_Stack(h);
-	pc *pc = Lookup_File(gSave, pc_id);
+	pc *pc = Lookup_File_Chained(gSave, pc_id);
 
 #if CODE_LOG
-	Log("C|GiveItem %d, %d, %d", pc->name, item, qty);
+	Log("C|GiveItem %d, %d, %d", pc->name, item_id, qty);
 #endif
 
-	h->result = Add_to_Inventory(pc, item, qty);
+	h->result = Add_to_Inventory(pc, item_id, qty);
+	Add_PC_to_Save(gSave, pc, pc_id);
 }
 
 noexport void EquipItem(code_host *h)
 {
-	file_id item = Pop_Stack(h);
+	file_id item_id = Pop_Stack(h);
 	file_id pc_id = Pop_Stack(h);
-	pc *pc = Lookup_File(gSave, pc_id);
+	pc *pc = Lookup_File_Chained(gSave, pc_id);
 
 #if CODE_LOG
-	Log("C|EquipItem %d, %d", pc->name, item);
+	Log("C|EquipItem %d, %d", pc->name, item_id);
 #endif
 
-	h->result = Equip_Item(pc, item);
+	h->result = Equip_Item(pc, item_id);
+	Add_PC_to_Save(gSave, pc, pc_id);
 }
 
 noexport void SetTileDescription(code_host *h)
 {
-	str_id string = Pop_Stack(h);
+	str_id s_id = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|SetTileDescription %d, %d, #%d", x, y, string);
+	Log("C|SetTileDescription %d, %d, #%d", x, y, s_id);
 #endif
 
-	TILE(gZone, x, y)->description = string;
+	TILE(gZone, x, y)->description = s_id;
 }
 
 noexport void SetTileColour(code_host *h)
 {
-	file_id c = Pop_Stack(h);
+	file_id grf_id = Pop_Stack(h);
 	dir face = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|SetTileColour %d, %d, %d, %d", x, y, face, c);
+	Log("C|SetTileColour %d, %d, %d, %d", x, y, face, grf_id);
 #endif
 
 	switch (face) {
 		case dUp:
-			TILE(gZone, x, y)->ceil = c;
+			TILE(gZone, x, y)->ceil = grf_id;
 			break;
 
 		case dDown:
-			TILE(gZone, x, y)->floor = c;
+			TILE(gZone, x, y)->floor = grf_id;
 			break;
 
 		default:
-			TILE(gZone, x, y)->walls[face].texture = c;
+			TILE(gZone, x, y)->walls[face].texture = grf_id;
 			break;
 	}
 
@@ -512,15 +513,15 @@ noexport void SetTileColour(code_host *h)
 
 noexport void SetTileThing(code_host *h)
 {
-	thing_id th = Pop_Stack(h);
+	file_id grf_id = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|SetTileThing %d, %d, %d", x, y, th);
+	Log("C|SetTileThing %d, %d, %d", x, y, grf_id);
 #endif
 
-	TILE(gZone, x, y)->thing = th;
+	TILE(gZone, x, y)->thing = grf_id;
 	redraw_fp = true;
 }
 
@@ -530,10 +531,10 @@ noexport void Teleport(code_host *h)
 	dir facing = Pop_Stack(h);
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
-	file_id zone = Pop_Stack(h);
+	file_id zone_id = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|Teleport %d, %d, %d, %d, %d", zone, x, y, facing, transition);
+	Log("C|Teleport %d, %d, %d, %d, %d", zone_id, x, y, facing, transition);
 #endif
 
 	switch (transition) {
@@ -544,8 +545,8 @@ noexport void Teleport(code_host *h)
 	gParty->y = y;
 	gParty->facing = facing;
 
-	if (gParty->zone != zone) {
-		Move_to_Zone(zone);
+	if (gParty->zone != zone_id) {
+		Move_to_Zone(zone_id);
 	}
 
 	redraw_description = true;
@@ -605,11 +606,11 @@ noexport void AddItem(code_host *h)
 {
 	pcnum index;
 	int qty = Pop_Stack(h);
-	file_id item = Pop_Stack(h);
+	file_id item_id = Pop_Stack(h);
 	pc *pc;
 
 #if CODE_LOG
-	Log("C|AddItem %d, %d", item, qty);
+	Log("C|AddItem %d, %d", item_id, qty);
 #endif
 
 	h->result = false;
@@ -617,20 +618,20 @@ noexport void AddItem(code_host *h)
 		pc = Get_Pc(index);
 		if (!pc) continue;
 
-		h->result = Add_to_Inventory(pc , item, qty);
+		h->result = Add_to_Inventory(pc, item_id, qty);
 		if (h->result) break;
 	}
 }
 
 noexport void Music(code_host *h)
 {
-	file_id id = Pop_Stack(h);
+	file_id sng_id = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|Music %d", id);
+	Log("C|Music %d", sng_id);
 #endif
 
-	Play_Music(Lookup_File(gDjn, id));
+	Play_Music(Lookup_File_Chained(gDjn, sng_id));
 }
 
 noexport void Converse(code_host *h)
@@ -674,11 +675,11 @@ noexport void ChangeState(code_host *h)
 
 noexport void Option(code_host *h)
 {
-	str_id string = Pop_Stack(h);
-	file_id state = Pop_Stack(h);
+	str_id s_id = Pop_Stack(h);
+	file_id script_id = Pop_Stack(h);
 
 #if CODE_LOG
-	Log("C|Option %d, %d", state, string);
+	Log("C|Option %d, %d", script_id, s_id);
 #endif
 
 	if (num_options == MAX_OPTIONS) {
@@ -686,25 +687,24 @@ noexport void Option(code_host *h)
 		return;
 	}
 
-	option_state[num_options] = state;
-	option_menu[num_options] = Resolve_String(string);
+	option_state[num_options] = script_id;
+	option_menu[num_options] = Resolve_String(s_id);
 	num_options++;
 }
 
 noexport void ChoosePcName(code_host *h)
 {
-	file_id ref = Pop_Stack(h);
+	file_id pc_id = Pop_Stack(h);
 	pc *pc;
 	char *name;
 
 #if CODE_LOG
-	Log("C|ChoosePcName %d", ref);
+	Log("C|ChoosePcName %d", pc_id);
 #endif
 
-	/* TODO: import file into save */
-	pc = Lookup_File(gSave, ref);
+	pc = Lookup_File_Chained(gSave, pc_id);
 	if (pc == null) {
-		dief("ChoosePcName: invalid resource ID: %d", ref);
+		dief("ChoosePcName: invalid resource ID: %d", pc_id);
 		return;
 	}
 
@@ -712,48 +712,95 @@ noexport void ChoosePcName(code_host *h)
 	/* TODO: use GotoXY position */
 	Draw_Font(50, 42, WHITE, "Choose a name:", gFont, true);
 	Input_String(50, 50, name, 50);
+
 	pc->name = name;
 	pc->header.name_id = 0;
+	Add_PC_to_Save(gSave, pc, pc_id);
 }
 
 noexport void ChoosePcPortrait(code_host *h)
 {
-	file_id ref = Pop_Stack(h);
+	file_id pc_id = Pop_Stack(h);
 	pc *pc;
 
 #if CODE_LOG
-	Log("C|ChoosePcPortrait %d", ref);
+	Log("C|ChoosePcPortrait %d", pc_id);
 #endif
 
-	/* TODO: import file into save */
-	pc = Lookup_File(gSave, ref);
+	pc = Lookup_File_Chained(gSave, pc_id);
 	if (pc == null) {
-		dief("ChoosePcPortrait: invalid resource ID: %d", ref);
+		dief("ChoosePcPortrait: invalid resource ID: %d", pc_id);
 		return;
 	}
 
 	/* TODO */
 	pc->header.portrait_id = 0;
+	Add_PC_to_Save(gSave, pc, pc_id);
 }
 
 noexport void ChoosePcPronouns(code_host *h)
 {
-	file_id ref = Pop_Stack(h);
+	file_id pc_id = Pop_Stack(h);
 	pc *pc;
 
 #if CODE_LOG
-	Log("C|ChoosePcPronouns %d", ref);
+	Log("C|ChoosePcPronouns %d", pc_id);
 #endif
 
-	/* TODO: import file into save */
-	pc = Lookup_File(gSave, ref);
+	pc = Lookup_File_Chained(gSave, pc_id);
 	if (pc == null) {
-		dief("ChoosePcPronouns: invalid resource ID: %d", ref);
+		dief("ChoosePcPronouns: invalid resource ID: %d", pc_id);
 		return;
 	}
 
 	/* TODO */
 	pc->header.pronouns = proHe;
+	Add_PC_to_Save(gSave, pc, pc_id);
+}
+
+noexport void SetAttitude(code_host *h)
+{
+	file_id _id = Pop_Stack(h);
+	int attitude = Pop_Stack(h);
+	djn_file *file;
+	pc *pc;
+	npc *npc;
+
+#if CODE_LOG
+	Log("C|SetAttitude %d, %d", _id, attitude);
+#endif
+
+	file = Lookup_File_Entry(gSave, _id, true, true);
+	if (file->type == ftPC) {
+		pc = file->object;
+		pc->header.attitude = attitude;
+		Add_PC_to_Save(gSave, pc, _id);
+	} else {
+		npc = file->object;
+		npc->attitude = attitude;
+		Add_NPC_to_Save(gSave, npc, _id);
+	}
+}
+
+noexport void GetAttitude(code_host *h)
+{
+	file_id _id = Pop_Stack(h);
+	djn_file *file;
+	pc *pc;
+	npc *npc;
+
+#if CODE_LOG
+	Log("C|GetAttitude %d", _id);
+#endif
+
+	file = Lookup_File_Entry(gSave, _id, true, true);
+	if (file->type == ftPC) {
+		pc = file->object;
+		h->result = pc->header.attitude;
+	} else {
+		npc = file->object;
+		h->result = npc->attitude;
+	}
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -818,6 +865,8 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coChoosePcName: ChoosePcName(h); return;
 		case coChoosePcPortrait: ChoosePcPortrait(h); return;
 		case coChoosePcPronouns: ChoosePcPronouns(h); return;
+		case coSetAttitude: SetAttitude(h); return;
+		case coGetAttitude: GetAttitude(h); return;
 	}
 
 	h->running = false;
@@ -853,7 +902,7 @@ noexport file_id Pick_Option(void)
 
 noexport void Reset_Host(code_host *h, file_id id)
 {
-	script *s = Lookup_File(gDjn, id);
+	script *s = Lookup_File_Chained(gDjn, id);
 	
 	h->code = s->code;
 	h->pc = 0;

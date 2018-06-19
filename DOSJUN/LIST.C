@@ -265,3 +265,35 @@ void Write_List(list *l, FILE *fp)
 		}
 	}
 }
+
+list *Duplicate_List(list *org, char *tag)
+{
+	int i;
+	list *dup = New_List_of_Capacity(org->type, org->capacity, tag);
+	void *temp;
+	dup->object_size = org->object_size;
+
+	switch (org->type) {
+		case ltString:
+			for (i = 0; i < org->size; i++)
+				dup->items[i] = Duplicate_String(org->items[i], tag);
+			break;
+
+		/* TODO: this could suck on a nested object */
+		case ltObject:
+			for (i = 0; i < org->size; i++) {
+				temp = Allocate(1, org->object_size, tag);
+				memcpy(temp, org->items[i], org->object_size);
+				dup->items[i] = temp;
+			}
+			break;
+
+		/* TODO: this is a source of bugs for sure */
+		default:
+			for (i = 0; i < org->size; i++)
+				dup->items[i] = org->items[i];
+			break;
+	}
+
+	return dup;
+}

@@ -24,6 +24,7 @@ typedef struct list {
 void Add_to_List(list *l, void *item);
 void Add_String_to_List(list *l, char *s);
 void Clear_List(list *l);
+list *Duplicate_List(list *l, char *tag);
 void Free_List(list *l);
 bool In_List(list *l, void *match);
 void *List_At(list *l, unsigned int index);

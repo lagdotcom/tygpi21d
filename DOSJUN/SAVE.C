@@ -153,3 +153,25 @@ bool Write_Party(FILE *fp, party *p)
 
 	return true;
 }
+
+void Add_PC_to_Save(djn *s, pc *org, file_id id)
+{
+	pc *dup;
+
+	if (In_Djn(s, id, false))
+		return;
+
+	dup = Duplicate_PC(org);
+	Add_to_Djn(s, dup, id, ftPC);
+}
+
+void Add_NPC_to_Save(djn *s, npc *org, file_id id)
+{
+	npc *dup;
+
+	if (In_Djn(s, id, false))
+		return;
+
+	dup = Duplicate_NPC(org);
+	Add_to_Djn(s, dup, id, ftNPC);
+}

@@ -14,6 +14,7 @@ typedef INT8 pcnum;
 bool Add_to_Inventory(pc *pc, file_id iid, unsigned char qty);
 void Draw_Character_Status(pcnum index, int x, int y);
 void Draw_Party_Status(void);
+pc *Duplicate_PC(pc *pc);
 bool Equip_Item(pc *pc, file_id iid);
 void Free_PC(pc *pc);
 item *Get_Equipped_Item(pc *pc, itemslot sl);
