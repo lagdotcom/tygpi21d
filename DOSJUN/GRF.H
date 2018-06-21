@@ -28,20 +28,25 @@ typedef struct grf {
 	grf_image *images;
 } grf;
 
-typedef struct point {
+typedef struct point2d {
 	int x;
 	int y;
-} point;
+} point2d;
 
-typedef struct box {
-	point start;
-	point end;
-} box;
+typedef struct size2d {
+	int w;
+	int h;
+} size2d;
+
+typedef struct box2d {
+	point2d start;
+	point2d end;
+} box2d;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-void Draw_GRF(point *xy, grf *g, int img, colour tint);
-void Draw_GRF_Clipped(point *xy, grf *g, int img, colour tint, box *bounds);
+void Draw_GRF(point2d *xy, grf *g, int img, colour tint);
+void Draw_GRF_Clipped(point2d *xy, grf *g, int img, colour tint, box2d *bounds);
 void Free_GRF(grf *g);
 bool Load_GRF(char *filename, grf *g, char *tag);
 bool Read_GRF(FILE *fp, grf *g); 

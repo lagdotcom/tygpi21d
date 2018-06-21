@@ -27,7 +27,11 @@ bool trigger_on_enter,
 	just_moved,
 	can_save;
 
-point topleft = { 0, 0 };
+point2d gTopLeft = { 0, 0 };
+noexport box2d gameStringBox = {
+	{ 12, 148 },
+	{ 307, 187 },
+};
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -130,9 +134,14 @@ wall *Get_Wall(coord x, coord y, dir dir, relative rel)
 	}
 }
 
-void Show_Game_String(char *string, bool wait_for_key)
+void Show_Game_String(const char *string, bool wait_for_key)
 {
-	Draw_Wrapped_Font(8, 144, 304, 48, WHITE, string, gFont, true);
+	Show_Game_String_Context(string, wait_for_key, 0, 0);
+}
+
+void Show_Game_String_Context(const char *string, bool wait_for_key, file_id speaker, file_id target)
+{
+	Show_Formatted_String(string, speaker, target, &gameStringBox, gFont, 0);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();
@@ -292,7 +301,7 @@ void Redraw_Dungeon_Screen(bool script)
 	if (redraw_everything) {
 		Fill_Double_Buffer(0);
 		if (explore_bg)
-			Draw_GRF(&topleft, explore_bg, 0, 0);
+			Draw_GRF(&gTopLeft, explore_bg, 0, 0);
 	}
 
 	if (redraw_fp || redraw_everything) Draw_FP();

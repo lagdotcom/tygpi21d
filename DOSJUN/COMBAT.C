@@ -22,6 +22,8 @@
 #define COMBAT_RECLAIM	0
 #define COMBAT_DEBUG	1
 
+#define BUFFER_SIZE		400
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct action {
@@ -45,13 +47,19 @@ noexport int monsters_alive;
 noexport int groups_alive;
 noexport UINT32 earned_experience;
 
+noexport box2d combatStringBox = {
+	{ 100, 148 },
+	{ 219, 187 },
+};
+
 /* H E L P E R  F U N C T I O N S //////////////////////////////////////// */
 
 #define Is_Enemy_Group(g) ((g) < GROUP_PCFRONT)
 
-noexport void Show_Combat_String(char *string, bool wait_for_key)
+noexport void Show_Combat_String(char *string, bool wait_for_key, file_id speaker, file_id target)
 {
-	Draw_Wrapped_Font(96, 144, 128, 48, WHITE, string, gFont, true);
+	/* Draw_Wrapped_Font(96, 144, 128, 48, WHITE, string, gFont, true); */
+	Show_Formatted_String(string, speaker, target, &combatStringBox, gFont, 0);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();
@@ -62,25 +70,25 @@ noexport void Show_Combat_String(char *string, bool wait_for_key)
 	}
 }
 
-void Combat_Message(char *format, ...)
+void Combat_Message(file_id speaker, file_id target, char *format, ...)
 {
 	va_list vargs;
 #if COMBAT_DYNALLOC
 	char *message;
-	int size;
+	int size2d;
 #else
-	char message[400];
+	char message[BUFFER_SIZE];
 #endif
 
 	va_start(vargs, format);
 #if COMBAT_DYNALLOC
-	size = vsprintf(NULL, format, vargs);
-	message = Allocate(size+1, 1, "Combat_Message");
+	size2d = vsprintf(NULL, format, vargs);
+	message = Allocate(size2d+1, 1, "Combat_Message");
 #endif
 	vsprintf(message, format, vargs);
 	va_end(vargs);
 
-	Show_Combat_String(message, true);
+	Show_Combat_String(message, true, speaker, target);
 #if COMBAT_DYNALLOC
 	Free(message);
 #endif
@@ -92,7 +100,7 @@ noexport void Highlight_Ally(int pc_active, int pc_select)
 	int i, colour;
 
 	for (i = 0; i < PARTY_SIZE; i++) {
-		strncpy(buffer, Get_Pc(i)->name, 8);
+		strncpy(buffer, Get_PC(i)->name, 8);
 		buffer[8] = 0;
 
 		colour = 15;
@@ -209,12 +217,12 @@ bool Is_Dead(combatant *victim)
 	return Get_Stat(victim, sHP) <= 0;
 }
 
-noexport void Kill(combatant *c)
+noexport void Kill(combatant *c, combatant *killer)
 {
 	groupnum group;
 
 	Log("Kill: %s(%d/g%d)", c->name, c->index, c->group);
-	Combat_Message("%s dies!", c->name);
+	Combat_Message(c->file, killer == null ? 0 : killer->file, "@n dies!");
 
 	if (c->is_pc) {
 		/* TODO */
@@ -236,15 +244,15 @@ noexport void Kill(combatant *c)
 	}
 }
 
-void Damage(combatant *victim, int amount)
+void Damage(combatant *victim, combatant *attacker, int amount)
 {
 	stat_value hp = Get_Stat(victim, sHP);
 	hp -= amount;
 
-	Combat_Message("%s takes %d damage.", victim->name, amount);
+	Combat_Message(victim->file, attacker == null ? 0 : attacker->file, "@n takes %d damage.", amount);
 	Set_Stat(victim, sHP, hp);
 	if (hp <= 0) {
-		Kill(victim);
+		Kill(victim, attacker);
 	}
 }
 
@@ -293,17 +301,17 @@ noexport void Attack_Inner(combatant *source, combatant *target, item *weapon)
 	base -= Get_Stat(target, sDodgeBonus);
 
 	if (randint(1, 20) <= base) {
-		Combat_Message("%s hits %s!", source->name, target->name);
+		Combat_Message(source->file, target->file, "@n hits @N!");
 
 		Get_Weapon_Damage(source, weapon, &min, &max);
 		roll = randint(min, max) - Get_Stat(target, sArmour);
 		if (roll > 0) {
-			Damage(target, roll);
+			Damage(target, source, roll);
 		} else {
-			Combat_Message("The blow glances off.");
+			Combat_Message(source->file, target->file, "The blow glances off.");
 		}
 	} else {
-		Combat_Message("%s attacks %s and misses.", source->name, target->name);
+		Combat_Message(source->file, target->file, "@n attacks @N and misses.");
 	}
 }
 
@@ -338,7 +346,7 @@ noexport void Block(combatant *c, combatant *target)
 	c->stats[sArmour] += bonus;
 	Add_Buff(target, "Blocking", exTurns, 1, Block_Expires, bonus);
 
-	Combat_Message("%s braces themselves.", c->name);
+	Combat_Message(c->file, 0, "@n braces @f.");
 }
 
 noexport bool Check_Defend(combatant *source)
@@ -393,9 +401,10 @@ noexport void Clear_Encounter(void)
 	Clear_List(combatants);
 }
 
-void Add_Monster(groupnum group, monster *template)
+void Add_Monster(groupnum group, file_id ref)
 {
 	list *buffs;
+	monster *template;
 	combatant *c = SzAlloc(1, combatant, "Add_Monster.combatant");
 	stat_value *stats = SzAlloc(NUM_STATS, stat_value, "Add_Monster.stats");
 	if (c == null || stats == null)
@@ -403,6 +412,7 @@ void Add_Monster(groupnum group, monster *template)
 
 	buffs = New_List(ltObject, "Add_Monster.buffs");
 
+	template = Lookup_File_Chained(gDjn, ref);
 	memcpy(stats, template->stats, sizeof(stat_value) * NUM_STATS);
 	stats[sHP] = stats[sMaxHP];
 	stats[sMP] = stats[sMaxMP];
@@ -428,12 +438,13 @@ void Add_Monster(groupnum group, monster *template)
 
 noexport void Add_Pc(pcnum index)
 {
-	pc *pc = Get_Pc(index);
+	pc *pc = Get_PC(index);
 
 	combatant *c = SzAlloc(1, combatant, "Add_Pc");
 	if (c == null)
 		die("Add_Pc: out of memory");
 
+	c->file = Get_PC_ID(index);
 	c->action = NO_ACTION;
 	c->buffs = pc->buffs;
 	c->group = In_Front_Row(pc) ? GROUP_PCFRONT : GROUP_PCBACK;
@@ -860,7 +871,7 @@ noexport void Do_Combat_Actions(list *active)
 #endif
 					/* only report the failure if we're still fighting */
 					if (groups_alive > 0)
-						Combat_Message("%s misses their chance.", c->name);
+						Combat_Message(c->file, 0, "@n misses @r chance.");
 
 					continue;
 				}
@@ -991,7 +1002,7 @@ void Start_Combat(encounter_id id)
 			write += sprintf(write, " %s x%d", name, count);
 
 			while (count > 0) {
-				Add_Monster(groups_alive, m);
+				Add_Monster(groups_alive, en->maximum[group]);
 				count--;
 			}
 
@@ -1012,7 +1023,7 @@ void Start_Combat(encounter_id id)
 	redraw_everything = true;
 	Fill_Double_Buffer(0);
 	if (combat_bg)
-		Draw_GRF(&topleft, combat_bg, 0, 0);
+		Draw_GRF(&gTopLeft, combat_bg, 0, 0);
 	/* TODO: file_id transformation */
 	Show_Picture(first_img);
 
@@ -1025,7 +1036,7 @@ void Start_Combat(encounter_id id)
 	for (count = 0; count < PARTY_SIZE; count++) {
 		c = List_At(combatants, count);
 		if (!Is_Dead(c)) {
-			Add_Experience(Get_Pc(count), earned_experience);
+			Add_Experience(Get_PC(count), earned_experience);
 		}
 	}
 

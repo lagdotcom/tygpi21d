@@ -181,15 +181,30 @@ char *Stat_Name(statistic st)
 	}
 }
 
+noexport box2d chooseBox = {
+	{ 8, Y_LEARN },
+	{ SCREEN_WIDTH, SCREEN_HEIGHT },
+};
+
+noexport box2d chooseBoxA = {
+	{ 8, Y_DESC },
+	{ 8 + 144, Y_DESC + 64 },
+};
+
+noexport box2d chooseBoxB = {
+	{ 168, Y_DESC },
+	{ 168 + 144, Y_DESC + 64 },
+};
+
 noexport skill_id Choose_Skill_Menu(skill_id a, skill_id b)
 {
 	unsigned char ch;
 	bool first = true;
 
-	Draw_Font(8, Y_LEARN, WHITE, "Choose a skill to learn:", gFont, true);
+	Show_Formatted_String("Choose a skill to learn:", 0, 0, &chooseBox, gFont, 0);
 
-	Draw_Wrapped_Font(  8, Y_DESC, 144, 64, SKILL_DESC, skills[a].description, gFont, false);
-	Draw_Wrapped_Font(168, Y_DESC, 144, 64, SKILL_DESC, skills[b].description, gFont, false);
+	Show_Formatted_String(skills[a].description, 0, 0, &chooseBoxA, gFont, SKILL_DESC);
+	Show_Formatted_String(skills[b].description, 0, 0, &chooseBoxB, gFont, SKILL_DESC);
 
 	while (true) {
 		Draw_Font(  8, Y_SKILL, first ? SKILL_SELECTED : WHITE, skills[a].name, gFont, true);
@@ -212,6 +227,11 @@ noexport skill_id Choose_Skill_Menu(skill_id a, skill_id b)
 		}
 	}
 }
+
+noexport box2d autoBox = {
+	{ 8, Y_DESC },
+	{ SCREEN_WIDTH - 8, Y_DESC + 64 },
+};
 
 /* Let the user choose which skill to learn on level up. Returns true if a screen redraw is needed. */
 noexport bool Choose_Skill(pc *pc, skill_id a, skill_id b)
@@ -239,7 +259,7 @@ noexport bool Choose_Skill(pc *pc, skill_id a, skill_id b)
 		sprintf(buffer, "%s learns %s!", pc->name, skills[learnt].name);
 		Draw_Font(8, Y_SKILL, WHITE, buffer, gFont, false);
 
-		Draw_Wrapped_Font(8, Y_DESC, SCREEN_WIDTH - 16, 64, SKILL_DESC, skills[learnt].description, gFont, false);
+		Show_Formatted_String(skills[learnt].description, 0, 0, &autoBox, gFont, SKILL_DESC);
 	}
 
 	Add_Skill(pc, learnt);

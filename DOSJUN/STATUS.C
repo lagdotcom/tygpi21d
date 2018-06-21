@@ -24,7 +24,7 @@ noexport void Stun_Expires(combatant *target, int argument)
 {
 	target->stats[sHitBonus] += STUN_HIT_LOSS * argument;
 	target->stats[sDodgeBonus] += STUN_DODGE_LOSS * argument;
-	Combat_Message("%s shakes it off.", target->name);
+	Combat_Message(target->file, 0, "@n shakes it off.");
 }
 
 bool Try_Stun(combatant *source, combatant *target, statistic stat)
@@ -32,7 +32,7 @@ bool Try_Stun(combatant *source, combatant *target, statistic stat)
 	int outcome, duration;
 
 	if (Roll(source, stat, target, sToughness, &outcome)) {
-		Combat_Message("%s sees stars!", target->name);
+		Combat_Message(source->file, target->file, "@N sees stars!");
 
 		duration = outcome / 3;
 		duration = duration < 2 ? 2 : duration;
@@ -57,15 +57,15 @@ noexport void Poison_Expires(combatant *target, int argument)
 
 	damage = randint(argument, argument + 1);
 	if (damage > 0) {
-		Combat_Message("%s suffers from poison.", target->name);
-		Damage(target, damage);
+		Combat_Message(target->file, 0, "@n suffers from poison.");
+		Damage(target, null, damage);
 	}
 
 	if (argument > 0) {
 		Add_Buff(target, POISON_BUFF_NAME, exTurns, 1, Poison_Expires, argument - 1);
 	} else {
 		target->stats[sToughness] += POISON_TOUGHNESS_LOSS;
-		Combat_Message("%s looks better.", target->name);
+		Combat_Message(target->file, 0, "@n looks better.");
 	}
 }
 
@@ -75,7 +75,7 @@ bool Try_Poison(combatant *source, combatant *target, statistic stat, int potenc
 
 	if (Roll(source, stat, target, sToughness, &outcome)) {
 		Log("Try_Poison: success %d", outcome);
-		Combat_Message("%s looks ill.", target->name);
+		Combat_Message(source->file, target->file, "@N looks ill.");
 
 		duration = potency + outcome / 3;
 		duration = duration < 2 ? 2 : duration;

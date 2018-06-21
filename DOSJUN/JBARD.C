@@ -39,9 +39,9 @@ noexport void Sing_Expires(combatant *target, int argument)
 
 	if (gState == gsCombat) {
 		if (argument == SING_HITBONUS) {
-			Combat_Message("%s stops singing.", target->name);
+			Combat_Message(target->file, 0, "@n stops singing.");
 		} else {
-			Combat_Message("%s's voice fades away.", target->name);
+			Combat_Message(target->file, 0, "@n's voice fades away.");
 		}
 	}
 }
@@ -71,5 +71,5 @@ void Sing(combatant *source, combatant *target)
 	}
 
 	Add_Buff(source, SING_BUFF_NAME, exTurns, duration, Sing_Expires, bonus);
-	Combat_Message("%s sings, and the party is inspired!", source->name);
+	Combat_Message(source->file, 0, "@n sings, and the party is inspired!");
 }

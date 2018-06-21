@@ -11,19 +11,19 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-noexport box whole_screen = {
+noexport box2d whole_screen = {
 	{ 0, 0 },
 	{ SCREEN_WIDTH, SCREEN_HEIGHT }
 };
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Draw_GRF(point *xy, grf *g, int img, colour tint)
+void Draw_GRF(point2d *xy, grf *g, int img, colour tint)
 {
 	Draw_GRF_Clipped(xy, g, img, tint, &whole_screen);
 }
 
-void Draw_GRF_Clipped(point *xy, grf *g, int img, colour tint, box *bounds)
+void Draw_GRF_Clipped(point2d *xy, grf *g, int img, colour tint, box2d *bounds)
 {
 	int x, y, ex;
 	grf_image *im;

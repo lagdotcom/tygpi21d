@@ -45,7 +45,7 @@ void Draw_Character_Status(pcnum index, int x, int y)
 	char buffer[9];
 	pc *pc;
 
-	pc = Get_Pc(index);
+	pc = Get_PC(index);
 	if (!pc) return;
 
 	strncpy(buffer, pc->name, 8);
@@ -316,14 +316,20 @@ item *Get_Equipped_Weapon(pc *pc, bool primary)
 	return it;
 }
 
-pc *Get_Pc(pcnum index)
+pc *Get_PC(pcnum index)
 {
 	file_id ref;
 
-	assert(index < PARTY_SIZE, "Get_Pc: pc number too high");
+	assert(index < PARTY_SIZE, "Get_PC: pc number too high");
 
 	ref = gParty->members[index];
 	return Lookup_File_Chained(gSave, ref);
+}
+
+file_id Get_PC_ID(pcnum index)
+{
+	assert(index < PARTY_SIZE, "Get_PC_ID: pc number too high");
+	return gParty->members[index];
 }
 
 char *Slot_Name(itemslot sl)
@@ -341,9 +347,9 @@ char *Slot_Name(itemslot sl)
 	}
 }
 
-stat_value Get_Pc_Stat(pc *pc, statistic st)
+stat_value Get_PC_Stat(pc *pc, statistic st)
 {
-	assert(st < NUM_STATS, "Get_Pc_Stat: stat number too high");
+	assert(st < NUM_STATS, "Get_PC_Stat: stat number too high");
 
 	return Get_Stat_Base(pc->header.stats, st) + pc->header.stats[st];
 }
@@ -353,7 +359,7 @@ noexport void Show_Pc_Stat(pc *pc, statistic st, int y)
 	char *name = Stat_Name(st);
 	char temp[5];
 
-	itoa(Get_Pc_Stat(pc, st), temp, 10);
+	itoa(Get_PC_Stat(pc, st), temp, 10);
 
 	Draw_Font(8, y, WHITE, name, gFont, false);
 	Draw_Font(80, y, WHITE, temp, gFont, false);
@@ -366,7 +372,7 @@ noexport void Show_Pc_Stat_Pair(pc *pc, statistic stc, statistic stm, int y)
 
 	Draw_Font(8, y, WHITE, name, gFont, false);
 
-	sprintf(temp, "%3d/%3d", Get_Pc_Stat(pc, stc), Get_Pc_Stat(pc, stm));
+	sprintf(temp, "%3d/%3d", Get_PC_Stat(pc, stc), Get_PC_Stat(pc, stm));
 	Draw_Font(80, y, WHITE, temp, gFont, false);
 }
 
@@ -408,8 +414,8 @@ noexport void Show_Pc_Items(pc *pc, int selected)
 
 noexport char *Get_Damage_Range(pc *pc)
 {
-	int min = Get_Pc_Stat(pc, sMinDamage);
-	int max = Get_Pc_Stat(pc, sMaxDamage);
+	int min = Get_PC_Stat(pc, sMinDamage);
+	int max = Get_PC_Stat(pc, sMaxDamage);
 	int i;
 	inventory *iv;
 	item *it;
@@ -546,7 +552,7 @@ noexport bool Confirm_Give_Item(pc *pc, int index)
 	if (!iv->item) return false;
 
 	dest_pc = Confirm_Pc("To whom? (1-6)");
-	if (dest_pc < 0 || pc == Get_Pc(dest_pc)) {
+	if (dest_pc < 0 || pc == Get_PC(dest_pc)) {
 		return false;
 	}
 	
@@ -558,7 +564,7 @@ noexport bool Confirm_Give_Item(pc *pc, int index)
 		}
 	}
 
-	dest_slot = Find_Empty_Inventory_Slot(Get_Pc(dest_pc));
+	dest_slot = Find_Empty_Inventory_Slot(Get_PC(dest_pc));
 	if (dest_slot < 0) {
 		Confirm("Inventory is full!");
 		Clear_Confirm();
@@ -601,7 +607,7 @@ noexport bool Confirm_Use_Item(pc *pc, int index)
 		}
 	}
 
-	if (Use_Item(it, pc, Get_Pc(dest_pc))) {
+	if (Use_Item(it, pc, Get_PC(dest_pc))) {
 		if (iv->quantity > 1) {
 			iv->quantity--;
 		} else {
@@ -620,7 +626,7 @@ void Show_Pc_Screen(pcnum starting_pc)
 	redraw_everything = true;
 
 	while (true) {
-		pc = Get_Pc(index);
+		pc = Get_PC(index);
 		Show_Pc_Stats(pc);
 		Show_Pc_Items(pc, selected);
 		Show_Double_Buffer();

@@ -23,9 +23,11 @@ item *Get_Equipped_Weapon(pc *pc, bool primary);
 file_id Get_Equipped_Weapon_Id(pc *pc, bool primary);
 
 /* Get the PC whose index this is */
-pc *Get_Pc(pcnum index);
+pc *Get_PC(pcnum index);
 
-stat_value Get_Pc_Stat(pc *c, statistic st);
+file_id Get_PC_ID(pcnum index);
+
+stat_value Get_PC_Stat(pc *c, statistic st);
 
 bool In_Front_Row(pc *pc);
 void Pc_Select(pcnum index);

@@ -86,7 +86,7 @@ noexport char *Get_Npc_Name(file_id ref)
 	return Resolve_String(npc->name_id);
 }
 
-noexport char *Get_Pc_Name(file_id ref)
+noexport char *Get_PC_Name(file_id ref)
 {
 	pc *pc = Lookup_File_Chained(gSave, ref);
 	return pc->name;
@@ -370,8 +370,8 @@ noexport void PcSpeak(code_host *h)
 	Log("C|PcSpeak %d, %d", pc_id, s_id);
 #endif
 	
-	sprintf(formatting_buf, "%s:\n%s", Get_Pc_Name(pc_id), Resolve_String(s_id));
-	Show_Game_String(formatting_buf, true);
+	sprintf(formatting_buf, "%s:\n%s", Get_PC_Name(pc_id), Resolve_String(s_id));
+	Show_Game_String_Context(formatting_buf, true, pc_id, 0);
 }
 
 noexport void PcAction(code_host *h)
@@ -383,8 +383,8 @@ noexport void PcAction(code_host *h)
 	Log("C|PcAction %d, %d", pc_id, s_id);
 #endif
 
-	sprintf(formatting_buf, "%s %s", Get_Pc_Name(pc_id), Resolve_String(s_id));
-	Show_Game_String(formatting_buf, true);
+	sprintf(formatting_buf, "%s %s", Get_PC_Name(pc_id), Resolve_String(s_id));
+	Show_Game_String_Context(formatting_buf, true, pc_id, 0);
 }
 
 noexport void NpcSpeak(code_host *h)
@@ -397,7 +397,7 @@ noexport void NpcSpeak(code_host *h)
 #endif
 
 	sprintf(formatting_buf, "%s:\n%s", Get_Npc_Name(npc_id), Resolve_String(s_id));
-	Show_Game_String(formatting_buf, true);
+	Show_Game_String_Context(formatting_buf, true, npc_id, 0);
 }
 
 noexport void NpcAction(code_host *h)
@@ -410,7 +410,7 @@ noexport void NpcAction(code_host *h)
 #endif
 
 	sprintf(formatting_buf, "%s %s", Get_Npc_Name(npc_id), Resolve_String(s_id));
-	Show_Game_String(formatting_buf, true);
+	Show_Game_String_Context(formatting_buf, true, npc_id, 0);
 }
 
 noexport void Text(code_host *h)
@@ -615,7 +615,7 @@ noexport void AddItem(code_host *h)
 
 	h->result = false;
 	for (index = 0; index < PARTY_SIZE; index++) {
-		pc = Get_Pc(index);
+		pc = Get_PC(index);
 		if (!pc) continue;
 
 		h->result = Add_to_Inventory(pc, item_id, qty);

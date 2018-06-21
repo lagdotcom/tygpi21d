@@ -58,6 +58,7 @@ typedef struct combatant {
 	void *target; /* combatant */
 	pri priority;
 	unsigned int index;
+	file_id file;
 } combatant;
 
 typedef bool(*action_check_fn)(combatant *source);
@@ -84,8 +85,8 @@ extern list *combatants;
 void Add_Buff(combatant *target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument);
 void Attack(combatant *source, combatant *target);
 bool Check_Attack(combatant *source);
-void Combat_Message(char *format, ...);
-void Damage(combatant *victim, int amount);
+void Combat_Message(file_id speaker, file_id target, char *format, ...);
+void Damage(combatant *victim, combatant* attacker, int amount);
 void Free_Combat(void);
 combatant *Get_Random_Target(groupnum group);
 stat_value Get_Stat_Base(stat_value *stats, statistic st);

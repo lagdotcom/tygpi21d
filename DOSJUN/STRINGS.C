@@ -12,7 +12,8 @@ typedef enum procase {
 	pcReflexive,
 } procase;
 
-#define BUFFER_SIZE 500
+#define BUFFER_SIZE 30
+#define FMT_CHAR	'@'
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
@@ -140,11 +141,27 @@ noexport const char *Get_Pronoun_Case(pronouns p, procase c)
 	return pronoun_cases[p * 5 + c];
 }
 
-void Show_Formatted_String(const char *s, file_id speaker, file_id target, box bounds, grf *font)
+noexport void Show_Word(grf *font, const char *word, point2d *p, const box2d *bounds, colour tint)
 {
-	int tint, i, row_height, cwidth, cheight;
-	char *b, *last_space;
-	point p, pspace;
+	size2d sz;
+
+	sz = Measure_String(font, word);
+	if (sz.w + p->x > bounds->end.x) {
+		p->x = bounds->start.x;
+		p->y += sz.h;
+	}
+
+	Draw_Font(p->x, p->y, tint, word, font, false);
+	p->x += sz.w + Char_Width(font, ' ');
+}
+
+/* TODO: bounds.end.y is never used */
+void Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour tint)
+{
+	int i;
+	char *b;
+	const char *word;
+	point2d p;
 	bool fmt_mode, match;
 	procase fmt_case;
 	pronouns
@@ -152,14 +169,14 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, box b
 		target_p = target ? Get_Pronouns(target) : proIt,
 		fmt_p;
 
-	p.x = bounds.start.x;
-	p.y = bounds.start.y;
-	last_space = b = formatter_buf;
-	tint = 0;
-	row_height = 0;
+	p.x = bounds->start.x;
+	p.y = bounds->start.y;
+	b = formatter_buf;
 	fmt_mode = false;
 
 	for (i = 0; i < strlen(s); i++) {
+		word = null;
+
 		if (fmt_mode) {
 			fmt_mode = false;
 			match = true;
@@ -215,6 +232,14 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, box b
 					fmt_p = target_p;
 					break;
 
+				case 'n':
+					word = Get_Name(speaker);
+					break;
+
+				case 'N':
+					word = Get_Name(target);
+					break;
+
 				default:
 					*b++ = s[i];
 					match = false;
@@ -222,7 +247,7 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, box b
 			}
 
 			if (match) {
-				b = strcat(b, Get_Pronoun_Case(fmt_p, fmt_case));
+				word = Get_Pronoun_Case(fmt_p, fmt_case);
 			}
 
 			continue;
@@ -231,31 +256,33 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, box b
 		switch (s[i]) {
 			case '\0':
 				if (b > formatter_buf) {
-					/* TODO */
+					*b = 0;
+					word = b = formatter_buf;
 				}
 				break;
 
-			case '%':
+			case FMT_CHAR:
 				fmt_mode = true;
 				break;
 
+			case ' ':
+				*b = 0;
+				word = b = formatter_buf;
+				break;
+
 			default:
-				if (s[i] == ' ') {
-					last_space = b;
-					pspace.x = p.x;
-					pspace.y = p.y;
-				}
-
 				*b++ = s[i];
-				cwidth = Char_Width(font, s[i]);
-				cheight = Char_Height(font, s[i]);
-				if (cheight > row_height) row_height = cheight;
-
-				if (p.x + cwidth >= bounds.end.x) {
-					/* TODO */
-				}
-
 				break;
 		}
+
+		if (word != null) {
+			Show_Word(font, word, &p, bounds, tint);
+		}
+	}
+
+	/* TODO: remove repetition */
+	if (b > formatter_buf) {
+		*b = 0;
+		Show_Word(font, formatter_buf, &p, bounds, tint);
 	}
 }

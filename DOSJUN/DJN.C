@@ -198,8 +198,6 @@ void *Lookup_File(djn *chain, file_id id, bool chained)
 
 bool In_Djn(djn *chain, file_id id, bool chained)
 {
-	djn_file *f;
-
 	/* Special case: cannot look up ID 0 */
 	if (id == 0)
 		return null;

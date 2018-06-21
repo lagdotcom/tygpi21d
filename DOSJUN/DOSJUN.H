@@ -76,7 +76,7 @@ extern bool
 	just_moved,
 	can_save;
 
-extern point topleft;
+extern point2d gTopLeft;
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
@@ -87,7 +87,8 @@ char Get_Y_Offset(dir dir);
 bool Is_Coord_Valid(coord x, coord y);
 void Redraw_Dungeon_Screen(bool script);
 char *Resolve_String(int id);
-void Show_Game_String(char *string, bool wait_for_key);
+void Show_Game_String(const char *string, bool wait_for_key);
+void Show_Game_String_Context(const char *string, bool wait_for_key, file_id speaker, file_id target);
 dir Turn_Left(dir dir);
 dir Turn_Right(dir dir);
 

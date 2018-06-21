@@ -23,7 +23,7 @@ bool Check_Hide(combatant *source)
 noexport void Hidden_Expires(combatant *source, int argument)
 {
 	if (gState == gsCombat) {
-		Combat_Message("%s is revealed!", source->name);
+		Combat_Message(source->file, 0, "@n is revealed!");
 	}
 }
 
@@ -34,7 +34,7 @@ void Hide(combatant *source, combatant *target)
 	if (dexterity > 20) dexterity = 20;
 	if (dexterity < 3) dexterity = 3;
 	Add_Buff(target, HIDE_BUFF_NAME, exTurnEndChance, 101 - (dexterity * 5), Hidden_Expires, 0);
-	Combat_Message("%s is hidden from view.", target->name);
+	Combat_Message(target->file, source->file, "@n is hidden from view.");
 }
 
 bool Check_SneakAttack(combatant *source)
@@ -44,14 +44,12 @@ bool Check_SneakAttack(combatant *source)
 
 noexport void SneakAttack_Inner(combatant *source, combatant *target, item *weapon)
 {
-	char *source_name = source->name,
-		*target_name = target->name;
 	stat_value base = Get_Stat(source, Get_Weapon_Stat(weapon));
 	stat_value min, max;
 	int roll, potency;
 
 	if (Is_Dead(target)) {
-		Combat_Message("%s missed their chance.", source_name);
+		Combat_Message(source->file, target->file, "@n missed their chance.");
 		return;
 	}
 
@@ -59,12 +57,12 @@ noexport void SneakAttack_Inner(combatant *source, combatant *target, item *weap
 	/* note: dodge bonus is ignored on enemy! */
 
 	if (randint(1, 20) <= base) {
-		Combat_Message("%s strikes %s from the shadows!", source_name, target_name);
+		Combat_Message(source->file, target->file, "@n strikes @N from the shadows!");
 
 		Get_Weapon_Damage(source, weapon, &min, &max);
 		roll = randint(min, max) * HIDE_MULTIPLIER - Get_Stat(target, sArmour);
 		if (roll > 0) {
-			Damage(target, roll);
+			Damage(target, source, roll);
 
 			if (Is_Dead(target)) {
 				return;
@@ -80,10 +78,10 @@ noexport void SneakAttack_Inner(combatant *source, combatant *target, item *weap
 				Try_Poison(source, target, sDexterity, potency);
 			}
 		} else {
-			Combat_Message("The blow glances off.");
+			Combat_Message(source->file, target->file, "The blow glances off.");
 		}
 	} else {
-		Combat_Message("%s sneakily attacks %s, but misses.", source_name, target_name);
+		Combat_Message(source->file, target->file, "@n sneakily attacks @N, but misses.");
 	}
 }
 

@@ -43,8 +43,8 @@ noexport bool Healing_Item(item *it, pc *pc)
 	stat_value current, maximum;
 	int amount;
 
-	current = Get_Pc_Stat(pc, sHP);
-	maximum = Get_Pc_Stat(pc, sMaxHP);
+	current = Get_PC_Stat(pc, sHP);
+	maximum = Get_PC_Stat(pc, sMaxHP);
 
 	if (current >= maximum)
 		return false;

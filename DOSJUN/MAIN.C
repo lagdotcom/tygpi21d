@@ -106,7 +106,7 @@ gamestate Show_Main_Menu(void)
 	while (!done) {
 		Fill_Double_Buffer(0);
 		if (menu_bg)
-			Draw_GRF(&topleft, menu_bg, 0, 0);
+			Draw_GRF(&gTopLeft, menu_bg, 0, 0);
 
 		option = Input_Menu(menu, 3, 100, 140);
 

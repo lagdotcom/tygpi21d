@@ -26,7 +26,7 @@ noexport void Concentrate_Inner(combatant *source, combatant *target, item *weap
 	int roll;
 
 	if (Is_Dead(target)) {
-		Combat_Message("%s loses their concentration.", source->name);
+		Combat_Message(source->file, 0, "@n loses @r concentration.");
 		return;
 	}
 
@@ -34,17 +34,17 @@ noexport void Concentrate_Inner(combatant *source, combatant *target, item *weap
 	base -= Get_Stat(target, sDodgeBonus);
 
 	if (randint(1, 20) <= base) {
-		Combat_Message("%s strikes %s true.", source->name, target->name);
+		Combat_Message(source->file, target->file, "@n strikes @N true.");
 
 		Get_Weapon_Damage(source, weapon, &min, &max);
 		roll = randint(min, max) - Get_Stat(target, sArmour) + CONCENTRATE_DMGBONUS;
 		if (roll > 0) {
-			Damage(target, roll);
+			Damage(target, source, roll);
 		} else {
-			Combat_Message("The blow glances off.");
+			Combat_Message(source->file, target->file, "The blow glances off.");
 		}
 	} else {
-		Combat_Message("%s narrowly misses %s.", source->name, target->name);
+		Combat_Message(source->file, target->file, "@n narrowly misses @N.");
 	}
 }
 
@@ -61,7 +61,7 @@ void Cleave(combatant *source, combatant *target)
 
 	retarget = Get_Random_Target(target->group);
 	if (retarget != null) {
-		Combat_Message("%s swings again!", source->name);
+		Combat_Message(source->file, retarget->file, "@n swings again!");
 		Add_Buff(source, CLEAVE_USED_BUFF, exTurns, 1, null, 0);
 
 		Attack(source, retarget);

@@ -72,11 +72,12 @@ Text in script files can have formatting characters in it:
 
 | Spec  | Description          | Example                 |
 | ----- | -------------------- | ----------------------- |
-| `%e`  | subject-pronoun      | he/she                  |
-| `%m`  | object-pronoun       | him/her                 |
-| `%r`  | posessive-determiner | his/her                 |
-| `%s`  | posessive-pronoun    | his/hers                |
-| `%f`  | reflexive            | himself/herself         |
+| `@n`  | name                 | Dudebro                 |
+| `@e`  | subject-pronoun      | he/she                  |
+| `@m`  | object-pronoun       | him/her                 |
+| `@r`  | posessive-determiner | his/her                 |
+| `@s`  | posessive-pronoun    | his/hers                |
+| `@f`  | reflexive            | himself/herself         |
 | `^xx` | colour               | xx = palette index, hex |
 
 Capitalising the char makes it refer to the speakee instead of the speaker. `PcAction/PcSpeak/NpcAction/NpcSpeak` default to the given PC/NPC. `Text` defaults to the 'leader' PC.
