@@ -156,6 +156,7 @@ noexport void Show_Word(grf *font, const char *word, point2d *p, const box2d *bo
 }
 
 /* TODO: bounds.end.y is never used */
+/* TODO: tint change */
 void Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour tint)
 {
 	int i;
@@ -280,7 +281,6 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, const
 		}
 	}
 
-	/* TODO: remove repetition */
 	if (b > formatter_buf) {
 		*b = 0;
 		Show_Word(font, formatter_buf, &p, bounds, tint);
