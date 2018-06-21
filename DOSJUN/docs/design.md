@@ -78,7 +78,8 @@ Text in script files can have formatting characters in it:
 | `@r`  | posessive-determiner | his/her                 |
 | `@s`  | posessive-pronoun    | his/hers                |
 | `@f`  | reflexive            | himself/herself         |
-| `^xx` | colour               | xx = palette index, hex |
+| `^nn` | colour               | nn = palette index, hex |
+| `^x`  | reset colour         |                         |
 
 Capitalising the char makes it refer to the speakee instead of the speaker. `PcAction/PcSpeak/NpcAction/NpcSpeak` default to the given PC/NPC. `Text` defaults to the 'leader' PC.
 

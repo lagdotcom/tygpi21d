@@ -155,25 +155,52 @@ noexport void Show_Word(grf *font, const char *word, point2d *p, const box2d *bo
 	p->x += sz.w + Char_Width(font, ' ');
 }
 
+noexport int Hex_Digit(char c)
+{
+	switch (c)
+	{
+		case '1': return 1;
+		case '2': return 2;
+		case '3': return 3;
+		case '4': return 4;
+		case '5': return 5;
+		case '6': return 6;
+		case '7': return 7;
+		case '8': return 8;
+		case '9': return 9;
+		case 'a': case 'A': return 0xa;
+		case 'b': case 'B': return 0xb;
+		case 'c': case 'C': return 0xc;
+		case 'd': case 'D': return 0xd;
+		case 'e': case 'E': return 0xe;
+		case 'f': case 'F': return 0xf;
+
+		default: return 0;
+	}
+}
+
 /* TODO: bounds.end.y is never used */
 /* TODO: tint change */
-void Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour tint)
+void Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour start_tint)
 {
-	int i;
+	int i, colour_mode;
 	char *b;
 	const char *word;
 	point2d p;
 	bool fmt_mode, match;
 	procase fmt_case;
+	colour tint;
 	pronouns
 		speaker_p = speaker ? Get_Pronouns(speaker) : proIt,
 		target_p = target ? Get_Pronouns(target) : proIt,
 		fmt_p;
 
+	tint = start_tint;
 	p.x = bounds->start.x;
 	p.y = bounds->start.y;
 	b = formatter_buf;
 	fmt_mode = false;
+	colour_mode = false;
 
 	for (i = 0; i < strlen(s); i++) {
 		word = null;
@@ -254,6 +281,23 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, const
 			continue;
 		}
 
+		switch (colour_mode) {
+			case 2:
+				tint += Hex_Digit(s[i]);
+				colour_mode = 0;
+				continue;
+
+			case 1:
+				if (s[i] == 'x') {
+					tint = start_tint;
+					colour_mode = 0;
+				} else {
+					tint = Hex_Digit(s[i]) << 4;
+					colour_mode = 2;
+				}
+				continue;
+		}
+
 		switch (s[i]) {
 			case '\0':
 				if (b > formatter_buf) {
@@ -269,6 +313,10 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, const
 			case ' ':
 				*b = 0;
 				word = b = formatter_buf;
+				break;
+
+			case '^':
+				colour_mode = 1;
 				break;
 
 			default:
