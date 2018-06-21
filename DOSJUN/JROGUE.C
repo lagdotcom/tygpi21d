@@ -49,7 +49,7 @@ noexport void SneakAttack_Inner(combatant *source, combatant *target, item *weap
 	int roll, potency;
 
 	if (Is_Dead(target)) {
-		Combat_Message(source->file, target->file, "@n missed their chance.");
+		Combat_Message(source->file, target->file, "@n missed @r chance.");
 		return;
 	}
 
