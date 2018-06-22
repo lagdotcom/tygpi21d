@@ -6,10 +6,6 @@
 #include "grf.h"
 #include "common.h"
 
-/* D E F I N E S ///////////////////////////////////////////////////////// */
-
-#define FONT_HEADER_PADDING 14
-
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 int Char_Width(grf *f, char ch);
