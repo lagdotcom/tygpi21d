@@ -151,7 +151,7 @@ noexport void Show_Word(grf *font, const char *word, point2d *p, const box2d *bo
 		p->y += sz.h;
 	}
 
-	Draw_Font(p->x, p->y, tint, word, font, false);
+	Draw_Font(p->x, p->y, tint, word, font, true);
 	p->x += sz.w + Char_Width(font, ' ');
 }
 
@@ -201,6 +201,9 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, const
 	b = formatter_buf;
 	fmt_mode = false;
 	colour_mode = false;
+
+	/* Clear the area first */
+	Draw_Square_DB(0, bounds->start.x, bounds->start.y, bounds->end.x, bounds->end.y, true);
 
 	for (i = 0; i < strlen(s); i++) {
 		word = null;
