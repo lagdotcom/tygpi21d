@@ -56,14 +56,17 @@
 #define TEX_2R2F	40
 #define TEXTURE_PIECES (TEX_2R2F + 1)
 
+#define THING_CLOSE	0
+#define THING_MID	1
+#define THING_FAR	2
+#define THING_PIECES (THING_FAR + 1)
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 bool redraw_fp;
 noexport pcx_picture current_pic;
 noexport bool picture_loaded = false;
 noexport char shown_picture[MAX_FILENAME_LENGTH];
-
-noexport pcx_picture *things = null;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -134,35 +137,6 @@ bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
 	return true;
 }
 
-noexport void Paste_DB(int dx, int dy, pcx_picture *texture, int w, int h, int sx, int sy)
-{
-	unsigned char *output;
-	char PtrDist *input;
-	int x, y, tex_width;
-	assert((dx + w) <= SCREEN_WIDTH, "Paste_DB: dx + w > width");
-	assert((dy + h) <= SCREEN_HEIGHT, "Paste_DB: dy + h > height");
-
-	tex_width = texture->header.width + 1;
-	assert((sx + w) <= tex_width, "Paste_DB: sx + w > img.width");
-	assert((sy + h) <= (texture->header.height + 1), "Paste_DB: sy + h > img.height");
-
-	output = &double_buffer[(dy + SY) * SCREEN_WIDTH + (dx + SX)];
-	input = &texture->buffer[sy * tex_width + sx];
-
-	for (y = 0; y < h; y++) {
-		for (x = 0; x < w; x++) {
-			if (*input != 0)
-				*output = *input;
-
-			output++;
-			input++;
-		}
-
-		output += SCREEN_WIDTH - w;
-		input += tex_width - w;
-	}
-}
-
 noexport void Draw_Tile_Segment(file_id texture_id, int dx, int dy, int piece)
 {
 	grf *tex;
@@ -178,14 +152,19 @@ noexport void Draw_Tile_Segment(file_id texture_id, int dx, int dy, int piece)
 	Draw_GRF_Clipped(&p, tex, piece, 0, null);
 }
 
-/* TODO: use GRF */
-noexport void Draw_Thing(thing_id th, int dx, int dy, int w, int h, int sx, int sy)
+noexport void Draw_Thing(file_id thing_id, int dx, int dy, int piece)
 {
-	assert(th < thINVALID, "Draw_Thing: thing number too high");
+	grf *thing;
+	point2d p;
+	assert(piece < THING_PIECES, "Draw_Thing: piece number too high");
 
-	if (th == 0) return;
+	if (thing_id == 0) return;
+	thing = Lookup_File(gDjn, thing_id, true);
+	assert(thing != null, "Draw_Thing: unknown thing ID");
 
-	Paste_DB(dx, dy, &things[th - 1], w, h, sx, sy);
+	p.x = dx + 96;
+	p.y = dy + 8;
+	Draw_GRF_Clipped(&p, thing, piece, 0, null);
 }
 
 noexport tile *Get_Offset_Tile(int forward, int left)
@@ -249,7 +228,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->ceil, 2, 43, TEX_2L1C);
 		Draw_Tile_Segment(t->floor, 2, 80, TEX_2L1F);
 
-		Draw_Thing(t->thing, 6, 43, 42, 42, 150, 86);
+		Draw_Thing(t->thing, 6, 43, THING_FAR);
 	}
 
 	t = Get_Offset_Tile(2, -1);
@@ -259,7 +238,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->floor, 80, 80, TEX_2R1F);
 		Draw_Tile_Segment(t->walls[rwall].texture, 112, 43, TEX_2R1R);
 
-		Draw_Thing(t->thing, 86, 43, 42, 42, 150, 86);
+		Draw_Thing(t->thing, 86, 43, THING_FAR);
 	}
 
 	t = Get_Offset_Tile(2, 0);
@@ -270,7 +249,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->floor, 44, 80, TEX_200F);
 		Draw_Tile_Segment(t->walls[rwall].texture, 80, 43, TEX_200R);
 
-		Draw_Thing(t->thing, 43, 43, 42, 42, 150, 86);
+		Draw_Thing(t->thing, 43, 43, THING_FAR);
 	}
 
 	t = Get_Offset_Tile(1, 1);
@@ -279,7 +258,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->ceil, 0, 32, TEX_1L1C);
 		Draw_Tile_Segment(t->floor, 0, 85, TEX_1L1F);
 
-		Draw_Thing(t->thing, 0, 32, 32, 64, 160, 0);
+		Draw_Thing(t->thing, 0, 32, THING_MID);
 	}
 
 	t = Get_Offset_Tile(1, -1);
@@ -288,7 +267,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->ceil, 85, 32, TEX_1R1C);
 		Draw_Tile_Segment(t->floor, 85, 85, TEX_1R1F);
 
-		Draw_Thing(t->thing, 96, 32, 32, 64, 128, 0);
+		Draw_Thing(t->thing, 96, 32, THING_MID);
 	}
 
 	t = Get_Offset_Tile(1, 0);
@@ -299,7 +278,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->floor, 33, 85, TEX_100F);
 		Draw_Tile_Segment(t->walls[rwall].texture, 85, 32, TEX_100R);
 
-		Draw_Thing(t->thing, 32, 32, 64, 64, 128, 0);
+		Draw_Thing(t->thing, 32, 32, THING_MID);
 	}
 
 	t = Get_Offset_Tile(0, 1);
@@ -308,7 +287,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->ceil, 0, 0, TEX_0L1C);
 		Draw_Tile_Segment(t->floor, 0, 96, TEX_0L1F);
 
-		Draw_Thing(t->thing, 0, 0, 32, 128, 96, 0);
+		Draw_Thing(t->thing, 0, 0, THING_CLOSE);
 	}
 
 	t = Get_Offset_Tile(0, -1);
@@ -317,7 +296,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->ceil, 96, 0, TEX_0R1C);
 		Draw_Tile_Segment(t->floor, 96, 96, TEX_0R1F);
 
-		Draw_Thing(t->thing, 96, 0, 32, 128, 0, 0);
+		Draw_Thing(t->thing, 96, 0, THING_CLOSE);
 	}
 
 	t = Get_Offset_Tile(0, 0);
@@ -329,7 +308,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->floor, 1, 96, TEX_000F);
 		Draw_Tile_Segment(t->walls[rwall].texture, 96, 0, TEX_000R);
 
-		Draw_Thing(t->thing, 0, 0, 128, 128, 0, 0);
+		Draw_Thing(t->thing, 0, 0, THING_CLOSE);
 	}
 
 	redraw_fp = false;
