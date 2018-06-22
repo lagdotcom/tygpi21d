@@ -179,8 +179,7 @@ noexport int Hex_Digit(char c)
 	}
 }
 
-/* TODO: bounds.end.y is never used */
-/* TODO: tint change */
+/* TODO: bounds.end.y should be checked, scroll text with prompts? */
 void Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour start_tint)
 {
 	int i, colour_mode;
