@@ -46,7 +46,12 @@ typedef struct box2d {
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Draw_GRF(point2d *xy, grf *g, int img, colour tint);
+
+/* Draw a GRF image onto the screen, clipped within a box.
+bounds: if null, defaults to the whole screen
+*/
 void Draw_GRF_Clipped(point2d *xy, grf *g, int img, colour tint, box2d *bounds);
+
 void Free_GRF(grf *g);
 bool Load_GRF(char *filename, grf *g, char *tag);
 bool Read_GRF(FILE *fp, grf *g); 
