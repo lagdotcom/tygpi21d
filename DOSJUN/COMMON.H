@@ -41,6 +41,11 @@ typedef enum job {
 	jRanger,	/* Str, Dex */
 	jBard,		/* Int, Dex */
 
+	jReserved1,
+	jReserved2,
+	jReserved3,
+	jReserved4,
+
 	NUM_JOBS
 } job;
 
