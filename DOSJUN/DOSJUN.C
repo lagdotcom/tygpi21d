@@ -30,7 +30,7 @@ bool trigger_on_enter,
 point2d gTopLeft = { 0, 0 };
 noexport box2d gameStringBox = {
 	{ 12, 148 },
-	{ 307, 187 },
+	{ 308, 188 },
 };
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */

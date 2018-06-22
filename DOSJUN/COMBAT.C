@@ -49,7 +49,7 @@ noexport UINT32 earned_experience;
 
 noexport box2d combatStringBox = {
 	{ 100, 148 },
-	{ 219, 187 },
+	{ 220, 188 },
 };
 
 /* H E L P E R  F U N C T I O N S //////////////////////////////////////// */

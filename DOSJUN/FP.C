@@ -68,6 +68,16 @@ noexport pcx_picture current_pic;
 noexport bool picture_loaded = false;
 noexport char shown_picture[MAX_FILENAME_LENGTH];
 
+#define VIEW_X	96
+#define VIEW_Y	8
+#define VIEW_W	128
+#define VIEW_H	128
+
+noexport box2d viewport = {
+	{ VIEW_X, VIEW_Y },
+	{ VIEW_X + VIEW_W, VIEW_Y + VIEW_H },
+};
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 noexport UINT32 Image_Size(pcx_picture_ptr image)
@@ -149,7 +159,7 @@ noexport void Draw_Tile_Segment(file_id texture_id, int dx, int dy, int piece)
 
 	p.x = dx + 96;
 	p.y = dy + 8;
-	Draw_GRF_Clipped(&p, tex, piece, 0, null);
+	Draw_GRF_Clipped(&p, tex, piece, 0, &viewport);
 }
 
 noexport void Draw_Thing(file_id thing_id, int dx, int dy, int piece)
@@ -164,7 +174,7 @@ noexport void Draw_Thing(file_id thing_id, int dx, int dy, int piece)
 
 	p.x = dx + 96;
 	p.y = dy + 8;
-	Draw_GRF_Clipped(&p, thing, piece, 0, null);
+	Draw_GRF_Clipped(&p, thing, piece, 0, &viewport);
 }
 
 noexport tile *Get_Offset_Tile(int forward, int left)
@@ -258,7 +268,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->ceil, 0, 32, TEX_1L1C);
 		Draw_Tile_Segment(t->floor, 0, 85, TEX_1L1F);
 
-		Draw_Thing(t->thing, 0, 32, THING_MID);
+		Draw_Thing(t->thing, -32, 32, THING_MID);
 	}
 
 	t = Get_Offset_Tile(1, -1);
@@ -287,7 +297,7 @@ void Draw_FP(void)
 		Draw_Tile_Segment(t->ceil, 0, 0, TEX_0L1C);
 		Draw_Tile_Segment(t->floor, 0, 96, TEX_0L1F);
 
-		Draw_Thing(t->thing, 0, 0, THING_CLOSE);
+		Draw_Thing(t->thing, -96, 0, THING_CLOSE);
 	}
 
 	t = Get_Offset_Tile(0, -1);
