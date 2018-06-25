@@ -9,15 +9,15 @@ void Free_NPC(npc *npc)
 
 }
 
-bool Read_NPC(FILE *fp, npc *npc)
+bool Read_NPC(FILE *fp, npc *n)
 {
-	fread(npc, sizeof(npc), 1, fp);
+	fread(n, sizeof(npc), 1, fp);
 	return true;
 }
 
-bool Write_NPC(FILE *fp, npc *npc)
+bool Write_NPC(FILE *fp, npc *n)
 {
-	fwrite(npc, sizeof(npc), 1, fp);
+	fwrite(n, sizeof(npc), 1, fp);
 	return true;
 }
 

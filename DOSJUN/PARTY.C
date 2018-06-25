@@ -754,7 +754,7 @@ pc *Duplicate_PC(pc *org)
 {
 	pc *dup = SzAlloc(1, pc, "Duplicate_PC");
 
-	memcpy(dup, org, sizeof(pc_header));
+	memcpy(&dup->header, &org->header, sizeof(pc_header));
 
 	dup->skills = Duplicate_List(org->skills, "Duplicate_PC.skills");
 	dup->buffs = Duplicate_List(org->buffs, "Duplicate_PC.buffs");
