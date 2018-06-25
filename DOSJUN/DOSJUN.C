@@ -504,6 +504,10 @@ void main(int argc, char **argv)
 	Log("%s", "main: Init");
 
 	printf("%s", "Initialising DOSJUN...\n");
+	if (!Initialise_DB()) {
+		dief("%s", "main: Not enough memory to create double buffer.");
+		return;
+	}
 
 	Ready_Djn_Chain(argc, argv);
 	if (gDjn == null) {
@@ -525,11 +529,6 @@ void main(int argc, char **argv)
 		printf("%s", "main: No font data found in DJN files.\n");
 		Free_Djn_Chain();
 		Stop_Memory_Tracking();
-		return;
-	}
-
-	if (!Initialise_DB()) {
-		dief("%s", "main: Not enough memory to create double buffer.");
 		return;
 	}
 

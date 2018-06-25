@@ -177,7 +177,7 @@ djn_file *Lookup_File_Entry(djn *chain, file_id id, bool load, bool chained)
 		d = chained ? d->next : null;
 	}
 
-	Log("Lookup_File_Entry: could not find file #%d", id);
+	Log("Lookup_File_Entry: could not find file #%d%s", id, chained ? " in chain" : "");
 	return null;
 }
 

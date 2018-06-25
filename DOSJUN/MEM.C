@@ -86,6 +86,13 @@ noexport void Update_Peak(long change)
 	if (current_use > peak_use) peak_use = current_use;
 }
 
+#define Connect_Nodes(p, n) { \
+	if (p != null) \
+		p->next = n; \
+	if (n != null) \
+		n->prev = p; \
+}
+
 noexport void Add_Entry(void *mem, MemSz size, char *tag)
 {
 	entry *e;
@@ -113,9 +120,8 @@ noexport void Add_Entry(void *mem, MemSz size, char *tag)
 
 	MLog(e, "A");
 
-	last->next = e;
-	e->prev = last;
 	e->next = null;
+	Connect_Nodes(last, e);
 	last = e;
 
 	Update_Peak(size);
@@ -132,12 +138,8 @@ noexport void Mark_Entry_Freed(void *mem)
 
 			Update_Peak(-e->size);
 
-			if (e->prev)
-				e->prev->next = e->next;
-
-			if (e->next)
-				e->next->prev = e->prev;
-			else
+			Connect_Nodes(e->prev, e->next);
+			if (last == e)
 				last = e->prev;
 
 			allocated_entries--;
@@ -188,6 +190,13 @@ void PtrDist *Allocate(MemSz count, MemSz size, char *tag)
 void PtrDist *Reallocate(void PtrDist *mem, MemSz count, MemSz size, char *tag)
 {
 	void PtrDist *nu = _realloc(mem, count * size);
+
+#ifdef FAR_MEMORY
+	Log("Reallocate: %lu*%lu | %p -> %p", count, size, mem, nu);
+#else
+	Log("Reallocate: %u*%u | %p -> %p", count, size, mem, nu);
+#endif
+
 	if (nu == mem) {
 		Update_Entry_Size(nu, count * size);
 	} else {
@@ -233,6 +242,7 @@ void Start_Memory_Tracking(void)
 	allocated_entries++;
 	entry_count++;
 	last = first;
+	first->tag = "Start_Memory_Tracking";
 
 	Clear_MLog();
 }

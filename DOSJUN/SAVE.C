@@ -18,6 +18,8 @@ void Initialise_Savefile(djn *s)
 	party *p;
 	globals *g;
 
+	s->files = null;
+
 	p = SzAlloc(1, party, "Initialise_Savefile.party");
 	Add_to_Djn(s, p, 0, ftParty);
 
