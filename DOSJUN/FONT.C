@@ -58,18 +58,29 @@ void Draw_Font(int sx, int sy, colour tint, const char *string, grf *f, bool tra
 	}
 }
 
+/* Measure how much space a string would take up when printed. Does not account for formatting chars. */
 size2d Measure_String(grf *f, const char *string)
 {
-	int i, y;
+	int x = 0,
+		y = 0;
 	size2d result = { 0, 0 };
+	size_t i,
+		len = strlen(string);
 
-	for (i = 0; i < strlen(string); i++) {
-		result.w += Char_Width(f, string[i]);
+	for (i = 0; i < len; i++) {
+		if (string[i] == '\n') {
+			result.h += y;
+			x = 0;
+			continue;
+		}
+
+		x += Char_Width(f, string[i]);
 		y = Char_Height(f, string[i]);
 
-		if (y > result.h)
-			result.h = y;
+		if (x > result.w)
+			result.w = x;
 	}
 
+	result.h += y;
 	return result;
 }

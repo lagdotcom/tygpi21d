@@ -36,6 +36,7 @@ noexport char **option_menu;
 noexport file_id *option_state;
 noexport int num_options = 0;
 noexport char *formatting_buf;
+noexport point2d text_pos;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -416,12 +417,29 @@ noexport void NpcAction(code_host *h)
 noexport void Text(code_host *h)
 {
 	str_id s_id = Pop_Stack(h);
+	char *s = Resolve_String(s_id);
+	box2d box;
+	point2d end;
 
 #if CODE_LOG
 	Log("C|Text %d", s_id);
 #endif
 
-	Show_Game_String(Resolve_String(s_id), true);
+	switch (gState)
+	{
+		case gsCutscene:
+			/* TODO: this is kind of dumb */
+			box.start = text_pos;
+			box.end.x = SCREEN_WIDTH;
+			box.end.y = SCREEN_HEIGHT;
+			end = Show_Formatted_String(s, 0, 0, &box, gFont, 0);
+			text_pos.y = end.y;
+			break;
+
+		default:
+			Show_Game_String(s, true);
+			break;
+	}
 }
 
 noexport void Unlock(code_host *h)
@@ -695,6 +713,7 @@ noexport void Option(code_host *h)
 noexport void ChoosePcName(code_host *h)
 {
 	file_id pc_id = Pop_Stack(h);
+	int row_height;
 	pc *pc;
 	char *name;
 
@@ -708,10 +727,11 @@ noexport void ChoosePcName(code_host *h)
 		return;
 	}
 
+	row_height = Char_Height(gFont, ' ');
 	name = SzAlloc(50, char, "ChoosePcName");
-	/* TODO: use GotoXY position */
-	Draw_Font(50, 42, WHITE, "Choose a name:", gFont, true);
-	Input_String(50, 50, name, 50);
+	Draw_Font(text_pos.x, text_pos.y, WHITE, "Choose a name:", gFont, true);
+	Input_String(text_pos.x, text_pos.y + row_height, name, 50);
+	text_pos.y += row_height * 2;
 
 	pc->name = name;
 	pc->header.name_id = 0;
@@ -803,6 +823,16 @@ noexport void GetAttitude(code_host *h)
 	}
 }
 
+noexport void GotoXY(code_host *h)
+{
+	text_pos.x = Pop_Stack(h);
+	text_pos.y = Pop_Stack(h);
+
+#if CODE_LOG
+	Log("C|GotoXY %d,%d", text_pos.x, text_pos.y);
+#endif
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -867,6 +897,8 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coChoosePcPronouns: ChoosePcPronouns(h); return;
 		case coSetAttitude: SetAttitude(h); return;
 		case coGetAttitude: GetAttitude(h); return;
+
+		case coGotoXY:		GotoXY(h); return;
 	}
 
 	h->running = false;

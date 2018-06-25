@@ -75,6 +75,7 @@ typedef enum code_op {
 	coChoosePcPronouns,	/* TODO */
 	coSetAttitude,
 	coGetAttitude,
+	coGotoXY,
 } code_op;
 
 typedef enum code_internal {

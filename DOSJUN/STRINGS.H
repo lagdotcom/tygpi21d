@@ -27,11 +27,11 @@ typedef struct strings {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-void Free_Formatter();
+void Free_Formatter(void);
 void Free_Strings(strings *s);
 char *Get_String(strings *s, str_id id);
-void Initialise_Formatter();
+void Initialise_Formatter(void);
 bool Read_Strings(FILE *fp, strings *s);
-void Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour tint);
+point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour start_tint);
 
 #endif

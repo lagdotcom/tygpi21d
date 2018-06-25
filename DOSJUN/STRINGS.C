@@ -15,6 +15,8 @@ typedef enum procase {
 #define BUFFER_SIZE 30
 #define FMT_CHAR	'@'
 
+/* #define FMT_LOG */
+
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 noexport const char *pronoun_cases[] = {
@@ -94,12 +96,12 @@ bool Read_Strings(FILE *fp, strings *s)
 	return true;
 }
 
-void Initialise_Formatter()
+void Initialise_Formatter(void)
 {
 	formatter_buf = SzAlloc(BUFFER_SIZE, char, "Initialise_Formatter");
 }
 
-void Free_Formatter()
+void Free_Formatter(void)
 {
 	Free(formatter_buf);
 }
@@ -141,7 +143,7 @@ noexport const char *Get_Pronoun_Case(pronouns p, procase c)
 	return pronoun_cases[p * 5 + c];
 }
 
-noexport void Show_Word(grf *font, const char *word, point2d *p, const box2d *bounds, colour tint)
+noexport void Show_Word(grf *font, const char *word, point2d *p, const box2d *bounds, colour tint, bool add_space)
 {
 	size2d sz;
 
@@ -151,8 +153,14 @@ noexport void Show_Word(grf *font, const char *word, point2d *p, const box2d *bo
 		p->y += sz.h;
 	}
 
+#ifdef FMT_LOG
+	Log("Show_Word: @%d,%d \"%s\" in c%d", p->x, p->y, word, tint);
+#endif
+
 	Draw_Font(p->x, p->y, tint, word, font, true);
-	p->x += sz.w + Char_Width(font, ' ');
+	p->x += sz.w;
+	if (add_space)
+		p->x += Char_Width(font, ' ');
 }
 
 noexport int Hex_Digit(char c)
@@ -180,19 +188,21 @@ noexport int Hex_Digit(char c)
 }
 
 /* TODO: bounds.end.y should be checked, scroll text with prompts? */
-void Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour start_tint)
+point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour start_tint)
 {
-	int i, colour_mode;
+	int colour_mode;
 	char *b;
-	const char *word;
+	const char *word = null;
 	point2d p;
-	bool fmt_mode, match;
+	bool fmt_mode, match, add_space = false;
 	procase fmt_case;
 	colour tint;
 	pronouns
 		speaker_p = speaker ? Get_Pronouns(speaker) : proIt,
 		target_p = target ? Get_Pronouns(target) : proIt,
 		fmt_p;
+	size_t i,
+		len = strlen(s);
 
 	tint = start_tint;
 	p.x = bounds->start.x;
@@ -202,11 +212,10 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, const
 	colour_mode = false;
 
 	/* Clear the area first */
-	Draw_Square_DB(0, bounds->start.x, bounds->start.y, bounds->end.x, bounds->end.y, true);
+	Draw_Square_DB(0, bounds->start.x, bounds->start.y, bounds->end.x - 1, bounds->end.y - 1, true);
 
-	for (i = 0; i < strlen(s); i++) {
-		word = null;
-
+	for (i = 0; i < len; i++) {
+		assert((b - formatter_buf) < BUFFER_SIZE, "Show_Formatted_String dealing with too large a word");
 		if (fmt_mode) {
 			fmt_mode = false;
 			match = true;
@@ -280,6 +289,7 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, const
 				word = Get_Pronoun_Case(fmt_p, fmt_case);
 			}
 
+			add_space = true;
 			continue;
 		}
 
@@ -287,9 +297,20 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, const
 			case 2:
 				tint += Hex_Digit(s[i]);
 				colour_mode = 0;
+#ifdef FMT_LOG
+				Log("Show_Formatted_String: c%d", tint);
+#endif
 				continue;
 
 			case 1:
+				/* if the buffer has something in it, we need to write it
+				so the old colour isn't lost */
+				if (b > formatter_buf) {
+					*b = 0;
+					b = formatter_buf;
+					Show_Word(gFont, b, &p, bounds, tint, false);
+				}
+
 				if (s[i] == 'x') {
 					tint = start_tint;
 					colour_mode = 0;
@@ -305,6 +326,7 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, const
 				if (b > formatter_buf) {
 					*b = 0;
 					word = b = formatter_buf;
+					add_space = false;
 				}
 				break;
 
@@ -315,10 +337,21 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, const
 			case ' ':
 				*b = 0;
 				word = b = formatter_buf;
+				add_space = true;
 				break;
 
 			case '^':
 				colour_mode = 1;
+				break;
+
+			case '\n':
+				if (b > formatter_buf) {
+					Show_Word(gFont, formatter_buf, &p, bounds, tint, false);
+					b = formatter_buf;
+				}
+
+				p.x = bounds->start.x;
+				p.y += Char_Height(gFont, ' ');
 				break;
 
 			default:
@@ -327,12 +360,17 @@ void Show_Formatted_String(const char *s, file_id speaker, file_id target, const
 		}
 
 		if (word != null) {
-			Show_Word(font, word, &p, bounds, tint);
+			Show_Word(font, word, &p, bounds, tint, add_space);
+			formatter_buf[0] = 0;
+			word = null;
 		}
 	}
 
 	if (b > formatter_buf) {
 		*b = 0;
-		Show_Word(font, formatter_buf, &p, bounds, tint);
+		Show_Word(font, formatter_buf, &p, bounds, tint, false);
 	}
+
+	p.y += Char_Height(gFont, ' ');
+	return p;
 }
