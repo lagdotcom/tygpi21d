@@ -59,7 +59,7 @@ noexport box2d combatStringBox = {
 noexport void Show_Combat_String(char *string, bool wait_for_key, file_id speaker, file_id target)
 {
 	/* Draw_Wrapped_Font(96, 144, 128, 48, WHITE, string, gFont, true); */
-	Show_Formatted_String(string, speaker, target, &combatStringBox, gFont, 0);
+	Show_Formatted_String(string, speaker, target, &combatStringBox, gFont, 0, false);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();

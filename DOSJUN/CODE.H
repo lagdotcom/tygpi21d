@@ -68,11 +68,11 @@ typedef enum code_op {
 	coNpcSpeak,
 	coNpcAction,
 	coOption,
-	coChoosePcName,		/* TODO */
+	coChoosePcName,
 	coJoinParty,		/* TODO */
 	coLeaveParty,		/* TODO */
 	coChoosePcPortrait, /* TODO */
-	coChoosePcPronouns,	/* TODO */
+	coChoosePcPronouns,
 	coSetAttitude,
 	coGetAttitude,
 	coGotoXY,

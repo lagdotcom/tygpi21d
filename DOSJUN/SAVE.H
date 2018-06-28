@@ -21,6 +21,8 @@ typedef enum pronouns {
 	proShe,
 	proThey,
 	proIt,
+
+	proNobody
 } pronouns;
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
@@ -90,6 +92,7 @@ void Add_NPC_to_Save(djn *s, npc *npc, file_id id);
 void Free_Globals(globals *g);
 void Free_Overlay(overlay *o);
 void Free_Savefile(djn *s);
+char *Get_Pronoun_Name(pronouns pro);
 bool Load_Savefile(char *filename, djn *s);
 void Initialise_Globals(globals *g, campaign *c);
 void Initialise_Overlay(overlay *o, zone *z);

@@ -32,6 +32,6 @@ void Free_Strings(strings *s);
 char *Get_String(strings *s, str_id id);
 void Initialise_Formatter(void);
 bool Read_Strings(FILE *fp, strings *s);
-point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour start_tint);
+point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour start_tint, bool transparent);
 
 #endif

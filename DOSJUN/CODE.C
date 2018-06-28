@@ -432,7 +432,7 @@ noexport void Text(code_host *h)
 			box.start = text_pos;
 			box.end.x = SCREEN_WIDTH;
 			box.end.y = SCREEN_HEIGHT;
-			end = Show_Formatted_String(s, 0, 0, &box, gFont, 0);
+			end = Show_Formatted_String(s, 0, 0, &box, gFont, 0, true);
 			text_pos.y = end.y;
 			break;
 
@@ -729,7 +729,7 @@ noexport void ChoosePcName(code_host *h)
 
 	row_height = Char_Height(gFont, ' ');
 	name = SzAlloc(50, char, "ChoosePcName");
-	Draw_Font(text_pos.x, text_pos.y, WHITE, "Choose a name:", gFont, true);
+	Draw_Font(text_pos.x, text_pos.y, 0, "Choose a name:", gFont, true);
 	Input_String(text_pos.x, text_pos.y + row_height, name, 50);
 	text_pos.y += row_height * 2;
 
@@ -760,8 +760,10 @@ noexport void ChoosePcPortrait(code_host *h)
 
 noexport void ChoosePcPronouns(code_host *h)
 {
+	char **menu;
 	file_id pc_id = Pop_Stack(h);
 	pc *pc;
+	int i;
 
 #if CODE_LOG
 	Log("C|ChoosePcPronouns %d", pc_id);
@@ -773,8 +775,14 @@ noexport void ChoosePcPronouns(code_host *h)
 		return;
 	}
 
-	/* TODO */
-	pc->header.pronouns = proHe;
+	menu = SzAlloc(proNobody, char*, "ChoosePcPronouns");
+	for (i = 0; i < proNobody; i++)
+		menu[i] = Get_Pronoun_Name(i);
+	Draw_Font(text_pos.x, text_pos.y, 0, "Choose a pronoun:", gFont, false);
+	i = Input_Menu(menu, proNobody, text_pos.x, text_pos.y + Char_Height(gFont, ' '));
+	Free(menu);
+
+	pc->header.pronouns = i;
 	Add_PC_to_Save(gSave, pc, pc_id);
 }
 

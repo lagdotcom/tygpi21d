@@ -141,7 +141,7 @@ void Show_Game_String(const char *string, bool wait_for_key)
 
 void Show_Game_String_Context(const char *string, bool wait_for_key, file_id speaker, file_id target)
 {
-	Show_Formatted_String(string, speaker, target, &gameStringBox, gFont, 0);
+	Show_Formatted_String(string, speaker, target, &gameStringBox, gFont, 0, false);
 
 	if (wait_for_key) {
 		Show_Double_Buffer();

@@ -201,10 +201,10 @@ noexport skill_id Choose_Skill_Menu(skill_id a, skill_id b)
 	unsigned char ch;
 	bool first = true;
 
-	Show_Formatted_String("Choose a skill to learn:", 0, 0, &chooseBox, gFont, 0);
+	Show_Formatted_String("Choose a skill to learn:", 0, 0, &chooseBox, gFont, 0, false);
 
-	Show_Formatted_String(skills[a].description, 0, 0, &chooseBoxA, gFont, SKILL_DESC);
-	Show_Formatted_String(skills[b].description, 0, 0, &chooseBoxB, gFont, SKILL_DESC);
+	Show_Formatted_String(skills[a].description, 0, 0, &chooseBoxA, gFont, SKILL_DESC, false);
+	Show_Formatted_String(skills[b].description, 0, 0, &chooseBoxB, gFont, SKILL_DESC, false);
 
 	while (true) {
 		Draw_Font(  8, Y_SKILL, first ? SKILL_SELECTED : WHITE, skills[a].name, gFont, true);
@@ -259,7 +259,7 @@ noexport bool Choose_Skill(pc *pc, skill_id a, skill_id b)
 		sprintf(buffer, "%s learns %s!", pc->name, skills[learnt].name);
 		Draw_Font(8, Y_SKILL, WHITE, buffer, gFont, false);
 
-		Show_Formatted_String(skills[learnt].description, 0, 0, &autoBox, gFont, SKILL_DESC);
+		Show_Formatted_String(skills[learnt].description, 0, 0, &autoBox, gFont, SKILL_DESC, false);
 	}
 
 	Add_Skill(pc, learnt);

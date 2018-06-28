@@ -47,6 +47,13 @@ noexport const char *pronoun_cases[] = {
 	"its",
 	"its",
 	"itself",
+
+	/* proNobody */
+	"(nobody)",
+	"(nobody)",
+	"(nobody)",
+	"(nobody)",
+	"(nobody)",
 };
 
 noexport char *formatter_buf = null;
@@ -188,7 +195,7 @@ noexport int Hex_Digit(char c)
 }
 
 /* TODO: bounds.end.y should be checked, scroll text with prompts? */
-point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour start_tint)
+point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, const box2d *bounds, grf *font, colour start_tint, bool transparent)
 {
 	int colour_mode;
 	char *b;
@@ -212,7 +219,8 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 	colour_mode = false;
 
 	/* Clear the area first */
-	Draw_Square_DB(0, bounds->start.x, bounds->start.y, bounds->end.x - 1, bounds->end.y - 1, true);
+	if (!transparent)
+		Draw_Square_DB(0, bounds->start.x, bounds->start.y, bounds->end.x - 1, bounds->end.y - 1, true);
 
 	for (i = 0; i < len; i++) {
 		assert((b - formatter_buf) < BUFFER_SIZE, "Show_Formatted_String dealing with too large a word");

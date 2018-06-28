@@ -177,3 +177,15 @@ void Add_NPC_to_Save(djn *s, npc *org, file_id id)
 	dup = Duplicate_NPC(org);
 	Add_to_Djn(s, dup, id, ftNPC);
 }
+
+char *Get_Pronoun_Name(pronouns pro)
+{
+	switch (pro) {
+		case proHe: return "he/him/his/himself";
+		case proShe: return "she/her/hers/herself";
+		case proThey: return "they/them/their/theirs/themself";
+		case proIt: return "it/its/itself";
+
+		default: return "?";
+	}
+}
