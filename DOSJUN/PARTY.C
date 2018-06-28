@@ -620,13 +620,20 @@ noexport bool Confirm_Use_Item(pc *pc, int index)
 
 void Show_Pc_Screen(pcnum starting_pc)
 {
-	pcnum index = starting_pc;
+	pcnum index = starting_pc,
+		pindex;
 	pc *pc;
-	int selected = 0;
+	int selected = 0,
+		scan = 0;
 	redraw_everything = true;
 
+	pc = Get_PC(index);
+	if (pc == null)
+		return;
+
 	while (true) {
-		pc = Get_PC(index);
+		pindex = index;
+
 		Show_Pc_Stats(pc);
 		Show_Pc_Items(pc, selected);
 		Show_Double_Buffer();
@@ -634,43 +641,35 @@ void Show_Pc_Screen(pcnum starting_pc)
 		switch (Get_Next_Scan_Code()) {
 			case SCAN_1:
 				index = 0;
-				selected = 0;
-				continue;
+				break;
 
 			case SCAN_2:
 				index = 1;
-				selected = 0;
-				continue;
+				break;
 
 			case SCAN_3:
 				index = 2;
-				selected = 0;
-				continue;
+				break;
 
 			case SCAN_4:
 				index = 3;
-				selected = 0;
-				continue;
+				break;
 
 			case SCAN_5:
 				index = 4;
-				selected = 0;
-				continue;
+				break;
 
 			case SCAN_6:
 				index = 5;
-				selected = 0;
-				continue;
+				break;
 
 			case SCAN_LEFT:
-				index--;
-				if (index < 0) index = PARTY_SIZE - 1;
-				continue;
+				scan = -1;
+				break;
 
 			case SCAN_RIGHT:
-				index++;
-				if (index >= PARTY_SIZE) index = 0;
-				continue;
+				scan = 1;
+				break;
 
 			case SCAN_UP:
 				selected--;
@@ -707,6 +706,25 @@ void Show_Pc_Screen(pcnum starting_pc)
 			case SCAN_Q:
 			case SCAN_ESC:
 				return;
+		}
+
+		if (index != pindex) {
+			pc = Get_PC(index);
+			if (pc == null) {
+				index = pindex;
+				pc = Get_PC(index);
+			}
+		}
+
+		if (scan) {
+			while (true) {
+				index += scan;
+				if (index >= PARTY_SIZE) index = 0;
+				if (index < 0) index = PARTY_SIZE - 1;
+
+				pc = Get_PC(index);
+				if (pc != null) break;
+			}
 		}
 	}
 }
@@ -759,8 +777,10 @@ pc *Duplicate_PC(pc *org)
 	dup->skills = Duplicate_List(org->skills, "Duplicate_PC.skills");
 	dup->buffs = Duplicate_List(org->buffs, "Duplicate_PC.buffs");
 
-	if (!org->header.name_id)
+	if (org->header.name_id == 0)
 		dup->name = Duplicate_String(org->name, "Duplicate_PC.name");
+	else
+		dup->name = org->name;
 
 	return dup;
 }

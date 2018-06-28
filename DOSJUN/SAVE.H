@@ -48,7 +48,7 @@ typedef struct pc_header {
 	char padding[PC_PADDING];
 
 	stat_value stats[NUM_STATS];
-	UINT8 job_level[NUM_JOBS];
+	UINT16 job_level[NUM_JOBS];
 	inventory items[INVENTORY_SIZE];
 } pc_header;
 

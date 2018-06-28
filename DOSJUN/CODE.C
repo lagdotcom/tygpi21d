@@ -841,6 +841,50 @@ noexport void GotoXY(code_host *h)
 #endif
 }
 
+noexport void JoinParty(code_host *h)
+{
+	file_id pc_id = Pop_Stack(h);
+	pc *pc;
+	int i;
+
+#if CODE_LOG
+	Log("C|JoinParty %d", pc_id);
+#endif
+
+	h->result = 0;
+	for (i = 0; i < PARTY_SIZE; i++) {
+		if (gParty->members[i] == pc_id)
+			return;
+
+		if (gParty->members[i] == 0) {
+			pc = Lookup_File_Chained(gSave, pc_id);
+			gParty->members[i] = pc_id;
+			Add_PC_to_Save(gSave, pc, pc_id);
+			h->result = 1;
+			return;
+		}
+	}
+}
+
+noexport void LeaveParty(code_host *h)
+{
+	file_id pc_id = Pop_Stack(h);
+	int i;
+
+#if CODE_LOG
+	Log("C|LeaveParty %d", pc_id);
+#endif
+
+	h->result = 0;
+	for (i = 0; i < PARTY_SIZE; i++) {
+		if (gParty->members[i] == pc_id) {
+			gParty->members[i] = 0;
+			h->result = 1;
+			return;
+		}
+	}
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -905,6 +949,8 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coChoosePcPronouns: ChoosePcPronouns(h); return;
 		case coSetAttitude: SetAttitude(h); return;
 		case coGetAttitude: GetAttitude(h); return;
+		case coJoinParty:	JoinParty(h); return;
+		case coLeaveParty:	LeaveParty(h); return;
 
 		case coGotoXY:		GotoXY(h); return;
 	}

@@ -29,7 +29,8 @@ void Draw_GRF_Clipped(point2d *xy, grf *g, int img, colour tint, box2d *bounds)
 	grf_image *im;
 	unsigned char *d, i, len, c;
 
-	assert(img < g->num_images, "Draw_GRF_Clipped: image index too high");
+	if (img >= g->num_images)
+		dief("Draw_GRF_Clipped: image index too high (%d > %d)", img, g->num_images);
 
 	if (bounds == null)
 		bounds = &whole_screen;
