@@ -320,6 +320,7 @@ pc *Get_PC(pcnum index)
 {
 	file_id ref;
 
+	assert(index >= 0, "Get_PC: pc number too low");
 	assert(index < PARTY_SIZE, "Get_PC: pc number too high");
 
 	ref = gParty->members[index];
@@ -328,6 +329,7 @@ pc *Get_PC(pcnum index)
 
 file_id Get_PC_ID(pcnum index)
 {
+	assert(index >= 0, "Get_PC_ID: pc number too low");
 	assert(index < PARTY_SIZE, "Get_PC_ID: pc number too high");
 	return gParty->members[index];
 }
@@ -453,7 +455,7 @@ noexport void Show_Pc_Stats(pc *pc)
 
 	Draw_Font(8, 8, WHITE, pc->name, gFont, false);
 
-	sprintf(temp, "Level %d %s", pc->header.job_level[pc->header.job], Job_Name(pc->header.job));
+	sprintf(temp, "Level %u %s", pc->header.job_level[pc->header.job], Job_Name(pc->header.job));
 	Draw_Font(8, 16, WHITE, temp, gFont, false);
 
 	Show_Pc_Stat(pc, sStrength, 32);
@@ -480,7 +482,7 @@ noexport unsigned char Confirm(char *prompt)
 	return Get_Next_Scan_Code();
 }
 
-#define Clear_Confirm() Draw_Square_DB(BLACK, ITEMS_X, CONFIRM_Y, SCREEN_WIDTH, CONFIRM_Y + 7, true)
+#define Clear_Confirm() Draw_Square_DB(BLACK, ITEMS_X, CONFIRM_Y, SCREEN_WIDTH - 1, CONFIRM_Y + 7, true)
 
 noexport bool Confirm_Drop_Item(pc *pc, int index)
 {
@@ -538,27 +540,32 @@ noexport void Clear_Inventory_Slot(inventory *iv)
 	iv->slot = slNone;
 }
 
-noexport bool Confirm_Give_Item(pc *pc, int index)
+noexport bool Confirm_Give_Item(pc *src, int index)
 {
 	inventory *iv,
 		*dest_iv;
 	pcnum dest_pc;
+	pc *dst;
 	int dest_slot;
 	assert(index < INVENTORY_SIZE, "Confirm_Give_Item: inventory index too high");
 
-	iv = &pc->header.items[index];
+	iv = &src->header.items[index];
 
 	/* Sanity check */
 	if (!iv->item) return false;
 
 	dest_pc = Confirm_Pc("To whom? (1-6)");
-	if (dest_pc < 0 || pc == Get_PC(dest_pc)) {
+	if (dest_pc < 0) {
 		return false;
 	}
+
+	dst = Get_PC(dest_pc);
+	if (dst == src || dst == null)
+		return false;
 	
 	/* Equipped? */
 	if (iv->flags & vfEquipped) {
-		if (!Remove_Item_At(pc, index)) {
+		if (!Remove_Item_At(src, index)) {
 			/* TODO */
 			return false;
 		}
@@ -571,7 +578,7 @@ noexport bool Confirm_Give_Item(pc *pc, int index)
 		return false;
 	}
 
-	dest_iv = &pc->header.items[dest_slot];
+	dest_iv = &dst->header.items[dest_slot];
 	dest_iv->flags = iv->flags;
 	dest_iv->item = iv->item;
 	dest_iv->quantity = iv->quantity;

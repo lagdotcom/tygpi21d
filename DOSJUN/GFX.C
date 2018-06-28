@@ -195,10 +195,10 @@ void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled)
 {
 	int y;
 
-	assert(x0 >= 0, "Draw_Square_DB: x0 not in screen");
-	assert(y0 >= 0, "Draw_Square_DB: y0 not in screen");
-	assert(x1 < SCREEN_WIDTH, "Draw_Square_DB: x1 not in screen");
-	assert(y1 < SCREEN_HEIGHT, "Draw_Square_DB: y1 not in screen");
+	if (x0 < 0 || x0 >= SCREEN_WIDTH)  dief("Draw_Square_DB: x0 not in screen (%d)", x0);
+	if (y0 < 0 || y0 >= SCREEN_HEIGHT) dief("Draw_Square_DB: y0 not in screen (%d)", y0);
+	if (x1 < 0 || x1 >= SCREEN_WIDTH)  dief("Draw_Square_DB: x1 not in screen (%d)", x1);
+	if (y1 < 0 || y1 >= SCREEN_HEIGHT) dief("Draw_Square_DB: y1 not in screen (%d)", y1);
 
 	if (filled) {
 		for (y = y0; y <= y1; y++) {
