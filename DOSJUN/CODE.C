@@ -885,6 +885,24 @@ noexport void LeaveParty(code_host *h)
 	}
 }
 
+noexport void InParty(code_host *h)
+{
+	file_id pc_id = Pop_Stack(h);
+	int i;
+
+#if CODE_LOG
+	Log("C|InParty %d", pc_id);
+#endif
+
+	h->result = 0;
+	for (i = 0; i < PARTY_SIZE; i++) {
+		if (gParty->members[i] == pc_id) {
+			h->result = 1;
+			return;
+		}
+	}
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -951,6 +969,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coGetAttitude: GetAttitude(h); return;
 		case coJoinParty:	JoinParty(h); return;
 		case coLeaveParty:	LeaveParty(h); return;
+		case coInParty:		InParty(h); return;
 
 		case coGotoXY:		GotoXY(h); return;
 	}
