@@ -510,6 +510,7 @@ void main(int argc, char **argv)
 	Ready_Djn_Chain(argc, argv);
 	if (gDjn == null) {
 		printf("%s", "Syntax: DOSJUN <file.djn> [file.djn]...\n");
+		Free_DB();
 		Stop_Memory_Tracking();
 		return;
 	}
