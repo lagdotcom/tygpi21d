@@ -5,8 +5,6 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-#define EXPORE_DEBUG	0
-
 noexport grf *explore_bg;
 
 djn *gDjn;

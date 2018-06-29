@@ -1,6 +1,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "dosjun.h"
+#include "features.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
@@ -12,10 +13,8 @@ typedef enum procase {
 	pcReflexive,
 } procase;
 
-#define BUFFER_SIZE 30
 #define FMT_CHAR	'@'
-
-/* #define FMT_LOG */
+#define COL_CHAR	'^'
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
@@ -105,7 +104,7 @@ bool Read_Strings(FILE *fp, strings *s)
 
 void Initialise_Formatter(void)
 {
-	formatter_buf = SzAlloc(BUFFER_SIZE, char, "Initialise_Formatter");
+	formatter_buf = SzAlloc(STRINGS_BUFFER_SIZE, char, "Initialise_Formatter");
 }
 
 void Free_Formatter(void)
@@ -160,7 +159,7 @@ noexport void Show_Word(grf *font, const char *word, point2d *p, const box2d *bo
 		p->y += sz.h;
 	}
 
-#ifdef FMT_LOG
+#if STRINGS_DEBUG
 	Log("Show_Word: @%d,%d \"%s\" in c%d", p->x, p->y, word, tint);
 #endif
 
@@ -223,7 +222,7 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 		Draw_Square_DB(0, bounds->start.x, bounds->start.y, bounds->end.x - 1, bounds->end.y - 1, true);
 
 	for (i = 0; i < len; i++) {
-		assert((b - formatter_buf) < BUFFER_SIZE, "Show_Formatted_String dealing with too large a word");
+		assert((b - formatter_buf) < COMBAT_BUFFER_SIZE, "Show_Formatted_String dealing with too large a word");
 		if (fmt_mode) {
 			fmt_mode = false;
 			match = true;
@@ -305,7 +304,7 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 			case 2:
 				tint += Hex_Digit(s[i]);
 				colour_mode = 0;
-#ifdef FMT_LOG
+#if STRINGS_DEBUG
 				Log("Show_Formatted_String: c%d", tint);
 #endif
 				continue;
@@ -348,7 +347,7 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 				add_space = true;
 				break;
 
-			case '^':
+			case COL_CHAR:
 				colour_mode = 1;
 				break;
 

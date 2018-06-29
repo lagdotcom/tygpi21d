@@ -3,10 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "dosjun.h"
-
-/* D E F I N E S ///////////////////////////////////////////////////////// */
-
-#define LIST_START_CAPACITY		10
+#include "features.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -105,7 +102,7 @@ void Free_List(list *l)
 	if (l == null)
 		return;
 
-#ifdef LIST_REPORT
+#if LIST_REPORT
 	Log("Free_List(%s): max_size %d, capacity %d", l->tag, l->max_size, l->capacity);
 #endif
 
@@ -122,7 +119,7 @@ void Add_to_List(list *l, void *item)
 	l->items[l->size] = item;
 	l->size++;
 
-#ifdef LIST_REPORT
+#if LIST_REPORT
 	if (l->size > l->max_size) {
 		l->max_size = l->size;
 	}

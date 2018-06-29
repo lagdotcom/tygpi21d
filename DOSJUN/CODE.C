@@ -1,11 +1,10 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "dosjun.h"
+#include "features.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define CODE_LOG		1
-#define CODE_LOG_STACK	0
 #define MAX_OPTIONS		10
 
 #define INVALID_SCRIPT	32767
@@ -59,7 +58,7 @@ noexport void Push_Stack(code_host *h, int value)
 	assert(h->sp < MAX_STACK, "Push_Stack: stack is full");
 
 	h->stack[h->sp++] = value;
-#if CODE_LOG_STACK
+#if CODE_DEBUG_STACK
 	Log("C|Push_Stack: %d", value);
 #endif
 }
@@ -70,7 +69,7 @@ noexport int Pop_Stack(code_host *h)
 	assert(h->sp > 0, "Pop_Stack: stack is empty");
 
 	value = h->stack[--h->sp];
-#if CODE_LOG_STACK
+#if CODE_DEBUG_STACK
 	Log("C|Pop_Stack: %d", value);
 #endif
 	return value;
@@ -98,7 +97,7 @@ noexport char *Get_PC_Name(file_id ref)
 noexport void Push_Global(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Push_Global.%d", index);
 #endif
 	Push_Stack(h, h->globals[index]);
@@ -107,7 +106,7 @@ noexport void Push_Global(code_host *h)
 noexport void Push_Local(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Push_Local.%d", index);
 #endif
 	Push_Stack(h, h->locals[index]);
@@ -116,7 +115,7 @@ noexport void Push_Local(code_host *h)
 noexport void Push_Temp(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Push_Temp.%d", index);
 #endif
 	Push_Stack(h, h->temps[index]);
@@ -125,7 +124,7 @@ noexport void Push_Temp(code_host *h)
 noexport void Push_Internal(code_host *h)
 {
 	internal_id index = Next_Op(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Push_Internal.%d", index);
 #endif
 
@@ -161,7 +160,7 @@ noexport void Push_Internal(code_host *h)
 noexport void Push_Literal(code_host *h)
 {
 	int value = Next_Literal(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Push_Literal: %d", value);
 #endif
 	Push_Stack(h, value);
@@ -170,7 +169,7 @@ noexport void Push_Literal(code_host *h)
 noexport void Pop_Global(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Pop_Global.%d", index);
 #endif
 	h->globals[index] = Pop_Stack(h);
@@ -179,7 +178,7 @@ noexport void Pop_Global(code_host *h)
 noexport void Pop_Local(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Pop_Local.%d", index);
 #endif
 	h->locals[index] = Pop_Stack(h);
@@ -188,7 +187,7 @@ noexport void Pop_Local(code_host *h)
 noexport void Pop_Temp(code_host *h)
 {
 	bytecode index = Next_Op(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Pop_Temp.%d", index);
 #endif
 	h->temps[index] = Pop_Stack(h);
@@ -198,7 +197,7 @@ noexport void Add(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Add: %d + %d", left, right);
 #endif
 	Push_Stack(h, left + right);
@@ -208,7 +207,7 @@ noexport void Sub(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Sub: %d - %d", left, right);
 #endif
 	Push_Stack(h, left - right);
@@ -218,7 +217,7 @@ noexport void Mul(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Mul: %d * %d", left, right);
 #endif
 	Push_Stack(h, left * right);
@@ -228,7 +227,7 @@ noexport void Div(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Div: %d / %d", left, right);
 #endif
 	Push_Stack(h, left / right);
@@ -238,7 +237,7 @@ noexport void And(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|And: %d & %d", left, right);
 #endif
 	Push_Stack(h, left & right);
@@ -248,7 +247,7 @@ noexport void Or(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Or: %d | %d", left, right);
 #endif
 	Push_Stack(h, left | right);
@@ -258,7 +257,7 @@ noexport void Eq(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Eq: %d == %d", left, right);
 #endif
 	Push_Stack(h, Bool(left == right));
@@ -268,7 +267,7 @@ noexport void Neq(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Neq: %d != %d", left, right);
 #endif
 	Push_Stack(h, Bool(left != right));
@@ -278,7 +277,7 @@ noexport void Lt(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Lt: %d < %d", left, right);
 #endif
 	Push_Stack(h, Bool(left < right));
@@ -288,7 +287,7 @@ noexport void Lte(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Lte: %d <= %d", left, right);
 #endif
 	Push_Stack(h, Bool(left <= right));
@@ -298,7 +297,7 @@ noexport void Gt(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Gt: %d > %d", left, right);
 #endif
 	Push_Stack(h, Bool(left > right));
@@ -308,7 +307,7 @@ noexport void Gte(code_host *h)
 {
 	int right = Pop_Stack(h);
 	int left = Pop_Stack(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Gte: %d >= %d", left, right);
 #endif
 	Push_Stack(h, Bool(left >= right));
@@ -317,7 +316,7 @@ noexport void Gte(code_host *h)
 noexport void Jump(code_host *h)
 {
 	h->next_pc = Next_Literal(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Jump: @%04x", h->next_pc);
 #endif
 }
@@ -325,7 +324,7 @@ noexport void Jump(code_host *h)
 noexport void JumpFalse(code_host *h)
 {
 	int offset = Next_Literal(h);
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|JumpFalse: @%04x", offset);
 #endif
 	if (!Pop_Stack(h)) h->next_pc = offset;
@@ -335,7 +334,7 @@ noexport void Return(code_host *h)
 {
 	h->running = false;
 	h->result = 0;
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Return @%04x", h->pc);
 #endif
 }
@@ -344,7 +343,7 @@ noexport void Call(code_host *h)
 {
 	file_id script_id = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Call %d", script_id);
 #endif
 
@@ -355,7 +354,7 @@ noexport void Combat(code_host *h)
 {
 	encounter_id combat = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Combat %d", combat);
 #endif
 
@@ -367,7 +366,7 @@ noexport void PcSpeak(code_host *h)
 	str_id s_id = Pop_Stack(h);
 	file_id pc_id = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|PcSpeak %d, %d", pc_id, s_id);
 #endif
 	
@@ -380,7 +379,7 @@ noexport void PcAction(code_host *h)
 	str_id s_id = Pop_Stack(h);
 	file_id pc_id = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|PcAction %d, %d", pc_id, s_id);
 #endif
 
@@ -393,7 +392,7 @@ noexport void NpcSpeak(code_host *h)
 	str_id s_id = Pop_Stack(h);
 	file_id npc_id = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|NpcSpeak %d, %d", npc_id, s_id);
 #endif
 
@@ -406,7 +405,7 @@ noexport void NpcAction(code_host *h)
 	str_id s_id = Pop_Stack(h);
 	file_id npc_id = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|NpcAction %d, %d", npc_id, s_id);
 #endif
 
@@ -421,7 +420,7 @@ noexport void Text(code_host *h)
 	box2d box;
 	point2d end;
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Text %d", s_id);
 #endif
 
@@ -449,7 +448,7 @@ noexport void Unlock(code_host *h)
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Unlock %d, %d, %d", x, y, dir);
 #endif
 
@@ -466,7 +465,7 @@ noexport void GiveItem(code_host *h)
 	file_id pc_id = Pop_Stack(h);
 	pc *pc = Lookup_File_Chained(gSave, pc_id);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|GiveItem %d, %d, %d", pc->name, item_id, qty);
 #endif
 
@@ -480,7 +479,7 @@ noexport void EquipItem(code_host *h)
 	file_id pc_id = Pop_Stack(h);
 	pc *pc = Lookup_File_Chained(gSave, pc_id);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|EquipItem %d, %d", pc->name, item_id);
 #endif
 
@@ -494,7 +493,7 @@ noexport void SetTileDescription(code_host *h)
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|SetTileDescription %d, %d, #%d", x, y, s_id);
 #endif
 
@@ -508,7 +507,7 @@ noexport void SetTileColour(code_host *h)
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|SetTileColour %d, %d, %d, %d", x, y, face, grf_id);
 #endif
 
@@ -535,7 +534,7 @@ noexport void SetTileThing(code_host *h)
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|SetTileThing %d, %d, %d", x, y, grf_id);
 #endif
 
@@ -551,7 +550,7 @@ noexport void Teleport(code_host *h)
 	coord x = Pop_Stack(h);
 	file_id zone_id = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Teleport %d, %d, %d, %d, %d", zone_id, x, y, facing, transition);
 #endif
 
@@ -576,7 +575,7 @@ noexport void SetDanger(code_host *h)
 {
 	UINT8 danger = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|SetDanger %d", danger);
 #endif
 
@@ -585,7 +584,7 @@ noexport void SetDanger(code_host *h)
 
 noexport void Safe(code_host *h)
 {
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("%s", "C|Safe");
 #endif
 
@@ -599,7 +598,7 @@ noexport void RemoveWall(code_host *h)
 	coord y = Pop_Stack(h);
 	coord x = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|RemoveWall %d, %d, %d", x, y, face);
 #endif
 
@@ -612,7 +611,7 @@ noexport void RemoveWall(code_host *h)
 
 noexport void Refresh(code_host *h)
 {
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("%s", "C|Refresh");
 #endif
 
@@ -627,7 +626,7 @@ noexport void AddItem(code_host *h)
 	file_id item_id = Pop_Stack(h);
 	pc *pc;
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|AddItem %d, %d", item_id, qty);
 #endif
 
@@ -645,7 +644,7 @@ noexport void Music(code_host *h)
 {
 	file_id sng_id = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Music %d", sng_id);
 #endif
 
@@ -657,7 +656,7 @@ noexport void Converse(code_host *h)
 	conversation_state = Pop_Stack(h);
 	converse_npc = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Converse %d, %d", converse_npc, conversation_state);
 #endif
 
@@ -667,7 +666,7 @@ noexport void Converse(code_host *h)
 
 noexport void EndConverse(code_host *h)
 {
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("%s", "C|EndConverse");
 #endif
 
@@ -681,7 +680,7 @@ noexport void ChangeState(code_host *h)
 {
 	conversation_state = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|ChangeState %d", conversation_state);
 #endif
 
@@ -696,7 +695,7 @@ noexport void Option(code_host *h)
 	str_id s_id = Pop_Stack(h);
 	file_id script_id = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|Option %d, %d", script_id, s_id);
 #endif
 
@@ -717,7 +716,7 @@ noexport void ChoosePcName(code_host *h)
 	pc *pc;
 	char *name;
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|ChoosePcName %d", pc_id);
 #endif
 
@@ -743,7 +742,7 @@ noexport void ChoosePcPortrait(code_host *h)
 	file_id pc_id = Pop_Stack(h);
 	pc *pc;
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|ChoosePcPortrait %d", pc_id);
 #endif
 
@@ -765,7 +764,7 @@ noexport void ChoosePcPronouns(code_host *h)
 	pc *pc;
 	int i;
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|ChoosePcPronouns %d", pc_id);
 #endif
 
@@ -794,7 +793,7 @@ noexport void SetAttitude(code_host *h)
 	pc *pc;
 	npc *npc;
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|SetAttitude %d, %d", _id, attitude);
 #endif
 
@@ -817,7 +816,7 @@ noexport void GetAttitude(code_host *h)
 	pc *pc;
 	npc *npc;
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|GetAttitude %d", _id);
 #endif
 
@@ -836,7 +835,7 @@ noexport void GotoXY(code_host *h)
 	text_pos.x = Pop_Stack(h);
 	text_pos.y = Pop_Stack(h);
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|GotoXY %d,%d", text_pos.x, text_pos.y);
 #endif
 }
@@ -847,7 +846,7 @@ noexport void JoinParty(code_host *h)
 	pc *pc;
 	int i;
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|JoinParty %d", pc_id);
 #endif
 
@@ -871,7 +870,7 @@ noexport void LeaveParty(code_host *h)
 	file_id pc_id = Pop_Stack(h);
 	int i;
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|LeaveParty %d", pc_id);
 #endif
 
@@ -890,7 +889,7 @@ noexport void InParty(code_host *h)
 	file_id pc_id = Pop_Stack(h);
 	int i;
 
-#if CODE_LOG
+#if CODE_DEBUG
 	Log("C|InParty %d", pc_id);
 #endif
 
@@ -1039,12 +1038,12 @@ int Run_Code(file_id id)
 
 		/* Continue active conversation */
 		if (gState == gsConverse && call_depth == 1) {
-#if CODE_LOG
+#if CODE_DEBUG
 			Log("%s", "Run_Code: still in conversation");
 #endif
 			if (conversation_state == INVALID_SCRIPT) {
 				conversation_state = Pick_Option();
-#if CODE_LOG
+#if CODE_DEBUG
 				Log("Run_Code: player picked option %d", conversation_state);
 #endif
 			}

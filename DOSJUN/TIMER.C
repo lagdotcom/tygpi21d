@@ -2,11 +2,11 @@
 
 #include "dosjun.h"
 #include <dos.h>
+#include "features.h"
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define TIMER_INT		0x1c
-#define TIMER_TICK_FREQ	(0x427d / 5)
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 

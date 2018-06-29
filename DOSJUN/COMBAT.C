@@ -1,6 +1,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "dosjun.h"
+#include "features.h"
 #include "gamelib.h"
 
 #include <time.h>
@@ -17,12 +18,6 @@
 #define GROUP_PCFRONT	ENCOUNTER_SIZE
 #define GROUP_PCBACK	(ENCOUNTER_SIZE + 1)
 #define GROUPS_SIZE		(ENCOUNTER_SIZE + 2)
-
-#define COMBAT_DYNALLOC	0
-#define COMBAT_RECLAIM	0
-#define COMBAT_DEBUG	1
-
-#define BUFFER_SIZE		400
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -73,15 +68,15 @@ noexport void Show_Combat_String(char *string, bool wait_for_key, file_id speake
 void Combat_Message(file_id speaker, file_id target, char *format, ...)
 {
 	va_list vargs;
-#if COMBAT_DYNALLOC
+#if COMBAT_ALLOC_MSGBUF
 	char *message;
 	int size2d;
 #else
-	char message[BUFFER_SIZE];
+	char message[COMBAT_BUFFER_SIZE];
 #endif
 
 	va_start(vargs, format);
-#if COMBAT_DYNALLOC
+#if COMBAT_ALLOC_MSGBUF
 	size2d = vsprintf(NULL, format, vargs);
 	message = Allocate(size2d+1, 1, "Combat_Message");
 #endif
@@ -89,7 +84,7 @@ void Combat_Message(file_id speaker, file_id target, char *format, ...)
 	va_end(vargs);
 
 	Show_Combat_String(message, true, speaker, target);
-#if COMBAT_DYNALLOC
+#if COMBAT_ALLOC_MSGBUF
 	Free(message);
 #endif
 }
@@ -1015,7 +1010,7 @@ void Start_Combat(encounter_id id)
 	Show_Picture(first_img);
 	Show_Game_String(description, true);
 	Free(description);
-#if COMBAT_RECLAIM
+#if COMBAT_RECLAIM_TEXTURES
 	Free_Textures();
 #endif
 
@@ -1044,7 +1039,7 @@ void Start_Combat(encounter_id id)
 	Expire_Combat_Buffs();
 	Clear_Encounter();
 
-#if COMBAT_RECLAIM
+#if COMBAT_RECLAIM_TEXTURES
 	Load_Textures(&gZone);
 #endif
 	Redraw_Dungeon_Screen(false);

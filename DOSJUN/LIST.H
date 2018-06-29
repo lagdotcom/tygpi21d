@@ -1,6 +1,8 @@
 #ifndef DOSJUN_LIST_H
 #define DOSJUN_LIST_H
 
+#include "features.h"
+
 typedef enum list_type {
 	ltString,
 	ltInteger,
@@ -16,7 +18,7 @@ typedef struct list {
 	void **items;
 	char *tag;
 
-#ifdef LIST_REPORT
+#if LIST_REPORT
 	unsigned int max_size;
 #endif
 } list;

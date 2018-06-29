@@ -5,10 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "dosjun.h"
-
-/* D E F I N E S ///////////////////////////////////////////////////////// */
-
-#define MAX_FILES	20
+#include "features.h"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -44,7 +41,7 @@ char **Get_Directory_Listing(char *pattern, int *count)
 	struct ffblk ff;
 	int i, done;
 
-	filenames = SzAlloc(MAX_FILES, char *, "Get_Directory_Listing");
+	filenames = SzAlloc(IO_MAXFILES, char *, "Get_Directory_Listing");
 	if (filenames == null)
 		die("Get_Directory_Listing: out of memory");
 
@@ -54,7 +51,7 @@ char **Get_Directory_Listing(char *pattern, int *count)
 		filenames[i++] = Duplicate_String(ff.ff_name, "Get_Directory_Listing");
 		done = findnext(&ff);
 
-		if (i == MAX_FILES) break;
+		if (i == IO_MAXFILES) break;
 	}
 
 	*count = i;
