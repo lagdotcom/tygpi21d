@@ -1,6 +1,7 @@
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include "dosjun.h"
+#include "features.h"
 #include "gamelib.h"
 #include "gfx.h"
 
@@ -149,6 +150,7 @@ bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
 
 noexport void Draw_Tile_Segment(file_id texture_id, int dx, int dy, int piece)
 {
+#if FEATURE_TEXTURES
 	grf *tex;
 	point2d p;
 	assert(piece < TEXTURE_PIECES, "Draw_Tile_Segment: piece number too high");
@@ -160,10 +162,12 @@ noexport void Draw_Tile_Segment(file_id texture_id, int dx, int dy, int piece)
 	p.x = dx + 96;
 	p.y = dy + 8;
 	Draw_GRF_Clipped(&p, tex, piece, 0, &viewport);
+#endif
 }
 
 noexport void Draw_Thing(file_id thing_id, int dx, int dy, int piece)
 {
+#if FEATURE_THINGS
 	grf *thing;
 	point2d p;
 	assert(piece < THING_PIECES, "Draw_Thing: piece number too high");
@@ -175,6 +179,7 @@ noexport void Draw_Thing(file_id thing_id, int dx, int dy, int piece)
 	p.x = dx + 96;
 	p.y = dy + 8;
 	Draw_GRF_Clipped(&p, thing, piece, 0, &viewport);
+#endif
 }
 
 noexport tile *Get_Offset_Tile(int forward, int left)

@@ -200,6 +200,9 @@ void Draw_Square_DB(colour col, int x0, int y0, int x1, int y1, bool filled)
 	if (x1 < 0 || x1 >= SCREEN_WIDTH)  dief("Draw_Square_DB: x1 not in screen (%d)", x1);
 	if (y1 < 0 || y1 >= SCREEN_HEIGHT) dief("Draw_Square_DB: y1 not in screen (%d)", y1);
 
+	if (x1 < x0) dief("Draw_Square_DB: x1 < x0 (%d < %d)", x1, x0);
+	if (y1 < y0) dief("Draw_Square_DB: y1 < y0 (%d < %d)", y1, y0);
+
 	if (filled) {
 		for (y = y0; y <= y1; y++) {
 			Draw_Line_DB(x0, y, x1, y, col);

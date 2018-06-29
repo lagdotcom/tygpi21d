@@ -1,0 +1,8 @@
+#ifndef DOSJUN_FEATURES_H
+#define DOSJUN_FEATURES_H
+
+#define FEATURE_FONT		1
+#define FEATURE_TEXTURES	1
+#define FEATURE_THINGS		1
+
+#endif
