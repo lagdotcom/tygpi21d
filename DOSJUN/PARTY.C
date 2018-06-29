@@ -11,10 +11,11 @@
 #define SX2 232
 #define SY 8
 
-#define ITEMS_X	140
-#define ITEMS_Y	32
+#define ITEMS_X	160
+#define ITEMS_Y	96
 
-#define CONFIRM_Y (ITEMS_Y + (INVENTORY_SIZE + 1) * 8)
+#define CONFIRM_X 160
+#define CONFIRM_Y 184
 
 #define ITEM_SELECTED YELLOW
 
@@ -44,9 +45,18 @@ void Draw_Character_Status(pcnum index, int x, int y)
 {
 	char buffer[9];
 	pc *pc;
+	grf *portrait;
+	point2d point;
 
 	pc = Get_PC(index);
 	if (!pc) return;
+
+	if (pc->header.portrait_id != 0) {
+		portrait = Lookup_File_Chained(gDjn, pc->header.portrait_id);
+		point.x = x;
+		point.y = y;
+		Draw_GRF(&point, portrait, 1, 0);
+	}
 
 	strncpy(buffer, pc->name, 8);
 	buffer[8] = 0;
@@ -356,26 +366,26 @@ stat_value Get_PC_Stat(pc *pc, statistic st)
 	return Get_Stat_Base(pc->header.stats, st) + pc->header.stats[st];
 }
 
-noexport void Show_Pc_Stat(pc *pc, statistic st, int y)
+noexport void Show_Pc_Stat(pc *pc, statistic st, int x, int y)
 {
 	char *name = Stat_Name(st);
 	char temp[5];
 
 	itoa(Get_PC_Stat(pc, st), temp, 10);
 
-	Draw_Font(8, y, WHITE, name, gFont, false);
-	Draw_Font(80, y, WHITE, temp, gFont, false);
+	Draw_Font(x, y, WHITE, name, gFont, false);
+	Draw_Font(x + 72, y, WHITE, temp, gFont, false);
 }
 
-noexport void Show_Pc_Stat_Pair(pc *pc, statistic stc, statistic stm, int y)
+noexport void Show_Pc_Stat_Pair(pc *pc, statistic stc, statistic stm, int x, int y)
 {
 	char *name = Stat_Name(stm);
 	char temp[10];
 
-	Draw_Font(8, y, WHITE, name, gFont, false);
+	Draw_Font(x, y, WHITE, name, gFont, false);
 
 	sprintf(temp, "%3d/%3d", Get_PC_Stat(pc, stc), Get_PC_Stat(pc, stm));
-	Draw_Font(80, y, WHITE, temp, gFont, false);
+	Draw_Font(x + 72, y, WHITE, temp, gFont, false);
 }
 
 noexport void Show_Pc_Items(pc *pc, int selected)
@@ -449,7 +459,9 @@ noexport char *Get_Damage_Range(pc *pc)
 
 noexport void Show_Pc_Stats(pc *pc)
 {
+	grf *portrait;
 	char temp[100];
+	point2d pos;
 
 	Fill_Double_Buffer(0);
 
@@ -458,31 +470,37 @@ noexport void Show_Pc_Stats(pc *pc)
 	sprintf(temp, "Level %u %s", pc->header.job_level[pc->header.job], Job_Name(pc->header.job));
 	Draw_Font(8, 16, WHITE, temp, gFont, false);
 
-	Show_Pc_Stat(pc, sStrength, 32);
-	Show_Pc_Stat(pc, sDexterity, 40);
-	Show_Pc_Stat(pc, sIntelligence, 48);
+	if (pc->header.portrait_id != 0) {
+		portrait = Lookup_File_Chained(gDjn, pc->header.portrait_id);
+		pos.x = 8;
+		pos.y = 32;
+		Draw_GRF(&pos, portrait, 0, 0);
+	}
 
-	Show_Pc_Stat_Pair(pc, sHP, sMaxHP, 64);
-	Show_Pc_Stat_Pair(pc, sMP, sMaxMP, 72);
+	Show_Pc_Stat_Pair(pc, sHP, sMaxHP, 8, 168);
+	Show_Pc_Stat_Pair(pc, sMP, sMaxMP, 8, 176);
 
-	Show_Pc_Stat(pc, sHitBonus, 88);
-	Show_Pc_Stat(pc, sDodgeBonus, 96);
+	Show_Pc_Stat(pc, sStrength, 160, 8);
+	Show_Pc_Stat(pc, sDexterity, 160, 16);
+	Show_Pc_Stat(pc, sIntelligence, 160, 24);
 
-	Show_Pc_Stat(pc, sArmour, 112);
-	Show_Pc_Stat(pc, sToughness, 120);
+	Show_Pc_Stat(pc, sHitBonus, 160, 40);
+	Draw_Font(160, 48, WHITE, "Damage", gFont, false);
+	Draw_Font(232, 48, WHITE, Get_Damage_Range(pc), gFont, false);
 
-	Draw_Font(8, 136, WHITE, "Damage", gFont, false);
-	Draw_Font(80, 136, WHITE, Get_Damage_Range(pc), gFont, false);
+	Show_Pc_Stat(pc, sDodgeBonus, 160, 64);
+	Show_Pc_Stat(pc, sArmour, 160, 72);
+	Show_Pc_Stat(pc, sToughness, 160, 80);
 }
 
 noexport unsigned char Confirm(char *prompt)
 {
-	Draw_Font(ITEMS_X, CONFIRM_Y, WHITE, prompt, gFont, false);
+	Draw_Font(CONFIRM_X, CONFIRM_Y, WHITE, prompt, gFont, false);
 	Show_Double_Buffer();
 	return Get_Next_Scan_Code();
 }
 
-#define Clear_Confirm() Draw_Square_DB(BLACK, ITEMS_X, CONFIRM_Y, SCREEN_WIDTH - 1, CONFIRM_Y + 7, true)
+#define Clear_Confirm() Draw_Square_DB(BLACK, CONFIRM_X, CONFIRM_Y, SCREEN_WIDTH - 1, CONFIRM_Y + 7, true)
 
 noexport bool Confirm_Drop_Item(pc *pc, int index)
 {
