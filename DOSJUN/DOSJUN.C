@@ -572,7 +572,6 @@ void main(int argc, char **argv)
 	Free_Music();
 	Free_Code();
 	Free_Formatter();
-	Delete_Picture();
 	Free_Timer();
 
 	Free_DB();

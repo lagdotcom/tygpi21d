@@ -64,10 +64,9 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-bool redraw_fp;
-noexport pcx_picture current_pic;
-noexport bool picture_loaded = false;
-noexport char shown_picture[MAX_FILENAME_LENGTH];
+bool redraw_fp = false;
+noexport file_id current_img_id = 0;
+noexport grf *current_img = null;
 
 #define VIEW_X	96
 #define VIEW_Y	8
@@ -80,73 +79,6 @@ noexport box2d viewport = {
 };
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
-
-noexport UINT32 Image_Size(pcx_picture_ptr image)
-{
-	UINT32 width = image->header.width;
-	UINT32 height = image->header.height;
-	width++;
-	height++;
-
-	return width * height;
-}
-
-bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag)
-{
-	FILE *fp;
-	int num_bytes, index;
-	UINT32 count, size;
-	unsigned char data;
-	char far *header, *write;
-
-	fp = fopen(filename, "rb");
-	if (!fp) {
-		dief("Load_Picture: Could not open for reading: %s\n", filename);
-		return false;
-	}
-
-	Log("Load_Picture: %s", filename);
-
-	header = (char far*)image;
-	for (index = 0; index < 128; index++) {
-		header[index] = (char)getc(fp);
-	}
-
-	size = Image_Size(image);
-#if FP_IMSZ
-	image->buffer = Allocate(size, 1, tag);
-#else
-	image->buffer = Allocate(image->header.width + 1, image->header.height + 1, tag);
-#endif
-	if (image->buffer == null) {
-		fclose(fp);
-		dief("Load_Picture: Could not allocate picture buffer.\n");
-		return false;
-	}
-
-	count = 0;
-	write = image->buffer;
-	while (count < size) {
-		data = (unsigned char)getc(fp);
-
-		if (data >= 192) {
-			num_bytes = data - 192;
-			data = (unsigned char)getc(fp);
-			while (num_bytes-- > 0) {
-				*write = data;
-				count++;
-				write++;
-			}
-		} else {
-			*write = data;
-			count++;
-			write++;
-		}
-	}
-
-	fclose(fp);
-	return true;
-}
 
 noexport void Draw_Tile_Segment(file_id texture_id, int dx, int dy, int piece)
 {
@@ -329,45 +261,17 @@ void Draw_FP(void)
 	redraw_fp = false;
 }
 
-void Delete_Picture(void)
+void Show_Picture(file_id ref)
 {
-	Log("Delete_Picture: %p", &current_pic);
-
-	if (picture_loaded) {
-		picture_loaded = false;
-		shown_picture[0] = 0;
-		Free(current_pic.buffer);
-	}
-}
-
-/* TODO: use file_id instead / GRF */
-void Show_Picture(char *name)
-{
-	int y;
-	unsigned char *output;
-	char *input;
-	char filename[MAX_FILENAME_LENGTH];
-
-	sprintf(filename, "PICS\\%s.PCX", name);
-
 	/* don't bother loading the picture if it's already loaded */
-	if (!picture_loaded || !streq(filename, shown_picture)) {
-		Delete_Picture();
+	if (current_img_id != ref) {
+		current_img_id = ref;
+		current_img = Lookup_File_Chained(gDjn, ref);
 
-		if (!Load_Picture(filename, &current_pic, name)) {
-			die("Show_Picture: could not load");
-		}
-
-		picture_loaded = true;
-		strcpy(shown_picture, filename);
+		if (current_img == null)
+			dief("Show_Picture: %d not found", ref);
 	}
 
 	/* copy picture to screen */
-	output = &double_buffer[8 * SCREEN_WIDTH + 96];
-	input = current_pic.buffer;
-	for (y = 0; y < 128; y++) {
-		memcpy(output, input, 128);
-		input += 128;
-		output += SCREEN_WIDTH;
-	}
+	Draw_GRF_Clipped(&viewport.start, current_img, 0, 0, &viewport);
 }

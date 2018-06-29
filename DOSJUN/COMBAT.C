@@ -1006,7 +1006,6 @@ void Start_Combat(encounter_id id)
 	}
 
 	/* Briefly show encounter on Dungeon screen */
-	/* TODO: file_id transformation */
 	Show_Picture(first_img);
 	Show_Game_String(description, true);
 	Free(description);
@@ -1019,7 +1018,6 @@ void Start_Combat(encounter_id id)
 	Fill_Double_Buffer(0);
 	if (combat_bg)
 		Draw_GRF(&gTopLeft, combat_bg, 0, 0);
-	/* TODO: file_id transformation */
 	Show_Picture(first_img);
 
 	/* DO IT */

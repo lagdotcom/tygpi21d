@@ -10,8 +10,6 @@
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Draw_FP(void);
-void Delete_Picture(void);
-bool Load_Picture(char *filename, pcx_picture_ptr image, char *tag);
-void Show_Picture(char *name);
+void Show_Picture(file_id ref);
 
 #endif
