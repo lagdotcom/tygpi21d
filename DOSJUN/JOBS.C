@@ -269,7 +269,7 @@ noexport bool Choose_Skill(pc *pc, skill_id a, skill_id b)
 void Level_Up(pc *pc)
 {
 	pc_header *ch = &pc->header;
-	unsigned char *level = &ch->job_level[ch->job];
+	UINT16 *level = &ch->job_level[ch->job];
 	job_spec *j = &jobspecs[ch->job];
 	level_spec *l;
 
@@ -291,7 +291,7 @@ void Level_Up(pc *pc)
 		Draw_Font(8, Y_MP, WHITE, buffer, gFont, 0);
 	}
 
-	if (ch->job_level[ch->job] < JOB_LEVELS) {
+	if (*level < JOB_LEVELS) {
 		l = &j->levels[*level];
 		if (l->stat != sNONE) {
 			ch->stats[l->stat]++;
@@ -299,15 +299,15 @@ void Level_Up(pc *pc)
 			Draw_Font(8, Y_STAT, WHITE, buffer, gFont, 0);
 		}
 
-		sprintf(buffer, "%s becomes %s level %d!", pc->name, Job_Name(ch->job), *level + 1);
+		(*level)++;
+
+		sprintf(buffer, "%s becomes %s level %d!", pc->name, Job_Name(ch->job), *level);
 		Draw_Font(8, Y_LEVEL, WHITE, buffer, gFont, 0);
 
 		if (Choose_Skill(pc, l->a, l->b)) {
 			Show_Double_Buffer();
 			Get_Next_Scan_Code();
 		}
-
-		(*level)++;
 	} else {
 		sprintf(buffer, "%s gains a level!", pc->name);
 		Draw_Font(8, Y_LEVEL, WHITE, buffer, gFont, 0);
