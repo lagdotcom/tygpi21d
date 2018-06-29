@@ -35,7 +35,7 @@ typedef enum itemspecial {
 	spHeal,
 } itemspecial;
 
-#define ITEM_PADDING				18
+#define ITEM_PADDING				16
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -47,6 +47,7 @@ typedef struct item {
 	itemspecial_id special;
 	INT16 special_argument1;
 	INT16 special_argument2;
+	file_id image_id;
 	unsigned char padding[ITEM_PADDING];
 
 	stat_value stats[NUM_STATS];
