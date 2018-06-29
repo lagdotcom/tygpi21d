@@ -1071,7 +1071,7 @@ void Initialise_Code(void)
 {
 	option_menu = SzAlloc(MAX_OPTIONS, char *, "Initialise_Code.option_menu");
 	option_state = SzAlloc(MAX_OPTIONS, file_id, "Initialise_Code.option_state");
-	formatting_buf = SzAlloc(300, char, "Initialise_Code.buf");
+	formatting_buf = SzAlloc(CODE_BUFFER_SIZE, char, "Initialise_Code.buf");
 }
 
 void Free_Code(void)

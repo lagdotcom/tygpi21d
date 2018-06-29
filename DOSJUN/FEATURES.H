@@ -24,6 +24,8 @@
 
 /* These values affect memory use */
 
+#define CODE_BUFFER_SIZE		300
+
 #define COMBAT_BUFFER_SIZE		400
 
 #define IO_MAXFILES				20
