@@ -210,6 +210,10 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 	size_t i,
 		len = strlen(s);
 
+#if STRINGS_DEBUG
+	Log("Show_Formatted_String: @%d,%d %s", bounds->start.x, bounds->start.y, s);
+#endif
+
 	tint = start_tint;
 	p.x = bounds->start.x;
 	p.y = bounds->start.y;
@@ -353,6 +357,7 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 
 			case '\n':
 				if (b > formatter_buf) {
+					*b = 0;
 					Show_Word(gFont, formatter_buf, &p, bounds, tint, false);
 					b = formatter_buf;
 				}
