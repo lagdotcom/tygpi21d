@@ -54,6 +54,8 @@ typedef struct itempos {
 	file_id item;
 	coord x;
 	coord y;
+	coord tile_x;
+	coord tile_y;
 } itempos;
 
 typedef struct zone_header {
