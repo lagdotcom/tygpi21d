@@ -30,6 +30,8 @@
 
 #define IO_MAXFILES				20
 
+#define JOBS_BUFFER_SIZE		100
+
 #define LIST_START_CAPACITY		10
 
 #define PARTY_PORTRAITS			50

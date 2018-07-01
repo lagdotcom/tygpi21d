@@ -21,7 +21,7 @@
 
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
-noexport char buffer[100];
+noexport char buffer[JOBS_BUFFER_SIZE];
 job_spec jobspecs[NUM_JOBS];
 skill_spec skills[NUM_SKILLS];
 
