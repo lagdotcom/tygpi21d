@@ -269,6 +269,10 @@ noexport void Kill(combatant *c, combatant *killer)
 			Log("Kill: groups alive=%d", groups_alive);
 #endif
 		}
+
+		/* On-kill triggered skills */
+		if (Check_Cleave(killer)) Cleave(killer, c);
+		if (Check_Inspire(killer)) Inspire(killer, c);
 	}
 }
 

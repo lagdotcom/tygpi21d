@@ -9,7 +9,11 @@
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+bool Check_Cleave(combatant *source);
 bool Check_Concentrate(combatant *source);
+bool Check_Inspire(combatant *source);
+void Cleave(combatant *source, combatant *target);
 void Concentrate(combatant *source, combatant *target);
+void Inspire(combatant *source, combatant *target);
 
 #endif

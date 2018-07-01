@@ -7,7 +7,11 @@
 #define CONCENTRATE_HITBONUS	4
 #define CONCENTRATE_DMGBONUS	4
 
+#define INSPIRE_HITBONUS		2
+#define INSPIRE_DMGBONUS		1
+
 #define CLEAVE_USED_BUFF		"Cleave Fatigue"
+#define INSPIRED_BUFF			"Inspiring"
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -56,11 +60,20 @@ void Concentrate(combatant *source, combatant *target)
 	With_Both_Weapons(source, target, Concentrate_Inner);
 }
 
+bool Check_Cleave(combatant *source)
+{
+	if (!Has_Skill(source, skCleave))
+		return false;
+
+	if (Has_Buff(source, CLEAVE_USED_BUFF))
+		return false;
+
+	return true;
+}
+
 void Cleave(combatant *source, combatant *target)
 {
 	combatant *retarget;
-
-	if (Has_Buff(source, CLEAVE_USED_BUFF)) return;
 
 	retarget = Get_Random_Target(target->group);
 	if (retarget != null) {
@@ -69,4 +82,53 @@ void Cleave(combatant *source, combatant *target)
 
 		Attack(source, retarget);
 	}
+}
+
+bool Check_Inspire(combatant *source)
+{
+	if (!Has_Skill(source, skInspire))
+		return false;
+
+	if (Has_Buff(source, INSPIRED_BUFF))
+		return false;
+
+	return true;
+}
+
+noexport void Inspire_Expires(combatant *target, int argument)
+{
+	combatant *c;
+	int i;
+
+	for (i = 0; i < combatants->size; i++) {
+		c = List_At(combatants, i);
+
+		if (c->is_pc == target->is_pc) {
+			c->stats[sHitBonus] -= INSPIRE_HITBONUS;
+			c->stats[sMaxDamage] -= INSPIRE_DMGBONUS;
+		}
+	}
+
+	Combat_Message(target->file, 0, "@n's inspiration fades.");
+}
+
+void Inspire(combatant *source, combatant *target)
+{
+	combatant *c;
+	int i;
+
+	/* Uh... that's not very inspiring! */
+	if (source->is_pc == target->is_pc) return;
+
+	for (i = 0; i < combatants->size; i++) {
+		c = List_At(combatants, i);
+
+		if (c->is_pc == source->is_pc) {
+			c->stats[sHitBonus] += INSPIRE_HITBONUS;
+			c->stats[sMaxDamage] += INSPIRE_DMGBONUS;
+		}
+	}
+
+	Combat_Message(source->file, 0, "@n inspires the party to victory!");
+	Add_Buff(source, INSPIRED_BUFF, exTurns, 2, Inspire_Expires, 0);
 }

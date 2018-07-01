@@ -13,8 +13,8 @@
 typedef enum skill_id {
 	skConcentrate,
 	sk_F1b,
+	skInspire,
 	skCleave,
-	sk_F2b,
 	sk_F3a,
 	sk_F3b,
 	sk_F4a,

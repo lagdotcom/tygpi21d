@@ -63,7 +63,7 @@ void Initialise_Jobs(void)
 {
 	Setup_Job(jFighter, "Fighter", 10, 0);
 	Setup_Job_Level(jFighter, 1, sNONE, skConcentrate, skNONE);
-	Setup_Job_Level(jFighter, 2, sNONE, skCleave, skNONE);
+	Setup_Job_Level(jFighter, 2, sNONE, skInspire, skCleave);
 	Setup_Job_Level(jFighter, 3, sNONE, skNONE, skNONE);
 	Setup_Job_Level(jFighter, 4, sStrength, skNONE, skNONE);
 	Setup_Job_Level(jFighter, 5, sNONE, skNONE, skNONE);
@@ -134,6 +134,7 @@ void Initialise_Jobs(void)
 	Setup_Job_Level(jRanger, 10, sStrength, skNONE, skNONE);
 
 	Setup_Skill(skConcentrate, "Concentrate", "Take your time.\nStrike carefully.");
+	Setup_Skill(skInspire, "Inspire", "Inspire the troops.\nYour kills motivate the party.");
 	Setup_Skill(skCleave, "Cleave", "Continue the slaughter.\nDon't stop after a kill.");
 
 	Setup_Skill(skSing, "Sing", "Inspire the party to greater deeds.\nAttacks will hit more often.");
