@@ -305,3 +305,24 @@ bool Save_Djn(char *filename, djn *d)
 	fclose(fp);
 	return true;
 }
+
+int Find_Files_of_Type(djn *d, djn_type ty, djn_subtype sty, file_id *buffer, int max)
+{
+	djn_file *f;
+	int count = 0,
+		i;
+
+	for (i = 0; i < d->count; i++) {
+		f = &d->files[i];
+
+		if (f->type == ty && (sty == stAny || f->subtype == sty)) {
+			buffer[count] = f->id;
+			count++;
+
+			if (count == max)
+				break;
+		}
+	}
+
+	return count;
+}

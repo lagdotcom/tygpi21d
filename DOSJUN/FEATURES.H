@@ -32,6 +32,8 @@
 
 #define LIST_START_CAPACITY		10
 
+#define PARTY_PORTRAITS			50
+
 #define STRINGS_BUFFER_SIZE		30
 
 #endif

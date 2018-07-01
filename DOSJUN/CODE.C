@@ -752,8 +752,7 @@ noexport void ChoosePcPortrait(code_host *h)
 		return;
 	}
 
-	/* TODO */
-	pc->header.portrait_id = 0;
+	pc->header.portrait_id = Pick_Portrait(pc->header.portrait_id);
 	Add_PC_to_Save(gSave, pc, pc_id);
 }
 

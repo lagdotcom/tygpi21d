@@ -31,6 +31,7 @@ stat_value Get_PC_Stat(pc *c, statistic st);
 
 bool In_Front_Row(pc *pc);
 void Pc_Select(pcnum index);
+file_id Pick_Portrait(file_id org);
 bool Read_PC(FILE *fp, pc *pc);
 bool Remove_Item(pc *pc, file_id iid);
 void Show_Pc_Screen(pcnum index);

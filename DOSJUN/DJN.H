@@ -50,6 +50,8 @@ typedef enum djn_subtype {
 	stPortrait,
 	stThing,
 	stMonster,
+
+	stAny = 255,
 } djn_subtype;
 
 typedef struct djn_file {
@@ -89,6 +91,7 @@ extern djn_file *current_reading_file;
 void Add_to_Djn(djn *d, void *f, file_id id, djn_type ty);
 void Close_Djn(djn *d);
 void *Find_File_Type(djn *chain, djn_type ty);
+int Find_Files_of_Type(djn *d, djn_type ty, djn_subtype sty, file_id *buffer, int max);
 void Free_Djn(djn *d);
 bool In_Djn(djn *d, file_id id, bool chained);
 bool Load_Djn(char *filename, djn *d);

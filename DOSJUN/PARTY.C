@@ -22,6 +22,7 @@
 /* G L O B A L S ///////////////////////////////////////////////////////// */
 
 noexport char damage_range_buf[10];
+noexport point2d portrait_pick = { 96, 24 };
 bool redraw_party;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
@@ -808,4 +809,64 @@ pc *Duplicate_PC(pc *org)
 		dup->name = org->name;
 
 	return dup;
+}
+
+file_id Pick_Portrait(file_id org)
+{
+	file_id ref = org;
+	file_id *buffer = SzAlloc(PARTY_PORTRAITS, file_id, "Pick_Portrait");
+	unsigned char ch;
+	grf *g;
+	bool done = false;
+	int count, i;
+
+	count = Find_Files_of_Type(gDjn, ftGraphic, stPortrait, buffer, 20);
+	if (count != 0) {
+		/* find current graphic */
+		for (i = 0; i < count; i++) {
+			if (buffer[i] == org) break;
+		}
+
+		if (i == count) i = 0;
+
+		redraw_everything = true;
+		Fill_Double_Buffer(0);
+		/* TODO: show UI? */
+
+		Draw_Font(8, 8, 0, "Pick a portrait:", gFont, true);
+		Draw_Font_Char(80, 84, 0, '<', gFont, true);
+		Draw_Font_Char(232, 84, 0, '>', gFont, true);
+
+		while (!done) {
+			ref = buffer[i];
+			g = Lookup_File_Chained(gDjn, ref);
+
+			Draw_Square_DB(0, portrait_pick.x, portrait_pick.y, portrait_pick.x + 127, portrait_pick.y + 127, true);
+			Draw_GRF(&portrait_pick, g, 0, 0);
+			Show_Double_Buffer();
+
+			ch = Get_Next_Scan_Code();
+
+			switch (ch) {
+				case SCAN_LEFT:
+				case SCAN_COMMA:
+					i--;
+					if (i < 0) i = count - 1;
+					break;
+
+				case SCAN_RIGHT:
+				case SCAN_PERIOD:
+					i++;
+					if (i == count) i = 0;
+					break;
+
+				case SCAN_ENTER:
+					done = true;
+					break;
+			}
+		}
+	}
+
+	Free(buffer);
+	return ref;
 }

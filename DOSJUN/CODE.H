@@ -71,7 +71,7 @@ typedef enum code_op {
 	coChoosePcName,
 	coJoinParty,
 	coLeaveParty,
-	coChoosePcPortrait, /* TODO */
+	coChoosePcPortrait,
 	coChoosePcPronouns,
 	coSetAttitude,
 	coGetAttitude,
