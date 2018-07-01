@@ -615,8 +615,18 @@ noexport void Refresh(code_host *h)
 	Log("%s", "C|Refresh");
 #endif
 
-	Draw_FP();
-	Draw_Party_Status();
+	switch (gState) {
+		case gsCutscene:
+			redraw_everything = true;
+			Fill_Double_Buffer(0);
+			Show_Double_Buffer();
+			break;
+
+		default:
+			Draw_FP();
+			Draw_Party_Status();
+			break;
+	}
 }
 
 noexport void AddItem(code_host *h)
