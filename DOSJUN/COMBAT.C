@@ -36,6 +36,7 @@ noexport grf *combat_bg;
 list *combatants;
 noexport list *active_combatants;
 noexport action *combat_actions;
+noexport combatant **pc_combatants;
 noexport list *combat_groups[GROUPS_SIZE];
 noexport int group_y[ENCOUNTER_SIZE];
 noexport int monsters_alive;
@@ -48,8 +49,6 @@ noexport box2d combatStringBox = {
 };
 
 /* H E L P E R  F U N C T I O N S //////////////////////////////////////// */
-
-#define Is_Enemy_Group(g) ((g) < GROUP_PCFRONT)
 
 noexport void Show_Combat_String(char *string, bool wait_for_key, file_id speaker, file_id target)
 {
@@ -95,6 +94,8 @@ noexport void Highlight_Ally(int pc_active, int pc_select)
 	int i, colour;
 
 	for (i = 0; i < PARTY_SIZE; i++) {
+		if (!pc_combatants[i]) continue;
+
 		strncpy(buffer, Get_PC(i)->name, 8);
 		buffer[8] = 0;
 
@@ -160,6 +161,36 @@ item *Get_Weapon(combatant *c, bool primary)
 	file_id iid = primary ? c->primary : c->secondary;
 
 	return iid ? Lookup_File_Chained(gDjn, iid) : null;
+}
+
+range Get_Weapon_Range(item *weapon)
+{
+	if (weapon == null) return rShort;
+
+	if (weapon->flags & ifLongRange) return rLong;
+	if (weapon->flags & ifMediumRange) return rMedium;
+	return rShort;
+}
+
+range Get_Attack_Range(combatant *c)
+{
+	item *primary;
+
+	if (Has_Buff(c, HIDE_BUFF_NAME)) {
+		return rLong;
+	}
+
+	primary = Get_Weapon(c, true);
+	return Get_Weapon_Range(primary);
+}
+
+range Get_Combatant_Range(combatant *a, combatant *b)
+{
+	if (a->row == rowFront) {
+		return b->row == rowFront ? rShort : rMedium;
+	}
+
+	return b->row == rowFront ? rMedium : rLong;
 }
 
 stat_value Get_Stat_Base(stat_value *stats, statistic st)
@@ -412,6 +443,7 @@ void Add_Monster(groupnum group, file_id ref)
 	stats[sHP] = stats[sMaxHP];
 	stats[sMP] = stats[sMaxMP];
 
+	c->file = ref;
 	c->action = NO_ACTION;
 	c->buffs = buffs;
 	c->group = group;
@@ -433,9 +465,11 @@ void Add_Monster(groupnum group, file_id ref)
 
 noexport void Add_Pc(pcnum index)
 {
+	combatant *c;
 	pc *pc = Get_PC(index);
+	if (!pc) return;
 
-	combatant *c = SzAlloc(1, combatant, "Add_Pc");
+	c = SzAlloc(1, combatant, "Add_Pc");
 	if (c == null)
 		die("Add_Pc: out of memory");
 
@@ -456,6 +490,8 @@ noexport void Add_Pc(pcnum index)
 
 	Add_to_List(combat_groups[c->group], c);
 	Add_to_List(combatants, c);
+
+	pc_combatants[index] = c;
 }
 
 void Add_Combat_Action(act id, char *name, action_check_fn check_fn, action_do_fn act_fn, targetflags target, pri priority)
@@ -476,6 +512,7 @@ void Initialise_Combat(void)
 		combat_groups[i] = New_List(ltReference, "Initialise_Combat.group_x");
 	}
 
+	pc_combatants = SzAlloc(PARTY_SIZE, combatant*, "Initialise_Combat.pc_combatants");
 	active_combatants = New_List(ltReference, "Initialise_Combat.active_combatants");
 
 	combat_actions = SzAlloc(NUM_ACTIONS, action, "Initialise_Combat.actions");
@@ -506,8 +543,8 @@ void Free_Combat(void)
 		Free_List(combat_groups[i]);
 	}
 
+	Free(pc_combatants);
 	Free_List(active_combatants);
-
 	Free(combat_actions);
 
 	if (combat_bg)
@@ -781,9 +818,26 @@ noexport combatant *Random_Alive_Pc(void)
 
 noexport void AI_Mindless(combatant *c)
 {
-	/* TODO: player row */
-	c->action = aAttack;
-	c->target = Random_Alive_Pc();
+	combatant *target = null;
+	range weapon_range = Get_Weapon_Range(Get_Weapon(c, true));
+
+	switch (weapon_range) {
+		case rLong:
+			target = Get_Random_Target(GROUP_PCBACK);
+			if (!target) target = Get_Random_Target(GROUP_PCFRONT);
+			break;
+
+		default:
+			target = Get_Random_Target(GROUP_PCFRONT);
+			break;
+	}
+
+	if (target) {
+		c->action = aAttack;
+		c->target = target;
+	} else {
+		c->action = NO_ACTION;
+	}
 }
 
 noexport void AI_Rogue(combatant *c)
@@ -975,6 +1029,7 @@ void Start_Combat(encounter_id id)
 
 	Log("Start_Combat: #%d", id);
 
+	memset(pc_combatants, 0, sizeof(combatant*) * PARTY_SIZE);
 	for (pc = 0; pc < PARTY_SIZE; pc++) {
 		Add_Pc(pc);
 	}
@@ -997,7 +1052,7 @@ void Start_Combat(encounter_id id)
 			write += sprintf(write, " %s x%d", name, count);
 
 			while (count > 0) {
-				Add_Monster(groups_alive, en->maximum[group]);
+				Add_Monster(groups_alive, en->monsters[group]);
 				count--;
 			}
 

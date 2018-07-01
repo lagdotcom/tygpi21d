@@ -21,6 +21,12 @@ typedef enum targetflags {
 	tfSelf = 8
 } targetflags;
 
+typedef enum range {
+	rShort = 1,
+	rMedium,
+	rLong,
+} range;
+
 typedef enum action_ids {
 	aAttack = 0,
 	aSneakAttack,
@@ -88,11 +94,14 @@ bool Check_Attack(combatant *source);
 void Combat_Message(file_id speaker, file_id target, char *format, ...);
 void Damage(combatant *victim, combatant* attacker, int amount);
 void Free_Combat(void);
+range Get_Attack_Range(combatant *c);
+range Get_Combatant_Range(combatant *a, combatant *b);
 combatant *Get_Random_Target(groupnum group);
 stat_value Get_Stat_Base(stat_value *stats, statistic st);
 stat_value Get_Stat(combatant *source, statistic st);
 item *Get_Weapon(combatant *source, bool primary);
 void Get_Weapon_Damage(combatant *source, item *weapon, stat_value *min, stat_value *max);
+range Get_Weapon_Range(item *weapon);
 statistic Get_Weapon_Stat(item *weapon);
 bool Has_Buff(combatant *target, char *name);
 bool Is_Dead(combatant *victim);

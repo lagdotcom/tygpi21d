@@ -10,7 +10,7 @@
 noexport void Resize_List(list *l, unsigned int new_capacity)
 {
 	void *new_storage = Reallocate(l->items, new_capacity, sizeof(void *), l->tag);
-	if (new_storage == null)
+	if (new_storage == null && new_capacity > 0)
 		dief("Resize_List(%s) failed: going from %u to %u", l->tag, l->capacity, new_capacity);
 
 	l->items = new_storage;
@@ -112,8 +112,11 @@ void Free_List(list *l)
 
 void Add_to_List(list *l, void *item)
 {
+	int newcap;
+
 	if (l->size == l->capacity) {
-		Resize_List(l, l->capacity * 2);
+		newcap = l->capacity ? l->capacity * 2 : 10;
+		Resize_List(l, newcap);
 	}
 
 	l->items[l->size] = item;

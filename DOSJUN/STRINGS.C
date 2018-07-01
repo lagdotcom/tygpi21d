@@ -122,22 +122,36 @@ noexport pronouns Get_Pronouns(file_id id)
 	}
 
 	/* TODO */
-	return proIt;
+	return proNobody;
 }
 
 noexport char *Get_Name(file_id id)
 {
 	djn_file *f = Lookup_File_Entry(gSave, id, true, true);
 	pc *pc;
+	npc *npc;
+	monster *m;
 
 	switch (f->type) {
 		case ftPC:
 			pc = f->object;
-			if (pc->header.name_id == 0) return pc->name;
+			if (pc->header.name_id == 0) {
+				Log("Get_Name: #%d = p %s", id, pc->name);
+				return pc->name;
+			}
+
+			Log("Get_Name: #%d = p str%d", id, pc->header.name_id);
 			return Resolve_String(pc->header.name_id);
 
 		case ftNPC:
-			return Resolve_String(((npc *)f->object)->name_id);
+			npc = f->object;
+			Log("Get_Name: #%d = n str%d", id, npc->name_id);
+			return Resolve_String(npc->name_id);
+
+		case ftMonster:
+			m = f->object;
+			Log("Get_Name: #%d = m str%d", id, m->name_id);
+			return Resolve_String(m->name_id);
 	}
 
 	/* TODO */
@@ -212,6 +226,7 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 
 #if STRINGS_DEBUG
 	Log("Show_Formatted_String: @%d,%d %s", bounds->start.x, bounds->start.y, s);
+	Log("Show_Formatted_String: #%d is talking to #%d", speaker, target);
 #endif
 
 	tint = start_tint;
@@ -230,6 +245,8 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 		if (fmt_mode) {
 			fmt_mode = false;
 			match = true;
+
+			Log("Show_Formatted_String: %c%c encountered", FMT_CHAR, s[i]);
 
 			switch (s[i]) {
 				case 'e':
@@ -284,10 +301,12 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 
 				case 'n':
 					word = Get_Name(speaker);
+					match = false;
 					break;
 
 				case 'N':
 					word = Get_Name(target);
+					match = false;
 					break;
 
 				default:
@@ -300,7 +319,11 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 				word = Get_Pronoun_Case(fmt_p, fmt_case);
 			}
 
-			add_space = true;
+			if (word) {
+				Show_Word(gFont, word, &p, bounds, tint, false);
+				word = null;
+			}
+
 			continue;
 		}
 
