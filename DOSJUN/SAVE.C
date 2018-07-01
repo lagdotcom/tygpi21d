@@ -65,6 +65,7 @@ void Initialise_Overlay(overlay *o, zone *z)
 	o->locals = SzAlloc(o->num_locals, UINT16, "Initialise_Overlay.locals");
 
 	o->items = New_List_of_Capacity(ltObject, z->header.num_items, "Initialise_Overlay.items");
+	o->items->object_size = sizeof(itempos);
 	for (i = 0; i < z->header.num_items; i++) {
 		p = SzAlloc(1, itempos, "Initialise_Overlay.item[i]");
 		memcpy(p, &z->items[i], sizeof(itempos));
