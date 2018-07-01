@@ -272,6 +272,7 @@ list *Duplicate_List(list *org, char *tag)
 	list *dup = New_List_of_Capacity(org->type, org->capacity, tag);
 	void *temp;
 	dup->object_size = org->object_size;
+	dup->size = org->size;
 
 	switch (org->type) {
 		case ltString:
