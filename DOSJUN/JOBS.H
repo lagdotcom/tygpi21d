@@ -173,6 +173,7 @@ void Free_Jobs(void);
 void Initialise_Jobs(void);
 void Level_Up(pc *c);
 void Set_Job(pc *c, job job);
+char *Skill_Name(skill_id sk);
 
 /* Get string representation of stat */
 char *Stat_Name(statistic st);

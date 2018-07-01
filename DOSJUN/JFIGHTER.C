@@ -30,6 +30,9 @@ noexport void Concentrate_Inner(combatant *source, combatant *target, item *weap
 		return;
 	}
 
+	if (Get_Combatant_Range(source, target) > Get_Weapon_Range(weapon))
+		return;
+
 	base += Get_Stat(source, sHitBonus) + CONCENTRATE_HITBONUS;
 	base -= Get_Stat(target, sDodgeBonus);
 

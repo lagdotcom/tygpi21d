@@ -181,6 +181,11 @@ char *Stat_Name(statistic st)
 	}
 }
 
+char *Skill_Name(skill_id sk)
+{
+	return skills[sk].name;
+}
+
 noexport box2d chooseBox = {
 	{ 8, Y_LEARN },
 	{ SCREEN_WIDTH, SCREEN_HEIGHT },

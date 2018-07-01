@@ -247,7 +247,9 @@ noexport void Kill(combatant *c, combatant *killer)
 {
 	groupnum group;
 
+#if COMBAT_DEBUG
 	Log("Kill: %s(%d/g%d)", c->name, c->index, c->group);
+#endif
 	Combat_Message(c->file, killer == null ? 0 : killer->file, "@n dies!");
 
 	if (c->is_pc) {
@@ -322,6 +324,9 @@ noexport void Attack_Inner(combatant *source, combatant *target, item *weapon)
 		/* TODO: reassign target? */
 		return;
 	}
+
+	if (Get_Combatant_Range(source, target) > Get_Weapon_Range(weapon))
+		return;
 
 	base += Get_Stat(source, sHitBonus);
 	base -= Get_Stat(target, sDodgeBonus);
@@ -413,7 +418,9 @@ noexport void Clear_Encounter(void)
 	combatant *c;
 	int i;
 
+#if COMBAT_DEBUG
 	Log("Clear_Encounter: %d to remove", combatants->size);
+#endif
 
 	for (i = 0; i < combatants->size; i++) {
 		c = List_At(combatants, i);
@@ -426,6 +433,37 @@ noexport void Clear_Encounter(void)
 
 	Clear_List(combatants);
 }
+
+#if COMBAT_DEBUG
+noexport void Log_Combatant(combatant *c)
+{
+	int i;
+	buff *b;
+	skill_id sk;
+
+	Log("Log_Combatant: %d - %s (#%d, %s)", c->index, c->name, c->file, c->is_pc ? "PC" : "Monster");
+	Log("- Group #%d (%s Row)", c->group, c->row == rowFront ? "Front" : "Back");
+	Log("- Weapon #%d/#%d", c->primary, c->secondary);
+
+	if (c->skills != null && c->skills->size > 0) {
+		Log("%s", "- Skills:");
+
+		for (i = 0; i < c->skills->size; i++) {
+			sk = (skill_id)List_At(c->skills, i);
+			Log("-- %s", Skill_Name(sk));
+		}
+	}
+
+	if (c->buffs != null && c->buffs->size > 0) {
+		Log("%s", "- Buffs:");
+
+		for (i = 0; i < c->buffs->size; i++) {
+			b = List_At(c->buffs, i);
+			Log("-- %s", b->name);
+		}
+	}
+}
+#endif
 
 void Add_Monster(groupnum group, file_id ref)
 {
@@ -461,6 +499,10 @@ void Add_Monster(groupnum group, file_id ref)
 	Add_to_List(combat_groups[group], c);
 	Add_to_List(combatants, c);
 	monsters_alive++;
+
+#if COMBAT_DEBUG
+	Log_Combatant(c);
+#endif
 }
 
 noexport void Add_Pc(pcnum index)
@@ -492,6 +534,10 @@ noexport void Add_Pc(pcnum index)
 	Add_to_List(combatants, c);
 
 	pc_combatants[index] = c;
+
+#if COMBAT_DEBUG
+	Log_Combatant(c);
+#endif
 }
 
 void Add_Combat_Action(act id, char *name, action_check_fn check_fn, action_do_fn act_fn, targetflags target, pri priority)
@@ -1048,7 +1094,9 @@ void Start_Combat(encounter_id id)
 		count = randint(en->minimum[group], en->maximum[group]);
 		if (count > 0) {
 			name = Resolve_String(m->name_id);
+#if COMBAT_DEBUG
 			Log("Start_Combat: adding %dx%s (#%04x)", count, name, en->monsters[group]);
+#endif
 			write += sprintf(write, " %s x%d", name, count);
 
 			while (count > 0) {

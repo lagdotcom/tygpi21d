@@ -136,21 +136,29 @@ noexport char *Get_Name(file_id id)
 		case ftPC:
 			pc = f->object;
 			if (pc->header.name_id == 0) {
+#if STRINGS_DEBUG
 				Log("Get_Name: #%d = p %s", id, pc->name);
+#endif
 				return pc->name;
 			}
 
+#if STRINGS_DEBUG
 			Log("Get_Name: #%d = p str%d", id, pc->header.name_id);
+#endif
 			return Resolve_String(pc->header.name_id);
 
 		case ftNPC:
 			npc = f->object;
+#if STRINGS_DEBUG
 			Log("Get_Name: #%d = n str%d", id, npc->name_id);
+#endif
 			return Resolve_String(npc->name_id);
 
 		case ftMonster:
 			m = f->object;
+#if STRINGS_DEBUG
 			Log("Get_Name: #%d = m str%d", id, m->name_id);
+#endif
 			return Resolve_String(m->name_id);
 	}
 
@@ -246,7 +254,9 @@ point2d Show_Formatted_String(const char *s, file_id speaker, file_id target, co
 			fmt_mode = false;
 			match = true;
 
+#if STRINGS_DEBUG
 			Log("Show_Formatted_String: %c%c encountered", FMT_CHAR, s[i]);
+#endif
 
 			switch (s[i]) {
 				case 'e':
