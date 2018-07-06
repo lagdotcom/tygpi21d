@@ -32,6 +32,8 @@ typedef enum code_op {
 	/* Bitwise */
 	coAnd,
 	coOr,
+	/* Unary */
+	coInvert,
 	/* Comparison */
 	coEQ = 0x40,
 	coNEQ,
@@ -85,7 +87,7 @@ typedef enum code_internal {
 	internalFacing,
 	internalDanger,
 	internalJustMoved,
-	internalSuccess,
+	internalSuccess__Unused,
 
 	internalReturn__Unused,
 	internalPartyFull,	/* TODO */

@@ -148,10 +148,6 @@ noexport void Push_Internal(code_host *h)
 		case internalJustMoved:
 			Push_Stack(h, Bool(just_moved));
 			return;
-
-		case internalSuccess:
-			Push_Stack(h, h->result);
-			return;
 	}
 
 	dief("Push_Internal: Unknown internal #%d", index);
@@ -251,6 +247,15 @@ noexport void Or(code_host *h)
 	Log("C|Or: %d | %d", left, right);
 #endif
 	Push_Stack(h, left | right);
+}
+
+noexport void Invert(code_host *h)
+{
+	int value = Pop_Stack(h);
+#if CODE_DEBUG
+	Log("C|Invert: %d", value);
+#endif
+	Push_Stack(h, Bool(!value));
 }
 
 noexport void Eq(code_host *h)
@@ -469,7 +474,7 @@ noexport void GiveItem(code_host *h)
 	Log("C|GiveItem %d, %d, %d", pc->name, item_id, qty);
 #endif
 
-	h->result = Add_to_Inventory(pc, item_id, qty);
+	Push_Stack(h, Bool(Add_to_Inventory(pc, item_id, qty)));
 	Add_PC_to_Save(gSave, pc, pc_id);
 }
 
@@ -483,7 +488,7 @@ noexport void EquipItem(code_host *h)
 	Log("C|EquipItem %d, %d", pc->name, item_id);
 #endif
 
-	h->result = Equip_Item(pc, item_id);
+	Push_Stack(h, Bool(Equip_Item(pc, item_id)));
 	Add_PC_to_Save(gSave, pc, pc_id);
 }
 
@@ -635,19 +640,21 @@ noexport void AddItem(code_host *h)
 	int qty = Pop_Stack(h);
 	file_id item_id = Pop_Stack(h);
 	pc *pc;
+	bool success = false;
 
 #if CODE_DEBUG
 	Log("C|AddItem %d, %d", item_id, qty);
 #endif
 
-	h->result = false;
 	for (index = 0; index < PARTY_SIZE; index++) {
 		pc = Get_PC(index);
 		if (!pc) continue;
 
-		h->result = Add_to_Inventory(pc, item_id, qty);
-		if (h->result) break;
+		success = Add_to_Inventory(pc, item_id, qty);
+		if (success) break;
 	}
+
+	Push_Stack(h, Bool(success));
 }
 
 noexport void Music(code_host *h)
@@ -832,10 +839,10 @@ noexport void GetAttitude(code_host *h)
 	file = Lookup_File_Entry(gSave, _id, true, true);
 	if (file->type == ftPC) {
 		pc = file->object;
-		h->result = pc->header.attitude;
+		Push_Stack(h, pc->header.attitude);
 	} else {
 		npc = file->object;
-		h->result = npc->attitude;
+		Push_Stack(h, npc->attitude);
 	}
 }
 
@@ -854,61 +861,68 @@ noexport void JoinParty(code_host *h)
 	file_id pc_id = Pop_Stack(h);
 	pc *pc;
 	int i;
+	bool result = false;
 
 #if CODE_DEBUG
 	Log("C|JoinParty %d", pc_id);
 #endif
 
-	h->result = 0;
+	/* TODO: this is technically wrong; might be a gap before the PC */
 	for (i = 0; i < PARTY_SIZE; i++) {
 		if (gParty->members[i] == pc_id)
-			return;
+			break;
 
 		if (gParty->members[i] == 0) {
 			pc = Lookup_File_Chained(gSave, pc_id);
 			gParty->members[i] = pc_id;
 			Add_PC_to_Save(gSave, pc, pc_id);
-			h->result = 1;
-			return;
+			result = true;
+			break;
 		}
 	}
+
+	Push_Stack(h, Bool(result));
 }
 
 noexport void LeaveParty(code_host *h)
 {
 	file_id pc_id = Pop_Stack(h);
 	int i;
+	bool success = false;
 
 #if CODE_DEBUG
 	Log("C|LeaveParty %d", pc_id);
 #endif
 
-	h->result = 0;
 	for (i = 0; i < PARTY_SIZE; i++) {
 		if (gParty->members[i] == pc_id) {
 			gParty->members[i] = 0;
-			h->result = 1;
-			return;
+			success = true;
+			break;
 		}
 	}
+
+	Push_Stack(h, Bool(success));
 }
 
 noexport void InParty(code_host *h)
 {
 	file_id pc_id = Pop_Stack(h);
 	int i;
+	bool success = false;
 
 #if CODE_DEBUG
 	Log("C|InParty %d", pc_id);
 #endif
 
-	h->result = 0;
 	for (i = 0; i < PARTY_SIZE; i++) {
 		if (gParty->members[i] == pc_id) {
-			h->result = 1;
-			return;
+			success = true;
+			break;
 		}
 	}
+
+	Push_Stack(h, Bool(success));
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -932,6 +946,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 
 		case coAnd:			And(h); return;
 		case coOr:			Or(h); return;
+		case coInvert:		Invert(h); return;
 
 		case coEQ:			Eq(h); return;
 		case coNEQ:			Neq(h); return;
