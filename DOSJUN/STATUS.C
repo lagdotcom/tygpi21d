@@ -20,10 +20,10 @@ bool Roll(combatant *source, statistic inflict, combatant *target, statistic def
 	return attacking >= defending;
 }
 
-noexport void Stun_Expires(combatant *target, int argument)
+void Stunned_Expires(combatant *target, buff *b)
 {
-	target->stats[sHitBonus] += STUN_HIT_LOSS * argument;
-	target->stats[sDodgeBonus] += STUN_DODGE_LOSS * argument;
+	target->stats[sHitBonus] += STUN_HIT_LOSS * b->arg1;
+	target->stats[sDodgeBonus] += STUN_DODGE_LOSS * b->arg2;
 	Combat_Message(target->file, 0, "@n shakes it off.");
 }
 
@@ -37,23 +37,24 @@ bool Try_Stun(combatant *source, combatant *target, statistic stat)
 		duration = outcome / 3;
 		duration = duration < 2 ? 2 : duration;
 
-		target->stats[sHitBonus] -= STUN_HIT_LOSS;
-		target->stats[sDodgeBonus] -= STUN_DODGE_LOSS;
-		Add_Buff(target, STUN_BUFF_NAME, exTurns, duration, Stun_Expires, 1);
+		target->stats[sHitBonus] -= STUN_HIT_LOSS * 1;
+		target->stats[sDodgeBonus] -= STUN_DODGE_LOSS * 1;
+		Add_Buff(target, Make_Buff(bfStunned, duration, 1, 1, "Try_Stun.stun"));
 
-		Remove_Buff(target, LOSE_MOVE_BUFF_NAME);
-		Add_Buff(target, LOSE_MOVE_BUFF_NAME, exTurns, duration, null, 0);
+		Remove_Buff(target, bfLoseNextMove);
+		Add_Buff(target, Make_Buff(bfLoseNextMove, duration, 0, 0, "Try_Stun.lnm"));
 		return true;
 	}
 
 	return false;
 }
 
-noexport void Poison_Expires(combatant *target, int argument)
+void Poisoned_Expires(combatant *target, buff *b)
 {
 	/* The Poison buff works strangely. It expires every turn, reducing in potency each time.
 	When the potency reaches 0, it expires permanently. */
 	int damage;
+	int argument = b->arg1;
 
 	damage = randint(argument, argument + 1);
 	if (damage > 0) {
@@ -62,7 +63,7 @@ noexport void Poison_Expires(combatant *target, int argument)
 	}
 
 	if (argument > 0) {
-		Add_Buff(target, POISON_BUFF_NAME, exTurns, 1, Poison_Expires, argument - 1);
+		Add_Buff(target, Make_Buff(bfPoisoned, 1, argument - 1, 0, "Poison_Expires"));
 	} else {
 		target->stats[sToughness] += POISON_TOUGHNESS_LOSS;
 		Combat_Message(target->file, 0, "@n looks better.");
@@ -81,7 +82,7 @@ bool Try_Poison(combatant *source, combatant *target, statistic stat, int potenc
 		duration = duration < 2 ? 2 : duration;
 
 		target->stats[sToughness] -= POISON_TOUGHNESS_LOSS;
-		Add_Buff(target, POISON_BUFF_NAME, exTurns, 1, Poison_Expires, duration);
+		Add_Buff(target, Make_Buff(bfPoisoned, 1, duration, 0, "Try_Poison"));
 		return true;
 	}
 

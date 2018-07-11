@@ -15,5 +15,6 @@ bool Check_Inspire(combatant *source);
 void Cleave(combatant *source, combatant *target);
 void Concentrate(combatant *source, combatant *target);
 void Inspire(combatant *source, combatant *target);
+void Inspiring_Expires(combatant *target, buff *b);
 
 #endif

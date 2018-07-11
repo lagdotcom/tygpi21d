@@ -533,6 +533,7 @@ void main(int argc, char **argv)
 
 	Initialise_Timer();
 	Initialise_Combat();
+	Initialise_Buffs();
 	Initialise_Jobs();
 	Initialise_Sound();
 	Initialise_Music();
@@ -567,6 +568,7 @@ void main(int argc, char **argv)
 	if (gSave)
 		Free_Savefile(gSave);
 
+	Free_Buffs();
 	Free_Combat();
 	Free_Jobs();
 	Free_Sound();

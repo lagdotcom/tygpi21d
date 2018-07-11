@@ -12,18 +12,18 @@
 bool Check_Sing(combatant *source)
 {
 	/* TODO: use Silenced somewhere */
-	if (Has_Buff(source, "Silenced")) {
+	if (Has_Buff(source, bfSilenced)) {
 		return false;
 	}
 
-	if (Has_Buff(source, SING_BUFF_NAME)) {
+	if (Has_Buff(source, bfSinging)) {
 		return false;
 	}
 
 	return Has_Skill(source, skSing);
 }
 
-noexport void Sing_Expires(combatant *target, int argument)
+void Singing_Expires(combatant *target, buff *b)
 {
 	combatant *c;
 	int i;
@@ -33,12 +33,12 @@ noexport void Sing_Expires(combatant *target, int argument)
 		c = List_At(combatants, i);
 
 		if (c->is_pc == is_pc) {
-			c->stats[sHitBonus] -= argument;
+			c->stats[sHitBonus] -= b->arg1;
 		}
 	}
 
 	if (gState == gsCombat) {
-		if (argument == SING_HITBONUS) {
+		if (b->arg1 == SING_HITBONUS) {
 			Combat_Message(target->file, 0, "@n stops singing.");
 		} else {
 			Combat_Message(target->file, 0, "@n's voice fades away.");
@@ -70,6 +70,6 @@ void Sing(combatant *source, combatant *target)
 		}
 	}
 
-	Add_Buff(source, SING_BUFF_NAME, exTurns, duration, Sing_Expires, bonus);
+	Add_Buff(source, Make_Buff(bfSinging, duration, bonus, 0, "Sing"));
 	Combat_Message(source->file, 0, "@n sings, and the party is inspired!");
 }

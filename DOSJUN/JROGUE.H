@@ -5,14 +5,11 @@
 
 #include "combat.h"
 
-/* D E F I N E S ///////////////////////////////////////////////////////// */
-
-#define HIDE_BUFF_NAME	"Hidden"
-
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 bool Check_Hide(combatant *source);
 bool Check_SneakAttack(combatant *source);
+void Hidden_Expires(combatant *source, buff *b);
 void Hide(combatant *source, combatant *target);
 void SneakAttack(combatant *source, combatant *target);
 

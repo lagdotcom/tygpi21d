@@ -14,13 +14,13 @@
 
 bool Check_Hide(combatant *source)
 {
-	if (Has_Buff(source, HIDE_BUFF_NAME))
+	if (Has_Buff(source, bfHidden))
 		return false;
 
 	return Has_Skill(source, skHide);
 }
 
-noexport void Hidden_Expires(combatant *source, int argument)
+void Hidden_Expires(combatant *source, buff *b)
 {
 	if (gState == gsCombat) {
 		Combat_Message(source->file, 0, "@n is revealed!");
@@ -33,13 +33,13 @@ void Hide(combatant *source, combatant *target)
 
 	if (dexterity > 20) dexterity = 20;
 	if (dexterity < 3) dexterity = 3;
-	Add_Buff(target, HIDE_BUFF_NAME, exTurnEndChance, 101 - (dexterity * 5), Hidden_Expires, 0);
+	Add_Buff(target, Make_Buff(bfHidden, 101 - (dexterity * 5), 0, 0, "Hide"));
 	Combat_Message(target->file, source->file, "@n is hidden from view.");
 }
 
 bool Check_SneakAttack(combatant *source)
 {
-	return Has_Buff(source, HIDE_BUFF_NAME);
+	return Has_Buff(source, bfHidden);
 }
 
 noexport void SneakAttack_Inner(combatant *source, combatant *target, item *weapon)

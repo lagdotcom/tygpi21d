@@ -10,9 +10,6 @@
 #define INSPIRE_HITBONUS		2
 #define INSPIRE_DMGBONUS		1
 
-#define CLEAVE_USED_BUFF		"Cleave Fatigue"
-#define INSPIRED_BUFF			"Inspiring"
-
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 bool Check_Concentrate(combatant *source)
@@ -65,7 +62,7 @@ bool Check_Cleave(combatant *source)
 	if (!Has_Skill(source, skCleave))
 		return false;
 
-	if (Has_Buff(source, CLEAVE_USED_BUFF))
+	if (Has_Buff(source, bfCleaveFatigue))
 		return false;
 
 	return true;
@@ -78,7 +75,7 @@ void Cleave(combatant *source, combatant *target)
 	retarget = Get_Random_Target(target->group);
 	if (retarget != null) {
 		Combat_Message(source->file, retarget->file, "@n swings again!");
-		Add_Buff(source, CLEAVE_USED_BUFF, exTurns, 1, null, 0);
+		Add_Buff(source, Make_Buff(bfCleaveFatigue, 1, 0, 0, "Cleave"));
 
 		Attack(source, retarget);
 	}
@@ -89,13 +86,13 @@ bool Check_Inspire(combatant *source)
 	if (!Has_Skill(source, skInspire))
 		return false;
 
-	if (Has_Buff(source, INSPIRED_BUFF))
+	if (Has_Buff(source, bfInspiring))
 		return false;
 
 	return true;
 }
 
-noexport void Inspire_Expires(combatant *target, int argument)
+void Inspiring_Expires(combatant *target, buff *b)
 {
 	combatant *c;
 	int i;
@@ -104,12 +101,14 @@ noexport void Inspire_Expires(combatant *target, int argument)
 		c = List_At(combatants, i);
 
 		if (c->is_pc == target->is_pc) {
-			c->stats[sHitBonus] -= INSPIRE_HITBONUS;
-			c->stats[sMaxDamage] -= INSPIRE_DMGBONUS;
+			c->stats[sHitBonus] -= b->arg1;
+			c->stats[sMaxDamage] -= b->arg2;
 		}
 	}
 
-	Combat_Message(target->file, 0, "@n's inspiration fades.");
+	if (gState == gsCombat) {
+		Combat_Message(target->file, 0, "@n's inspiration fades.");
+	}
 }
 
 void Inspire(combatant *source, combatant *target)
@@ -130,5 +129,5 @@ void Inspire(combatant *source, combatant *target)
 	}
 
 	Combat_Message(source->file, 0, "@n inspires the party to victory!");
-	Add_Buff(source, INSPIRED_BUFF, exTurns, 2, Inspire_Expires, 0);
+	Add_Buff(source, Make_Buff(bfInspiring, 2, INSPIRE_HITBONUS, INSPIRE_DMGBONUS, "Inspire"));
 }

@@ -176,7 +176,7 @@ range Get_Attack_Range(combatant *c)
 {
 	item *primary;
 
-	if (Has_Buff(c, HIDE_BUFF_NAME)) {
+	if (Has_Buff(c, bfHidden)) {
 		return rLong;
 	}
 
@@ -307,7 +307,7 @@ bool Check_Attack(combatant *source)
 	item *weapon;
 
 	/* Sneak Attack is handled separately */
-	if (Has_Buff(source, HIDE_BUFF_NAME)) return false;
+	if (Has_Buff(source, bfHidden)) return false;
 
 	in_front_row = source->row == rowFront;
 	weapon = Get_Weapon(source, true);
@@ -369,9 +369,9 @@ noexport bool Check_Block(combatant *source)
 	return true;
 }
 
-noexport void Block_Expires(combatant *c, int argument)
+void Blocking_Expires(combatant *c, buff *b)
 {
-	c->stats[sArmour] -= argument;
+	c->stats[sArmour] -= b->arg1;
 }
 
 noexport void Block(combatant *c, combatant *target)
@@ -379,7 +379,7 @@ noexport void Block(combatant *c, combatant *target)
 	int bonus = c->stats[sStrength];
 
 	c->stats[sArmour] += bonus;
-	Add_Buff(target, "Blocking", exTurns, 1, Block_Expires, bonus);
+	Add_Buff(target, Make_Buff(bfBlocking, 1, bonus, 0, "Block"));
 
 	Combat_Message(c->file, 0, "@n braces @f.");
 }
@@ -443,6 +443,7 @@ noexport void Log_Combatant(combatant *c)
 {
 	int i;
 	buff *b;
+	buffspec *spec;
 	skill_id sk;
 
 	Log("Log_Combatant: %d - %s (#%d, %s)", c->index, c->name, c->file, c->is_pc ? "PC" : "Monster");
@@ -463,7 +464,8 @@ noexport void Log_Combatant(combatant *c)
 
 		for (i = 0; i < c->buffs->size; i++) {
 			b = List_At(c->buffs, i);
-			Log("-- %s", b->name);
+			spec = &buffspecs[b->id];
+			Log("-- %s", spec->name);
 		}
 	}
 }
@@ -749,24 +751,16 @@ noexport combatant *Get_Pc_Target(pcnum pc, act action_id)
 	}
 }
 
-void Add_Buff(combatant *target, char *name, expiry_type exty, int duration, buff_expiry_fn expiry, int argument)
+void Add_Buff(combatant *target, buff *b)
 {
-	buff *b;
-
-	b = Allocate(1, sizeof(buff), name);
-	if (b == null)
-		die("Add_Buff: out of memory");
-
-	b->name = name;
-	b->type = exty;
-	b->duration = duration;
-	b->expiry = expiry;			/* is this dangerous to Read/Write? */
-	b->argument = argument;
+#if COMBAT_DEBUG
+	Log("Add_Buff: %s(%d/g%d) gains %s", target->name, target->index, target->group, buffspecs[b->id].name);
+#endif
 
 	Add_to_List(target->buffs, b);
 }
 
-bool Has_Buff(combatant *c, char *name)
+bool Has_Buff(combatant *c, buff_id id)
 {
 	buff *b;
 	int i;
@@ -774,7 +768,7 @@ bool Has_Buff(combatant *c, char *name)
 	for (i = 0; i < c->buffs->size; i++) {
 		b = List_At(c->buffs, i);
 
-		if (streq(b->name, name)) {
+		if (b->id == id) {
 			return true;
 		}
 	}
@@ -784,13 +778,19 @@ bool Has_Buff(combatant *c, char *name)
 
 noexport void Remove_Buff_from_List(combatant *owner, buff *b)
 {
-	if (b->expiry != null)
-		b->expiry(owner, b->argument);
+	buffspec *spec = &buffspecs[b->id];
+
+#if COMBAT_DEBUG
+	Log("Remove_Buff_from_List: %s(%d/g%d) loses %s", owner->name, owner->index, owner->group, spec->name);
+#endif
+
+	if (spec->expiry != null)
+		spec->expiry(owner, b);
 
 	Remove_from_List(owner->buffs, b);
 }
 
-void Remove_Buff(combatant *target, char *name)
+void Remove_Buff(combatant *target, buff_id id)
 {
 	buff *b;
 	int i;
@@ -798,7 +798,7 @@ void Remove_Buff(combatant *target, char *name)
 	for (i = target->buffs->size - 1; i >= 0; i--) {
 		b = List_At(target->buffs, i);
 
-		if (streq(b->name, name)) {
+		if (b->id == id) {
 			Remove_Buff_from_List(target, b);
 			return;
 		}
@@ -808,6 +808,7 @@ void Remove_Buff(combatant *target, char *name)
 void Expire_Buffs(void)
 {
 	buff *b;
+	buffspec *spec;
 	combatant *c;
 	int i, j;
 
@@ -816,7 +817,9 @@ void Expire_Buffs(void)
 
 		for (j = c->buffs->size - 1; j >= 0; j--) {
 			b = List_At(c->buffs, j);
-			if (b->type == exTurns) {
+			spec = &buffspecs[b->id];
+
+			if (spec->type == exTurns) {
 				b->duration--;
 
 				if (b->duration <= 0) {
@@ -824,7 +827,7 @@ void Expire_Buffs(void)
 				}
 			}
 
-			if (b->type == exTurnEndChance) {
+			if (spec->type == exTurnEndChance) {
 				if (randint(0, 100) < b->duration) {
 					Remove_Buff_from_List(c, b);
 				}
@@ -836,6 +839,7 @@ void Expire_Buffs(void)
 void Expire_Combat_Buffs(void)
 {
 	buff *b;
+	buffspec *spec;
 	combatant *c;
 	int i, j;
 
@@ -843,7 +847,9 @@ void Expire_Combat_Buffs(void)
 		c = List_At(combatants, i);
 		for (j = c->buffs->size - 1; j >= 0; j--) {
 			b = List_At(c->buffs, j);
-			if (b->type == exTurns || b->type == exTurnEndChance) {
+			spec = &buffspecs[b->id];
+
+			if (spec->type == exTurns || spec->type == exTurnEndChance) {
 				Remove_Buff_from_List(c, b);
 			}
 		}
@@ -1022,8 +1028,8 @@ noexport void Enter_Combat_Loop(void)
 				continue;
 			}
 
-			if (Has_Buff(c, LOSE_MOVE_BUFF_NAME)) {
-				Remove_Buff(c, LOSE_MOVE_BUFF_NAME);
+			if (Has_Buff(c, bfLoseNextMove)) {
+				Remove_Buff(c, bfLoseNextMove);
 				c->action = NO_ACTION;
 				continue;
 			}

@@ -6,6 +6,7 @@
 #include "common.h"
 #include "types.h"
 
+#include "buffs.h"
 #include "campaign.h"
 #include "code.h"
 #include "combat.h"
