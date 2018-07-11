@@ -471,7 +471,7 @@ noexport void Log_Combatant(combatant *c)
 }
 #endif
 
-void Add_Monster(groupnum group, file_id ref)
+combatant *Add_Monster(groupnum group, file_id ref)
 {
 	list *buffs;
 	monster *template;
@@ -509,19 +509,20 @@ void Add_Monster(groupnum group, file_id ref)
 #if COMBAT_DEBUG
 	Log_Combatant(c);
 #endif
+
+	return c;
 }
 
-noexport void Add_Pc(pcnum index)
+noexport combatant *Add_Pc(pc *pc, file_id ref, pcnum index)
 {
 	combatant *c;
-	pc *pc = Get_PC(index);
-	if (!pc) return;
+	if (!pc) return null;
 
 	c = SzAlloc(1, combatant, "Add_Pc");
 	if (c == null)
 		die("Add_Pc: out of memory");
 
-	c->file = Get_PC_ID(index);
+	c->file = ref;
 	c->action = NO_ACTION;
 	c->buffs = pc->buffs;
 	c->group = In_Front_Row(pc) ? GROUP_PCFRONT : GROUP_PCBACK;
@@ -544,6 +545,13 @@ noexport void Add_Pc(pcnum index)
 #if COMBAT_DEBUG
 	Log_Combatant(c);
 #endif
+
+	return c;
+}
+
+noexport combatant *Add_PC_by_Index(pcnum index)
+{
+	return Add_Pc(Get_PC(index), Get_PC_ID(index), index);
 }
 
 void Add_Combat_Action(act id, char *name, action_check_fn check_fn, action_do_fn act_fn, targetflags target, pri priority)
@@ -790,7 +798,7 @@ noexport void Remove_Buff_from_List(combatant *owner, buff *b)
 	Remove_from_List(owner->buffs, b);
 }
 
-void Remove_Buff(combatant *target, buff_id id)
+bool Remove_Buff(combatant *target, buff_id id)
 {
 	buff *b;
 	int i;
@@ -800,9 +808,34 @@ void Remove_Buff(combatant *target, buff_id id)
 
 		if (b->id == id) {
 			Remove_Buff_from_List(target, b);
-			return;
+			return true;
 		}
 	}
+
+	return false;
+}
+
+bool Remove_Buff_from_PC(file_id ref, buff_id id)
+{
+	pc *pc;
+	buff *b;
+	combatant *target;
+	int i;
+
+	pc = Lookup_File_Chained(gSave, ref);
+	for (i = pc->buffs->size - 1; i >= 0; i--) {
+		b = List_At(pc->buffs, i);
+
+		if (b->id == id) {
+			/* Temporarily create a combatant! */
+			target = Add_Pc(pc, ref, 0);
+			Remove_Buff_from_List(target, b);
+			Free(target);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void Expire_Buffs(void)
@@ -1087,7 +1120,7 @@ void Start_Combat(encounter_id id)
 
 	memset(pc_combatants, 0, sizeof(combatant*) * PARTY_SIZE);
 	for (pc = 0; pc < PARTY_SIZE; pc++) {
-		Add_Pc(pc);
+		Add_PC_by_Index(pc);
 	}
 
 	description = Allocate(10 + (NAME_SIZE+ENCOUNTER_SIZE)*6, 1, "Start_Combat");

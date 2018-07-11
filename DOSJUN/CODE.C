@@ -925,6 +925,68 @@ noexport void InParty(code_host *h)
 	Push_Stack(h, Bool(success));
 }
 
+noexport void AddBuff(code_host *h)
+{
+	file_id pc_id = Pop_Stack(h);
+	buff_id buff = Pop_Stack(h);
+	int duration = Pop_Stack(h);
+	int arg1 = Pop_Stack(h);
+	int arg2 = Pop_Stack(h);
+	pc *pc;
+
+#if CODE_DEBUG
+	Log("C|AddBuff %d, %d, %d, %d, %d", pc_id, buff, duration, arg1, arg2);
+#endif
+
+	pc = Lookup_File_Chained(gSave, pc_id);
+	Add_to_List(pc->buffs, Make_Buff(buff, duration, arg1, arg2, "AddBuff"));
+
+	Add_PC_to_Save(gSave, pc, pc_id);
+}
+
+noexport void RemoveBuff(code_host *h)
+{
+	file_id pc_id = Pop_Stack(h);
+	buff_id buff = Pop_Stack(h);
+	pc *pc;
+
+#if CODE_DEBUG
+	Log("C|RemoveBuff %d, %d", pc_id, buff);
+#endif
+
+	pc = Lookup_File_Chained(gSave, pc_id);
+	Push_Stack(h, Bool(Remove_Buff_from_PC(pc_id, buff)));
+
+	/* This shouldn't be necessary, but who knows */
+	Add_PC_to_Save(gSave, pc, pc_id);
+}
+
+noexport void HasBuff(code_host *h)
+{
+	file_id pc_id = Pop_Stack(h);
+	buff_id buff_id = Pop_Stack(h);
+	buff *b;
+	pc *pc;
+	int i;
+	bool result = false;
+
+#if CODE_DEBUG
+	Log("C|HasBuff %d, %d", pc_id, buff_id);
+#endif
+
+	pc = Lookup_File_Chained(gSave, pc_id);
+
+	for (i = 0; i < pc->buffs->size; i++) {
+		b = pc->buffs->items[i];
+		if (b->id == buff_id) {
+			result = true;
+			break;
+		}
+	}
+
+	Push_Stack(h, Bool(result));
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -995,6 +1057,9 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coInParty:		InParty(h); return;
 
 		case coGotoXY:		GotoXY(h); return;
+		case coAddBuff:		AddBuff(h); return;
+		case coHasBuff:		HasBuff(h); return;
+		case coRemoveBuff:	RemoveBuff(h); return;
 	}
 
 	h->running = false;

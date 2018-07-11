@@ -94,7 +94,8 @@ bool Has_Buff(combatant *target, buff_id id);
 bool Is_Dead(combatant *victim);
 void Initialise_Combat(void);
 int randint(int minimum, int maximum);
-void Remove_Buff(combatant *target, buff_id id);
+bool Remove_Buff(combatant *target, buff_id id);
+bool Remove_Buff_from_PC(file_id ref, buff_id id);
 void Start_Combat(encounter_id id);
 void With_Both_Weapons(combatant *source, combatant *target, weapon_atk_fn func);
 

@@ -79,6 +79,9 @@ typedef enum code_op {
 	coGetAttitude,
 	coGotoXY,
 	coInParty,
+	coHasBuff,
+	coAddBuff,
+	coRemoveBuff,
 } code_op;
 
 typedef enum code_internal {
