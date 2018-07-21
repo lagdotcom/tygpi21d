@@ -103,3 +103,17 @@ bool Save_Zone(char *filename, zone *z)
 	fclose(fp);
 	return true;
 }
+
+void Add_Item_to_Tile(int x, int y, file_id ref)
+{
+	itempos *ip;
+
+	ip = SzAlloc(1, itempos, "Add_Item_to_Tile");
+	ip->item = ref;
+	ip->x = x;
+	ip->y = y;
+	ip->tile_x = random(100);
+	ip->tile_y = random(100);
+
+	Add_to_List(gOverlay->items, ip);
+}

@@ -523,6 +523,9 @@ noexport bool Confirm_Drop_Item(pc *pc, int index)
 		}
 
 		if (!failed) {
+			Add_Item_to_Tile(gParty->x, gParty->y, iv->item);
+			redraw_fp = true;
+
 			iv->item = 0;
 			result = true;
 		}
@@ -869,4 +872,23 @@ file_id Pick_Portrait(file_id org)
 
 	Free(buffer);
 	return ref;
+}
+
+bool Add_Item_to_Party(file_id item_id, int qty, pcnum *given_to)
+{
+	pcnum index;
+	pc *pc;
+
+	for (index = 0; index < PARTY_SIZE; index++) {
+		pc = Get_PC(index);
+		if (!pc) continue;
+
+		if (Add_to_Inventory(pc, item_id, qty)) {
+			*given_to = index;
+			return true;
+		}
+	}
+
+	*given_to = -1;
+	return false;
 }

@@ -86,6 +86,7 @@ typedef struct zone {
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+void Add_Item_to_Tile(int x, int y, file_id ref);
 void Free_Zone(zone *z);
 void Initialise_Zone(zone *z);
 bool Load_Zone(char *filename, zone *z);

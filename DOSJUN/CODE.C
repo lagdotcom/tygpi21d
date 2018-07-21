@@ -636,7 +636,6 @@ noexport void Refresh(code_host *h)
 
 noexport void AddItem(code_host *h)
 {
-	pcnum index;
 	int qty = Pop_Stack(h);
 	file_id item_id = Pop_Stack(h);
 	pc *pc;
@@ -646,14 +645,7 @@ noexport void AddItem(code_host *h)
 	Log("C|AddItem %d, %d", item_id, qty);
 #endif
 
-	for (index = 0; index < PARTY_SIZE; index++) {
-		pc = Get_PC(index);
-		if (!pc) continue;
-
-		success = Add_to_Inventory(pc, item_id, qty);
-		if (success) break;
-	}
-
+	success = Add_Item_to_Party(item_id, qty, pc);
 	Push_Stack(h, Bool(success));
 }
 
@@ -744,9 +736,9 @@ noexport void ChoosePcName(code_host *h)
 	}
 
 	row_height = Char_Height(gFont, ' ');
-	name = SzAlloc(50, char, "ChoosePcName");
+	name = SzAlloc(CODE_NAME_BUFFER_SIZE, char, "ChoosePcName");
 	Draw_Font(text_pos.x, text_pos.y, 0, "Choose a name:", gFont, true);
-	Input_String(text_pos.x, text_pos.y + row_height, name, 50);
+	Input_String(text_pos.x, text_pos.y + row_height, name, CODE_NAME_BUFFER_SIZE);
 	text_pos.y += row_height * 2;
 
 	pc->name = name;

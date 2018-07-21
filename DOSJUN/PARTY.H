@@ -12,6 +12,7 @@ typedef INT8 pcnum;
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 bool Add_to_Inventory(pc *pc, file_id iid, unsigned char qty);
+bool Add_Item_to_Party(file_id item_id, int qty, pcnum *given_to);
 void Draw_Character_Status(pcnum index, int x, int y);
 void Draw_Party_Status(void);
 pc *Duplicate_PC(pc *pc);

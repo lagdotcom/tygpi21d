@@ -25,8 +25,12 @@
 /* These values affect memory use */
 
 #define CODE_BUFFER_SIZE		300
+#define CODE_NAME_BUFFER_SIZE	50
 
 #define COMBAT_BUFFER_SIZE		400
+
+#define DOSJUN_BUFFER_SIZE		300
+#define DOSJUN_REMOVAL_LIST_SIZE		100
 
 #define IO_MAXFILES				20
 

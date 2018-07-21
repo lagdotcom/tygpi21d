@@ -31,18 +31,19 @@ noexport box2d gameStringBox = {
 	{ 308, 188 },
 };
 
+noexport char strbuf[DOSJUN_BUFFER_SIZE];
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
 void dief(char *format, ...)
 {
 	va_list vargs;
-	char buf[500];
 
 	va_start(vargs, format);
-	vsprintf(buf, format, vargs);
+	vsprintf(strbuf, format, vargs);
 	va_end(vargs);
 
-	die(buf);
+	die(strbuf);
 }
 
 char Get_X_Offset(dir dir)
@@ -323,6 +324,49 @@ void Redraw_Dungeon_Screen(bool script)
 	just_moved = false;
 }
 
+noexport void Try_Get_Items(void)
+{
+	pcnum num;
+	pc *pc;
+	unsigned int i;
+	itempos *ip;
+	item *it;
+	int remove_indices[DOSJUN_REMOVAL_LIST_SIZE];
+
+	bool success = true;
+	int j = 0;
+
+	for (i = 0; i < gOverlay->items->size; i++)
+	{
+		ip = List_At(gOverlay->items, i);
+		if (ip->x == gParty->x && ip->y == gParty->y) {
+			if (Add_Item_to_Party(ip->item, 1, &num)) {
+				pc = Lookup_File(gSave, gParty->members[num], true);
+				it = Lookup_File(gDjn, ip->item, true);
+				sprintf(strbuf, "%s gets %s.", pc->name, Resolve_String(it->name_id));
+				Show_Game_String(strbuf, true);
+				remove_indices[j++] = i;
+
+				/* don't break memory */
+				if (j == DOSJUN_REMOVAL_LIST_SIZE)
+					break;
+			} else {
+				success = false;
+				break;
+			}
+		}
+	}
+
+	while (j > 0) {
+		ip = List_At(gOverlay->items, remove_indices[--j]);
+		Remove_from_List(gOverlay->items, ip);
+	}
+
+	if (!success) {
+		Show_Game_String("You couldn't carry everything.", true);
+	}
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 gamestate Show_Dungeon_Screen(void)
@@ -406,6 +450,10 @@ gamestate Show_Dungeon_Screen(void)
 
 			case SCAN_SPACE:
 				Trigger_Use_Script();
+				break;
+
+			case SCAN_G:
+				Try_Get_Items();
 				break;
 		}
 	}
