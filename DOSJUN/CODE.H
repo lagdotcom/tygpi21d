@@ -20,10 +20,12 @@ typedef enum code_op {
 	coPushLocal,
 	coPushTemp,
 	coPushInternal,
+	coPushFlag,
 	coPushLiteral = 0x1F,
 	coPopGlobal = 0x20,
 	coPopLocal,
 	coPopTemp,
+	coPopFlag,
 	/* Arithmetic */
 	coAdd = 0x30,
 	coSub,

@@ -96,19 +96,37 @@ noexport char *Get_PC_Name(file_id ref)
 
 noexport void Push_Global(code_host *h)
 {
-	bytecode index = Next_Op(h);
+	int index = Next_Literal(h);
 #if CODE_DEBUG
 	Log("C|Push_Global.%d", index);
 #endif
+	assert(index < gGlobals->num_globals, "Push_Global: index too high");
 	Push_Stack(h, h->globals[index]);
+}
+
+noexport void Push_Flag(code_host *h)
+{
+	int index = Next_Literal(h);
+	int offset, bit;
+
+#if CODE_DEBUG
+	Log("C|Push_Flag.%d", index);
+#endif
+
+	assert(index < gGlobals->num_flags, "Push_Flag: index too high");
+	offset = index >> 4;
+	bit = 1 << (index % 8);
+
+	Push_Stack(h, Bool(h->flags[offset] & bit));
 }
 
 noexport void Push_Local(code_host *h)
 {
-	bytecode index = Next_Op(h);
+	int index = Next_Literal(h);
 #if CODE_DEBUG
 	Log("C|Push_Local.%d", index);
 #endif
+	assert(index < gOverlay->num_locals, "Push_Local: index too high");
 	Push_Stack(h, h->locals[index]);
 }
 
@@ -118,6 +136,7 @@ noexport void Push_Temp(code_host *h)
 #if CODE_DEBUG
 	Log("C|Push_Temp.%d", index);
 #endif
+	assert(index < MAX_TEMPS, "Push_Temp: index too high");
 	Push_Stack(h, h->temps[index]);
 }
 
@@ -164,19 +183,42 @@ noexport void Push_Literal(code_host *h)
 
 noexport void Pop_Global(code_host *h)
 {
-	bytecode index = Next_Op(h);
+	int index = Next_Literal(h);
 #if CODE_DEBUG
 	Log("C|Pop_Global.%d", index);
 #endif
+	assert(index < gGlobals->num_globals, "Pop_Global: index too high");
 	h->globals[index] = Pop_Stack(h);
+}
+
+noexport void Pop_Flag(code_host *h)
+{
+	int index = Next_Literal(h);
+	int set = Pop_Stack(h);
+	int offset, bit;
+
+#if CODE_DEBUG
+	Log("C|Pop_Flag.%d", index);
+#endif
+
+	assert(index < gGlobals->num_flags, "Pop_Flag: index too high");
+	offset = index >> 4;
+	bit = 1 << (index % 8);
+
+	if (set) {
+		h->flags[offset] |= bit;
+	} else {
+		h->flags[offset] &= ~bit;
+	}
 }
 
 noexport void Pop_Local(code_host *h)
 {
-	bytecode index = Next_Op(h);
+	int index = Next_Literal(h);
 #if CODE_DEBUG
 	Log("C|Pop_Local.%d", index);
 #endif
+	assert(index < gOverlay->num_locals, "Pop_Local: index too high");
 	h->locals[index] = Pop_Stack(h);
 }
 
@@ -186,6 +228,7 @@ noexport void Pop_Temp(code_host *h)
 #if CODE_DEBUG
 	Log("C|Pop_Temp.%d", index);
 #endif
+	assert(index < MAX_TEMPS, "Pop_Temp: index too high");
 	h->temps[index] = Pop_Stack(h);
 }
 
@@ -989,9 +1032,11 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coPushTemp:	Push_Temp(h); return;
 		case coPushInternal:Push_Internal(h); return;
 		case coPushLiteral:	Push_Literal(h); return;
+		case coPushFlag:	Push_Flag(h); return;
 		case coPopGlobal:	Pop_Global(h); return;
 		case coPopLocal:	Pop_Local(h); return;
 		case coPopTemp:		Pop_Temp(h); return;
+		case coPopFlag:		Pop_Flag(h); return;
 
 		case coAdd:			Add(h); return;
 		case coSub:			Sub(h); return;
