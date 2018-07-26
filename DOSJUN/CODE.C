@@ -681,14 +681,14 @@ noexport void AddItem(code_host *h)
 {
 	int qty = Pop_Stack(h);
 	file_id item_id = Pop_Stack(h);
-	pc *pc;
+	pcnum num;
 	bool success = false;
 
 #if CODE_DEBUG
 	Log("C|AddItem %d, %d", item_id, qty);
 #endif
 
-	success = Add_Item_to_Party(item_id, qty, pc);
+	success = Add_Item_to_Party(item_id, qty, &num);
 	Push_Stack(h, Bool(success));
 }
 
