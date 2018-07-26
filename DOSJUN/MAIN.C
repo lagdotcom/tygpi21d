@@ -92,7 +92,7 @@ gamestate Show_Main_Menu(void)
 	int option;
 	bool done = false;
 	char *menu[3];
-	sng s;
+	sng *s = null;
 	gamestate next;
 	menu[0] = "NEW GAME";
 	menu[1] = "LOAD GAME";
@@ -100,8 +100,10 @@ gamestate Show_Main_Menu(void)
 
 	menu_bg = Lookup_File_Chained(gDjn, gCampaign->menubg_id);
 
-	Load_SNG("ANTICAR.SNG", &s);
-	Start_SNG(&s);
+	if (gCampaign->menumusic_id) {
+		s = Lookup_File(gDjn, gCampaign->menumusic_id, true);
+		Start_SNG(s);
+	}
 
 	while (!done) {
 		Fill_Double_Buffer(0);
@@ -130,8 +132,10 @@ gamestate Show_Main_Menu(void)
 		}
 	}
 
-	Stop_SNG();
-	Free_SNG(&s);
+	if (gCampaign->menumusic_id) {
+		Stop_SNG();
+		Unload_File(gDjn, gCampaign->menumusic_id);
+	}
 
 	if (menu_bg)
 		Unload_File(gDjn, gCampaign->menubg_id);

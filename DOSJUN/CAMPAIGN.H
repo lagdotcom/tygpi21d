@@ -7,7 +7,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define CAMPAIGN_PADDING		10
+#define CAMPAIGN_PADDING		8
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -23,6 +23,7 @@ typedef struct campaign {
 	UINT16 menubg_id;
 	UINT16 dungeonbg_id;
 	UINT16 combatbg_id;
+	UINT16 menumusic_id;
 
 	unsigned char unused[CAMPAIGN_PADDING];
 } campaign;
