@@ -91,8 +91,8 @@ noexport void Draw_Tile_Segment(file_id texture_id, int dx, int dy, int piece)
 	tex = Lookup_File(gDjn, texture_id, true);
 	assert(tex != null, "Draw_Tile_Segment: unknown texture ID");
 
-	p.x = dx + 96;
-	p.y = dy + 8;
+	p.x = dx + VIEW_X;
+	p.y = dy + VIEW_Y;
 	Draw_GRF_Clipped(&p, tex, piece, 0, &viewport);
 #endif
 }
@@ -108,8 +108,8 @@ noexport void Draw_Thing(file_id thing_id, int dx, int dy, int piece)
 	thing = Lookup_File(gDjn, thing_id, true);
 	assert(thing != null, "Draw_Thing: unknown thing ID");
 
-	p.x = dx + 96;
-	p.y = dy + 8;
+	p.x = dx + VIEW_X;
+	p.y = dy + VIEW_Y;
 	Draw_GRF_Clipped(&p, thing, piece, 0, &viewport);
 #endif
 }
@@ -135,11 +135,46 @@ noexport tile *Get_Offset_Tile(int forward, int left)
 noexport void Clear_FP(void)
 {
 	int y;
-	unsigned char *output = &double_buffer[8 * SCREEN_WIDTH + 96];
+	unsigned char *output = &double_buffer[VIEW_Y * SCREEN_WIDTH + VIEW_X];
 
-	for (y = 0; y < 128; y++) {
-		memset(output, 0, 128);
+	for (y = 0; y < VIEW_H; y++) {
+		memset(output, 0, VIEW_W);
 		output += SCREEN_WIDTH;
+	}
+}
+
+noexport void Draw_Items_in_Tile(coord x, coord y, int distance)
+{
+	int i;
+	itempos *ip;
+	item *it;
+	grf *g;
+	point2d p;
+
+	for (i = 0; i < gOverlay->items->size; i++) {
+		ip = List_At(gOverlay->items, i);
+
+		if (ip->x != x || ip->y != y || !ip->item)
+			continue;
+
+		it = Lookup_File(gDjn, ip->item, true);
+		if (it == null || !it->image_id)
+			continue;
+
+		g = Lookup_File(gDjn, it->image_id, true);
+		if (g == null || g->num_images <= distance)
+			continue;
+
+		p.x = VIEW_X;
+		p.y = VIEW_Y + VIEW_H - 32;
+
+		p.x += ip->tile_x * VIEW_W / 100;
+		p.y += ip->tile_y * 32 / 100;
+
+		p.x -= g->images[distance].width / 2;
+		p.y -= g->images[distance].height / 2;
+
+		Draw_GRF_Clipped(&p, g, distance, 0, &viewport);
 	}
 }
 
@@ -257,6 +292,8 @@ void Draw_FP(void)
 
 		Draw_Thing(t->thing, 0, 0, THING_CLOSE);
 	}
+
+	Draw_Items_in_Tile(gParty->x, gParty->y, 0);
 
 	redraw_fp = false;
 }

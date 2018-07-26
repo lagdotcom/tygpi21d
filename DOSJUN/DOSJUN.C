@@ -344,6 +344,11 @@ noexport void Try_Get_Items(void)
 				pc = Lookup_File(gSave, gParty->members[num], true);
 				it = Lookup_File(gDjn, ip->item, true);
 				sprintf(strbuf, "%s gets %s.", pc->name, Resolve_String(it->name_id));
+
+				/* null items are not drawn */
+				ip->item = 0;
+				Draw_FP();
+
 				Show_Game_String(strbuf, true);
 				remove_indices[j++] = i;
 
