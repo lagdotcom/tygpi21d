@@ -8,7 +8,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define ZONE_HEADER_PADDING			10
+#define ZONE_HEADER_PADDING			8
 #define WALL_PADDING				1
 #define TILE_PADDING				16
 #define ENCOUNTER_SIZE	6
@@ -71,6 +71,7 @@ typedef struct zone_header {
 	str_id name_id;
 	UINT16 num_locals;
 	UINT16 num_items;
+	file_id on_exit;
 
 	unsigned char padding[ZONE_HEADER_PADDING];
 } zone_header;

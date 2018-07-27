@@ -24,6 +24,7 @@ gamestate Start_New_Game(void)
 	Initialise_Globals(gGlobals, gCampaign);
 
 	gParty = Find_File_Type(gSave, ftParty);
+	gParty->zone = 0;
 	gParty->encounter_chance = 0;
 	gParty->danger = 1;
 
@@ -45,6 +46,9 @@ _dead:
 
 void Move_to_Zone(file_id id)
 {
+	if (gParty->zone && gZone->header.on_exit)
+		Run_Code(gZone->header.on_exit);
+
 	gZone = Lookup_File_Chained(gDjn, id);
 	if (gZone == null)
 		dief("Move_to_Zone: could not find zone #%d", id);
