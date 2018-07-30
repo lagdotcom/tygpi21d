@@ -225,7 +225,7 @@ item *Get_Equipped_Item(pc *pc, itemslot sl)
 
 bool PC_Can_Equip(pc *pc, item *it)
 {
-	if (it->flags && ifHeavy) {
+	if (it->flags & ifHeavy) {
 		switch (pc->header.job) {
 			case jFighter:
 			case jPure:
@@ -238,7 +238,7 @@ bool PC_Can_Equip(pc *pc, item *it)
 		}
 	}
 
-	if (it->flags && ifLight) {
+	if (it->flags & ifLight) {
 		switch (pc->header.job) {
 			case jFighter:
 			case jPure:
@@ -261,6 +261,20 @@ bool PC_Can_Equip(pc *pc, item *it)
 
 		default: return false;
 	}
+}
+
+char *Item_Weight(item *it)
+{
+	if (it->flags & ifHeavy) return "Heavy";
+	if (it->flags & ifLight) return "Light";
+	return "Medium";
+}
+
+char *Item_Type(item *it)
+{
+	if (Is_Weapon(it)) return "Weapon";
+	if (Is_Armour(it)) return "Armour";
+	return "Other";
 }
 
 bool Equip_Item_At(pc *pc, int index)
@@ -296,6 +310,7 @@ bool Equip_Item_At(pc *pc, int index)
 	if (sl == slInvalid) return false;
 
 	if (!PC_Can_Equip(pc, it)) {
+		Log("Equip_Item_At: %s cannot equip %s (%s/%s)", jobspecs[pc->header.job].name, Resolve_String(it->name_id), Item_Weight(it), Item_Type(it));
 		Confirm("Can't equip that.");
 		Clear_Confirm();
 		return false;
