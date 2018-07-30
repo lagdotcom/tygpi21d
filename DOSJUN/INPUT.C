@@ -73,19 +73,20 @@ bool Input_Number(int x, int y, int *number, int min, int max)
 
 bool Input_String(int x, int y, char *string, int max)
 {
-	/* TODO: font */
-	int cx = x,
-		cy = y,
-		i = 0;
+	int i = 0;
 	char ch;
+	int ex = SCREEN_WIDTH - 1;
+	int ey = y + Char_Height(gFont, ' ') - 1;
 
-	string[i] = 0;
-	Blit_Char_DB(cx, cy, '_', WHITE, 0);
-	Show_Double_Buffer();
+	string[i] = '_';
+	string[i + 1] = 0;
 
 	while (true) {
-		ch = getch();
+		Draw_Square_DB(0, x, y, ex, ey, true);
+		Draw_Font(x, y, 0, string, gFont, true);
+		Show_Double_Buffer();
 
+		ch = getch();
 		if (ch == '\r') {
 			if (i == 0) {
 				continue;
@@ -95,27 +96,14 @@ bool Input_String(int x, int y, char *string, int max)
 			return true;
 		} else if (ch == DEL) {
 			if (i > 0) {
-				Blit_Char_DB(cx, cy, ' ', WHITE, 0);
-				string[--i] = 0;
-				cx -= 8;
+				string[i] = 0;
+				string[--i] = '_';
 			}
 		} else if (i < (max - 1)) {
 			string[i++] = ch;
-			string[i] = 0;
-			Blit_Char_DB(cx, cy, ch, WHITE, 0);
-			cx += 8;
+			string[i] = '_';
+			string[i + 1] = 0;
 		}
-
-		if (cx < 0) {
-			cy -= 8;
-			cx = SCREEN_WIDTH - 8;
-		} else if (cx >= SCREEN_WIDTH) {
-			cy += 8;
-			cx = 0;
-		}
-
-		Blit_Char_DB(cx, cy, '_', WHITE, 0);
-		Show_Double_Buffer();
 	}
 }
 
