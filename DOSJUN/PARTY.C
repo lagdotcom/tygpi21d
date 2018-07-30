@@ -42,6 +42,15 @@ void Pc_Select(pcnum num)
 	Pc_Select_Box(num == 5, SX2, SY + 68);
 }
 
+noexport unsigned char Confirm(char *prompt)
+{
+	Draw_Font(CONFIRM_X, CONFIRM_Y, WHITE, prompt, gFont, false);
+	Show_Double_Buffer();
+	return Get_Next_Scan_Code();
+}
+
+#define Clear_Confirm() Draw_Square_DB(BLACK, CONFIRM_X, CONFIRM_Y, SCREEN_WIDTH - 1, CONFIRM_Y + 7, true)
+
 void Draw_Character_Status(pcnum index, int x, int y)
 {
 	char buffer[9];
@@ -111,6 +120,20 @@ bool Is_Weapon(item *it)
 		case itPrimaryWeapon:
 		case itTwoHandedWeapon:
 		case itSmallWeapon:
+			return true;
+
+		default: return false;
+	}
+}
+
+bool Is_Armour(item *it)
+{
+	switch (it->type)
+	{
+		case itShield:
+		case itHelmet:
+		case itBodyArmour:
+		case itFootwear:
 			return true;
 
 		default: return false;
@@ -200,6 +223,46 @@ item *Get_Equipped_Item(pc *pc, itemslot sl)
 	return Lookup_File_Chained(gDjn, Get_Equipped_Item_Id(pc, sl));
 }
 
+bool PC_Can_Equip(pc *pc, item *it)
+{
+	if (it->flags && ifHeavy) {
+		switch (pc->header.job) {
+			case jFighter:
+			case jPure:
+				return true;
+
+			case jCorrupt:
+				return Is_Weapon(it);
+
+			default: return false;
+		}
+	}
+
+	if (it->flags && ifLight) {
+		switch (pc->header.job) {
+			case jFighter:
+			case jPure:
+				return Is_Weapon(it);
+
+			default: return true;
+		}
+	}
+
+	switch (pc->header.job) {
+		case jFighter:
+		case jCleric:
+		case jRanger:
+		case jPure:
+		case jCorrupt:
+			return true;
+
+		case jRogue:
+			return Is_Armour(it);
+
+		default: return false;
+	}
+}
+
 bool Equip_Item_At(pc *pc, int index)
 {
 	inventory *iv;
@@ -217,8 +280,6 @@ bool Equip_Item_At(pc *pc, int index)
 	it = Lookup_File_Chained(gDjn, iv->item);
 	if (it == null) return false;
 
-	/* TODO: check char can equip item */
-
 	/* Small Weapons can go in either hand */
 	ty = it->type;
 	if (ty == itSmallWeapon) {
@@ -233,6 +294,12 @@ bool Equip_Item_At(pc *pc, int index)
 
 	/* Unequippable? */
 	if (sl == slInvalid) return false;
+
+	if (!PC_Can_Equip(pc, it)) {
+		Confirm("Can't equip that.");
+		Clear_Confirm();
+		return false;
+	}
 
 	/* Cursed? */
 	if (!Remove_Equipped_Items(pc, sl)) return false;
@@ -493,15 +560,6 @@ noexport void Show_Pc_Stats(pc *pc)
 	Show_Pc_Stat(pc, sArmour, 160, 72);
 	Show_Pc_Stat(pc, sToughness, 160, 80);
 }
-
-noexport unsigned char Confirm(char *prompt)
-{
-	Draw_Font(CONFIRM_X, CONFIRM_Y, WHITE, prompt, gFont, false);
-	Show_Double_Buffer();
-	return Get_Next_Scan_Code();
-}
-
-#define Clear_Confirm() Draw_Square_DB(BLACK, CONFIRM_X, CONFIRM_Y, SCREEN_WIDTH - 1, CONFIRM_Y + 7, true)
 
 noexport bool Confirm_Drop_Item(pc *pc, int index)
 {

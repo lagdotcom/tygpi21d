@@ -41,8 +41,8 @@ typedef enum job {
 	jRanger,	/* Str, Dex */
 	jBard,		/* Int, Dex */
 
-	jReserved1,
-	jReserved2,
+	jPure,
+	jCorrupt,
 	jReserved3,
 	jReserved4,
 
