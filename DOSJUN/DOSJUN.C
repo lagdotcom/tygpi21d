@@ -274,11 +274,34 @@ void Random_Encounter(encounter_id eid)
 	Start_Combat(eid);
 }
 
+bool Check_Party_Level(int min, int max)
+{
+	pc *p;
+	int pl = 0;
+	int i;
+
+	if (min == 0 && max == 0)
+		return true;
+
+	for (i = 0; i < PARTY_SIZE; i++) {
+		p = Get_PC(i);
+		if (p) {
+			pl += p->header.total_level;
+		}
+	}
+
+	if (min && min > pl) return false;
+	if (max && max < pl) return false;
+
+	return true;
+}
+
 void Check_Random_Encounter(void)
 {
 	int i;
 	tile *under = TILE(gZone, gParty->x, gParty->y);
 	etable *et;
+	encounter *ec;
 	if (under->etable == 0) return;
 
 	if (gParty->encounter_chance < 200)
@@ -287,6 +310,11 @@ void Check_Random_Encounter(void)
 	if (randint(0, 100) < gParty->encounter_chance) {
 		et = &gZone->etables[under->etable - 1];
 		for (i = 0; i < et->possibilities; i++) {
+			ec = &gZone->encounters[et->encounters[i]];
+			if (!Check_Party_Level(ec->min_level, ec->max_level)) {
+				continue;
+			}
+
 			if (randint(0, 100) < et->percentages[i]) {
 				Random_Encounter(et->encounters[i]);
 				return;
