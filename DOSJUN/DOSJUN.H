@@ -66,6 +66,7 @@ extern djn *gSave;
 extern zone *gZone;
 extern overlay *gOverlay;
 extern globals *gGlobals;
+extern palette *gPalette;
 
 extern bool
 	trigger_on_enter,

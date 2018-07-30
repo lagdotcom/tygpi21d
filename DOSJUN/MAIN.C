@@ -95,9 +95,12 @@ gamestate Show_Main_Menu(void)
 {
 	int option;
 	bool done = false;
+	bool first = true;
 	char *menu[3];
 	sng *s = null;
 	gamestate next;
+	RGB_color black;
+
 	menu[0] = "NEW GAME";
 	menu[1] = "LOAD GAME";
 	menu[2] = "QUIT";
@@ -109,10 +112,19 @@ gamestate Show_Main_Menu(void)
 		Start_SNG(s);
 	}
 
+	black.red = 0; black.green = 0; black.blue = 0;
+	Fill_Palette(&black);
+
 	while (!done) {
 		Fill_Double_Buffer(0);
 		if (menu_bg)
 			Draw_GRF(&gTopLeft, menu_bg, 0, 0);
+
+		if (first) {
+			first = false;
+			Show_Double_Buffer();
+			Fade_From(gPalette, &black, 3);
+		}
 
 		option = Input_Menu(menu, 3, 100, 140);
 

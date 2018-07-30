@@ -230,3 +230,51 @@ void Apply_Palette(palette *p)
 		Set_Palette_Register(i, &p->colours[i]);
 	}
 }
+
+noexport RGB_color_ptr Mix(RGB_color_ptr a, RGB_color_ptr b, int percentage)
+{
+	RGB_color mixed;
+	double ratio = percentage / 100.0;
+	double oppos = 1 - ratio;
+
+	mixed.red = a->red * oppos + b->red * ratio;
+	mixed.blue = a->blue * oppos + b->blue * ratio;
+	mixed.green = a->green * oppos + b->green * ratio;
+
+	return &mixed;
+}
+
+void Fade_To(palette *p, RGB_color_ptr c, int delay)
+{
+	int percentage, i;
+
+	for (percentage = 1; percentage <= 100; percentage++) {
+		for (i = 0; i < PALETTE_SIZE; i++) {
+			Set_Palette_Register(i, Mix(&p->colours[i], c, percentage));
+		}
+
+		Delay(delay);
+	}
+}
+
+void Fade_From(palette *p, RGB_color_ptr c, int delay)
+{
+	int percentage, i;
+
+	for (percentage = 1; percentage <= 100; percentage++) {
+		for (i = 0; i < PALETTE_SIZE; i++) {
+			Set_Palette_Register(i, Mix(c, &p->colours[i], percentage));
+		}
+
+		Delay(delay);
+	}
+}
+
+void Fill_Palette(RGB_color_ptr c)
+{
+	int i;
+
+	for (i = 0; i < PALETTE_SIZE; i++) {
+		Set_Palette_Register(i, c);
+	}
+}

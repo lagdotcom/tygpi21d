@@ -17,6 +17,7 @@ strings *gStrings;
 zone *gZone;
 overlay *gOverlay;
 globals *gGlobals;
+palette *gPalette;
 
 bool redraw_everything,
 	redraw_description;
@@ -566,11 +567,9 @@ char *Resolve_String(int id)
 
 noexport void Load_Djn_Palette(void)
 {
-	palette *pal;
-
-	pal = Find_File_Type(gDjn, ftPalette);
-	if (pal) {
-		Apply_Palette(pal);
+	gPalette = Find_File_Type(gDjn, ftPalette);
+	if (gPalette) {
+		Apply_Palette(gPalette);
 		Log("%s", "Load_Djn_Palette: found");
 	} else {
 		Log("%s", "Load_Djn_Palette: not present");
