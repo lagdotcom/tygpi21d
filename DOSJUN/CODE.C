@@ -114,8 +114,8 @@ noexport void Push_Flag(code_host *h)
 #endif
 
 	assert(index < gGlobals->num_flags, "Push_Flag: index too high");
-	offset = index >> 4;
-	bit = 1 << (index % 8);
+	offset = index >> 5;
+	bit = 1 << (index % 16);
 
 	Push_Stack(h, Bool(h->flags[offset] & bit));
 }
@@ -202,8 +202,8 @@ noexport void Pop_Flag(code_host *h)
 #endif
 
 	assert(index < gGlobals->num_flags, "Pop_Flag: index too high");
-	offset = index >> 4;
-	bit = 1 << (index % 8);
+	offset = index >> 5;
+	bit = 1 << (index % 16);
 
 	if (set) {
 		h->flags[offset] |= bit;
