@@ -307,7 +307,7 @@ void Level_Up(pc *pc)
 
 		(*level)++;
 
-		sprintf(buffer, "%s becomes %s level %d!", pc->name, Job_Name(ch->job), *level);
+		sprintf(buffer, "%s becomes %s level %u!", pc->name, Job_Name(ch->job), *level);
 		Draw_Font(8, Y_LEVEL, WHITE, buffer, gFont, 0);
 
 		if (Choose_Skill(pc, l->a, l->b)) {

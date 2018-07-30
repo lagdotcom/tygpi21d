@@ -786,7 +786,12 @@ bool Has_Buff(combatant *c, buff_id id)
 
 noexport void Remove_Buff_from_List(combatant *owner, buff *b)
 {
-	buffspec *spec = &buffspecs[b->id];
+	buffspec *spec;
+
+	assert(owner != null, "Remove_Buff_from_List: null owner");
+	assert(b != null, "Remove_Buff_from_List: null buff");
+		
+	spec = &buffspecs[b->id];
 
 #if COMBAT_DEBUG
 	Log("Remove_Buff_from_List: %s(%d/g%d) loses %s", owner->name, owner->index, owner->group, spec->name);
