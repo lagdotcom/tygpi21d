@@ -11,6 +11,7 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define PC_PADDING			15
+#define PARTY_PADDING		41
 
 typedef enum charflag {
 	cfBackRow = 1
@@ -66,6 +67,10 @@ typedef struct partystatus {
 	coord x, y;
 	UINT8 encounter_chance;
 	UINT8 danger;
+
+	UINT32 steps_taken;
+
+	unsigned char padding[PARTY_PADDING];
 } party;
 
 typedef struct globals {

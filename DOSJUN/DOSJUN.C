@@ -202,6 +202,7 @@ bool Try_Move_Forward(void)
 
 	ax = gParty->x + Get_X_Offset(gParty->facing);
 	ay = gParty->y + Get_Y_Offset(gParty->facing);
+	gParty->steps_taken++;
 
 	gParty->x = ax;
 	gParty->y = ay;
