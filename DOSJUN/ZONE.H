@@ -11,6 +11,7 @@
 #define ZONE_HEADER_PADDING			8
 #define WALL_PADDING				1
 #define TILE_PADDING				16
+#define ENCOUNTER_PADDING			4
 #define ENCOUNTER_SIZE	6
 #define ETABLE_SIZE		6
 
@@ -42,6 +43,10 @@ typedef struct encounter {
 	monster_id monsters[ENCOUNTER_SIZE];
 	unsigned char minimum[ENCOUNTER_SIZE];
 	unsigned char maximum[ENCOUNTER_SIZE];
+	UINT16 min_level;
+	UINT16 max_level;
+
+	unsigned char padding[ENCOUNTER_PADDING];
 } encounter;
 
 typedef struct etable {
