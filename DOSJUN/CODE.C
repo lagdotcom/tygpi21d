@@ -1040,6 +1040,17 @@ noexport void Fade(code_host *h)
 	}
 }
 
+noexport void GetPCInSlot(code_host *h)
+{
+	int slot = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|GetPCInSlot %d", slot);
+#endif
+
+	Push_Stack(h, Get_PC_ID(slot));
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -1116,6 +1127,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coHasBuff:		HasBuff(h); return;
 		case coRemoveBuff:	RemoveBuff(h); return;
 		case coFade:		Fade(h); return;
+		case coGetPCInSlot:	GetPCInSlot(h); return;
 	}
 
 	h->running = false;

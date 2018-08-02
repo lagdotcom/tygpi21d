@@ -21,6 +21,7 @@ typedef enum code_op {
 	coPushTemp,
 	coPushInternal,
 	coPushFlag,
+	coGetPCInSlot,
 	coPushLiteral = 0x1F,
 	coPopGlobal = 0x20,
 	coPopLocal,
