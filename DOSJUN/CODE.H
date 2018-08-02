@@ -84,6 +84,7 @@ typedef enum code_op {
 	coHasBuff,
 	coAddBuff,
 	coRemoveBuff,
+	coFade,
 } code_op;
 
 typedef enum code_internal {

@@ -36,6 +36,7 @@ noexport file_id *option_state;
 noexport int num_options = 0;
 noexport char *formatting_buf;
 noexport point2d text_pos;
+noexport RGB_color faded_colour;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -1022,6 +1023,23 @@ noexport void HasBuff(code_host *h)
 	Push_Stack(h, Bool(result));
 }
 
+noexport void Fade(code_host *h)
+{
+	int i = Pop_Stack(h);
+	int delay = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|Fade %d, %d", i, delay);
+#endif
+
+	if (i) {
+		faded_colour = gPalette->colours[i];
+		Fade_To(gPalette, &faded_colour, delay);
+	} else {
+		Fade_From(gPalette, &faded_colour, delay);
+	}
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -1097,6 +1115,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coAddBuff:		AddBuff(h); return;
 		case coHasBuff:		HasBuff(h); return;
 		case coRemoveBuff:	RemoveBuff(h); return;
+		case coFade:		Fade(h); return;
 	}
 
 	h->running = false;
