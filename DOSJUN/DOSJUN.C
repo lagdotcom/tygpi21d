@@ -209,6 +209,7 @@ bool Try_Move_Forward(void)
 	gParty->y = ay;
 	redraw_description = true;
 	redraw_fp = true;
+	current_fp_effect = FX_NONE;
 	trigger_on_enter = true;
 	just_moved = true;
 	can_save = false;
@@ -352,6 +353,7 @@ void Redraw_Dungeon_Screen(bool script)
 	Show_Double_Buffer();
 
 	just_moved = false;
+	current_fp_effect = TILE(gZone, gParty->x, gParty->y)->effect;
 }
 
 noexport void Try_Get_Items(void)
@@ -447,12 +449,14 @@ gamestate Show_Dungeon_Screen(void)
 				gParty->facing = Turn_Left(gParty->facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
+				current_fp_effect = FX_NONE;
 				break;
 
 			case SCAN_RIGHT:
 				gParty->facing = Turn_Right(gParty->facing);
 				trigger_on_enter = true;
 				redraw_fp = true;
+				current_fp_effect = FX_NONE;
 				break;
 
 			case SCAN_UP:
@@ -612,6 +616,7 @@ void main(int argc, char **argv)
 		return;
 	}
 
+	Initialise_FP();
 	Initialise_Timer();
 	Initialise_Combat();
 	Initialise_Buffs();
@@ -657,6 +662,7 @@ void main(int argc, char **argv)
 	Free_Code();
 	Free_Formatter();
 	Free_Timer();
+	Free_FP();
 
 	Free_DB();
 	Free_Djn_Chain();

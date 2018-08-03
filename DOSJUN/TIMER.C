@@ -20,6 +20,9 @@ noexport void interrupt Timer_Tick(void)
 {
 	if (sng_playing)
 		Continue_SNG();
+
+	if (current_fp_effect)
+		Continue_Effect();
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */

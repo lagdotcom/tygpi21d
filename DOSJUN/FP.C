@@ -78,7 +78,37 @@ noexport box2d viewport = {
 	{ VIEW_X + VIEW_W, VIEW_Y + VIEW_H },
 };
 
+noexport void *fp_buffer;
+
+int current_fp_effect = 0;
+
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
+
+noexport void Save_FP(void)
+{
+	int y;
+	unsigned char *buffer = fp_buffer;
+	unsigned char *source = &double_buffer[VIEW_Y * SCREEN_WIDTH + VIEW_X];
+
+	for (y = 0; y < VIEW_H; y++) {
+		memcpy(buffer, source, VIEW_W);
+		buffer += VIEW_W;
+		source += SCREEN_WIDTH;
+	}
+}
+
+noexport void Restore_FP(void)
+{
+	int y;
+	unsigned char *buffer = fp_buffer;
+	unsigned char *source = &double_buffer[VIEW_Y * SCREEN_WIDTH + VIEW_X];
+
+	for (y = 0; y < VIEW_H; y++) {
+		memcpy(source, buffer, VIEW_W);
+		buffer += VIEW_W;
+		source += SCREEN_WIDTH;
+	}
+}
 
 noexport void Draw_Tile_Segment(file_id texture_id, int dx, int dy, int piece)
 {
@@ -296,6 +326,7 @@ void Draw_FP(void)
 	Draw_Items_in_Tile(gParty->x, gParty->y, 0);
 
 	redraw_fp = false;
+	Save_FP();
 }
 
 void Show_Picture(file_id ref)
@@ -311,4 +342,78 @@ void Show_Picture(file_id ref)
 
 	/* copy picture to screen */
 	Draw_GRF_Clipped(&viewport.start, current_img, 0, 0, &viewport);
+}
+
+void Initialise_FP(void)
+{
+	fp_buffer = Allocate(VIEW_W * VIEW_H, 1, "Initialise_FP");
+}
+
+void Free_FP(void)
+{
+	Free(fp_buffer);
+}
+
+#define NUM_DROPS	15
+typedef struct drop {
+	int x;
+	int y;
+	UINT8 v;
+} drop;
+
+noexport void Reset_Drop(drop *d, bool init)
+{
+	d->x = randint(0, VIEW_W - 1);
+	d->y = randint(init ? - 400 : -VIEW_H, 0);
+	d->v = 0;
+}
+
+noexport void Water_Effect(void)
+{
+	static bool init = false;
+	static drop drops[NUM_DROPS];
+	static int timer;
+	drop *d = drops;
+	int i;
+
+	if (!init) {
+		for (i = 0, d = drops; i < NUM_DROPS; i++, d++) {
+			Reset_Drop(d, true);
+		}
+
+		init = true;
+		timer = 0;
+	}
+
+	if (timer) {
+		timer--;
+		return;
+	}
+
+	Restore_FP();
+	for (i = 0, d = drops; i < NUM_DROPS; i++, d++) {
+		d->y += d->v / 20;
+		d->v += 3;
+
+		if (d->y >= VIEW_H) {
+			Reset_Drop(d, false);
+		} else if (d->y > 2) {
+			Plot_Pixel_Fast_DB(d->x + VIEW_X, d->y + VIEW_Y, 6);
+			Plot_Pixel_Fast_DB(d->x + VIEW_X, d->y + VIEW_Y - 1, 22);
+			Plot_Pixel_Fast_DB(d->x + VIEW_X, d->y + VIEW_Y - 2, 38);
+			Plot_Pixel_Fast_DB(d->x + VIEW_X, d->y + VIEW_Y - 3, 54);
+		}
+	}
+	Show_Double_Buffer();
+
+	timer = 8;
+}
+
+void Continue_Effect(void)
+{
+	switch (current_fp_effect) {
+		case FX_WATER:
+			Water_Effect();
+			break;
+	}
 }

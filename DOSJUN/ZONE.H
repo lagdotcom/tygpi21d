@@ -10,10 +10,13 @@
 
 #define ZONE_HEADER_PADDING			8
 #define WALL_PADDING				1
-#define TILE_PADDING				16
+#define TILE_PADDING				15
 #define ENCOUNTER_PADDING			4
 #define ENCOUNTER_SIZE	6
 #define ETABLE_SIZE		6
+
+#define FX_NONE			0
+#define FX_WATER		1
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -35,6 +38,7 @@ typedef struct tile {
 	file_id thing;
 	file_id on_use;
 	UINT8 danger;
+	UINT8 effect;
 
 	unsigned char padding[TILE_PADDING];
 } tile;
