@@ -20,7 +20,7 @@
 
 #define STRINGS_DEBUG			0
 
-#define TIMER_TICK_FREQ			(0x427d / 5)
+#define TIMER_TICK_COUNTER		(0x427d / 5)
 
 /* These values affect memory use */
 

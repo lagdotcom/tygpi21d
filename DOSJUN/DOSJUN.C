@@ -404,6 +404,35 @@ noexport void Try_Get_Items(void)
 	}
 }
 
+noexport void Show_Timer(void)
+{
+	char timebuf[100];
+	char *s;
+	UINT32 hours, mins, secs;
+
+	s = strcpy(timebuf, "You have spent") + 14;
+	secs = gParty->seconds_elapsed;
+	mins = secs / 60;
+	hours = mins / 60;
+	mins = mins % 60;
+	secs = secs % 60;
+
+	if (hours) {
+		s += sprintf(s, " %d hours,", hours);
+	}
+
+	if (mins) {
+		s += sprintf(s, " %d minutes,", mins);
+	}
+
+	if (secs) {
+		s += sprintf(s, " %d seconds", secs);
+	}
+
+	strcpy(s, " in the dungeon.");
+	Show_Game_String(timebuf, true);
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 gamestate Show_Dungeon_Screen(void)
@@ -494,12 +523,17 @@ gamestate Show_Dungeon_Screen(void)
 			case SCAN_G:
 				Try_Get_Items();
 				break;
+
+			case SCAN_T:
+				Show_Timer();
+				break;
 		}
 	}
 
 	if (explore_bg)
 		Unload_File(gDjn, gCampaign->dungeonbg_id);
-
+	
+	clock_enabled = false;
 	return new;
 }
 
@@ -641,6 +675,7 @@ void main(int argc, char **argv)
 				break;
 
 			case gsDungeon:
+				clock_enabled = true;
 				gState = Show_Dungeon_Screen();
 				break;
 		}

@@ -42,7 +42,13 @@ void Free_Savefile(djn *s)
 
 bool Save_Savefile(char *filename, djn *s)
 {
-	return Save_Djn(filename, s);
+	bool result;
+
+	clock_enabled = false;
+	result = Save_Djn(filename, s);
+	clock_enabled = true;
+
+	return result;
 }
 
 void Initialise_Globals(globals *g, campaign *c)
