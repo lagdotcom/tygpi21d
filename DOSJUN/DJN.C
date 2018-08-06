@@ -21,13 +21,13 @@ typedef struct loaderspec {
 djn_file *current_reading_file;
 
 noexport loaderspec loaders[] = {
-	{ ftCampaign, sizeof(campaign), Free_Campaign, Read_Campaign, null },
+	{ ftCampaign, sizeof(campaign), null,          Read_Campaign, null },
 	{ ftGlobals,  sizeof(globals),  Free_Globals,  Read_Globals,  Write_Globals },
 	{ ftGraphic,  sizeof(grf),      Free_GRF,      Read_GRF,      null },
 	{ ftItem,     sizeof(item),     null,          Read_Item,     null },
 	{ ftMonster,  sizeof(monster),  Free_Monster,  Read_Monster,  null },
 	{ ftMusic,    sizeof(sng),      Free_SNG,      Read_SNG,      null },
-	{ ftNPC,      sizeof(npc),      Free_NPC,      Read_NPC,      Write_NPC },
+	{ ftNPC,      sizeof(npc),      null,          Read_NPC,      Write_NPC },
 	{ ftPalette,  sizeof(palette),  null,          Read_Palette,  null },
 	{ ftParty,    sizeof(party),    null,          Read_Party,    Write_Party },
 	{ ftPC,       sizeof(pc),       Free_PC,       Read_PC,       Write_PC },

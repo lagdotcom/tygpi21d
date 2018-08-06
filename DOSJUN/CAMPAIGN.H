@@ -31,7 +31,6 @@ typedef struct campaign {
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 bool Load_Campaign(char *filename, campaign *c);
-void Free_Campaign(campaign *c);
 bool Read_Campaign(FILE *fp, campaign *c);
 bool Save_Campaign(char *filename, campaign *c);
 

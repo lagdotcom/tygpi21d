@@ -28,11 +28,6 @@ bool Load_Campaign(char *filename, campaign *c)
 	return res;
 }
 
-void Free_Campaign(campaign *c)
-{
-	Log("Free_Campaign: %p", c);
-}
-
 bool Save_Campaign(char *filename, campaign *c)
 {
 	FILE *fp = fopen(filename, "wb");

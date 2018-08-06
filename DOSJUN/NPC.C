@@ -4,11 +4,6 @@
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-void Free_NPC(npc *npc)
-{
-
-}
-
 bool Read_NPC(FILE *fp, npc *n)
 {
 	fread(n, sizeof(npc), 1, fp);
