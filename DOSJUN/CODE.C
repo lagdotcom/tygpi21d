@@ -839,8 +839,8 @@ noexport void ChoosePcPronouns(code_host *h)
 
 noexport void SetAttitude(code_host *h)
 {
-	file_id _id = Pop_Stack(h);
 	int attitude = Pop_Stack(h);
+	file_id _id = Pop_Stack(h);
 	djn_file *file;
 	pc *pc;
 	npc *npc;
@@ -884,11 +884,11 @@ noexport void GetAttitude(code_host *h)
 
 noexport void GotoXY(code_host *h)
 {
-	text_pos.x = Pop_Stack(h);
 	text_pos.y = Pop_Stack(h);
+	text_pos.x = Pop_Stack(h);
 
 #if CODE_DEBUG
-	Log("C|GotoXY %d,%d", text_pos.x, text_pos.y);
+	Log("C|GotoXY %d, %d", text_pos.x, text_pos.y);
 #endif
 }
 
@@ -963,11 +963,11 @@ noexport void InParty(code_host *h)
 
 noexport void AddBuff(code_host *h)
 {
-	file_id pc_id = Pop_Stack(h);
-	buff_id buff = Pop_Stack(h);
-	int duration = Pop_Stack(h);
-	int arg1 = Pop_Stack(h);
 	int arg2 = Pop_Stack(h);
+	int arg1 = Pop_Stack(h);
+	int duration = Pop_Stack(h);
+	buff_id buff = Pop_Stack(h);
+	file_id pc_id = Pop_Stack(h);
 	pc *pc;
 
 #if CODE_DEBUG
@@ -982,8 +982,8 @@ noexport void AddBuff(code_host *h)
 
 noexport void RemoveBuff(code_host *h)
 {
-	file_id pc_id = Pop_Stack(h);
 	buff_id buff = Pop_Stack(h);
+	file_id pc_id = Pop_Stack(h);
 	pc *pc;
 
 #if CODE_DEBUG
@@ -999,8 +999,8 @@ noexport void RemoveBuff(code_host *h)
 
 noexport void HasBuff(code_host *h)
 {
-	file_id pc_id = Pop_Stack(h);
 	buff_id buff_id = Pop_Stack(h);
+	file_id pc_id = Pop_Stack(h);
 	buff *b;
 	pc *pc;
 	int i;
@@ -1025,8 +1025,8 @@ noexport void HasBuff(code_host *h)
 
 noexport void Fade(code_host *h)
 {
-	int i = Pop_Stack(h);
 	int delay = Pop_Stack(h);
+	int i = Pop_Stack(h);
 
 #if CODE_DEBUG
 	Log("C|Fade %d, %d", i, delay);
@@ -1053,9 +1053,9 @@ noexport void GetPCInSlot(code_host *h)
 
 noexport void PlaceItem(code_host *h)
 {
-	file_id ref = Pop_Stack(h);
-	int x = Pop_Stack(h);
 	int y = Pop_Stack(h);
+	int x = Pop_Stack(h);
+	file_id ref = Pop_Stack(h);
 
 #if CODE_DEBUG
 	Log("C|PlaceItem #%d, %d, %d", ref, x, y);
@@ -1071,10 +1071,10 @@ noexport void ShowImage(code_host *h)
 	grf *g;
 	point2d p;
 
-	ref = Pop_Stack(h);
-	p.x = Pop_Stack(h);
-	p.y = Pop_Stack(h);
 	img = Pop_Stack(h);
+	p.y = Pop_Stack(h);
+	p.x = Pop_Stack(h);
+	ref = Pop_Stack(h);
 
 #if CODE_DEBUG
 	Log("C|ShowImage #%d, %d, %d, %d", ref, p.x, p.y, img);
@@ -1089,6 +1089,16 @@ noexport void ShowImage(code_host *h)
 	redraw_everything = true;
 	Draw_GRF(&p, g, img, 0);
 	Show_Double_Buffer();
+}
+
+noexport void Wait(code_host *h)
+{
+#if CODE_DEBUG
+	Log("%s", "C|Wait");
+#endif
+
+	Show_Double_Buffer();
+	Get_Next_Scan_Code();
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -1170,6 +1180,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coGetPCInSlot:	GetPCInSlot(h); return;
 		case coPlaceItem:	PlaceItem(h); return;
 		case coShowImage:	ShowImage(h); return;
+		case coWait:		Wait(h); return;
 	}
 
 	h->running = false;
