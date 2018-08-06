@@ -1051,6 +1051,19 @@ noexport void GetPCInSlot(code_host *h)
 	Push_Stack(h, Get_PC_ID(slot));
 }
 
+noexport void PlaceItem(code_host *h)
+{
+	file_id ref = Pop_Stack(h);
+	int x = Pop_Stack(h);
+	int y = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|PlaceItem #%d, %d, %d", ref, x, y);
+#endif
+
+	Add_Item_to_Tile(x, y, ref);
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -1128,6 +1141,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coRemoveBuff:	RemoveBuff(h); return;
 		case coFade:		Fade(h); return;
 		case coGetPCInSlot:	GetPCInSlot(h); return;
+		case coPlaceItem:	PlaceItem(h); return;
 	}
 
 	h->running = false;
