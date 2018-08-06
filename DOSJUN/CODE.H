@@ -87,6 +87,7 @@ typedef enum code_op {
 	coRemoveBuff,
 	coFade,
 	coPlaceItem,
+	coShowImage,
 } code_op;
 
 typedef enum code_internal {

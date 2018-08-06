@@ -1064,6 +1064,33 @@ noexport void PlaceItem(code_host *h)
 	Add_Item_to_Tile(x, y, ref);
 }
 
+noexport void ShowImage(code_host *h)
+{
+	file_id ref;
+	int img;
+	grf *g;
+	point2d p;
+
+	ref = Pop_Stack(h);
+	p.x = Pop_Stack(h);
+	p.y = Pop_Stack(h);
+	img = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|ShowImage #%d, %d, %d, %d", ref, p.x, p.y, img);
+#endif
+
+	g = Lookup_File(gDjn, ref, true);
+	if (!g) {
+		dief("ShowImage: invalid resource ID: %d", ref);
+		return;
+	}
+
+	redraw_everything = true;
+	Draw_GRF(&p, g, img, 0);
+	Show_Double_Buffer();
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -1142,6 +1169,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coFade:		Fade(h); return;
 		case coGetPCInSlot:	GetPCInSlot(h); return;
 		case coPlaceItem:	PlaceItem(h); return;
+		case coShowImage:	ShowImage(h); return;
 	}
 
 	h->running = false;
