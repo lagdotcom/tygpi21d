@@ -1116,12 +1116,14 @@ void Start_Combat(encounter_id id)
 	file_id first_img = 0;
 	groupnum group;
 	pcnum pc;
-	int count;
+	int count,
+		fp_effect = current_fp_effect;
 	encounter *en = &gZone->encounters[id];
 	monster *m;
 	combatant *c;
 
 	Log("Start_Combat: #%d", id);
+	current_fp_effect = 0;
 
 	memset(pc_combatants, 0, sizeof(combatant*) * PARTY_SIZE);
 	for (pc = 0; pc < PARTY_SIZE; pc++) {
@@ -1192,4 +1194,5 @@ void Start_Combat(encounter_id id)
 	Load_Textures(&gZone);
 #endif
 	Redraw_Dungeon_Screen(false);
+	current_fp_effect = fp_effect;
 }
