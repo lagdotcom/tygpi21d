@@ -725,15 +725,19 @@ void Show_Pc_Screen(pcnum starting_pc)
 	pcnum index = starting_pc,
 		pindex;
 	pc *pc;
+	bool running = true;
 	int selected = 0,
-		scan = 0;
+		scan = 0,
+		fp_effect = current_fp_effect;
+
+	current_fp_effect = 0;
 	redraw_everything = true;
 
 	pc = Get_PC(index);
 	if (pc == null)
 		return;
 
-	while (true) {
+	while (running) {
 		pindex = index;
 
 		Show_Pc_Stats(pc);
@@ -807,7 +811,8 @@ void Show_Pc_Screen(pcnum starting_pc)
 
 			case SCAN_Q:
 			case SCAN_ESC:
-				return;
+				running = false;
+				break;
 		}
 
 		if (index != pindex) {
@@ -829,6 +834,8 @@ void Show_Pc_Screen(pcnum starting_pc)
 			}
 		}
 	}
+
+	current_fp_effect = fp_effect;
 }
 
 void Free_PC(pc *pc)
