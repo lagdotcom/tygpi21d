@@ -11,7 +11,7 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define PC_PADDING			15
-#define PARTY_PADDING		37
+#define PARTY_PADDING		33
 
 typedef enum charflag {
 	cfBackRow = 1
@@ -73,6 +73,9 @@ typedef struct partystatus {
 
 	/* Real time spent in dungeon */
 	UINT32 seconds_elapsed;
+
+	/* Combat turns taken */
+	UINT32 combat_turns_taken;
 
 	unsigned char padding[PARTY_PADDING];
 } party;

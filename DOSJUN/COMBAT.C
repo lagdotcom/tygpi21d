@@ -1053,6 +1053,7 @@ noexport void Enter_Combat_Loop(void)
 	while (monsters_alive > 0) {
 		Log("Enter_Combat_Loop: begin round");
 		if (!first_turn) Expire_Buffs();
+		gParty->combat_turns_taken++;
 
 		Show_Combat_Pc_Stats();
 		Show_Enemies();
