@@ -64,3 +64,37 @@ bool Use_Item(item *it, pc *user, pc *targ)
 		default: return false;
 	}
 }
+
+bool Read_DropTable(FILE *fp, droptable *dt)
+{
+	fread(dt, DROPTABLE_HEADERSZ, 1, fp);
+	dt->drops = SzAlloc(dt->count, drop, "Read_DropTable");
+	fread(dt->drops, sizeof(drop), dt->count, fp);
+
+	return true;
+}
+
+void Free_DropTable(droptable *dt)
+{
+	Free(dt->drops);
+}
+
+file_id Get_Drop(droptable *dt)
+{
+	drop *d;
+	file_id ref;
+	int i;
+
+	for (d = dt->drops, i = 0; i < dt->count; d++, i++) {
+		if (randint(0, 99) >= d->chance) continue;
+
+		if (d->flags && drfTable) {
+			ref = Get_Drop(Lookup_File(gDjn, d->ref, true));
+			if (ref) return ref;
+		} else {
+			return d->ref;
+		}
+	}
+
+	return 0;
+}

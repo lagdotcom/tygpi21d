@@ -355,13 +355,13 @@ void Free_FP(void)
 }
 
 #define NUM_DROPS	15
-typedef struct drop {
+typedef struct raindrop {
 	int x;
 	int y;
 	UINT8 v;
-} drop;
+} raindrop;
 
-noexport void Reset_Drop(drop *d, bool init)
+noexport void Reset_Drop(raindrop *d, bool init)
 {
 	d->x = randint(0, VIEW_W - 1);
 	d->y = randint(init ? - 400 : -VIEW_H, 0);
@@ -371,9 +371,9 @@ noexport void Reset_Drop(drop *d, bool init)
 noexport void Water_Effect(void)
 {
 	static bool init = false;
-	static drop drops[NUM_DROPS];
+	static raindrop drops[NUM_DROPS];
 	static int timer;
-	drop *d = drops;
+	raindrop *d = drops;
 	int i;
 
 	if (!init) {

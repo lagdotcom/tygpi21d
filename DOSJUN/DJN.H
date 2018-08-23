@@ -37,6 +37,7 @@ typedef enum djn_type {
 	ftFont, /* UNUSED */
 	ftStrings,
 	ftPalette,
+	ftDropTable,
 
 	ftParty = 0xC0,
 	ftGlobals,

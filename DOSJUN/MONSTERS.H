@@ -9,7 +9,7 @@
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define MONSTER_PADDING				15
+#define MONSTER_PADDING				12
 #define MONSTER_SIZE				64
 
 typedef enum row {
@@ -37,6 +37,7 @@ typedef struct monster {
 	UINT32 experience;
 	file_id weapon;
 	monsterflag_id flags;
+	file_id drops_id;
 	unsigned char unused[MONSTER_PADDING];
 	stat_value stats[NUM_STATS];
 

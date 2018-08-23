@@ -34,6 +34,7 @@ typedef struct action {
 noexport grf *combat_bg;
 
 list *combatants;
+list *drops;
 noexport list *active_combatants;
 noexport action *combat_actions;
 noexport combatant **pc_combatants;
@@ -243,6 +244,20 @@ bool Is_Dead(combatant *victim)
 	return Get_Stat(victim, sHP) <= 0;
 }
 
+noexport void Add_Drop(file_id dtid)
+{
+	file_id ref;
+	if (!dtid) return;
+
+	ref = Get_Drop(Lookup_File(gDjn, dtid, true));
+	if (ref) {
+#if COMBAT_DEBUG
+		Log("Add_Drop: got #%d", ref);
+#endif
+		Add_to_List(drops, ref);
+	}
+}
+
 noexport void Kill(combatant *c, combatant *killer)
 {
 	groupnum group;
@@ -269,6 +284,8 @@ noexport void Kill(combatant *c, combatant *killer)
 			Log("Kill: groups alive=%d", groups_alive);
 #endif
 		}
+
+		Add_Drop(c->monster->drops_id);
 
 		/* On-kill triggered skills */
 		if (Check_Cleave(killer)) Cleave(killer, c);
@@ -572,6 +589,8 @@ void Initialise_Combat(void)
 		combat_groups[i] = New_List(ltReference, "Initialise_Combat.group_x");
 	}
 
+	drops = New_List(ltInteger, "Initialise_Combat.drops");
+
 	pc_combatants = SzAlloc(PARTY_SIZE, combatant*, "Initialise_Combat.pc_combatants");
 	active_combatants = New_List(ltReference, "Initialise_Combat.active_combatants");
 
@@ -603,6 +622,7 @@ void Free_Combat(void)
 		Free_List(combat_groups[i]);
 	}
 
+	Free_List(drops);
 	Free(pc_combatants);
 	Free_List(active_combatants);
 	Free(combat_actions);
@@ -1114,10 +1134,11 @@ void Start_Combat(encounter_id id)
 	char *description,
 		*write,
 		*name;
-	file_id first_img = 0;
+	file_id first_img = 0,
+		item_id;
 	groupnum group;
 	pcnum pc;
-	int count,
+	int i,
 		fp_effect = current_fp_effect;
 	encounter *en = &gZone->encounters[id];
 	monster *m;
@@ -1142,17 +1163,17 @@ void Start_Combat(encounter_id id)
 		m = Lookup_File_Chained(gDjn, en->monsters[group]);
 		if (!first_img) first_img = m->image_id;
 
-		count = randint(en->minimum[group], en->maximum[group]);
-		if (count > 0) {
+		i = randint(en->minimum[group], en->maximum[group]);
+		if (i > 0) {
 			name = Resolve_String(m->name_id);
 #if COMBAT_DEBUG
-			Log("Start_Combat: adding %dx%s (#%04x)", count, name, en->monsters[group]);
+			Log("Start_Combat: adding %dx%s (#%04x)", i, name, en->monsters[group]);
 #endif
-			write += sprintf(write, " %s x%d", name, count);
+			write += sprintf(write, " %s x%d", name, i);
 
-			while (count > 0) {
+			while (i > 0) {
 				Add_Monster(groups_alive, en->monsters[group]);
-				count--;
+				i--;
 			}
 
 			groups_alive++;
@@ -1180,12 +1201,24 @@ void Start_Combat(encounter_id id)
 	Enter_Combat_Loop();
 	
 	/* TODO: if you lose... shouldn't do this */
-	for (count = 0; count < PARTY_SIZE; count++) {
-		c = List_At(combatants, count);
+	for (i = 0; i < PARTY_SIZE; i++) {
+		c = List_At(combatants, i);
 		if (!Is_Dead(c)) {
-			Add_Experience(Get_PC(count), earned_experience);
+			Add_Experience(Get_PC(i), earned_experience);
 		}
 	}
+
+	/* TODO: how to report this to the player? */
+	for (i = 0; i < drops->size; i++) {
+		item_id = (file_id)List_At(drops, i);
+
+		/* TODO: stackable items with N..M items? */
+		if (!Add_Item_to_Party(item_id, 1, &pc)) {
+			Add_Item_to_Tile(gParty->x, gParty->y, item_id);
+		}
+	}
+
+	Clear_List(drops);
 
 	gState = gsDungeon;
 	Expire_Combat_Buffs();

@@ -22,6 +22,7 @@ djn_file *current_reading_file;
 
 noexport loaderspec loaders[] = {
 	{ ftCampaign, sizeof(campaign), null,          Read_Campaign, null },
+	{ ftDropTable,sizeof(droptable),Free_DropTable,Read_DropTable,null },
 	{ ftGlobals,  sizeof(globals),  Free_Globals,  Read_Globals,  Write_Globals },
 	{ ftGraphic,  sizeof(grf),      Free_GRF,      Read_GRF,      null },
 	{ ftItem,     sizeof(item),     null,          Read_Item,     null },

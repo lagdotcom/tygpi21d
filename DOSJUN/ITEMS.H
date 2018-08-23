@@ -35,7 +35,14 @@ typedef enum itemspecial {
 	spHeal,
 } itemspecial;
 
+typedef enum dropflag {
+	drfTable = 1,
+} dropflag;
+
 #define ITEM_PADDING				16
+
+#define DROPTABLE_PADDING			14
+#define DROPTABLE_HEADERSZ			16
 
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
@@ -53,10 +60,26 @@ typedef struct item {
 	stat_value stats[NUM_STATS];
 } item;
 
+typedef struct drop {
+	file_id ref;
+	UINT8 chance;
+	UINT8 flags;
+} drop;
+
+typedef struct droptable {
+	UINT16 count;
+	unsigned char padding[DROPTABLE_PADDING];
+
+	drop *drops;
+} droptable;
+
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
+file_id Get_Drop(droptable *dt);
 bool Item_Has_Use(item *it);
 bool Item_Needs_Target(item *it);
+void Free_DropTable(droptable *dt);
+bool Read_DropTable(FILE *fp, droptable *dt);
 bool Read_Item(FILE *fp, item *i);
 bool Save_Item(char *filename, item *i);
 bool Use_Item(item *it, pc *user, pc *targ);
