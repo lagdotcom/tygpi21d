@@ -101,6 +101,7 @@ typedef enum code_internal {
 
 	internalReturn__Unused,
 	internalPartyFull,	/* TODO */
+	internalZone,
 
 	internalInvalid = 0xFF
 } code_internal;

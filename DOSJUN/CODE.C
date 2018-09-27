@@ -157,6 +157,10 @@ noexport void Push_Internal(code_host *h)
 			Push_Stack(h, gParty->y);
 			return;
 
+		case internalZone:
+			Push_Stack(h, gParty->zone);
+			return;
+
 		case internalFacing:
 			Push_Stack(h, gParty->facing);
 			return;
@@ -618,6 +622,7 @@ noexport void Teleport(code_host *h)
 	redraw_description = true;
 	redraw_fp = true;
 	trigger_on_enter = true;
+	trigger_zone_enter = true;
 }
 
 noexport void SetDanger(code_host *h)
