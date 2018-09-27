@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "types.h"
+#include "events.h"
 
 #include "buffs.h"
 #include "campaign.h"

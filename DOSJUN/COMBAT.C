@@ -269,6 +269,7 @@ noexport void Kill(combatant *c, combatant *killer)
 
 	if (c->is_pc) {
 		/* TODO */
+		Fire_Combat_Event(evPCDied, killer, c);
 	} else {
 		monsters_alive--;
 		earned_experience += c->monster->experience;
@@ -290,6 +291,8 @@ noexport void Kill(combatant *c, combatant *killer)
 		/* On-kill triggered skills */
 		if (Check_Cleave(killer)) Cleave(killer, c);
 		if (Check_Inspire(killer)) Inspire(killer, c);
+
+		Fire_Combat_Event(evMonsterDied, killer, c);
 	}
 }
 
@@ -300,6 +303,7 @@ void Damage(combatant *victim, combatant *attacker, int amount)
 
 	Combat_Message(victim->file, attacker == null ? 0 : attacker->file, "@n takes %d damage.", amount);
 	Set_Stat(victim, sHP, hp);
+	Fire_Combat_Event(evCombatantDamaged, attacker, victim);
 	if (hp <= 0) {
 		Kill(victim, attacker);
 	}
@@ -1119,6 +1123,8 @@ noexport void Enter_Combat_Loop(void)
 
 		Clear_List(active_combatants);
 		first_turn = false;
+
+		Fire_Event(evCombatTurnEnded, null);
 	}
 
 	redraw_description = true;
@@ -1198,6 +1204,7 @@ void Start_Combat(encounter_id id)
 	/* DO IT */
 	earned_experience = 0;
 	gState = gsCombat;
+	Fire_Event(evCombatEntered, null);
 	Enter_Combat_Loop();
 	
 	/* TODO: if you lose... shouldn't do this */
@@ -1222,6 +1229,8 @@ void Start_Combat(encounter_id id)
 
 	gState = gsDungeon;
 	Expire_Combat_Buffs();
+	Fire_Event(evCombatExited, null);
+	Expire_Listeners(eeCombat);
 	Clear_Encounter();
 
 #if COMBAT_RECLAIM_TEXTURES

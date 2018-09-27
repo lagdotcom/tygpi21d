@@ -46,8 +46,12 @@ _dead:
 
 void Move_to_Zone(file_id id)
 {
-	if (gParty->zone && gZone->header.on_exit)
-		Run_Code(gZone->header.on_exit);
+	if (gParty->zone) {
+		if (gZone->header.on_exit) Run_Code(gZone->header.on_exit);
+
+		Fire_Event(evZoneExited, null);
+		Expire_Listeners(eeZone);
+	}
 
 	gZone = Lookup_File_Chained(gDjn, id);
 	if (gZone == null)

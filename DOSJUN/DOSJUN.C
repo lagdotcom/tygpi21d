@@ -24,6 +24,7 @@ bool redraw_everything,
 bool trigger_on_enter,
 	trigger_zone_enter,
 	just_moved,
+	just_turned,
 	can_save;
 
 point2d gTopLeft = { 0, 0 };
@@ -225,6 +226,8 @@ void Trigger_Enter_Script(void)
 {
 	tile *under = TILE(gZone, gParty->x, gParty->y);
 
+	Fire_Event(evPartyMoved, null);
+
 	if (under->on_enter) {
 #if EXPLORE_DEBUG
 		Log("%s", "Trigger_Enter_Script");
@@ -249,6 +252,8 @@ void Trigger_Use_Script(void)
 
 void Trigger_Zone_Enter_Script(void)
 {
+	Fire_Event(evZoneEntered, null);
+
 	if (gZone->header.on_enter) {
 #if EXPLORE_DEBUG
 		Log("%s", "Trigger_Zone_Enter_Script");
@@ -340,6 +345,9 @@ void Redraw_Dungeon_Screen(bool script)
 		Check_Random_Encounter();
 		Trigger_Zone_Move_Script();
 	}
+	if (script && just_turned) {
+		Fire_Event(evPartyTurned, null);
+	}
 	if (script && trigger_zone_enter) Trigger_Zone_Enter_Script();
 	if (script && trigger_on_enter) Trigger_Enter_Script();
 
@@ -353,6 +361,7 @@ void Redraw_Dungeon_Screen(bool script)
 	Show_Double_Buffer();
 
 	just_moved = false;
+	just_turned = false;
 	current_fp_effect = TILE(gZone, gParty->x, gParty->y)->effect;
 }
 
@@ -376,6 +385,7 @@ noexport void Try_Get_Items(void)
 				pc = Lookup_File(gSave, gParty->members[num], true);
 				it = Lookup_File(gDjn, ip->item, true);
 				sprintf(strbuf, "%s gets %s.", pc->name, Resolve_String(it->name_id));
+				Fire_Item_Event(evItemTaken, pc, it);
 
 				/* null items are not drawn */
 				ip->item = 0;
@@ -477,6 +487,7 @@ gamestate Show_Dungeon_Screen(void)
 			case SCAN_LEFT:
 				gParty->facing = Turn_Left(gParty->facing);
 				trigger_on_enter = true;
+				just_turned = true;
 				redraw_fp = true;
 				current_fp_effect = FX_NONE;
 				break;
@@ -484,6 +495,7 @@ gamestate Show_Dungeon_Screen(void)
 			case SCAN_RIGHT:
 				gParty->facing = Turn_Right(gParty->facing);
 				trigger_on_enter = true;
+				just_turned = true;
 				redraw_fp = true;
 				current_fp_effect = FX_NONE;
 				break;
@@ -651,6 +663,7 @@ void main(int argc, char **argv)
 	}
 
 	Initialise_FP();
+	Initialise_Events();
 	Initialise_Timer();
 	Initialise_Combat();
 	Initialise_Buffs();
@@ -697,6 +710,7 @@ void main(int argc, char **argv)
 	Free_Code();
 	Free_Formatter();
 	Free_Timer();
+	Free_Events();
 	Free_FP();
 
 	Free_DB();

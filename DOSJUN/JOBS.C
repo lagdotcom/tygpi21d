@@ -324,6 +324,7 @@ void Level_Up(pc *pc)
 
 	ch->experience = 0;
 	ch->total_level++;
+	Fire_PC_Event(evPCLevelGained, pc);
 }
 
 UINT32 Experience_to_Level(pc *pc)
