@@ -1135,6 +1135,23 @@ noexport void Wait(code_host *h)
 	Get_Next_Scan_Code();
 }
 
+noexport void Listen(code_host *h)
+{
+	event_id ev;
+	file_id script;
+	event_expiry ee;
+
+	ee = Pop_Stack(h);
+	script = Pop_Stack(h);
+	ev = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|Listen e%d, #%d, x%d", ev, script, ee);
+#endif
+
+	Add_Script_Listener(ev, ee, script);
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -1215,6 +1232,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coPlaceItem:	PlaceItem(h); return;
 		case coShowImage:	ShowImage(h); return;
 		case coWait:		Wait(h); return;
+		case coListen:		Listen(h); return;
 	}
 
 	h->running = false;
