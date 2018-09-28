@@ -155,7 +155,7 @@ noexport void Play_WAV(wave *data)
 	outportb(DMA1_C1_PAGE, page);
 
 	length = data->length - 1;	/* yes, minus one */
-	outportb(DMA1_C1_SIZE, length & 0xFF);	/* yes, minus one*/
+	outportb(DMA1_C1_SIZE, length & 0xFF);
 	outportb(DMA1_C1_SIZE, length >> 8);
 
 	outportb(DMA1_MASK, MASK_C1 | MASK_CLEAR);

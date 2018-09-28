@@ -1263,7 +1263,7 @@ int Run_Event_Code(file_id id, event_data *data)
 	bool result;
 	code_host *h;
 
-	Log("Run_Code: %d", id);
+	Log("Run_Code: %d (%p)", id, data);
 
 	h = SzAlloc(1, code_host, "Run_Code.host");
 

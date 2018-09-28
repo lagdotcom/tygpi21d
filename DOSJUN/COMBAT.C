@@ -254,7 +254,7 @@ noexport void Add_Drop(file_id dtid)
 #if COMBAT_DEBUG
 		Log("Add_Drop: got #%d", ref);
 #endif
-		Add_to_List(drops, ref);
+		Add_to_List(drops, (void*)ref);
 	}
 }
 
