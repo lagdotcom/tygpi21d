@@ -94,6 +94,7 @@ void Close_Djn(djn *d);
 void *Find_File_Type(djn *chain, djn_type ty);
 int Find_Files_of_Type(djn *d, djn_type ty, djn_subtype sty, file_id *buffer, int max);
 void Free_Djn(djn *d);
+file_id Get_File_ID(djn *chain, void *data);
 bool In_Djn(djn *d, file_id id, bool chained);
 bool Load_Djn(char *filename, djn *d);
 void *Lookup_File(djn *chain, file_id id, bool chained);

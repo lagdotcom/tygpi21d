@@ -579,7 +579,6 @@ noexport void Show_Pc_Stats(pc *pc)
 noexport bool Confirm_Drop_Item(pc *pc, int index)
 {
 	inventory *iv;
-	item *it;
 	bool result = false;
 	bool failed = false;
 
@@ -597,9 +596,8 @@ noexport bool Confirm_Drop_Item(pc *pc, int index)
 		}
 
 		if (!failed) {
-			it = Lookup_File(gDjn, iv->item, false);
 			Add_Item_to_Tile(gParty->x, gParty->y, iv->item);
-			Fire_Item_Event(evItemDropped, pc, it);
+			Fire_Item_Event(evItemDropped, Get_File_ID(gDjn, pc), iv->item);
 			redraw_fp = true;
 
 			iv->item = 0;

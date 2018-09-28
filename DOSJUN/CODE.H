@@ -102,6 +102,10 @@ typedef enum code_internal {
 	internalReturn__Unused,
 	internalPartyFull,	/* TODO */
 	internalZone,
+	internalEventAttacker,
+	internalEventTarget,
+	internalEventPC,
+	internalEventItem,
 
 	internalInvalid = 0xFF
 } code_internal;
@@ -116,6 +120,7 @@ void Free_Code(void);
 void Free_Script(script *s);
 void Initialise_Code(void);
 int Run_Code(file_id id);
+int Run_Event_Code(file_id id, event_data *data);
 bool Read_Script(FILE *fp, script *s);
 
 #endif

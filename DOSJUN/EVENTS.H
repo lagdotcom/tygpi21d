@@ -36,10 +36,10 @@ typedef enum event_expiry {
 } event_expiry;
 
 typedef struct event_data {
-	combatant* attacker;
-	combatant* target;
-	pc* pc;
-	item* item;
+	file_id attacker;
+	file_id target;
+	file_id pc;
+	file_id item;
 } event_data;
 
 typedef void(*event_handler_fn)(event_data *data);
@@ -50,9 +50,9 @@ void Add_Listener(event_id ev, event_expiry ee, event_handler_fn h);
 void Add_Script_Listener(event_id ev, event_expiry ee, file_id s);
 void Expire_Listeners(event_expiry ee);
 void Fire_Event(event_id ev, event_data *data);
-void Fire_Combat_Event(event_id ev, combatant *attacker, combatant *target);
-void Fire_Item_Event(event_id ev, pc *pc, item *it);
-void Fire_PC_Event(event_id ev, pc *pc);
+void Fire_Combat_Event(event_id ev, file_id attacker, file_id target);
+void Fire_Item_Event(event_id ev, file_id pc, file_id it);
+void Fire_PC_Event(event_id ev, file_id pc);
 void Free_Events(void);
 void Initialise_Events(void);
 

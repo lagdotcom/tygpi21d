@@ -18,6 +18,7 @@ typedef struct code_host {
 	int *locals;
 	int *temps;
 	int *stack;
+	event_data *edata;
 
 	int pc, next_pc;
 	int sp;
@@ -141,6 +142,14 @@ noexport void Push_Temp(code_host *h)
 	Push_Stack(h, h->temps[index]);
 }
 
+#define CHECK_EDATA() { \
+	if (h->edata == null) { \
+		Log("C|Push_Internal.%d: not in event", index); \
+		Push_Stack(h, 0); \
+		return; \
+	} \
+}
+
 noexport void Push_Internal(code_host *h)
 {
 	internal_id index = Next_Op(h);
@@ -171,6 +180,26 @@ noexport void Push_Internal(code_host *h)
 
 		case internalJustMoved:
 			Push_Stack(h, Bool(just_moved));
+			return;
+
+		case internalEventAttacker:
+			CHECK_EDATA();
+			Push_Stack(h, h->edata->attacker);
+			return;
+
+		case internalEventItem:
+			CHECK_EDATA();
+			Push_Stack(h, h->edata->item);
+			return;
+
+		case internalEventPC:
+			CHECK_EDATA();
+			Push_Stack(h, h->edata->pc);
+			return;
+
+		case internalEventTarget:
+			CHECK_EDATA();
+			Push_Stack(h, h->edata->target);
 			return;
 	}
 
@@ -1229,7 +1258,7 @@ noexport void Reset_Host(code_host *h, file_id id)
 	h->sp = 0;
 }
 
-int Run_Code(file_id id)
+int Run_Event_Code(file_id id, event_data *data)
 {
 	bool result;
 	code_host *h;
@@ -1243,6 +1272,7 @@ int Run_Code(file_id id)
 	h->locals = gOverlay->locals;
 	h->temps = SzAlloc(MAX_TEMPS, int, "Run_Code.temps");
 	h->stack = SzAlloc(MAX_STACK, int, "Run_Code.stack");
+	h->edata = data;
 
 	Reset_Host(h, id);
 	call_depth++;
@@ -1280,6 +1310,11 @@ int Run_Code(file_id id)
 
 	call_depth--;
 	return result;
+}
+
+int Run_Code(file_id id)
+{
+	return Run_Event_Code(id, null);
 }
 
 void Initialise_Code(void)

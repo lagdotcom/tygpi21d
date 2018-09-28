@@ -269,7 +269,7 @@ noexport void Kill(combatant *c, combatant *killer)
 
 	if (c->is_pc) {
 		/* TODO */
-		Fire_Combat_Event(evPCDied, killer, c);
+		Fire_Combat_Event(evPCDied, killer->file, c->file);
 	} else {
 		monsters_alive--;
 		earned_experience += c->monster->experience;
@@ -292,7 +292,7 @@ noexport void Kill(combatant *c, combatant *killer)
 		if (Check_Cleave(killer)) Cleave(killer, c);
 		if (Check_Inspire(killer)) Inspire(killer, c);
 
-		Fire_Combat_Event(evMonsterDied, killer, c);
+		Fire_Combat_Event(evMonsterDied, killer->file, c->file);
 	}
 }
 
@@ -303,7 +303,7 @@ void Damage(combatant *victim, combatant *attacker, int amount)
 
 	Combat_Message(victim->file, attacker == null ? 0 : attacker->file, "@n takes %d damage.", amount);
 	Set_Stat(victim, sHP, hp);
-	Fire_Combat_Event(evCombatantDamaged, attacker, victim);
+	Fire_Combat_Event(evCombatantDamaged, attacker->file, victim->file);
 	if (hp <= 0) {
 		Kill(victim, attacker);
 	}

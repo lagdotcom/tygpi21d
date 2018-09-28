@@ -114,8 +114,7 @@ void Fire_Event(event_id ev, event_data *data)
 	for (i = 0, l = listeners; i < capacity; i++, l++) {
 		if (l->ev == ev) {
 			if (l->script) {
-				/* TODO: provide data */
-				Run_Code(l->script);
+				Run_Event_Code(l->script, data);
 				scripts++;
 			} else {
 				l->handler(data);
@@ -146,7 +145,7 @@ void Initialise_Events(void)
 
 /* C O N V E N I E N C E  F U N C T I O N S ////////////////////////////// */
 
-void Fire_Combat_Event(event_id ev, combatant *attacker, combatant *target)
+void Fire_Combat_Event(event_id ev, file_id attacker, file_id target)
 {
 	event_data *data = SzAlloc(1, event_data, "Fire_Combat_Event");
 
@@ -157,7 +156,7 @@ void Fire_Combat_Event(event_id ev, combatant *attacker, combatant *target)
 	Free(data);
 }
 
-void Fire_Item_Event(event_id ev, pc *pc, item *it)
+void Fire_Item_Event(event_id ev, file_id pc, file_id it)
 {
 	event_data *data = SzAlloc(1, event_data, "Fire_Item_Event");
 
@@ -168,7 +167,7 @@ void Fire_Item_Event(event_id ev, pc *pc, item *it)
 	Free(data);
 }
 
-void Fire_PC_Event(event_id ev, pc *pc)
+void Fire_PC_Event(event_id ev, file_id pc)
 {
 	event_data *data = SzAlloc(1, event_data, "Fire_PC_Event");
 

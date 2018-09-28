@@ -385,7 +385,7 @@ noexport void Try_Get_Items(void)
 				pc = Lookup_File(gSave, gParty->members[num], true);
 				it = Lookup_File(gDjn, ip->item, true);
 				sprintf(strbuf, "%s gets %s.", pc->name, Resolve_String(it->name_id));
-				Fire_Item_Event(evItemTaken, pc, it);
+				Fire_Item_Event(evItemTaken, gParty->members[num], ip->item);
 
 				/* null items are not drawn */
 				ip->item = 0;

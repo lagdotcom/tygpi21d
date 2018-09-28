@@ -327,3 +327,24 @@ int Find_Files_of_Type(djn *d, djn_type ty, djn_subtype sty, file_id *buffer, in
 
 	return count;
 }
+
+/* Get the file ID for a loaded file. */
+file_id Get_File_ID(djn *chain, void *data)
+{
+	/* TODO: This is dumb. We should store the ID in the file somewhere instead. */
+	djn *d = chain;
+	djn_file *f;
+	int i;
+
+	while (d) {
+		for (i = 0; i < d->count; i++) {
+			f = &d->files[i];
+			if (f->object == data)
+				return f->id;
+		}
+
+		d = d->next;
+	}
+
+	return 0;
+}
