@@ -90,6 +90,8 @@ typedef enum code_op {
 	coShowImage,
 	coWait,
 	coListen,
+	coHasItem,
+	coTakeItem,
 } code_op;
 
 typedef enum code_internal {

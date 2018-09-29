@@ -721,6 +721,56 @@ noexport bool Confirm_Use_Item(pc *pc, int index)
 	return false;
 }
 
+bool Party_Has_Item(file_id ref)
+{
+	/* TODO: extend to allow checking for more than 1 at once? */
+	int i;
+	pcnum index;
+	pc *pc;
+
+	for (index = 0; index < PARTY_SIZE; index++) {
+		pc = Get_PC(index);
+		if (pc == null) continue;
+
+		for (i = 0; i < INVENTORY_SIZE; i++) {
+			if (pc->header.items[i].item == ref)
+				return true;
+		}
+	}
+
+	return false;
+}
+
+bool Party_Take_Item(file_id ref)
+{
+	/* TODO: extend to allow taking of more than 1 at once? */
+	int i;
+	pcnum index;
+	pc *pc;
+	inventory *iv;
+
+	for (index = 0; index < PARTY_SIZE; index++) {
+		pc = Get_PC(index);
+		if (pc == null) continue;
+
+		for (i = 0, iv = pc->header.items; i < INVENTORY_SIZE; i++, iv++) {
+			if (iv->item == ref) {
+				/* Don't automatically remove equipped items */
+				if (iv->flags & vfEquipped) continue;
+
+				/* OK, we've found it */
+				iv->quantity--;
+				if (iv->quantity == 0)
+					iv->item = 0;
+
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 void Show_Pc_Screen(pcnum starting_pc)
 {
 	pcnum index = starting_pc,

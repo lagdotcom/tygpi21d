@@ -31,6 +31,13 @@ file_id Get_PC_ID(pcnum index);
 stat_value Get_PC_Stat(pc *c, statistic st);
 
 bool In_Front_Row(pc *pc);
+
+/* Determine if any member of the active party has an item. */
+bool Party_Has_Item(file_id ref);
+
+/* Find an item and take it off the party. Fails if nobody has it or if it is equipped. */
+bool Party_Take_Item(file_id ref);
+
 void Pc_Select(pcnum index);
 file_id Pick_Portrait(file_id org);
 bool Read_PC(FILE *fp, pc *pc);

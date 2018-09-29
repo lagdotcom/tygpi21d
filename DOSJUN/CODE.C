@@ -1137,19 +1137,43 @@ noexport void Wait(code_host *h)
 
 noexport void Listen(code_host *h)
 {
-	event_id ev;
-	file_id script;
-	event_expiry ee;
-
-	ee = Pop_Stack(h);
-	script = Pop_Stack(h);
-	ev = Pop_Stack(h);
+	event_expiry ee = Pop_Stack(h);
+	file_id script = Pop_Stack(h);
+	event_id ev = Pop_Stack(h);
 
 #if CODE_DEBUG
 	Log("C|Listen e%d, #%d, x%d", ev, script, ee);
 #endif
 
 	Add_Script_Listener(ev, ee, script);
+}
+
+noexport void HasItem(code_host *h)
+{
+	file_id item = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|HasItem %d", item);
+#endif
+
+	Push_Stack(h, Bool(Party_Has_Item(item)));
+}
+
+noexport void TakeItem(code_host *h)
+{
+	file_id item = Pop_Stack(h);
+	bool result;
+
+#if CODE_DEBUG
+	Log("C|TakeItem %d", item);
+#endif
+
+	result = Party_Take_Item(item);
+	Push_Stack(h, Bool(result));
+
+	if (result) {
+		/* TODO: save the PC whose item got taken */
+	}
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -1195,6 +1219,8 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coUnlock:		Unlock(h); return;
 		case coGiveItem:	GiveItem(h); return;
 		case coEquipItem:	EquipItem(h); return;
+		case coHasItem:		HasItem(h); return;
+		case coTakeItem:	TakeItem(h); return;
 		case coSetTileDescription: SetTileDescription(h); return;
 		case coSetTileColour: SetTileColour(h); return;
 		case coTeleport:	Teleport(h); return;
