@@ -28,6 +28,7 @@ extern options *gOptions;
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Read_Options(FILE *fp, options *o);
+void Show_Options_Screen(void);
 void Write_Options(FILE *fp, options *o);
 
 #endif

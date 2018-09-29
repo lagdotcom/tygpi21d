@@ -127,9 +127,9 @@ noexport UINT8 adlib_regs[] = {
 };
 
 noexport player p;
-noexport chan *channels;
-noexport char *ghost_regs;
-noexport char *instrument_data;
+noexport chan *channels = null;
+noexport char *ghost_regs = null;
+noexport char *instrument_data = null;
 
 bool sng_playing = false;
 
@@ -158,7 +158,7 @@ bool Read_SNG(FILE *fp, sng *s)
 	}
 
 	pattern_data = filesize(fp) - SNG_HEADER_LEN;
-	s->patterns = Allocate(1, pattern_data, "Load_SNG");
+	s->patterns = Allocate(1, pattern_data, "Read_SNG");
 
 	/* TODO: fix warning (fread takes size_t, not long) */
 	fread(s->patterns, pattern_data, 1, fp);
@@ -289,10 +289,6 @@ void Start_SNG(sng *s)
 	p.tempo = 6;
 	p.counter = 5;
 
-	channels = SzAlloc(NUM_CHANNELS, chan, "Start_SNG.channels");
-	ghost_regs = SzAlloc(256, UINT8, "Start_SNG.ghost_regs");
-	instrument_data = Allocate(NUM_INSTRUMENTS, 16, "Start_SNG.instrument_data");
-
 	Convert_Instruments(s->instruments);
 	All_Note_Off();
 
@@ -317,6 +313,17 @@ void Stop_SNG(void)
 	Write(0x53, 0x3f);
 	Write(0x54, 0x3f);
 
+}
+
+void Initialise_SNG_Player(void)
+{
+	channels = SzAlloc(NUM_CHANNELS, chan, "Start_SNG.channels");
+	ghost_regs = SzAlloc(256, UINT8, "Start_SNG.ghost_regs");
+	instrument_data = Allocate(NUM_INSTRUMENTS, 16, "Start_SNG.instrument_data");
+}
+
+void Free_SNG_Player(void)
+{
 	Free(instrument_data);
 	Free(ghost_regs);
 	Free(channels);

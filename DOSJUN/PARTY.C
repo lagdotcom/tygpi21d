@@ -786,7 +786,7 @@ void Show_Pc_Screen(pcnum starting_pc)
 
 	pc = Get_PC(index);
 	if (pc == null)
-		return;
+		running = false;
 
 	while (running) {
 		pindex = index;

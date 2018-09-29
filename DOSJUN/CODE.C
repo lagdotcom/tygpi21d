@@ -735,7 +735,7 @@ noexport void Music(code_host *h)
 	Log("C|Music %d", sng_id);
 #endif
 
-	Start_SNG(Lookup_File_Chained(gDjn, sng_id));
+	Start_Music(sng_id);
 }
 
 noexport void Converse(code_host *h)

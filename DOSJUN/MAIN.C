@@ -105,7 +105,6 @@ gamestate Show_Main_Menu(void)
 	bool done = false;
 	bool first = true;
 	char *menu[3];
-	sng *s = null;
 	gamestate next;
 	RGB_color black;
 
@@ -115,10 +114,7 @@ gamestate Show_Main_Menu(void)
 
 	menu_bg = Lookup_File_Chained(gDjn, gCampaign->menubg_id);
 
-	if (gCampaign->menumusic_id) {
-		s = Lookup_File(gDjn, gCampaign->menumusic_id, true);
-		Start_SNG(s);
-	}
+	Start_Music(gCampaign->menumusic_id);
 
 	black.red = 0; black.green = 0; black.blue = 0;
 	Fill_Palette(&black);
@@ -156,10 +152,7 @@ gamestate Show_Main_Menu(void)
 		}
 	}
 
-	if (gCampaign->menumusic_id) {
-		Stop_SNG();
-		Unload_File(gDjn, gCampaign->menumusic_id);
-	}
+	Stop_Music();
 
 	if (menu_bg)
 		Unload_File(gDjn, gCampaign->menubg_id);

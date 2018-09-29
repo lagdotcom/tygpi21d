@@ -9,8 +9,9 @@
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
-void Initialise_Music(void);
 void Free_Music(void);
+void Initialise_Music(void);
+void Start_Music(file_id ref);
 void Stop_Music(void);
 
 #endif

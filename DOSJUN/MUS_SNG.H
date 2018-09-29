@@ -62,6 +62,8 @@ extern bool sng_playing;
 
 void Continue_SNG(void);
 void Free_SNG(sng *s);
+void Free_SNG_Player(void);
+void Initialise_SNG_Player(void);
 bool Load_SNG(char *filename, sng *s);
 bool Read_SNG(FILE *fp, sng *s);
 void Start_SNG(sng *s);

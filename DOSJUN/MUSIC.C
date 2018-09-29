@@ -1,35 +1,42 @@
-#include "common.h"
-#include "mus_sng.h"
-#include <stdio.h>
-#include <string.h>
+#include "dosjun.h"
 
-noexport bool playing, loaded;
-noexport char active_track[9];
-noexport sng song;
+noexport file_id song_id;
 
 void Initialise_Music(void)
 {
-	playing = false;
-	loaded = false;
-	active_track[0] = 0;
+	Initialise_SNG_Player();
 }
 
 void Stop_Music(void)
 {
-	if (playing) {
-		Log("%s", "Stop_Music: Stopping");
-		Stop_SNG();
-		playing = false;
+	if (song_id) {
+		Log("Stop_Music: %d", song_id);
+
+		Unload_File(gDjn, song_id);
+		song_id = 0;
+	}
+}
+
+void Start_Music(file_id ref)
+{
+	sng *s;
+
+	Stop_Music();
+
+	if (!ref) {
+		return;
 	}
 
-	if (loaded) {
-		Log("%s", "Stop_Music: Freeing");
-		Free_SNG(&song);
-		loaded = false;
+	Log("Start_Music: %d", ref);
+	s = Lookup_File(gDjn, ref, false);
+	if (s) {
+		song_id = ref;
+		Start_SNG(s);
 	}
 }
 
 void Free_Music(void)
 {
 	Stop_Music();
+	Free_SNG_Player();
 }

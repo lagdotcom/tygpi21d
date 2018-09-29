@@ -98,7 +98,11 @@ noexport void Add_Entry(void *mem, MemSz size, char *tag)
 	entry *e;
 
 	if (mem == null) {
+#ifdef FAR_MEMORY
+		printf("MEM: Could not allocate %lu bytes for %s.\n", size, tag);
+#else
 		printf("MEM: Could not allocate %u bytes for %s.\n", size, tag);
+#endif
 		Stop_Memory_Tracking();
 		abort();
 		return;
@@ -106,7 +110,7 @@ noexport void Add_Entry(void *mem, MemSz size, char *tag)
 
 	e = _calloc(1, sizeof(entry));
 	if (e == null) {
-		printf("MEM: Could not allocate another entry (already have %u).\n", allocated_entries);
+		printf("MEM: Could not allocate another entry (already have %lu).\n", allocated_entries);
 		Stop_Memory_Tracking();
 		abort();
 		return;

@@ -539,6 +539,10 @@ gamestate Show_Dungeon_Screen(void)
 			case SCAN_T:
 				Show_Timer();
 				break;
+
+			case SCAN_O:
+				Show_Options_Screen();
+				break;
 		}
 	}
 
