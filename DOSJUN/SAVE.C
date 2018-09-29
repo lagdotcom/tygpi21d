@@ -17,6 +17,7 @@ void Initialise_Savefile(djn *s)
 {
 	party *p;
 	globals *g;
+	options *o;
 
 	s->files = null;
 
@@ -25,6 +26,11 @@ void Initialise_Savefile(djn *s)
 
 	g = SzAlloc(1, globals, "Initialise_Savefile.globals");
 	Add_to_Djn(s, g, 0, ftGlobals);
+
+	o = SzAlloc(1, options, "Initialise_Savefile.options");
+	o->music_vol = MAX_VOLUME;
+	o->sound_vol = MAX_VOLUME;
+	Add_to_Djn(s, o, 0, ftOptions);
 
 	s->next = gDjn;
 }

@@ -37,6 +37,7 @@ noexport loaderspec loaders[] = {
 	{ ftStrings,  sizeof(strings),  Free_Strings,  Read_Strings,  null },
 	{ ftZone,     sizeof(zone),     Free_Zone,     Read_Zone,     null },
 	{ ftOverlay,  sizeof(overlay),  Free_Overlay,  Read_Overlay,  Write_Overlay },
+	{ ftOptions,  sizeof(options),  null,          Read_Options,  Write_Options },
 
 	{ ftUnknown, 0, null, null, null }
 };

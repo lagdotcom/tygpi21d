@@ -26,6 +26,7 @@
 #include "mus_sng.h"
 #include "monsters.h"
 #include "npc.h"
+#include "options.h"
 #include "party.h"
 #include "save.h"
 #include "sound.h"

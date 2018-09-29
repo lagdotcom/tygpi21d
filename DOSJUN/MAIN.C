@@ -28,6 +28,8 @@ gamestate Start_New_Game(void)
 	gParty->encounter_chance = 0;
 	gParty->danger = 1;
 
+	gOptions = Find_File_Type(gSave, ftOptions);
+
 	redraw_everything = true;
 	trigger_on_enter = true;
 	trigger_zone_enter = true;
@@ -80,6 +82,8 @@ bool Load_Game(void)
 	Load_Savefile(filenames[choice], gSave);
 
 	/* TODO: check this is the right campaign for the save file!! */
+
+	gOptions = Find_File_Type(gSave, ftOptions);
 
 	Move_to_Zone(gParty->zone);
 	gState = gsDungeon;

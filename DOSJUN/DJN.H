@@ -42,6 +42,7 @@ typedef enum djn_type {
 	ftParty = 0xC0,
 	ftGlobals,
 	ftOverlay,
+	ftOptions,
 } djn_type;
 
 typedef enum djn_subtype {

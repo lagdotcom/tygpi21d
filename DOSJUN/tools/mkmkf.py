@@ -5,7 +5,7 @@ DEFINES = ['MEMORY_DEBUG', 'FAR_MEMORY']
 #DEFINES = ['FAR_MEMORY']
 OBJECTS = {
 	'DEMO': ['MKDEMO', 'CAMPAIGN', 'IO', 'ITEMS', 'MONSTERS', 'SAVE', 'ZONE'],
-	'MAIN': ['DOSJUN', 'BUFFS', 'CAMPAIGN', 'CODE', 'COMBAT', 'DJN', 'EVENTS', 'FONT', 'FP', 'GFX', 'GRF', 'INPUT', 'IO', 'ITEMS', 'JFIGHTER', 'JCLERIC', 'JMAGE', 'JBARD', 'JROGUE', 'JRANGER', 'JOBS', 'LIST', 'LOGGING', 'MAIN', 'MEM', 'MONSTERS', 'MUS_SNG', 'MUSIC', 'NPC', 'PARTY', 'SAVE', 'SOUND', 'STATUS', 'STRINGS', 'TIMER', 'ZONE'],
+	'MAIN': ['DOSJUN', 'BUFFS', 'CAMPAIGN', 'CODE', 'COMBAT', 'DJN', 'EVENTS', 'FONT', 'FP', 'GFX', 'GRF', 'INPUT', 'IO', 'ITEMS', 'JFIGHTER', 'JCLERIC', 'JMAGE', 'JBARD', 'JROGUE', 'JRANGER', 'JOBS', 'LIST', 'LOGGING', 'MAIN', 'MEM', 'MONSTERS', 'MUS_SNG', 'MUSIC', 'NPC', 'OPTIONS', 'PARTY', 'SAVE', 'SOUND', 'STATUS', 'STRINGS', 'TIMER', 'ZONE'],
 	#'EDITOR': ['EDITOR', 'GFX', 'INPUT', 'IO', 'ITEMS', 'JC', 'JC_LEX', 'JC_PAR', 'MEM', 'MONSTERS', 'SAVE', 'ZONE'],
 	#'JCC': ['JCC', 'JC', 'JC_LEX', 'JC_PAR', 'MEM']
 }
@@ -37,14 +37,14 @@ def wexe(exe, objs=None):
 	if not objs: objs = exe
 	f.write("""
 %(exe)s.EXE: $(%(objs)s_OBJS) $(HEADERS)
-	TCC $(CFLAGS_EXE) %(exe)s.OBJ DOSJUN.LIB ..\LIB\GAMELIB%(model)s.LIB
+	TCC $(CFLAGS_EXE) %(exe)s.OBJ DOSJUN.LIB ..\\LIB\\GAMELIB%(model)s.LIB
 """ % { 'exe': exe, 'objs' : objs, 'model': MODEL.upper() })
 
 # Write it
 f = open('..\\MAKEFILE', 'w')
 
-f.write('CFLAGS = -G -I\TC\INCLUDE -I..\LIB -m%s -d -w %s\n' % (MODEL, ' '.join(['-D%s' % d for d in DEFINES])))
-f.write('CFLAGS_EXE = -G -L\TC\LIB -m%s -d -w\n' % MODEL)
+f.write('CFLAGS = -G -I\\TC\\INCLUDE -I..\\LIB -m%s -d -w %s\n' % (MODEL, ' '.join(['-D%s' % d for d in DEFINES])))
+f.write('CFLAGS_EXE = -G -L\\TC\\LIB -m%s -d -w\n' % MODEL)
 for k, v in OBJECTS.items():
 	f.write('%s_OBJS = %s\n' % (k, ' '.join(map(objname, v))))
 f.write('HEADERS = %s\n' % ' '.join(HEADERS))

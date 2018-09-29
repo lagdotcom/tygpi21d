@@ -330,6 +330,11 @@ noexport void Play_Note(UINT8 channel, UINT8 inst, UINT16 freq, UINT8 volume)
 	chan *ch;
 	if (channel >= NUM_CHANNELS) return;
 
+	if (gOptions != null) {
+		volume *= gOptions->music_vol;
+		volume /= MAX_VOLUME;
+	}
+
 	p.note_volume = volume;
 
 	ch = &channels[channel];
