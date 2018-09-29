@@ -12,6 +12,7 @@ void Stop_Music(void)
 	if (song_id) {
 		Log("Stop_Music: %d", song_id);
 
+		Stop_SNG();
 		Unload_File(gDjn, song_id);
 		song_id = 0;
 	}

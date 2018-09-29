@@ -135,17 +135,6 @@ bool sng_playing = false;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-noexport long filesize(FILE *fp)
-{
-	long size, pos;
-
-	pos = ftell(fp);
-	fseek(fp, 0, SEEK_END);
-	size = ftell(fp);
-	fseek(fp, pos, SEEK_SET);
-	return size;
-}
-
 bool Read_SNG(FILE *fp, sng *s)
 {
 	long pattern_data;
@@ -157,7 +146,7 @@ bool Read_SNG(FILE *fp, sng *s)
 		return false;
 	}
 
-	pattern_data = filesize(fp) - SNG_HEADER_LEN;
+	pattern_data = current_reading_file->size  - SNG_HEADER_LEN;
 	s->patterns = Allocate(1, pattern_data, "Read_SNG");
 
 	/* TODO: fix warning (fread takes size_t, not long) */
