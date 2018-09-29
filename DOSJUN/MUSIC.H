@@ -10,7 +10,6 @@
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 void Initialise_Music(void);
-bool Play_Music(char *track);
 void Free_Music(void);
 void Stop_Music(void);
 

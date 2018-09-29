@@ -29,35 +29,6 @@ void Stop_Music(void)
 	}
 }
 
-bool Play_Music(char *track)
-{
-	char filename[13];
-
-	if (!streq(track, active_track)) {
-		if (loaded) {
-			Stop_Music();
-		}
-
-		sprintf(filename, "%s.SNG", track);
-
-		Log("Play_Music: Loading %s", track);
-		if (!Load_SNG(filename, &song)) {
-			return false;
-		}
-
-		loaded = true;
-		strcpy(active_track, track);
-	}
-
-	if (!playing) {
-		Log("%s", "Play_Music: Playing");
-		Start_SNG(&song);
-		playing = true;
-	}
-
-	return true;
-}
-
 void Free_Music(void)
 {
 	Stop_Music();
