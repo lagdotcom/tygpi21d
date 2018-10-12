@@ -21,7 +21,7 @@ noexport int next;
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
-noexport char* Event_Name(event_id ev)
+noexport char *Event_Name(event_id ev)
 {
 	switch (ev) {
 		case evCombatantDamaged: return "CombatantDamaged";
@@ -37,6 +37,16 @@ noexport char* Event_Name(event_id ev)
 		case evPCLevelGained: return "PCLevelGained";
 		case evZoneEntered: return "ZoneEntered";
 		case evZoneExited: return "ZoneExited";
+		default: return "?";
+	}
+}
+
+noexport char *Event_Expiry(event_expiry ee)
+{
+	switch (ee) {
+		case eeNever: return "Never";
+		case eeZone: return "Zone";
+		case eeCombat: return "Combat";
 		default: return "?";
 	}
 }
@@ -58,7 +68,7 @@ noexport void New_Listener(event_id ev, event_expiry ee, event_handler_fn h, fil
 		}
 	}
 
-	Log("New_Listener: %s exp=%d han=%p scr=%d", Event_Name(ev), ee, h, s);
+	Log("New_Listener: %s exp=%s han=%p scr=%d", Event_Name(ev), Event_Expiry(ee), h, s);
 
 	l = &listeners[next];
 	l->ev = ev;
@@ -91,6 +101,8 @@ void Expire_Listeners(event_expiry ee)
 {
 	int i;
 	listener *l;
+
+	Log("Expire_Listeners: %s", Event_Expiry(ee));
 
 	for (i = 0, l = listeners; i < capacity; i++, l++) {
 		if (l->ee == ee) {
