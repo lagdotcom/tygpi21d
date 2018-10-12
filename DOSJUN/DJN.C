@@ -9,6 +9,7 @@ typedef void(*ft_free_fn)(void*);
 typedef bool(*ft_io_fn)(FILE*, void*);
 
 typedef struct loaderspec {
+	char *ext;
 	djn_type type;
 	size_t size;
 	ft_free_fn free;
@@ -21,25 +22,25 @@ typedef struct loaderspec {
 djn_file *current_reading_file;
 
 noexport loaderspec loaders[] = {
-	{ ftCampaign, sizeof(campaign), null,          Read_Campaign, null },
-	{ ftDropTable,sizeof(droptable),Free_DropTable,Read_DropTable,null },
-	{ ftGlobals,  sizeof(globals),  Free_Globals,  Read_Globals,  Write_Globals },
-	{ ftGraphic,  sizeof(grf),      Free_GRF,      Read_GRF,      null },
-	{ ftItem,     sizeof(item),     null,          Read_Item,     null },
-	{ ftMonster,  sizeof(monster),  Free_Monster,  Read_Monster,  null },
-	{ ftMusic,    sizeof(sng),      Free_SNG,      Read_SNG,      null },
-	{ ftNPC,      sizeof(npc),      null,          Read_NPC,      Write_NPC },
-	{ ftPalette,  sizeof(palette),  null,          Read_Palette,  null },
-	{ ftParty,    sizeof(party),    null,          Read_Party,    Write_Party },
-	{ ftPC,       sizeof(pc),       Free_PC,       Read_PC,       Write_PC },
-	{ ftScript,   sizeof(script),   Free_Script,   Read_Script,   null },
-	/* { ftSound,    sizeof(wav),      Free_WAV,      Read_WAV,      null }, */
-	{ ftStrings,  sizeof(strings),  Free_Strings,  Read_Strings,  null },
-	{ ftZone,     sizeof(zone),     Free_Zone,     Read_Zone,     null },
-	{ ftOverlay,  sizeof(overlay),  Free_Overlay,  Read_Overlay,  Write_Overlay },
-	{ ftOptions,  sizeof(options),  null,          Read_Options,  Write_Options },
+	{ "CMP", ftCampaign, sizeof(campaign), null,          Read_Campaign, null },
+	{ "DRP", ftDropTable,sizeof(droptable),Free_DropTable,Read_DropTable,null },
+	{ "GLB", ftGlobals,  sizeof(globals),  Free_Globals,  Read_Globals,  Write_Globals },
+	{ "GRF", ftGraphic,  sizeof(grf),      Free_GRF,      Read_GRF,      null },
+	{ "ITM", ftItem,     sizeof(item),     null,          Read_Item,     null },
+	{ "MON", ftMonster,  sizeof(monster),  Free_Monster,  Read_Monster,  null },
+	{ "SNG", ftMusic,    sizeof(sng),      Free_SNG,      Read_SNG,      null },
+	{ "NPC", ftNPC,      sizeof(npc),      null,          Read_NPC,      Write_NPC },
+	{ "PAL", ftPalette,  sizeof(palette),  null,          Read_Palette,  null },
+	{ "PTY", ftParty,    sizeof(party),    null,          Read_Party,    Write_Party },
+	{ "PC",  ftPC,       sizeof(pc),       Free_PC,       Read_PC,       Write_PC },
+	{ "JCC", ftScript,   sizeof(script),   Free_Script,   Read_Script,   null },
+	/* { "WAV", ftSound,    sizeof(wav),      Free_WAV,      Read_WAV,      null }, */
+	{ "STR", ftStrings,  sizeof(strings),  Free_Strings,  Read_Strings,  null },
+	{ "ZON", ftZone,     sizeof(zone),     Free_Zone,     Read_Zone,     null },
+	{ "ZOO", ftOverlay,  sizeof(overlay),  Free_Overlay,  Read_Overlay,  Write_Overlay },
+	{ "OPT", ftOptions,  sizeof(options),  null,          Read_Options,  Write_Options },
 
-	{ ftUnknown, 0, null, null, null }
+	{ "???", ftUnknown, 0, null, null, null }
 };
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
@@ -98,7 +99,7 @@ noexport void Free_Djn_File(djn_file *f)
 {
 	loaderspec *spec = Get_Spec(f->type);
 
-	Log("Free_Djn_File: @%p, #%d(%d) %s", f, f->id, f->type, NAMEOF(f));
+	Log("Free_Djn_File: @%p, %s#%d %s", f, spec->ext, f->id, NAMEOF(f));
 
 	Free(f->name);
 
@@ -130,7 +131,7 @@ noexport void *Load_File(djn_file* f)
 	djn *d = f->parent;
 	loaderspec *spec = Get_Spec(f->type);
 
-	Log("Load_File: #%d(%d) %s", f->id, f->type, NAMEOF(f));
+	Log("Load_File: @%p, %s#%d %s", f, spec->ext, f->id, NAMEOF(f));
 
 	if (d->f == null) {
 		dief("Load_File: could not load #%d, djn is already closed", f->id);
@@ -138,7 +139,7 @@ noexport void *Load_File(djn_file* f)
 	}
 
 	if (!spec->read)
-		dief("Load_File: don't know how to parse type %d", f->type);
+		dief("Load_File: don't know how to parse type %s/%d", spec->ext, f->type);
 
 	fseek(d->f, f->offset, SEEK_SET);
 	f->object = Allocate(1, spec->size, "Load_File");
@@ -235,24 +236,27 @@ void *Find_File_Type(djn *chain, djn_type ty)
 void Unload_File(djn *chain, file_id id)
 {
 	djn_file *f = Lookup_File_Entry(chain, id, false, true);
+	loaderspec *spec = Get_Spec(f->type);
 
 	if (f != null) {
-		Log("Unload_File: #%d(%d) %s", id, f->type, NAMEOF(f));
+		Log("Unload_File: %s#%d %s", spec->ext, id, NAMEOF(f));
 		Free_Djn_File(f);
 	} else {
-		Log("Unload_File: #%d(NOT FOUND)", id);
+		Log("Unload_File: NF?#%d", id);
 	}
 }
 
 void Add_to_Djn(djn *d, void *obj, file_id id, djn_type ty)
 {
+	loaderspec *spec;
 	djn_file *f; 
 
 	/* Don't add a file twice */
 	if (In_Djn(d, id, false))
 		return;
 
-	Log("Add_to_Djn: adding #%d(%d)", id, ty);
+	spec = Get_Spec(ty);
+	Log("Add_to_Djn: adding %s#%d", spec->ext, id);
 
 	d->count++;
 	d->files = Reallocate(d->files, d->count, sizeof(djn_file), "Add_to_Djn");
@@ -284,7 +288,7 @@ bool Save_Djn(char *filename, djn *d)
 
 		if (!spec->write) {
 			fclose(fp);
-			dief("Save_Djn: cannot write file of type %d", f->type);
+			dief("Save_Djn: cannot write file of type %s", spec->ext);
 			return false;
 		}
 
