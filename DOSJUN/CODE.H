@@ -111,6 +111,10 @@ typedef enum code_internal {
 	internalEventPC,
 	internalEventItem,
 
+	internalSteps,
+	internalHours,
+	internalMinutes,
+
 	internalInvalid = 0xFF
 } code_internal;
 

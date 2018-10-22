@@ -152,6 +152,7 @@ noexport void Push_Temp(code_host *h)
 
 noexport void Push_Internal(code_host *h)
 {
+	int temp;
 	internal_id index = Next_Op(h);
 #if CODE_DEBUG
 	Log("C|Push_Internal.%d", index);
@@ -200,6 +201,20 @@ noexport void Push_Internal(code_host *h)
 		case internalEventTarget:
 			CHECK_EDATA();
 			Push_Stack(h, h->edata->target);
+			return;
+
+		case internalSteps:
+			Push_Stack(h, (int)gParty->steps_taken);
+			return;
+
+		case internalHours:
+			temp = gParty->seconds_elapsed / 60 / 60;
+			Push_Stack(h, temp);
+			return;
+
+		case internalMinutes:
+			temp = gParty->seconds_elapsed / 60;
+			Push_Stack(h, temp % 60);
 			return;
 	}
 
