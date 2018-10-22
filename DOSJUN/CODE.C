@@ -1176,6 +1176,31 @@ noexport void TakeItem(code_host *h)
 	}
 }
 
+noexport void ItemAt(code_host *h)
+{
+	coord y = Pop_Stack(h);
+	coord x = Pop_Stack(h);
+	file_id item = Pop_Stack(h);
+	int i;
+	itempos *ip;
+
+#if CODE_DEBUG
+	Log("C|ItemAt #%d, %d, %d", item, x, y);
+#endif
+
+	for (i = 0; i < gOverlay->items->size; i++) {
+		ip = List_At(gOverlay->items, i);
+
+		if (ip->x == x && ip->y == y && ip->item == item) {
+			Push_Stack(h, Bool(true));
+			return;
+		}
+	}
+
+	Push_Stack(h, Bool(false));
+	return;
+}
+
 /* M A I N /////////////////////////////////////////////////////////////// */
 
 noexport void Run_Code_Instruction(code_host *h, bytecode op)
@@ -1259,6 +1284,7 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coShowImage:	ShowImage(h); return;
 		case coWait:		Wait(h); return;
 		case coListen:		Listen(h); return;
+		case coItemAt:		ItemAt(h); return;
 	}
 
 	h->running = false;

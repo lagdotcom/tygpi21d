@@ -92,6 +92,7 @@ typedef enum code_op {
 	coListen,
 	coHasItem,
 	coTakeItem,
+	coItemAt,
 } code_op;
 
 typedef enum code_internal {
