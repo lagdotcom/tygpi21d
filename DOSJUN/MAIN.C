@@ -37,7 +37,7 @@ gamestate Start_New_Game(void)
 
 	Fill_Double_Buffer(0);
 	gState = gsCutscene;
-	Run_Code(gCampaign->script_start);
+	Run_Script_Code(gCampaign->script_start);
 
 	return gsDungeon;
 
@@ -49,7 +49,7 @@ _dead:
 void Move_to_Zone(file_id id)
 {
 	if (gParty->zone) {
-		if (gZone->header.on_exit) Run_Code(gZone->header.on_exit);
+		if (gZone->header.on_exit) Run_Script_Code(gZone->header.on_exit);
 
 		Fire_Event(evZoneExited, null);
 		Expire_Listeners(eeZone);

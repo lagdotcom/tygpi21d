@@ -8,9 +8,7 @@
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define MAX_GLOBALS		20
-#define MAX_LOCALS		20
 #define MAX_TEMPS		20
-#define MAX_CONSTS		200
 #define MAX_STACK		20
 
 typedef enum code_op {
@@ -93,6 +91,14 @@ typedef enum code_op {
 	coHasItem,
 	coTakeItem,
 	coItemAt,
+	coRandom,
+
+	coSelectTargets = 0xE0,
+	coFilterTargets,
+	coSelectAction,
+	coSelectTarget,
+	coGetBestWeaponRange,
+	coAble,
 } code_op;
 
 typedef enum code_internal {
@@ -104,7 +110,7 @@ typedef enum code_internal {
 	internalSuccess__Unused,
 
 	internalReturn__Unused,
-	internalPartyFull,	/* TODO */
+	internalPartyFull,
 	internalZone,
 	internalEventAttacker,
 	internalEventTarget,
@@ -114,6 +120,9 @@ typedef enum code_internal {
 	internalSteps,
 	internalHours,
 	internalMinutes,
+
+	internalSelf = 0xE0,
+	internalTarget,
 
 	internalInvalid = 0xFF
 } code_internal;
@@ -127,8 +136,9 @@ typedef struct script {
 void Free_Code(void);
 void Free_Script(script *s);
 void Initialise_Code(void);
-int Run_Code(file_id id);
+int Run_AI_Code(file_id id, int self, int *action, int *target);
 int Run_Event_Code(file_id id, event_data *data);
+int Run_Script_Code(file_id id);
 bool Read_Script(FILE *fp, script *s);
 
 #endif

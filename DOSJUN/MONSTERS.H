@@ -17,11 +17,6 @@ typedef enum row {
 	rowBack
 } row;
 
-typedef enum ai {
-	aiMindless,
-	aiRogue
-} ai;
-
 typedef enum monsterflag {
 	mHasSkills = 1,
 } monsterflag;
@@ -33,7 +28,7 @@ typedef struct monster {
 	str_id name_id;
 	file_id image_id;
 	row_id row;
-	ai_id ai;
+	file_id ai;
 	UINT32 experience;
 	file_id weapon;
 	monsterflag_id flags;

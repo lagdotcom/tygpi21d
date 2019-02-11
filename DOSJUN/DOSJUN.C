@@ -232,7 +232,7 @@ void Trigger_Enter_Script(void)
 #if EXPLORE_DEBUG
 		Log("%s", "Trigger_Enter_Script");
 #endif
-		Run_Code(under->on_enter);
+		Run_Script_Code(under->on_enter);
 	}
 
 	trigger_on_enter = false;
@@ -246,7 +246,7 @@ void Trigger_Use_Script(void)
 #if EXPLORE_DEBUG
 		Log("%s", "Trigger_Use_Script");
 #endif
-		Run_Code(under->on_use);
+		Run_Script_Code(under->on_use);
 	}
 }
 
@@ -258,7 +258,7 @@ void Trigger_Zone_Enter_Script(void)
 #if EXPLORE_DEBUG
 		Log("%s", "Trigger_Zone_Enter_Script");
 #endif
-		Run_Code(gZone->header.on_enter);
+		Run_Script_Code(gZone->header.on_enter);
 	}
 
 	trigger_zone_enter = false;
@@ -270,7 +270,7 @@ void Trigger_Zone_Move_Script(void)
 #if EXPLORE_DEBUG
 		Log("%s", "Trigger_Zone_Move_Script");
 #endif
-		Run_Code(gZone->header.on_move);
+		Run_Script_Code(gZone->header.on_move);
 	}
 }
 

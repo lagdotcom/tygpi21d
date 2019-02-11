@@ -584,6 +584,11 @@ void Add_Combat_Action(act id, char *name, action_check_fn check_fn, action_do_f
 	combat_actions[id].priority = priority > MAX_PRIORITY ? MAX_PRIORITY : priority;
 }
 
+bool Combatant_Can_Do(int index, act id)
+{
+	return combat_actions[id].check(List_At(combatants, index));
+}
+
 void Initialise_Combat(void)
 {
 	groupnum i;
@@ -920,20 +925,6 @@ void Expire_Combat_Buffs(void)
 
 /* A I  R O U T I N E S ////////////////////////////////////////////////// */
 
-noexport combatant *Random_Alive_Pc(void)
-{
-	int t;
-	combatant *c;
-
-	/* TODO: make this less awkward */
-	do {
-		t = randint(0, PARTY_SIZE - 1);
-		c = List_At(combatants, t);
-	} while (Is_Dead(c));
-
-	return c;
-}
-
 noexport void AI_Mindless(combatant *c)
 {
 	combatant *target = null;
@@ -955,18 +946,6 @@ noexport void AI_Mindless(combatant *c)
 		c->target = target;
 	} else {
 		c->action = NO_ACTION;
-	}
-}
-
-noexport void AI_Rogue(combatant *c)
-{
-	/* TODO: player row */
-	if (Check_Hide(c) && randint(0, 1) == 1) {
-		c->action = aHide;
-		c->target = c;
-	} else {
-		c->action = Check_SneakAttack(c) ? aSneakAttack : aAttack;
-		c->target = Random_Alive_Pc();
 	}
 }
 
@@ -1070,7 +1049,7 @@ noexport void Do_Combat_Actions(list *active)
 
 noexport void Enter_Combat_Loop(void)
 {
-	int i;
+	int i, temp;
 	combatant *c;
 	bool first_turn = true;
 
@@ -1101,14 +1080,12 @@ noexport void Enter_Combat_Loop(void)
 				c->action = Get_Pc_Action(i);
 				c->target = Get_Pc_Target(i, c->action);
 			} else {
-				switch (c->monster->ai) {
-					case aiMindless:
-						AI_Mindless(c);
-						break;
-
-					case aiRogue:
-						AI_Rogue(c);
-						break;
+				if (c->monster->ai) {
+					c->action = NO_ACTION;
+					Run_AI_Code(c->monster->ai, i, &c->action, &temp);
+					c->target = List_At(combatants, temp);
+				} else {
+					AI_Mindless(c);
 				}
 			}
 

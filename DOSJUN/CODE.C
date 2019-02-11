@@ -9,6 +9,15 @@
 
 #define INVALID_SCRIPT	32767
 
+#define SELECT_ALL		0
+#define SELECT_ALLIES	1
+#define SELECT_ENEMIES	2
+#define SELECT_RANDOM	-1
+
+#define FILTER_ALIVE	0
+#define FILTER_RANGE	1
+#define FILTER_HPBELOW	2
+
 /* S T R U C T U R E S /////////////////////////////////////////////////// */
 
 typedef struct code_host {
@@ -19,6 +28,10 @@ typedef struct code_host {
 	int *temps;
 	int *stack;
 	event_data *edata;
+	int self;
+	int action;
+	int target;
+	list *targets;
 
 	int pc, next_pc;
 	int sp;
@@ -152,7 +165,7 @@ noexport void Push_Temp(code_host *h)
 
 noexport void Push_Internal(code_host *h)
 {
-	int temp;
+	UINT32 temp;
 	internal_id index = Next_Op(h);
 #if CODE_DEBUG
 	Log("C|Push_Internal.%d", index);
@@ -181,6 +194,18 @@ noexport void Push_Internal(code_host *h)
 
 		case internalJustMoved:
 			Push_Stack(h, Bool(just_moved));
+			return;
+
+		case internalPartyFull:
+			for (temp = 0; temp < PARTY_SIZE; temp++)
+			{
+				if (!gParty->members[temp]) {
+					Push_Stack(h, Bool(false));
+					return;
+				}
+			}
+
+			Push_Stack(h, Bool(true));
 			return;
 
 		case internalEventAttacker:
@@ -215,6 +240,14 @@ noexport void Push_Internal(code_host *h)
 		case internalMinutes:
 			temp = gParty->seconds_elapsed / 60;
 			Push_Stack(h, temp % 60);
+			return;
+
+		case internalSelf:
+			Push_Stack(h, h->self);
+			return;
+
+		case internalTarget:
+			Push_Stack(h, h->target);
 			return;
 	}
 
@@ -444,7 +477,7 @@ noexport void Call(code_host *h)
 	Log("C|Call %d", script_id);
 #endif
 
-	h->call_result = Run_Code(script_id);
+	h->call_result = Run_Script_Code(script_id);
 }
 
 noexport void Combat(code_host *h)
@@ -1213,7 +1246,180 @@ noexport void ItemAt(code_host *h)
 	}
 
 	Push_Stack(h, Bool(false));
-	return;
+}
+
+noexport void Random(code_host *h)
+{
+	int max = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|Random %d", max);
+#endif
+
+	Push_Stack(h, randint(0, max));
+}
+
+noexport void SelectTargets(code_host *h)
+{
+	combatant *self, *c;
+	bool match;
+	int i;
+	int selection = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|SelectTargets[%d]", selection);
+#endif
+
+	if (h->targets != null) {
+		Clear_List(h->targets);
+	} else {
+		h->targets = New_List(ltInteger, "SelectTargets");
+	}
+
+	self = List_At(combatants, h->self);
+	for (i = 0; i < combatants->size; i++) {
+		c = List_At(combatants, i);
+
+		switch (selection) {
+			case SELECT_ALLIES: match = self->group == c->group; break;
+			case SELECT_ENEMIES: match = self->group != c->group; break;
+			case SELECT_ALL: match = true; break;
+
+			default:
+				dief("SelectTargets[%d] is not a valid filter", selection);
+				return;
+		}
+
+		if (match)
+			Add_to_List(h->targets, (void *)i);
+	}
+}
+
+noexport bool Filter_By_Alive(combatant *c, bool want_alive)
+{
+	bool dead = Is_Dead(c);
+	return (dead && !want_alive) || (!dead && want_alive);
+}
+
+noexport bool Filter_By_HpBelow(combatant *c, int percentage)
+{
+	int itemp = Get_Stat(c, sHP) * 100 / Get_Stat(c, sMaxHP);
+	return itemp < percentage;
+}
+
+noexport bool Filter_By_Range(combatant *self, combatant *target, range r)
+{
+	return Get_Combatant_Range(self, target) <= r;
+}
+
+noexport void FilterTargets(code_host *h)
+{
+	combatant *self, *c;
+	bool match;
+	int i = 0, index;
+	int value = Pop_Stack(h);
+	int filter = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|FilterTargets[%d] %d", filter, value);
+#endif
+
+	if (h->targets == null) {
+		die("FilterTargets before SelectTargets");
+		return;
+	}
+
+	self = List_At(combatants, h->self);
+	while (i < h->targets->size) {
+		index = (int)List_At(h->targets, i);
+		c = List_At(combatants, index);
+		match = false;
+
+		switch (filter) {
+			case FILTER_ALIVE: match = Filter_By_Alive(c, value); break;
+			case FILTER_HPBELOW: match = Filter_By_HpBelow(c, value); break;
+			case FILTER_RANGE: match = Filter_By_Range(self, c, value); break;
+
+			default:
+				dief("FilterTargets[%d] is not a valid filter", filter);
+				return;
+		}
+
+		if (match) {
+			Remove_from_List(h->targets, (void *)index);
+		} else {
+			i++;
+		}
+	}
+}
+
+noexport void SelectAction(code_host *h)
+{
+	int action = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|SelectAction %d", action);
+#endif
+
+	h->action = action;
+}
+
+noexport void SelectTarget(code_host *h)
+{
+	int i;
+	int target = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|SelectTarget %d", target);
+#endif
+
+	if (target == SELECT_RANDOM) {
+		if (h->targets == null) {
+			die("SelectTarget[Random] before SelectTargets");
+			return;
+		}
+
+		if (h->targets->size == 0) {
+			/* this technically seems wrong, but Is_Valid_Target() should catch this later */
+			target = 0;
+		} else {
+			i = randint(0, h->targets->size - 1);
+			target = (int)List_At(h->targets, i);
+		}
+	}
+
+	h->target = target;
+}
+
+noexport void GetBestWeaponRange(code_host *h)
+{
+	combatant *c;
+	range rpri = rShort;
+	range rsec;
+	int index = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|GetBestWeaponRange %d", index);
+#endif
+
+	c = List_At(combatants, index);
+	rpri = Get_Weapon_Range(Get_Weapon(c, true));
+	rsec = Get_Weapon_Range(Get_Weapon(c, false));
+
+	if (rsec > rpri) rpri = rsec;
+	Push_Stack(h, rpri);
+}
+
+noexport void Able(code_host *h)
+{
+	int ability = Pop_Stack(h);
+	int index = Pop_Stack(h);
+
+#if CODE_DEBUG
+	Log("C|Able #%d, %d", index, ability);
+#endif
+
+	Push_Stack(h, Bool(Combatant_Can_Do(index, ability)));
 }
 
 /* M A I N /////////////////////////////////////////////////////////////// */
@@ -1300,6 +1506,14 @@ noexport void Run_Code_Instruction(code_host *h, bytecode op)
 		case coWait:		Wait(h); return;
 		case coListen:		Listen(h); return;
 		case coItemAt:		ItemAt(h); return;
+		case coRandom:		Random(h); return;
+
+		case coSelectTargets: SelectTargets(h); return;
+		case coFilterTargets: FilterTargets(h); return;
+		case coSelectAction: SelectAction(h); return;
+		case coSelectTarget: SelectTarget(h); return;
+		case coGetBestWeaponRange: GetBestWeaponRange(h); return;
+		case coAble:		Able(h); return;
 	}
 
 	h->running = false;
@@ -1343,21 +1557,15 @@ noexport void Reset_Host(code_host *h, file_id id)
 	h->sp = 0;
 }
 
-int Run_Event_Code(file_id id, event_data *data)
+int Run_Code(code_host *h, file_id id)
 {
 	bool result;
-	code_host *h;
-
-	Log("Run_Code: %d (%p)", id, data);
-
-	h = SzAlloc(1, code_host, "Run_Code.host");
 
 	h->globals = gGlobals->globals;
 	h->flags = gGlobals->flags;
 	h->locals = gOverlay->locals;
 	h->temps = SzAlloc(MAX_TEMPS, int, "Run_Code.temps");
 	h->stack = SzAlloc(MAX_STACK, int, "Run_Code.stack");
-	h->edata = data;
 
 	Reset_Host(h, id);
 	call_depth++;
@@ -1383,7 +1591,8 @@ int Run_Event_Code(file_id id, event_data *data)
 				num_options = 0;
 
 				Log("Run_Code: state %d", conversation_state);
-			} else {
+			}
+			else {
 				EndConverse(h);
 			}
 		}
@@ -1391,15 +1600,57 @@ int Run_Event_Code(file_id id, event_data *data)
 
 	Free(h->temps);
 	Free(h->stack);
-	Free(h);
 
 	call_depth--;
 	return result;
 }
 
-int Run_Code(file_id id)
+int Run_Script_Code(file_id id)
 {
-	return Run_Event_Code(id, null);
+	int result;
+	code_host *h;
+
+	Log("Run_Script_Code: %d", id);
+	h = SzAlloc(1, code_host, "Run_Code.host");
+	result = Run_Code(h, id);
+	Free(h);
+
+	return result;
+}
+
+int Run_Event_Code(file_id id, event_data *data)
+{
+	int result;
+	code_host *h;
+
+	Log("Run_Event_Code: %d (%p)", id, data);
+	h = SzAlloc(1, code_host, "Run_Event_Code.host");
+	h->edata = data;
+	result = Run_Code(h, id);
+	Free(h);
+
+	return result;
+}
+
+int Run_AI_Code(file_id id, int self, int *action, int *target)
+{
+	int result;
+	code_host *h;
+
+	Log("Run_AI_Code: %d (%d)", id, self);
+	h = SzAlloc(1, code_host, "Run_AI_Code.host");
+	h->self = self;
+	h->targets = null;
+	result = Run_Code(h, id);
+
+	*action = h->action;
+	*target = h->target;
+
+	if (h->targets != null)
+		Free_List(h->targets);
+
+	Free(h);
+	return result;
 }
 
 void Initialise_Code(void)

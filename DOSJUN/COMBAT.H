@@ -79,6 +79,7 @@ void Attack(combatant *source, combatant *target);
 void Blocking_Expires(combatant *c, buff *b);
 bool Check_Attack(combatant *source);
 void Combat_Message(file_id speaker, file_id target, char *format, ...);
+bool Combatant_Can_Do(int index, act id);
 void Damage(combatant *victim, combatant* attacker, int amount);
 void Free_Combat(void);
 range Get_Attack_Range(combatant *c);
